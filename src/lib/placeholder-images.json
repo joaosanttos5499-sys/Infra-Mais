@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "report-photo-placeholder",
+      "description": "Placeholder for report photo upload",
+      "imageUrl": "https://images.unsplash.com/photo-1697032252894-6d5d719b9b00?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y2FtZXJhJTIwaWNvbnxlbnwwfHx8fDE3NjEwMDA4ODB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "camera icon"
+    }
+  ]
 }
