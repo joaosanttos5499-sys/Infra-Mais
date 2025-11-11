@@ -14,15 +14,11 @@ export type Category = {
 };
 
 export const categories: Category[] = [
-  { value: "pothole", label: "Pothole", icon: AlertTriangle },
-  {
-    value: "streetlight",
-    label: "Broken Streetlight",
-    icon: LightbulbOff,
-  },
-  { value: "water_leak", label: "Water Leak", icon: Droplets },
-  { value: "garbage", label: "Uncollected Garbage", icon: Trash2 },
-  { value: "graffiti", label: "Graffiti", icon: SprayCan },
+  { value: "pothole", label: "Buraco no asfalto", icon: AlertTriangle },
+  { value: "garbage", label: "Lixo", icon: Trash2 },
+  { value: "streetlight", label: "Iluminação", icon: LightbulbOff },
+  { value: "vandalism", label: "Vandalismo", icon: SprayCan },
+  { value: "water_leak", label: "Vazamento de água", icon: Droplets },
 ];
 
 export const getCategory = (value: string) => {
