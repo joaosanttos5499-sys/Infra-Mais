@@ -21,8 +21,8 @@ export default function Home() {
         </div>
         <div className="bg-background">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
-              <div className="bg-card p-8 rounded-lg shadow-lg border">
+            <div className="flex justify-center">
+              <div className="bg-card p-8 rounded-lg shadow-lg border max-w-lg w-full">
                 <h2 className="text-3xl font-headline font-bold text-foreground">
                   Para Cidadãos
                 </h2>
