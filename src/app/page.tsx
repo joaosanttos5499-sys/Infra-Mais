@@ -15,7 +15,7 @@ export default function Home() {
               Infra Mais
             </h1>
             <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-foreground/80">
-              Ajude a melhorar sua cidade, um relato de cada vez.
+              Um portal de relatos de problemas da infraestrutura.
             </p>
           </div>
         </div>
