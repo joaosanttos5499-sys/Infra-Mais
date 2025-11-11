@@ -8,7 +8,7 @@ function DashboardSkeleton() {
   return (
     <div className="flex items-center justify-center p-12">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <p className="ml-4 text-muted-foreground">Loading reports...</p>
+      <p className="ml-4 text-muted-foreground">Carregando relatórios...</p>
     </div>
   );
 }
@@ -23,10 +23,10 @@ export default async function DashboardPage() {
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             <h1 className="text-4xl font-bold font-headline">
-              Issue Dashboard
+              Painel de Problemas
             </h1>
             <p className="text-muted-foreground mt-1">
-              View and manage all reported infrastructure issues.
+              Visualize e gerencie todos os problemas de infraestrutura relatados.
             </p>
           </div>
           <Suspense fallback={<DashboardSkeleton />}>

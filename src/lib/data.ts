@@ -15,19 +15,19 @@ if (reports.length === 0) {
   reports.push({
     id: String(idCounter++),
     category: 'pothole',
-    location: '123 Main St, Anytown, USA',
-    description: 'Large pothole in the middle of the street, causing traffic issues.',
+    location: 'Rua Principal, 123, Qualquerlugar, BR',
+    description: 'Buraco grande no meio da rua, causando problemas no trânsito.',
     photoUrl: 'https://picsum.photos/seed/pothole1/600/400',
-    summary: 'A significant pothole at 123 Main St is disrupting traffic flow.',
+    summary: 'Um buraco significativo na Rua Principal, 123, está atrapalhando o fluxo do trânsito.',
     status: 'PENDING',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
   }, {
     id: String(idCounter++),
     category: 'streetlight',
-    location: 'Corner of Oak & Maple Ave',
-    description: 'The streetlight on the corner is completely out. It has been dark for a few nights now, which feels unsafe.',
+    location: 'Esquina da Av. Carvalho com a Alameda Bordo',
+    description: 'O poste de luz da esquina está completamente apagado. Já faz algumas noites que está escuro, o que parece perigoso.',
     photoUrl: 'https://picsum.photos/seed/light1/600/400',
-    summary: 'A broken streetlight at Oak and Maple Ave is causing safety concerns due to darkness.',
+    summary: 'Um poste de luz quebrado na esquina da Av. Carvalho com a Alameda Bordo está causando preocupações de segurança devido à escuridão.',
     status: 'IN_PROGRESS',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
   });

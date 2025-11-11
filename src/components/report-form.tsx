@@ -21,7 +21,7 @@ function SubmitButton() {
   return (
     <Button type="submit" className="w-full" disabled={pending} aria-disabled={pending}>
       {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      Submit Report
+      Enviar Relatório
     </Button>
   );
 }
@@ -37,7 +37,7 @@ export function ReportForm() {
   useEffect(() => {
     if (formState?.errors?._form) {
       toast({
-        title: "Error",
+        title: "Erro",
         description: formState.errors._form.join(", "),
         variant: "destructive",
       });
@@ -62,22 +62,22 @@ export function ReportForm() {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle className="font-headline text-3xl">Report an Issue</CardTitle>
+        <CardTitle className="font-headline text-3xl">Relatar um Problema</CardTitle>
         <CardDescription>
-          Fill out the details below to submit a report to the city.
+          Preencha os detalhes abaixo para enviar um relatório para a cidade.
         </CardDescription>
       </CardHeader>
       <form action={formAction} ref={formRef}>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category">Categoria</Label>
             <Select name="category" required>
-              <SelectTrigger id="category" aria-label="Select category">
-                <SelectValue placeholder="Select the type of issue" />
+              <SelectTrigger id="category" aria-label="Selecione a categoria">
+                <SelectValue placeholder="Selecione o tipo de problema" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Issue Categories</SelectLabel>
+                  <SelectLabel>Categorias de Problemas</SelectLabel>
                   {categories.map((category) => (
                     <SelectItem key={category.value} value={category.value}>
                       <div className="flex items-center gap-2">
@@ -94,11 +94,11 @@ export function ReportForm() {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="location">Localização</Label>
             <Input
               id="location"
               name="location"
-              placeholder="e.g., Corner of Main St & 2nd Ave"
+              placeholder="ex: Esquina da Rua Principal com a Av. 2"
               required
             />
             {formState?.errors?.location && (
@@ -106,14 +106,14 @@ export function ReportForm() {
             )}
           </div>
           <div className="space-y-2">
-            <Label>Photo of the Issue</Label>
+            <Label>Foto do Problema</Label>
             <div className="aspect-video rounded-md border border-dashed flex items-center justify-center relative overflow-hidden bg-muted/50">
                 {photoPreview ? (
-                    <Image src={photoPreview} alt="Preview of uploaded photo" fill className="object-cover" />
+                    <Image src={photoPreview} alt="Pré-visualização da foto enviada" fill className="object-cover" />
                 ) : (
                     <div className="text-center text-muted-foreground p-4">
                         <Camera className="mx-auto h-12 w-12" />
-                        <p className="mt-2 text-sm">Upload a photo</p>
+                        <p className="mt-2 text-sm">Carregar uma foto</p>
                     </div>
                 )}
             </div>
@@ -123,11 +123,11 @@ export function ReportForm() {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Descrição</Label>
             <Textarea
               id="description"
               name="description"
-              placeholder="Please provide a detailed description of the problem."
+              placeholder="Forneça uma descrição detalhada do problema."
               required
               rows={5}
             />
@@ -137,7 +137,7 @@ export function ReportForm() {
           </div>
            {formState?.errors?._form && (
             <Alert variant="destructive">
-              <AlertTitle>Submission Failed</AlertTitle>
+              <AlertTitle>Falha no Envio</AlertTitle>
               <AlertDescription>{formState.errors._form.join(', ')}</AlertDescription>
             </Alert>
           )}
@@ -145,7 +145,7 @@ export function ReportForm() {
         <CardFooter className="flex justify-end gap-2">
             <Button variant="outline" type="button" onClick={() => { formRef.current?.reset(); setPhotoPreview(null); }}>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Reset
+                Resetar
             </Button>
             <SubmitButton />
         </CardFooter>
