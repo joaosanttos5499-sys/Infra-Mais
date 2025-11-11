@@ -23,7 +23,7 @@ export function Header() {
               href="/report/new"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              New Report
+              Relatar um Problema
             </Link>
             <Link
               href="/dashboard"
