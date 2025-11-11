@@ -15,7 +15,7 @@ export default function Home() {
               Infra Mais
             </h1>
             <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-foreground/80">
-              Um portal de relatos na infraestrutura.
+              Um portal de relatos de problemas na infraestrutura.
             </p>
           </div>
         </div>
@@ -36,7 +36,8 @@ export default function Home() {
                 </Button>
               </div>
               <div className="bg-card p-8 rounded-lg shadow-lg border">
-                <h2 className="text-3xl font-headline font-bold text-foreground">
+                <h2 className="text-3xl font-headline font-bold text
+-foreground">
                   Para Funcionários da Cidade
                 </h2>
                 <p className="mt-2 text-muted-foreground">
