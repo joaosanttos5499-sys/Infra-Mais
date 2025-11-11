@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
-import { addReport, updateReportStatus as dbUpdateReportStatus } from "@/lib/data";
+import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport } from "@/lib/data";
 import { type Report, type ReportStatus } from "@/lib/types";
 import { categories } from "./categories";
 
@@ -75,7 +75,7 @@ export async function submitReport(
       photoDataUri,
     });
 
-    const newReport: Omit<Report, "id" | "createdAt" | "status"> = {
+    const newReport: Omit<Report, "id" | "createdAt" | "status" | "upvotes"> = {
       category,
       bairro,
       location,
@@ -109,4 +109,15 @@ export async function updateReportStatus(
     console.error(error);
     return { success: false, message: "Failed to update status." };
   }
+}
+
+export async function upvoteReportAction(reportId: string) {
+    try {
+        await dbUpvoteReport(reportId);
+        revalidatePath("/dashboard");
+        return { success: true };
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: "Failed to upvote." };
+    }
 }

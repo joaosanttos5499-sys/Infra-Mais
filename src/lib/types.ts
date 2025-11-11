@@ -10,6 +10,7 @@ export interface Report {
   summary: string;
   status: ReportStatus;
   createdAt: Date;
+  upvotes: number;
 }
 
-export type NewReport = Omit<Report, "id" | "createdAt" | "status">;
+export type NewReport = Omit<Report, "id" | "createdAt" | "status" | "upvotes">;

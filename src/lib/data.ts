@@ -22,6 +22,7 @@ if (reports.length === 0) {
     summary: 'Um buraco significativo na Rua Principal, 123, está atrapalhando o fluxo do trânsito.',
     status: 'PENDING',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
+    upvotes: 12,
   }, {
     id: String(idCounter++),
     category: 'streetlight',
@@ -32,6 +33,7 @@ if (reports.length === 0) {
     summary: 'Um poste de luz quebrado na esquina da Av. Carvalho com a Alameda Bordo está causando preocupações de segurança devido à escuridão.',
     status: 'IN_PROGRESS',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+    upvotes: 5,
   });
 }
 
@@ -47,6 +49,7 @@ export async function addReport(report: NewReport): Promise<Report> {
     id: String(idCounter++),
     status: "PENDING",
     createdAt: new Date(),
+    upvotes: 0,
   };
   reports.push(newReport);
   return newReport;
@@ -62,4 +65,13 @@ export async function updateReportStatus(
     return reports[reportIndex];
   }
   return undefined;
+}
+
+export async function upvoteReport(id: string): Promise<Report | undefined> {
+    const reportIndex = reports.findIndex((r) => r.id === id);
+    if (reportIndex !== -1) {
+        reports[reportIndex].upvotes++;
+        return reports[reportIndex];
+    }
+    return undefined;
 }
