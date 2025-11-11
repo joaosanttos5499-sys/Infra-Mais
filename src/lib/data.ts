@@ -16,7 +16,7 @@ if (reports.length === 0) {
     id: String(idCounter++),
     category: 'pothole',
     bairro: 'Centro',
-    location: 'Rua Principal, 123, Qualquerlugar, BR',
+    location: 'Rua Principal, 123',
     description: 'Buraco grande no meio da rua, causando problemas no trânsito.',
     photoUrl: 'https://picsum.photos/seed/pothole1/600/400',
     summary: 'Um buraco significativo na Rua Principal, 123, está atrapalhando o fluxo do trânsito.',
