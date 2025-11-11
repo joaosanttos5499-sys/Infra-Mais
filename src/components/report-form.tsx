@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useEffect, useRef, useState, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import Image from "next/image";
 import { Camera, Loader2, RefreshCw } from "lucide-react";
 import { submitReport } from "@/lib/actions";
@@ -27,7 +27,7 @@ function SubmitButton() {
 }
 
 export function ReportForm() {
-  const [formState, formAction] = useFormState(submitReport, undefined);
+  const [formState, formAction] = useActionState(submitReport, undefined);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
