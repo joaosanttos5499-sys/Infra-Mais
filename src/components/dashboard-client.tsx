@@ -33,37 +33,54 @@ function ReportCard({ report, onStatusChange }: { report: Report, onStatusChange
       <CardContent className="p-0">
         <Accordion type="single" collapsible>
           <AccordionItem value={report.id} className="border-b-0">
-            <div className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-center gap-3 flex-1">
-                {category?.icon && <category.icon className="h-6 w-6 text-primary hidden sm:block" />}
-                <div className="flex-1">
-                  <p className="font-semibold">{category?.label || report.category}</p>
-                  <p className="text-sm text-muted-foreground">{report.bairro} - {report.location}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <StatusBadge status={report.status} />
-                <AccordionTrigger className="p-2 hover:bg-accent rounded-md [&[data-state=open]>svg]:text-accent" />
-              </div>
-            </div>
-            <AccordionContent className="bg-muted/50">
-              <div className="grid md:grid-cols-2 gap-6 p-6">
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold text-sm mb-1">Resumo da IA</h4>
-                    <p className="text-sm text-foreground/80">{report.summary}</p>
+            <div className="grid md:grid-cols-[2fr_1fr] gap-4 p-4">
+              <div className="flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    {category?.icon && <category.icon className="h-6 w-6 text-primary hidden sm:block" />}
+                    <div className="flex-1">
+                      <p className="font-semibold">{category?.label || report.category}</p>
+                      <p className="text-sm text-muted-foreground">{report.bairro} - {report.location}</p>
+                    </div>
                   </div>
-                  <div>
+                  <div className="flex items-center gap-4">
+                    <StatusBadge status={report.status} />
+                  </div>
+                </div>
+                 <div className="mt-4">
+                    <p className="text-sm text-foreground/80">{report.summary}</p>
+                 </div>
+              </div>
+               <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm self-start">
+                   <Image
+                      src={report.photoUrl}
+                      alt={`Problema em ${report.location}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                </div>
+            </div>
+            
+            <div className="flex justify-end items-center px-4 pb-2">
+                <AccordionTrigger className="p-2 w-auto hover:bg-accent rounded-md [&[data-state=open]>svg]:text-accent">
+                    <span className="text-sm mr-1">Detalhes</span>
+                </AccordionTrigger>
+            </div>
+
+            <AccordionContent className="bg-muted/50">
+              <div className="p-6 space-y-4">
+                <div>
                     <h4 className="font-semibold text-sm mb-1">Descrição Completa</h4>
                     <p className="text-sm text-foreground/80">{report.description}</p>
-                  </div>
-                  <div>
+                </div>
+                <div>
                     <h4 className="font-semibold text-sm mb-1">Relatado</h4>
                      <p className="text-sm text-foreground/80" title={format(report.createdAt, "PPPppp")}>
                         {formatDistanceToNow(report.createdAt, { addSuffix: true })}
                     </p>
-                  </div>
-                  <div className="space-y-2">
+                </div>
+                <div className="space-y-2">
                     <h4 className="font-semibold text-sm">Atualizar Status</h4>
                     <Select
                         defaultValue={report.status}
@@ -79,16 +96,6 @@ function ReportCard({ report, onStatusChange }: { report: Report, onStatusChange
                         </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm">
-                   <Image
-                      src={report.photoUrl}
-                      alt={`Problema em ${report.location}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                    />
-                </div>
               </div>
             </AccordionContent>
           </AccordionItem>
