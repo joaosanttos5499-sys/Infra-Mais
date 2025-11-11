@@ -11,7 +11,7 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "CityFix",
+  title: "Infra Mais",
   description: "Report infrastructure issues in your city.",
 };
 

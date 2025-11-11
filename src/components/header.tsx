@@ -9,7 +9,7 @@ export function Header() {
           <Link href="/" className="flex items-center gap-2">
             <Building className="h-7 w-7 text-primary" />
             <span className="text-2xl font-bold font-headline text-foreground">
-              CityFix
+              Infra Mais
             </span>
           </Link>
           <nav className="flex items-center gap-4 text-sm font-medium">
