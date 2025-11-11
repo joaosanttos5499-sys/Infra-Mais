@@ -34,7 +34,21 @@ if (reports.length === 0) {
     status: 'IN_PROGRESS',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
     upvotes: 5,
-  });
+  },
+  {
+    id: String(idCounter++),
+    category: 'garbage',
+    bairro: 'Jardins',
+    location: 'Praça das Flores',
+    description: 'Lixo acumulado na praça, atraindo pragas.',
+    photoUrl: 'https://picsum.photos/seed/garbage1/600/400',
+    photoAfterUrl: 'https://picsum.photos/seed/garbage-resolved/600/400',
+    summary: 'Acúmulo de lixo na Praça das Flores necessita de remoção urgente.',
+    status: 'RESOLVED',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), // 5 days ago
+    upvotes: 25,
+  }
+  );
 }
 
 
@@ -57,11 +71,15 @@ export async function addReport(report: NewReport): Promise<Report> {
 
 export async function updateReportStatus(
   id: string,
-  status: ReportStatus
+  status: ReportStatus,
+  photoAfterUrl?: string,
 ): Promise<Report | undefined> {
   const reportIndex = reports.findIndex((r) => r.id === id);
   if (reportIndex !== -1) {
     reports[reportIndex].status = status;
+    if (photoAfterUrl) {
+        reports[reportIndex].photoAfterUrl = photoAfterUrl;
+    }
     return reports[reportIndex];
   }
   return undefined;

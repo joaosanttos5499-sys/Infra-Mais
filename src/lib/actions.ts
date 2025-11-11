@@ -75,7 +75,7 @@ export async function submitReport(
       photoDataUri,
     });
 
-    const newReport: Omit<Report, "id" | "createdAt" | "status" | "upvotes"> = {
+    const newReport: Omit<Report, "id" | "createdAt" | "status" | "upvotes" | "photoAfterUrl"> = {
       category,
       bairro,
       location,
@@ -99,15 +99,27 @@ export async function submitReport(
 
 export async function updateReportStatus(
   reportId: string,
-  status: ReportStatus
+  formData: FormData,
 ) {
+  const status = formData.get("status") as ReportStatus;
+  const photoAfterFile = formData.get("photoAfter") as File | null;
+  
+  let photoAfterUrl: string | undefined = undefined;
+
   try {
-    await dbUpdateReportStatus(reportId, status);
+     if (photoAfterFile && photoAfterFile.size > 0) {
+      if (photoAfterFile.size > 4 * 1024 * 1024) {
+         return { success: false, message: "A foto da solução deve ter menos de 4MB." };
+      }
+      photoAfterUrl = await fileToDataUri(photoAfterFile);
+    }
+
+    await dbUpdateReportStatus(reportId, status, photoAfterUrl);
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
     console.error(error);
-    return { success: false, message: "Failed to update status." };
+    return { success: false, message: "Falha ao atualizar status." };
   }
 }
 

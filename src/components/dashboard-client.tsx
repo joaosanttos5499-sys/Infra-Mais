@@ -1,6 +1,6 @@
 "use client";
 
-import { useOptimistic, useState } from "react";
+import { useOptimistic, useState, useRef, useActionState } from "react";
 import Image from "next/image";
 import { format, formatDistanceToNow } from "date-fns";
 import { updateReportStatus, upvoteReportAction } from "@/lib/actions";
@@ -14,7 +14,9 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, RefreshCw } from "lucide-react";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
 
 const statusConfig: Record<ReportStatus, { label: string; className: string }> = {
   PENDING: { label: "Pendente", className: "bg-orange-100 text-orange-800 border-orange-200" },
@@ -28,15 +30,31 @@ function StatusBadge({ status }: { status: ReportStatus }) {
 }
 
 function ReportCard({ 
-    report, 
-    onStatusChange,
+    report,
     onUpvote 
 }: { 
-    report: Report, 
-    onStatusChange: (id: string, status: ReportStatus) => void,
+    report: Report,
     onUpvote: (id: string) => void
 }) {
   const category = getCategory(report.category);
+  const { toast } = useToast();
+  const [formState, formAction, isPending] = useActionState(updateReportStatus, undefined, report.id);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [photoAfterPreview, setPhotoAfterPreview] = useState<string | null>(null);
+
+   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoAfterPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPhotoAfterPreview(null);
+    }
+  };
+
 
   return (
     <Card className="overflow-hidden">
@@ -62,15 +80,29 @@ function ReportCard({
                         <p className="text-sm text-foreground/80">{report.summary}</p>
                     </div>
                 </div>
-                <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm self-start">
-                    <Image
-                        src={report.photoUrl}
-                        alt={`Problema em ${report.location}`}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        />
+
+                {report.status === 'RESOLVED' ? (
+                     <div className="grid grid-cols-2 gap-2 self-start">
+                        <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm">
+                            <Image src={report.photoUrl} alt="Antes" fill className="object-cover" sizes="(max-width: 768px) 50vw, 17vw"/>
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Antes</div>
+                        </div>
+                        <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm">
+                            <Image src={report.photoAfterUrl || 'https://picsum.photos/seed/resolved-placeholder/400/300'} alt="Depois" fill className="object-cover" sizes="(max-width: 768px) 50vw, 17vw"/>
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Depois</div>
+                        </div>
                     </div>
+                ) : (
+                    <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm self-start">
+                        <Image
+                            src={report.photoUrl}
+                            alt={`Problema em ${report.location}`}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                            />
+                    </div>
+                )}
                 </div>
                 <div className="flex justify-between items-center mt-4">
                     <Button variant="ghost" size="sm" onClick={() => onUpvote(report.id)}>
@@ -84,34 +116,55 @@ function ReportCard({
             </div>
 
             <AccordionContent className="bg-muted/50">
-              <div className="p-6 space-y-4">
-                <div>
-                    <h4 className="font-semibold text-sm mb-1">Descrição Completa</h4>
-                    <p className="text-sm text-foreground/80">{report.description}</p>
+              <form action={formAction} ref={formRef}>
+                <div className="p-6 space-y-4">
+                    <div>
+                        <h4 className="font-semibold text-sm mb-1">Descrição Completa</h4>
+                        <p className="text-sm text-foreground/80">{report.description}</p>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-sm mb-1">Relatado</h4>
+                        <p className="text-sm text-foreground/80" title={format(report.createdAt, "PPPppp")}>
+                            {formatDistanceToNow(report.createdAt, { addSuffix: true })}
+                        </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor={`photoAfter-${report.id}`}>Foto da Solução (Opcional)</Label>
+                      <div className="aspect-video rounded-md border border-dashed flex items-center justify-center relative overflow-hidden bg-muted/80">
+                          {(photoAfterPreview || report.photoAfterUrl) ? (
+                              <Image src={photoAfterPreview || report.photoAfterUrl!} alt="Pré-visualização da foto da solução" fill className="object-cover" />
+                          ) : (
+                              <div className="text-center text-muted-foreground p-4">
+                                  <Camera className="mx-auto h-10 w-10" />
+                                  <p className="mt-2 text-xs">Carregar foto do "depois"</p>
+                              </div>
+                          )}
+                      </div>
+                      <Input id={`photoAfter-${report.id}`} name="photoAfter" type="file" accept="image/*" className="file:text-primary file:font-semibold text-xs" onChange={handlePhotoChange} />
+                    </div>
+
+                    <div className="flex items-end gap-4">
+                      <div className="space-y-2 flex-1">
+                          <Label htmlFor={`status-${report.id}`}>Atualizar Status</Label>
+                          <Select name="status" defaultValue={report.status}>
+                              <SelectTrigger id={`status-${report.id}`} className="bg-background">
+                                  <SelectValue placeholder="Mudar status" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                  {Object.entries(statusConfig).map(([key, { label }]) => (
+                                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                                  ))}
+                              </SelectContent>
+                          </Select>
+                      </div>
+                      <Button type="submit" disabled={isPending}>
+                        {isPending ? <Loader2 className="animate-spin" /> : <Upload />}
+                        <span className="ml-2">Atualizar</span>
+                      </Button>
+                    </div>
                 </div>
-                <div>
-                    <h4 className="font-semibold text-sm mb-1">Relatado</h4>
-                     <p className="text-sm text-foreground/80" title={format(report.createdAt, "PPPppp")}>
-                        {formatDistanceToNow(report.createdAt, { addSuffix: true })}
-                    </p>
-                </div>
-                <div className="space-y-2">
-                    <h4 className="font-semibold text-sm">Atualizar Status</h4>
-                    <Select
-                        defaultValue={report.status}
-                        onValueChange={(value: ReportStatus) => onStatusChange(report.id, value)}
-                    >
-                        <SelectTrigger className="w-[180px] bg-background">
-                            <SelectValue placeholder="Mudar status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {Object.entries(statusConfig).map(([key, { label }]) => (
-                                <SelectItem key={key} value={key}>{label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                  </div>
-              </div>
+              </form>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
@@ -120,7 +173,7 @@ function ReportCard({
   );
 }
 
-function ReportList({ reports, onStatusChange, onUpvote }: { reports: Report[], onStatusChange: (id: string, status: ReportStatus) => void, onUpvote: (id: string) => void }) {
+function ReportList({ reports, onUpvote }: { reports: Report[], onUpvote: (id: string) => void }) {
     if (reports.length === 0) {
       return (
           <div className="text-center py-16 border-2 border-dashed rounded-lg">
@@ -133,14 +186,14 @@ function ReportList({ reports, onStatusChange, onUpvote }: { reports: Report[], 
   return (
     <div className="space-y-4">
       {reports.map((report) => (
-        <ReportCard key={report.id} report={report} onStatusChange={onStatusChange} onUpvote={onUpvote} />
+        <ReportCard key={report.id} report={report} onUpvote={onUpvote} />
       ))}
     </div>
   );
 }
 
 type OptimisticUpdate = 
-    | { type: 'status', id: string; status: ReportStatus }
+    | { type: 'status', id: string; status: ReportStatus, photoAfterUrl?: string }
     | { type: 'upvote', id: string }
 
 export function DashboardClient({ reports }: { reports: Report[] }) {
@@ -150,7 +203,11 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
     reports,
     (state, update: OptimisticUpdate) => {
       if (update.type === 'status') {
-          const newState = state.map((r) => (r.id === update.id ? { ...r, status: update.status } : r));
+          const newState = state.map((r) => 
+            (r.id === update.id 
+                ? { ...r, status: update.status, photoAfterUrl: update.photoAfterUrl || r.photoAfterUrl } 
+                : r
+            ));
           return newState.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       }
       if (update.type === 'upvote') {
@@ -160,23 +217,6 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
       return state;
     }
   );
-
-  const handleStatusChange = async (reportId: string, status: ReportStatus) => {
-    setOptimisticReports({ type: 'status', id: reportId, status });
-    const result = await updateReportStatus(reportId, status);
-    if (!result?.success) {
-      toast({
-        title: "Falha na Atualização",
-        description: result.message || "Não foi possível atualizar o status do relatório.",
-        variant: "destructive",
-      });
-    } else {
-        toast({
-            title: "Status Atualizado",
-            description: `Status do relatório alterado para "${statusConfig[status].label}".`,
-        });
-    }
-  };
 
   const handleUpvote = async (reportId: string) => {
       setOptimisticReports({ type: 'upvote', id: reportId });
@@ -209,13 +249,13 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
             <TabsTrigger value="RESOLVED">Resolvidos</TabsTrigger>
         </TabsList>
         <TabsContent value="PENDING">
-            <ReportList reports={filteredReports("PENDING")} onStatusChange={handleStatusChange} onUpvote={handleUpvote} />
+            <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} />
         </TabsContent>
         <TabsContent value="IN_PROGRESS">
-            <ReportList reports={filteredReports("IN_PROGRESS")} onStatusChange={handleStatusChange} onUpvote={handleUpvote}/>
+            <ReportList reports={filteredReports("IN_PROGRESS")} onUpvote={handleUpvote}/>
         </TabsContent>
         <TabsContent value="RESOLVED">
-            <ReportList reports={filteredReports("RESOLVED")} onStatusChange={handleStatusChange} onUpvote={handleUpvote}/>
+            <ReportList reports={filteredReports("RESOLVED")} onUpvote={handleUpvote}/>
         </TabsContent>
     </Tabs>
   );
