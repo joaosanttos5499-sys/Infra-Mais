@@ -38,7 +38,7 @@ function ReportCard({ report, onStatusChange }: { report: Report, onStatusChange
                 {category?.icon && <category.icon className="h-6 w-6 text-primary hidden sm:block" />}
                 <div className="flex-1">
                   <p className="font-semibold">{category?.label || report.category}</p>
-                  <p className="text-sm text-muted-foreground">{report.location}</p>
+                  <p className="text-sm text-muted-foreground">{report.bairro} - {report.location}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">

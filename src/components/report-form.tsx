@@ -93,8 +93,20 @@ export function ReportForm() {
               <p className="text-sm font-medium text-destructive">{formState.errors.category}</p>
             )}
           </div>
+           <div className="space-y-2">
+            <Label htmlFor="bairro">Bairro</Label>
+            <Input
+              id="bairro"
+              name="bairro"
+              placeholder="ex: Centro, Vila Madalena"
+              required
+            />
+            {formState?.errors?.bairro && (
+              <p className="text-sm font-medium text-destructive">{formState.errors.bairro}</p>
+            )}
+          </div>
           <div className="space-y-2">
-            <Label htmlFor="location">Localização</Label>
+            <Label htmlFor="location">Endereço</Label>
             <Input
               id="location"
               name="location"

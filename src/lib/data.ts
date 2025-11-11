@@ -15,6 +15,7 @@ if (reports.length === 0) {
   reports.push({
     id: String(idCounter++),
     category: 'pothole',
+    bairro: 'Centro',
     location: 'Rua Principal, 123, Qualquerlugar, BR',
     description: 'Buraco grande no meio da rua, causando problemas no trânsito.',
     photoUrl: 'https://picsum.photos/seed/pothole1/600/400',
@@ -24,6 +25,7 @@ if (reports.length === 0) {
   }, {
     id: String(idCounter++),
     category: 'streetlight',
+    bairro: 'Vila Madalena',
     location: 'Esquina da Av. Carvalho com a Alameda Bordo',
     description: 'O poste de luz da esquina está completamente apagado. Já faz algumas noites que está escuro, o que parece perigoso.',
     photoUrl: 'https://picsum.photos/seed/light1/600/400',
