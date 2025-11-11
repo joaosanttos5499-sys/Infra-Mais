@@ -20,16 +20,16 @@ export function Header() {
               Home
             </Link>
             <Link
+              href="/dashboard"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Funcionários
+            </Link>
+            <Link
               href="/report/new"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               Relatar um Problema
-            </Link>
-            <Link
-              href="/dashboard"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Dashboard
             </Link>
           </nav>
         </div>
