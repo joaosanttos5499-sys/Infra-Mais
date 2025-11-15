@@ -15,6 +15,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import dynamic from 'next/dynamic';
+
+const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
+  ssr: false,
+});
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -69,6 +74,12 @@ export function ReportForm() {
       </CardHeader>
       <form action={formAction} ref={formRef}>
         <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label>Localização no Mapa</Label>
+            <div className="rounded-lg overflow-hidden border">
+              <LeafletMap />
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="category">Categoria</Label>
             <Select name="category" required>
