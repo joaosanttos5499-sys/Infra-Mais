@@ -21,7 +21,7 @@ export default function LeafletMap() {
     if (!mapRef.current) return;
 
     // Cria o mapa manualmente (sem react-leaflet)
-    const map = L.map(mapRef.current, { scrollWheelZoom: false }).setView([-6.515, -36.35], 14);
+    const map = L.map(mapRef.current, { scrollWheelZoom: true }).setView([-6.515, -36.35], 14);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
