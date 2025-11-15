@@ -17,10 +17,6 @@ export default function Home() {
     <>
       <Header />
       <main>
-        <div className="mt-10">
-          <LeafletMap />
-        </div>
-
         <div className="bg-background pt-24 pb-12 md:pt-32 md:pb-20 text-center">
           <div className="relative z-10 px-4">
             <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tight text-primary">
@@ -31,8 +27,12 @@ export default function Home() {
             </p>
           </div>
         </div>
+        
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20">
+          <LeafletMap />
+        </div>
 
-        <div className="bg-background">
+        <div className="bg-background pt-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="bg-card p-8 rounded-lg shadow-lg border flex flex-col">
