@@ -1,14 +1,26 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/header";
 
+// IMPORTAÇÃO DINÂMICA DO MAPA (CORRIGE O ERRO)
+import dynamic from "next/dynamic";
+const LeafletMap = dynamic(() => import("@/components/LeafletMap"), {
+  ssr: false,
+});
+
 export default function Home() {
   return (
     <>
       <Header />
       <main>
+        <div className="mt-10">
+          <LeafletMap />
+        </div>
+
         <div className="bg-background pt-24 pb-12 md:pt-32 md:pb-20 text-center">
           <div className="relative z-10 px-4">
             <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tight text-primary">
@@ -19,6 +31,7 @@ export default function Home() {
             </p>
           </div>
         </div>
+
         <div className="bg-background">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -27,7 +40,8 @@ export default function Home() {
                   Para Cidadãos
                 </h2>
                 <p className="mt-2 text-muted-foreground flex-grow">
-                  Viu um problema? Um buraco, um poste de luz quebrado ou lixo não recolhido? Denuncie em segundos.
+                  Viu um problema? Um buraco, um poste de luz quebrado ou lixo não recolhido? 
+                  Denuncie em segundos.
                 </p>
                 <Button asChild size="lg" className="mt-6 w-full sm:w-auto">
                   <Link href="/report/new">
@@ -35,6 +49,7 @@ export default function Home() {
                   </Link>
                 </Button>
               </div>
+
               <div className="bg-card p-8 rounded-lg shadow-lg border flex flex-col">
                 <h2 className="text-3xl font-headline font-bold text-foreground">
                   Problemas Relatados
