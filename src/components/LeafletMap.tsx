@@ -21,7 +21,7 @@ export default function LeafletMap() {
     if (!mapRef.current) return;
 
     // Cria o mapa manualmente (sem react-leaflet)
-    const map = L.map(mapRef.current, { scrollWheelZoom: false }).setView([-8.05, -34.9], 13);
+    const map = L.map(mapRef.current, { scrollWheelZoom: false }).setView([-6.515, -36.35], 14);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
@@ -37,7 +37,7 @@ export default function LeafletMap() {
       iconAnchor: [12, 41],
     });
 
-    L.marker([-8.05, -34.9], { icon }).addTo(map).bindPopup("Exemplo de marcador");
+    L.marker([-6.515, -36.35], { icon }).addTo(map).bindPopup("Centro de Picuí, PB");
 
     // Salva globalmente para permitir remoção futura (HMR/dev)
     (window as any).__leafletMap = map;
