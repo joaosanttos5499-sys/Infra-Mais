@@ -26,10 +26,10 @@ export function Header() {
               Funcionários
             </Link>
             <Link
-              href="/report/new"
+              href="/support"
               className="opacity-90 hover:opacity-100 transition-opacity"
             >
-              Relatar um Problema
+              Suporte
             </Link>
           </nav>
         </div>
