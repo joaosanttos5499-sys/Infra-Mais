@@ -19,7 +19,7 @@ export default function Home() {
       <main>
         <div className="bg-background pt-24 pb-12 md:pt-32 md:pb-20 text-center">
           <div className="relative z-10 px-4">
-            <div className="flex justify-center items-center gap-2">
+            <div className="flex justify-center items-center gap-5">
               <Image
                 src="/img/logo1.png"
                 alt="Infra Mais Logo"
@@ -37,11 +37,13 @@ export default function Home() {
           </div>
         </div>
         
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20">
-          <LeafletMap />
+        <div className="relative z-20 -mt-16 bg-primary/10 py-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <LeafletMap />
+          </div>
         </div>
 
-        <div className="bg-muted/50 pt-16 mt-16">
+        <div className="bg-muted/50 pt-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="bg-card p-8 rounded-lg shadow-lg border flex flex-col">
