@@ -23,9 +23,9 @@ export default function Home() {
               <Image
                 src="/img/logo1.png"
                 alt="Infra Mais Logo"
-                width={80}
-                height={80}
-                className="h-16 w-16 md:h-20 md:w-20"
+                width={120}
+                height={120}
+                className="h-24 w-24 md:h-32 md:w-32"
               />
               <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tight text-primary">
                 Infra Mais
