@@ -17,24 +17,7 @@ export default function Home() {
     <>
       <Header />
       <main>
-        <div className="bg-background pt-24 pb-12 md:pt-32 md:pb-20 text-center">
-          <div className="relative z-10 px-4">
-            <div className="flex justify-center items-center gap-5">
-              <Image
-                src="/img/logo1.png"
-                alt="Infra Mais Logo"
-                width={120}
-                height={120}
-                className="h-24 w-24 md:h-32 md:w-32"
-              />
-              <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tight text-primary">
-                Infra Mais
-              </h1>
-            </div>
-          </div>
-        </div>
-        
-        <div className="relative z-20 -mt-16 bg-primary/10 py-8">
+        <div className="relative z-20 bg-primary/10 py-8 pt-8">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <LeafletMap />
           </div>
