@@ -19,7 +19,7 @@ export default function Home() {
       <main>
         <div className="bg-background pt-24 pb-12 md:pt-32 md:pb-20 text-center">
           <div className="relative z-10 px-4">
-            <div className="flex justify-center items-center gap-4">
+            <div className="flex justify-center items-center gap-2">
               <Image
                 src="/img/logo1.png"
                 alt="Infra Mais Logo"
