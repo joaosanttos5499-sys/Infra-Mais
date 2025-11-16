@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/header";
+import { Separator } from "@/components/ui/separator";
 
 // IMPORTAÇÃO DINÂMICA DO MAPA (CORRIGE O ERRO)
 import dynamic from "next/dynamic";
@@ -23,6 +24,7 @@ export default function Home() {
               <h2 className="text-3xl font-headline font-bold text-foreground mb-4">
                 Localização em Tempo Real
               </h2>
+              <Separator className="mb-6" />
               <LeafletMap />
             </div>
           </div>
