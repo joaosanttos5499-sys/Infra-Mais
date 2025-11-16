@@ -17,27 +17,7 @@ export default function Home() {
     <>
       <Header />
       <main>
-        <div className="relative z-20 bg-transparent py-8 pt-8">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="inline-block">
-              <Image
-                src="/img/logo2.jpg"
-                alt="Infra Mais Logo"
-                width={150}
-                height={150}
-                className="rounded-full mx-auto"
-              />
-            </div>
-            <h1 className="mt-4 text-5xl font-extrabold tracking-tight font-headline text-foreground sm:text-6xl md:text-7xl">
-              Infra Mais
-            </h1>
-            <p className="mt-4 max-w-2xl mx-auto text-lg text-foreground/80 sm:text-xl">
-              Um portal de relatos de problemas na infraestrutura.
-            </p>
-          </div>
-        </div>
-
-        <div className="relative z-20 bg-transparent py-8 pt-8">
+        <div className="relative z-20 bg-transparent py-8">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-card p-8 rounded-lg shadow-lg border">
               <LeafletMap />
