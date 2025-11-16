@@ -43,7 +43,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="bg-muted/50 pt-16">
+        <div className="bg-primary/10 pt-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="bg-card p-8 rounded-lg shadow-lg border flex flex-col">
