@@ -1,14 +1,19 @@
 import Link from "next/link";
-import { Building } from "lucide-react";
+import Image from "next/image";
 
 export function Header() {
   return (
     <header className="bg-card text-primary sticky top-0 z-50 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <Building className="h-7 w-7" />
-            <span className="text-2xl font-bold font-headline">
+          <Link href="/" className="flex items-center gap-3">
+             <Image
+                src="/img/logo1.png"
+                alt="Infra Mais Logo"
+                width={40}
+                height={40}
+              />
+            <span className="text-2xl font-bold font-headline text-primary">
               Infra Mais
             </span>
           </Link>
