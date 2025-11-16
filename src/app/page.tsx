@@ -19,9 +19,18 @@ export default function Home() {
       <main>
         <div className="bg-background pt-24 pb-12 md:pt-32 md:pb-20 text-center">
           <div className="relative z-10 px-4">
-            <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tight text-primary">
-              Infra Mais
-            </h1>
+            <div className="flex justify-center items-center gap-4">
+              <Image
+                src="/img/logo1.png"
+                alt="Infra Mais Logo"
+                width={80}
+                height={80}
+                className="h-16 w-16 md:h-20 md:w-20"
+              />
+              <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tight text-primary">
+                Infra Mais
+              </h1>
+            </div>
             <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-foreground/80">
               Um portal de relatos de problemas na infraestrutura.
             </p>
