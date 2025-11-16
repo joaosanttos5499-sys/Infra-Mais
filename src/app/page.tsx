@@ -31,9 +31,6 @@ export default function Home() {
                 Infra Mais
               </h1>
             </div>
-            <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-foreground/80">
-              Um portal de relatos de problemas na infraestrutura.
-            </p>
           </div>
         </div>
         
