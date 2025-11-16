@@ -76,7 +76,7 @@ export function ReportForm() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label>Localização no Mapa</Label>
-            <div className="rounded-lg overflow-hidden border">
+            <div className="rounded-lg overflow-hidden border relative z-0">
               <LeafletMap />
             </div>
           </div>
