@@ -34,7 +34,7 @@ export default async function Home() {
         </div>
 
         {/* Mapa */}
-        <div className="relative z-20 bg-transparent py-8">
+        <div className="relative z-20 bg-transparent py-8 pb-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-card p-8 rounded-lg shadow-lg border">
               <h2 className="text-3xl font-headline font-bold text-foreground mb-4">
@@ -45,27 +45,6 @@ export default async function Home() {
             </div>
           </div>
         </div>
-
-        {/* Card "Problemas Relatados" */}
-        <div className="bg-transparent pb-16">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-               <div className="bg-card p-8 rounded-lg shadow-lg border flex flex-col md:max-w-xl mx-auto">
-                    <h2 className="text-3xl font-headline font-bold text-foreground">
-                    Problemas Relatados
-                    </h2>
-                    <Separator className="my-4" />
-                    <p className="mt-2 text-muted-foreground flex-grow">
-                    Veja os problemas pendentes e resolvidos relatados pela população.
-                    </p>
-                    <Button asChild size="lg" className="mt-6 w-full sm:w-auto self-start">
-                    <Link href="/dashboard">
-                        Ver Relatos <ArrowRight className="ml-2 h-5 w-5" />
-                    </Link>
-                    </Button>
-                </div>
-            </div>
-        </div>
-
       </main>
     </>
   );
