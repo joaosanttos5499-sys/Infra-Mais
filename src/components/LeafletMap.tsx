@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { type Report } from "@/lib/types";
+import { getCategory } from "@/lib/categories";
+import { renderToString } from 'react-dom/server';
 
 // Define a interface para as props
 interface LeafletMapProps {
@@ -52,16 +54,23 @@ export default function LeafletMap({
 
     // Adiciona marcadores para relatórios (página inicial)
     if (!interactive && reports.length > 0) {
-      const icon = L.icon({
-        iconUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png",
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon-2x.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-      });
-        
       reports.forEach(report => {
-          const reportMarker = L.marker([report.latitude, report.longitude], { icon })
+          const category = getCategory(report.category);
+          const IconComponent = category?.icon;
+
+          const iconHtml = IconComponent 
+            ? renderToString(<IconComponent className="h-5 w-5 text-white" />)
+            : '';
+
+          const customIcon = L.divIcon({
+              html: `<div style="background-color: ${category?.color || '#3b82f6'};" class="rounded-full p-2 shadow-lg">${iconHtml}</div>`,
+              className: 'custom-leaflet-icon',
+              iconSize: [32, 32],
+              iconAnchor: [16, 16],
+              popupAnchor: [0, -16]
+          });
+          
+          const reportMarker = L.marker([report.latitude, report.longitude], { icon: customIcon })
               .addTo(map)
               .bindPopup(`<b>${report.category}</b><br>${report.location}`);
           reportMarkers.current.push(reportMarker);
