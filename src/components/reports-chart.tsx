@@ -7,6 +7,8 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
 } from "@/components/ui/chart"
 
 interface ReportsChartProps {
@@ -49,6 +51,7 @@ export function ReportsChart({ total, resolved }: ReportsChartProps) {
     }
 
     return (
+      <div className="flex items-center">
         <ChartContainer
             config={chartConfig}
             className="mx-auto aspect-square h-48"
@@ -58,7 +61,7 @@ export function ReportsChart({ total, resolved }: ReportsChartProps) {
                 cursor={false}
                 content={<ChartTooltipContent hideLabel />}
             />
-            <Pie
+             <Pie
                 data={chartData}
                 dataKey="count"
                 nameKey="status"
@@ -94,5 +97,15 @@ export function ReportsChart({ total, resolved }: ReportsChartProps) {
             </text>
         </PieChart>
         </ChartContainer>
+         <div className="flex flex-col gap-2 text-sm">
+            {chartData.map((item) => (
+                <div key={item.status} className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.fill }} />
+                    <span>{item.status}:</span>
+                    <span className="font-semibold">{item.count}</span>
+                </div>
+            ))}
+        </div>
+      </div>
   )
 }
