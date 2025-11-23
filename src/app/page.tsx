@@ -1,26 +1,14 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/header";
 import { Separator } from "@/components/ui/separator";
 import { getReports } from "@/lib/data";
-import { useEffect, useState } from "react";
-import { Report } from "@/lib/types";
+import { type Report } from "@/lib/types";
+import { HomeMapClient } from "@/components/home-map-client";
 
-// IMPORTAÇÃO DINÂMICA DO MAPA (CORRIGE O ERRO)
-import dynamic from "next/dynamic";
-const LeafletMap = dynamic(() => import("@/components/LeafletMap"), {
-  ssr: false,
-});
-
-export default function Home() {
-  const [reports, setReports] = useState<Report[]>([]);
-  useEffect(() => {
-    getReports().then(setReports);
-  }, []);
+export default async function Home() {
+  const reports: Report[] = await getReports();
 
   return (
     <>
@@ -33,7 +21,7 @@ export default function Home() {
                 Localização em Tempo Real
               </h2>
               <Separator className="mb-6" />
-              <LeafletMap reports={reports} />
+              <HomeMapClient reports={reports} />
             </div>
           </div>
         </div>
