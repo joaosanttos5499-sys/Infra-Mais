@@ -1,6 +1,7 @@
 
 
 
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -89,10 +90,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
               Sobre o Infra Mais
             </h2>
             <p className="text-muted-foreground">
-              O Infra Mais é uma plataforma de cidadania colaborativa, criada para conectar os cidadãos à gestão municipal. Nosso objetivo é oferecer um canal direto e eficiente para que você possa relatar problemas de infraestrutura na sua vizinhança, como buracos, problemas de iluminação, e acúmulo de lixo.
-            </p>
-            <p className="text-muted-foreground">
-              Acreditamos que, com a sua ajuda, podemos construir uma cidade melhor para todos. Cada relatório é uma contribuição valiosa para a manutenção e melhoria do nosso espaço urbano.
+              O Infra Mais é uma plataforma criada para facilitar a comunicação entre os cidadãos e a prefeitura, permitindo o registro rápido e organizado de problemas relacionados à infraestrutura da cidade. O objetivo do site é tornar o processo de identificação, envio e acompanhamento de solicitações mais simples, transparente e eficiente.
             </p>
           </div>
           <div>
