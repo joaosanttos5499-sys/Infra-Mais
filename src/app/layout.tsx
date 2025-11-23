@@ -5,6 +5,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/header";
 import { SocialsHeader } from "@/components/socials-header";
+import { Footer } from "@/components/footer";
 
 const ptSans = PT_Sans({
   subsets: ["latin"],
@@ -24,10 +25,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-background font-body antialiased", ptSans.variable)}>
+      <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", ptSans.variable)}>
         <SocialsHeader />
-        {children}
+        <div className="flex-grow">
+          {children}
+        </div>
         <Toaster />
+        <Footer />
       </body>
     </html>
   );
+}
