@@ -92,7 +92,7 @@ export default async function Home() {
                 Viu um problema? Um buraco, um poste de luz quebrado ou lixo não recolhido?
                 Denuncie em segundos.
               </p>
-              <Button asChild size="lg" className="mt-6 w-full sm:w-auto self-start">
+              <Button asChild size="lg" className="mt-6 w-full sm:w-auto self-start bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
                 <Link href="/report/new">
                   Relatar um Problema <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
