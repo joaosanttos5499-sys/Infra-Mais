@@ -1,5 +1,5 @@
+
 import { Suspense } from "react";
-import { Header } from "@/components/header";
 import { DashboardClient } from "@/components/dashboard-client";
 import { getReports } from "@/lib/data";
 import { Loader2 } from "lucide-react";
@@ -18,7 +18,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Header />
       <main className="flex-1 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
