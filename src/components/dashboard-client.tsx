@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useOptimistic, useState, useRef, useActionState } from "react";
@@ -232,10 +233,10 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
 
   return (
     <Tabs defaultValue="PENDING" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="PENDING">Pendentes</TabsTrigger>
-            <TabsTrigger value="IN_PROGRESS">Em Andamento</TabsTrigger>
-            <TabsTrigger value="RESOLVED">Resolvidos</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-card border">
+            <TabsTrigger value="PENDING" className="data-[state=active]:bg-amber-400 data-[state=active]:text-black">Pendentes</TabsTrigger>
+            <TabsTrigger value="IN_PROGRESS" className="data-[state=active]:bg-amber-400 data-[state=active]:text-black">Em Andamento</TabsTrigger>
+            <TabsTrigger value="RESOLVED" className="data-[state=active]:bg-amber-400 data-[state=active]:text-black">Resolvidos</TabsTrigger>
         </TabsList>
         <TabsContent value="PENDING">
             <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} />
@@ -249,3 +250,5 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
     </Tabs>
   );
 }
+
+    
