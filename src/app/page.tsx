@@ -63,7 +63,7 @@ async function RecentReports() {
         })}
       </div>
        <div className="text-center">
-          <Button asChild variant="outline">
+          <Button asChild className="bg-amber-400 text-amber-900 hover:bg-amber-400/90 focus-visible:ring-amber-500">
             <Link href="/dashboard">
               Ver todos os problemas
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -118,7 +118,7 @@ export default async function Home() {
         {/* Problemas Recentes */}
         <div className="bg-transparent py-8 pb-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-             <div className="mb-12">
+             <div className="mb-8">
                 <h2 className="text-3xl font-headline font-bold text-foreground">
                     Problemas Recentes
                 </h2>
