@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Header } from "@/components/header";
 import { Separator } from "@/components/ui/separator";
 import { getReports } from "@/lib/data";
 import { type Report } from "@/lib/types";
@@ -12,20 +11,7 @@ export default async function Home() {
 
   return (
     <>
-      <Header />
       <main>
-        <div className="relative z-20 bg-transparent py-8">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-card p-8 rounded-lg shadow-lg border">
-              <h2 className="text-3xl font-headline font-bold text-foreground mb-4">
-                Localização em Tempo Real
-              </h2>
-              <Separator className="mb-6" />
-              <HomeMapClient reports={reports} />
-            </div>
-          </div>
-        </div>
-
         <div className="bg-transparent pt-8">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -59,6 +45,17 @@ export default async function Home() {
                   </Link>
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+        <div className="relative z-20 bg-transparent py-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-card p-8 rounded-lg shadow-lg border">
+              <h2 className="text-3xl font-headline font-bold text-foreground mb-4">
+                Localização em Tempo Real
+              </h2>
+              <Separator className="mb-6" />
+              <HomeMapClient reports={reports} />
             </div>
           </div>
         </div>
