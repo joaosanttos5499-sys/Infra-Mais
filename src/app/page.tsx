@@ -2,6 +2,7 @@
 
 
 
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -89,6 +90,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
             <h2 className="text-3xl font-headline font-bold text-foreground">
               Sobre o Infra Mais
             </h2>
+            <Separator className="my-4" />
             <p className="text-muted-foreground">
               O Infra Mais é uma plataforma criada para facilitar a comunicação entre os cidadãos e a prefeitura, permitindo o registro rápido e organizado de problemas relacionados à infraestrutura da cidade. O objetivo do site é tornar o processo de identificação, envio e acompanhamento de solicitações mais simples, transparente e eficiente.
             </p>
