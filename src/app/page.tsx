@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -88,7 +89,7 @@ export default async function Home() {
                 Denuncie em segundos.
               </p>
               <Button asChild size="lg" className="mt-6 w-full sm:w-auto self-start">
-                <Link href="/login">
+                <Link href="/signup">
                   Relatar um Problema <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -112,12 +113,12 @@ export default async function Home() {
         {/* Problemas Recentes */}
         <div className="bg-transparent py-8 pb-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-             <div className="text-center mb-12">
+             <div className="mb-12">
                 <h2 className="text-3xl font-headline font-bold text-foreground">
                     Problemas Recentes
                 </h2>
                 <p className="text-muted-foreground mt-2">Veja os últimos problemas relatados pela comunidade.</p>
-                <Separator className="mt-4 max-w-sm mx-auto" />
+                <Separator className="mt-4" />
              </div>
              <RecentReports />
           </div>
