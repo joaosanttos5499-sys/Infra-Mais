@@ -3,6 +3,7 @@
 
 
 
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -137,35 +138,37 @@ export default async function Home() {
             </div>
           </div>
         </div>
-
-        {/* Mapa */}
-        <div className="relative z-20 bg-transparent py-8">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-card p-8 rounded-lg shadow-lg border">
-              <h2 className="text-3xl font-headline font-bold text-foreground mb-4">
-                Localização em Tempo Real
-              </h2>
-              <Separator className="mb-6" />
-              <HomeMapClient reports={reports} />
-            </div>
-          </div>
-        </div>
-
-        {/* Problemas Recentes */}
-        <div className="bg-transparent py-8 pb-16">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-             <div className="mb-8 text-left">
-                <h2 className="text-3xl font-headline font-bold text-foreground">
-                    Problemas Recentes
-                </h2>
-                <p className="text-muted-foreground mt-2">Veja os últimos problemas relatados pela comunidade.</p>
-                <Separator className="mt-4" />
-             </div>
-             <RecentReports />
-          </div>
-        </div>
         
-        <AboutSection reports={reports} />
+        <div className="bg-muted">
+            {/* Mapa */}
+            <div className="relative z-20 bg-transparent py-8">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-card p-8 rounded-lg shadow-lg border">
+                <h2 className="text-3xl font-headline font-bold text-foreground mb-4">
+                    Localização em Tempo Real
+                </h2>
+                <Separator className="mb-6" />
+                <HomeMapClient reports={reports} />
+                </div>
+            </div>
+            </div>
+
+            {/* Problemas Recentes */}
+            <div className="bg-transparent py-8 pb-16">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="mb-8 text-left">
+                    <h2 className="text-3xl font-headline font-bold text-foreground">
+                        Problemas Recentes
+                    </h2>
+                    <p className="text-muted-foreground mt-2">Veja os últimos problemas relatados pela comunidade.</p>
+                    <Separator className="mt-4" />
+                </div>
+                <RecentReports />
+            </div>
+            </div>
+            
+            <AboutSection reports={reports} />
+        </div>
 
       </main>
     </>
