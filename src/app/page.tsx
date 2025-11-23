@@ -1,10 +1,73 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getReports } from "@/lib/data";
 import { type Report } from "@/lib/types";
 import { HomeMapClient } from "@/components/home-map-client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getCategory } from "@/lib/categories";
+import { formatDistanceToNow } from "date-fns";
+
+async function RecentReports() {
+  const reports = await getReports();
+  const recentReports = reports.slice(0, 3);
+
+  if (recentReports.length === 0) {
+    return (
+      <div className="text-center text-muted-foreground py-8">
+        Nenhum problema relatado recentemente.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {recentReports.map((report) => {
+          const category = getCategory(report.category);
+          return (
+            <Card key={report.id} className="overflow-hidden flex flex-col">
+              <div className="relative aspect-video">
+                <Image
+                  src={report.photoUrl}
+                  alt={report.description}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+              </div>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                   {category?.icon && <category.icon className="h-5 w-5 text-primary" />} 
+                   <span>{category?.label || report.category}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {report.location}
+                </p>
+                 <p className="text-xs text-muted-foreground mt-2">
+                    {formatDistanceToNow(report.createdAt, { addSuffix: true })}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+       <div className="text-center">
+          <Button asChild variant="outline">
+            <Link href="/dashboard">
+              Ver todos os problemas
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+    </div>
+  );
+}
+
 
 export default async function Home() {
   const reports: Report[] = await getReports();
@@ -34,7 +97,7 @@ export default async function Home() {
         </div>
 
         {/* Mapa */}
-        <div className="relative z-20 bg-transparent py-8 pb-16">
+        <div className="relative z-20 bg-transparent py-8">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-card p-8 rounded-lg shadow-lg border">
               <h2 className="text-3xl font-headline font-bold text-foreground mb-4">
@@ -45,6 +108,21 @@ export default async function Home() {
             </div>
           </div>
         </div>
+
+        {/* Problemas Recentes */}
+        <div className="bg-transparent py-8 pb-16">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+             <div className="text-center mb-12">
+                <h2 className="text-3xl font-headline font-bold text-foreground">
+                    Problemas Recentes
+                </h2>
+                <p className="text-muted-foreground mt-2">Veja os últimos problemas relatados pela comunidade.</p>
+                <Separator className="mt-4 max-w-sm mx-auto" />
+             </div>
+             <RecentReports />
+          </div>
+        </div>
+
       </main>
     </>
   );
