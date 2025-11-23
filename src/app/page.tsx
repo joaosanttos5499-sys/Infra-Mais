@@ -1,17 +1,19 @@
 
 
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getReports } from "@/lib/data";
-import { type Report } from "@/lib/types";
+import { type Report, type ReportStatus } from "@/lib/types";
 import { HomeMapClient } from "@/components/home-map-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCategory } from "@/lib/categories";
 import { formatDistanceToNow } from "date-fns";
 import { StatusBadge } from "@/components/status-badge";
+import { ReportsChart } from "@/components/reports-chart";
 
 async function RecentReports() {
   const reports = await getReports();
@@ -74,6 +76,41 @@ async function RecentReports() {
   );
 }
 
+function AboutSection({ reports }: { reports: Report[] }) {
+  const totalReports = reports.length;
+  const resolvedReports = reports.filter(r => r.status === 'RESOLVED').length;
+
+  return (
+    <div className="bg-transparent py-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-4">
+            <h2 className="text-3xl font-headline font-bold text-foreground">
+              Sobre o Infra Mais
+            </h2>
+            <p className="text-muted-foreground">
+              O Infra Mais é uma plataforma de cidadania colaborativa, criada para conectar os cidadãos à gestão municipal. Nosso objetivo é oferecer um canal direto e eficiente para que você possa relatar problemas de infraestrutura na sua vizinhança, como buracos, problemas de iluminação, e acúmulo de lixo.
+            </p>
+            <p className="text-muted-foreground">
+              Acreditamos que, com a sua ajuda, podemos construir uma cidade melhor para todos. Cada relatório é uma contribuição valiosa para a manutenção e melhoria do nosso espaço urbano.
+            </p>
+          </div>
+          <div>
+            <Card className="shadow-lg">
+                <CardHeader>
+                    <CardTitle>Visão Geral dos Relatórios</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ReportsChart total={totalReports} resolved={resolvedReports} />
+                </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 export default async function Home() {
   const reports: Report[] = await getReports();
@@ -127,6 +164,8 @@ export default async function Home() {
              <RecentReports />
           </div>
         </div>
+        
+        <AboutSection reports={reports} />
 
       </main>
     </>
