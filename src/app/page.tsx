@@ -1,4 +1,5 @@
 
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -10,6 +11,7 @@ import { HomeMapClient } from "@/components/home-map-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCategory } from "@/lib/categories";
 import { formatDistanceToNow } from "date-fns";
+import { StatusBadge } from "@/components/status-badge";
 
 async function RecentReports() {
   const reports = await getReports();
@@ -38,6 +40,9 @@ async function RecentReports() {
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
+                 <div className="absolute top-2 right-2">
+                    <StatusBadge status={report.status} />
+                </div>
               </div>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">

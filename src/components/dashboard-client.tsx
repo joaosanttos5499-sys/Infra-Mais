@@ -7,27 +7,16 @@ import { updateReportStatus, upvoteReportAction } from "@/lib/actions";
 import { type Report, type ReportStatus } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
 import { ThumbsUp, Camera, Upload, Loader2, RefreshCw } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { statusConfig, StatusBadge } from "./status-badge";
 
-const statusConfig: Record<ReportStatus, { label: string; className: string }> = {
-  PENDING: { label: "Pendente", className: "bg-orange-100 text-orange-800 border-orange-200" },
-  IN_PROGRESS: { label: "Em Andamento", className: "bg-blue-100 text-blue-800 border-blue-200" },
-  RESOLVED: { label: "Resolvido", className: "bg-green-100 text-green-800 border-green-200" },
-};
-
-function StatusBadge({ status }: { status: ReportStatus }) {
-  const { label, className } = statusConfig[status];
-  return <Badge variant="outline" className={cn("font-semibold", className)}>{label}</Badge>;
-}
 
 function ReportCard({ 
     report,
