@@ -84,7 +84,7 @@ export default async function Home() {
         {/* Card "Reportar um Problema" */}
         <div className="bg-transparent pt-8">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-            <div className="bg-card p-8 rounded-lg shadow-lg border flex flex-col md:max-w-xl mx-auto">
+            <div className="bg-card p-8 rounded-lg shadow-lg border flex flex-col md:max-w-xl">
               <h2 className="text-3xl font-headline font-bold text-foreground">
                 Reportar um Problema
               </h2>
