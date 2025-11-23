@@ -63,7 +63,7 @@ export default function LeafletMap({
             : '';
 
           const customIcon = L.divIcon({
-              html: `<div style="background-color: ${category?.color || '#3b82f6'};" class="rounded-full p-2 shadow-lg">${iconHtml}</div>`,
+              html: `<div style="background-color: ${category?.color || '#3b82f6'}; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;" class="rounded-full shadow-lg">${iconHtml}</div>`,
               className: 'custom-leaflet-icon',
               iconSize: [32, 32],
               iconAnchor: [16, 16],
