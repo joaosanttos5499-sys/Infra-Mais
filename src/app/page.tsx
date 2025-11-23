@@ -83,18 +83,17 @@ export default async function Home() {
       <main>
         {/* Card "Reportar um Problema" */}
         <div className="pt-8">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-            <div className="flex flex-col md:max-w-xl p-8">
+          <div className="max-w-6xl px-4 sm:px-6 lg:px-8 pb-8">
+            <div className="flex flex-col md:max-w-xl p-8 -mx-8 sm:-mx-6 lg:-mx-8">
               <h2 className="text-3xl font-headline font-bold text-foreground">
                 Reportar um Problema
               </h2>
-              <Separator className="my-4" />
               <p className="mt-2 text-muted-foreground flex-grow">
                 Viu um problema? Um buraco, um poste de luz quebrado ou lixo não recolhido?
                 Denuncie em segundos.
               </p>
               <Button asChild size="lg" className="mt-6 w-full sm:w-auto self-start">
-                <Link href="/signup">
+                <Link href="/report/new">
                   Relatar um Problema <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
