@@ -10,8 +10,8 @@ export function Footer() {
             <Image
               src="/img/logo1.png"
               alt="Infra Mais Logo"
-              width={30}
-              height={30}
+              width={40}
+              height={40}
             />
             <span className="text-xl font-bold font-headline">
               Infra Mais
