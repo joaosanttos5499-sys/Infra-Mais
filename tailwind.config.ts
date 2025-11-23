@@ -16,6 +16,9 @@ export default {
       },
     },
     extend: {
+      spacing: {
+        '5': '1.25rem',
+      },
       fontFamily: {
         body: ['var(--font-pt-sans)', 'sans-serif'],
         headline: ['var(--font-pt-sans)', 'sans-serif'],
