@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -7,10 +7,10 @@ import { Header } from "@/components/header";
 import { SocialsHeader } from "@/components/socials-header";
 import { Footer } from "@/components/footer";
 
-const montserrat = Montserrat({
+const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "700"],
-  variable: "--font-montserrat",
+  variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", montserrat.variable)}>
+      <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", poppins.variable)}>
         <SocialsHeader />
         <Header />
         <div className="flex-grow">
