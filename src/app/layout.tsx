@@ -27,6 +27,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", ptSans.variable)}>
         <SocialsHeader />
+        <Header />
         <div className="flex-grow">
           {children}
         </div>
