@@ -12,49 +12,7 @@ let idCounter = reports.length > 0 ? Math.max(...reports.map(r => parseInt(r.id)
 
 if (reports.length === 0) {
   // Add some initial data for demonstration
-  reports.push({
-    id: String(idCounter++),
-    category: 'pothole',
-    bairro: 'Centro',
-    location: 'Rua Antônio Firmino, perto da prefeitura',
-    description: 'Buraco grande no meio da rua, causando problemas no trânsito.',
-    photoUrl: 'https://picsum.photos/seed/pothole1/600/400',
-    summary: 'Um buraco significativo na Rua Antônio Firmino está atrapalhando o fluxo do trânsito.',
-    status: 'PENDING',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
-    upvotes: 12,
-    latitude: -6.515,
-    longitude: -36.35,
-  }, {
-    id: String(idCounter++),
-    category: 'streetlight',
-    bairro: 'JK',
-    location: 'Rua Sebastião Ferreira de Castro',
-    description: 'O poste de luz da esquina está completamente apagado. Já faz algumas noites que está escuro, o que parece perigoso.',
-    photoUrl: 'https://picsum.photos/seed/light1/600/400',
-    summary: 'Um poste de luz quebrado na Rua Sebastião Ferreira de Castro está causando preocupações de segurança.',
-    status: 'IN_PROGRESS',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    upvotes: 5,
-    latitude: -6.518,
-    longitude: -36.355,
-  },
-  {
-    id: String(idCounter++),
-    category: 'garbage',
-    bairro: 'Limeira',
-    location: 'Próximo ao açude do povoado',
-    description: 'Lixo acumulado na beira do açude, atraindo pragas.',
-    photoUrl: 'https://picsum.photos/seed/garbage1/600/400',
-    photoAfterUrl: 'https://picsum.photos/seed/garbage-resolved/600/400',
-    summary: 'Acúmulo de lixo no povoado de Limeira necessita de remoção urgente.',
-    status: 'RESOLVED',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), // 5 days ago
-    upvotes: 25,
-    latitude: -6.505,
-    longitude: -36.36,
-  }
-  );
+  // The user requested to delete all sample reports.
 }
 
 
