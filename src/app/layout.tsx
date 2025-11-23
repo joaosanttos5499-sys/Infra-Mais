@@ -3,6 +3,8 @@ import { PT_Sans } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { Header } from "@/components/header";
+import { SocialsHeader } from "@/components/socials-header";
 
 const ptSans = PT_Sans({
   subsets: ["latin"],
@@ -23,9 +25,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-body antialiased", ptSans.variable)}>
+        <SocialsHeader />
         {children}
         <Toaster />
       </body>
     </html>
   );
-}
