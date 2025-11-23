@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PT_Sans } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -7,10 +7,10 @@ import { Header } from "@/components/header";
 import { SocialsHeader } from "@/components/socials-header";
 import { Footer } from "@/components/footer";
 
-const ptSans = PT_Sans({
+const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["400", "700"],
-  variable: "--font-pt-sans",
+  variable: "--font-montserrat",
 });
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", ptSans.variable)}>
+      <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", montserrat.variable)}>
         <SocialsHeader />
         <Header />
         <div className="flex-grow">
