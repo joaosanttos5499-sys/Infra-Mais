@@ -31,7 +31,7 @@ export default async function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="bg-card p-8 rounded-lg shadow-lg border flex flex-col">
                 <h2 className="text-3xl font-headline font-bold text-foreground">
-                  Para Cidadãos
+                  Reportar um Problema
                 </h2>
                 <Separator className="my-4" />
                 <p className="mt-2 text-muted-foreground flex-grow">
