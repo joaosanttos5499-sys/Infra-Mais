@@ -6,6 +6,9 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/header";
 import { Separator } from "@/components/ui/separator";
+import { getReports } from "@/lib/data";
+import { useEffect, useState } from "react";
+import { Report } from "@/lib/types";
 
 // IMPORTAÇÃO DINÂMICA DO MAPA (CORRIGE O ERRO)
 import dynamic from "next/dynamic";
@@ -14,6 +17,11 @@ const LeafletMap = dynamic(() => import("@/components/LeafletMap"), {
 });
 
 export default function Home() {
+  const [reports, setReports] = useState<Report[]>([]);
+  useEffect(() => {
+    getReports().then(setReports);
+  }, []);
+
   return (
     <>
       <Header />
@@ -25,7 +33,7 @@ export default function Home() {
                 Localização em Tempo Real
               </h2>
               <Separator className="mb-6" />
-              <LeafletMap />
+              <LeafletMap reports={reports} />
             </div>
           </div>
         </div>

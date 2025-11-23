@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import Image from "next/image";
-import { Camera, Loader2, RefreshCw } from "lucide-react";
+import { Camera, Loader2, RefreshCw, MapPin } from "lucide-react";
 import { submitReport } from "@/lib/actions";
 import { categories } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,7 @@ export function ReportForm() {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
@@ -62,6 +63,16 @@ export function ReportForm() {
     }
   };
 
+  const handleMapClick = (lat: number, lng: number) => {
+    setSelectedLocation({ lat, lng });
+  };
+  
+  const resetForm = () => {
+      formRef.current?.reset();
+      setPhotoPreview(null);
+      setSelectedLocation(null);
+  }
+
   const photoPlaceholder = PlaceHolderImages.find(p => p.id === 'report-photo-placeholder')?.imageUrl || "https://picsum.photos/seed/placeholder/400/300";
 
   return (
@@ -69,17 +80,29 @@ export function ReportForm() {
       <CardHeader>
         <CardTitle className="font-headline text-3xl">Relatar um Problema</CardTitle>
         <CardDescription>
-          Preencha os detalhes abaixo para enviar um relatório para a cidade.
+          Preencha os detalhes abaixo para enviar um relatório para a cidade. Clique no mapa para selecionar a localização exata.
         </CardDescription>
       </CardHeader>
       <form action={formAction} ref={formRef}>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label>Localização no Mapa</Label>
-            <div className="rounded-lg overflow-hidden border relative z-0">
-              <LeafletMap />
+             <div className="rounded-lg overflow-hidden border relative z-0">
+                <LeafletMap 
+                    interactive={true} 
+                    onLocationSelect={handleMapClick}
+                    selectedLocation={selectedLocation}
+                />
             </div>
+             {(!selectedLocation) && (
+                <div className="text-sm text-muted-foreground flex items-center gap-2 pt-1">
+                    <MapPin className="h-4 w-4"/>
+                    <span>Clique no mapa para marcar a localização do problema.</span>
+                </div>
+            )}
           </div>
+          <input type="hidden" name="latitude" value={selectedLocation?.lat ?? 0} />
+          <input type="hidden" name="longitude" value={selectedLocation?.lng ?? 0} />
           <div className="space-y-2">
             <Label htmlFor="category">Categoria</Label>
             <Select name="category" required>
@@ -117,7 +140,7 @@ export function ReportForm() {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location">Endereço</Label>
+            <Label htmlFor="location">Endereço ou ponto de referência</Label>
             <Input
               id="location"
               name="location"
@@ -166,7 +189,7 @@ export function ReportForm() {
           )}
         </CardContent>
         <CardFooter className="flex justify-end gap-2">
-            <Button variant="outline" type="button" onClick={() => { formRef.current?.reset(); setPhotoPreview(null); }}>
+            <Button variant="outline" type="button" onClick={resetForm}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Resetar
             </Button>

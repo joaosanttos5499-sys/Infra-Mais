@@ -12,6 +12,8 @@ export interface Report {
   status: ReportStatus;
   createdAt: Date;
   upvotes: number;
+  latitude: number;
+  longitude: number;
 }
 
 export type NewReport = Omit<Report, "id" | "createdAt" | "status" | "upvotes" | "photoAfterUrl">;

@@ -23,6 +23,8 @@ if (reports.length === 0) {
     status: 'PENDING',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
     upvotes: 12,
+    latitude: -6.515,
+    longitude: -36.35,
   }, {
     id: String(idCounter++),
     category: 'streetlight',
@@ -34,6 +36,8 @@ if (reports.length === 0) {
     status: 'IN_PROGRESS',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
     upvotes: 5,
+    latitude: -6.518,
+    longitude: -36.355,
   },
   {
     id: String(idCounter++),
@@ -47,6 +51,8 @@ if (reports.length === 0) {
     status: 'RESOLVED',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), // 5 days ago
     upvotes: 25,
+    latitude: -6.505,
+    longitude: -36.36,
   }
   );
 }

@@ -15,6 +15,8 @@ const ReportSchema = z.object({
   bairro: z.string().min(3, "Bairro must be at least 3 characters."),
   location: z.string().min(3, "Location must be at least 3 characters."),
   description: z.string().min(10, "Description must be at least 10 characters."),
+  latitude: z.coerce.number().min(-90).max(90),
+  longitude: z.coerce.number().min(-180).max(180),
 });
 
 type FormState = {
@@ -25,6 +27,8 @@ type FormState = {
     location?: string[];
     description?: string[];
     photo?: string[];
+    latitude?: string[];
+    longitude?: string[];
     _form?: string[];
   };
 };
@@ -44,12 +48,22 @@ export async function submitReport(
     bairro: formData.get("bairro"),
     location: formData.get("location"),
     description: formData.get("description"),
+    latitude: formData.get("latitude"),
+    longitude: formData.get("longitude"),
   });
 
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
     };
+  }
+  
+  if(validatedFields.data.latitude === 0 && validatedFields.data.longitude === 0) {
+      return {
+          errors: {
+              _form: ["Please select a location on the map."]
+          }
+      }
   }
 
   const photoFile = formData.get("photo") as File;
@@ -65,7 +79,7 @@ export async function submitReport(
   try {
     const photoDataUri = await fileToDataUri(photoFile);
 
-    const { category, bairro, location, description } = validatedFields.data;
+    const { category, bairro, location, description, latitude, longitude } = validatedFields.data;
 
     const aiSummary = await summarizeReport({
       category,
@@ -82,6 +96,8 @@ export async function submitReport(
       description,
       summary: aiSummary.summary,
       photoUrl: photoDataUri,
+      latitude,
+      longitude,
     };
 
     addReport(newReport);
