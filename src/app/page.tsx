@@ -37,6 +37,7 @@ export default function Home() {
                 <h2 className="text-3xl font-headline font-bold text-foreground">
                   Para Cidadãos
                 </h2>
+                <Separator className="my-4" />
                 <p className="mt-2 text-muted-foreground flex-grow">
                   Viu um problema? Um buraco, um poste de luz quebrado ou lixo não recolhido? 
                   Denuncie em segundos.
@@ -52,6 +53,7 @@ export default function Home() {
                 <h2 className="text-3xl font-headline font-bold text-foreground">
                   Problemas Relatados
                 </h2>
+                <Separator className="my-4" />
                 <p className="mt-2 text-muted-foreground flex-grow">
                   Veja os problemas pendentes e resolvidos relatados pela população.
                 </p>
