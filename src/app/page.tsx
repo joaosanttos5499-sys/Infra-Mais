@@ -1,9 +1,4 @@
 
-
-
-
-
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -120,15 +115,15 @@ export default async function Home() {
     <>
       <main>
         {/* Card "Reportar um Problema" */}
-        <div className="pt-16 pb-8">
+        <div className="py-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:max-w-xl">
-              <h2 className="text-4xl font-headline font-bold text-foreground">
+              <h2 className="text-5xl font-headline font-bold text-foreground mb-2">
                 Reportar um Problema
               </h2>
               <p className="mt-4 text-muted-foreground flex-grow">
-                Viu um problema? Um buraco, um poste de luz quebrado ou lixo não recolhido?
-                Denuncie em segundos.
+                Informe rapidamente um problema encontrado na sua cidade. Descreva o que aconteceu, envie uma foto e marque no mapa o local exato.
+Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
               </p>
               <Button asChild size="lg" className="mt-6 w-full sm:w-auto self-start bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
                 <Link href="/report/new">

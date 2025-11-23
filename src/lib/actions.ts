@@ -1,3 +1,4 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -67,18 +68,21 @@ export async function submitReport(
   }
 
   const photoFile = formData.get("photo") as File;
-  if (!photoFile || photoFile.size === 0) {
-    return { errors: { photo: ["A photo of the issue is required."] } };
+  let photoDataUri = "";
+
+  if (photoFile && photoFile.size > 0) {
+    // Limit file size to 4MB
+    if (photoFile.size > 4 * 1024 * 1024) {
+      return { errors: { photo: ["Photo size must be less than 4MB."] } };
+    }
+    photoDataUri = await fileToDataUri(photoFile);
+  } else {
+    // Use a placeholder if no photo is uploaded
+    photoDataUri = "https://picsum.photos/seed/placeholder/400/300";
   }
 
-  // Limit file size to 4MB
-  if (photoFile.size > 4 * 1024 * 1024) {
-    return { errors: { photo: ["Photo size must be less than 4MB."] } };
-  }
 
   try {
-    const photoDataUri = await fileToDataUri(photoFile);
-
     const { category, bairro, location, description, latitude, longitude } = validatedFields.data;
 
     const aiSummary = await summarizeReport({

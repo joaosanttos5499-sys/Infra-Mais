@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef, useState, useActionState } from "react";
@@ -152,7 +153,7 @@ export function ReportForm() {
             )}
           </div>
           <div className="space-y-2">
-            <Label>Foto do Problema</Label>
+            <Label>Foto do Problema (Opcional)</Label>
             <div className="aspect-video rounded-md border border-dashed flex items-center justify-center relative overflow-hidden bg-muted/50">
                 {photoPreview ? (
                     <Image src={photoPreview} alt="Pré-visualização da foto enviada" fill className="object-cover" />
@@ -163,7 +164,7 @@ export function ReportForm() {
                     </div>
                 )}
             </div>
-            <Input id="photo" name="photo" type="file" accept="image/*" required className="file:text-primary file:font-semibold" onChange={handlePhotoChange} ref={photoInputRef} />
+            <Input id="photo" name="photo" type="file" accept="image/*" className="file:text-primary file:font-semibold" onChange={handlePhotoChange} ref={photoInputRef} />
              {formState?.errors?.photo && (
               <p className="text-sm font-medium text-destructive">{formState.errors.photo}</p>
             )}
