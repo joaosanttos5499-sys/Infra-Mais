@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useOptimistic, useState, useRef, useActionState } from "react";
+import { useOptimistic, useState, useRef, useActionState, useEffect } from "react";
 import Image from "next/image";
 import { format, formatDistanceToNow } from "date-fns";
 import { updateReportStatus, upvoteReportAction } from "@/lib/actions";
@@ -47,7 +47,7 @@ function ReportCard({
 
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden" id={`report-${report.id}`}>
       <CardContent className="p-0">
         <Accordion type="single" collapsible>
           <AccordionItem value={report.id} className="border-b-0">
@@ -188,6 +188,7 @@ type OptimisticUpdate =
 
 export function DashboardClient({ reports }: { reports: Report[] }) {
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState<ReportStatus>("PENDING");
   
   const [optimisticReports, setOptimisticReports] = useOptimistic(
     reports,
@@ -207,6 +208,27 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
       return state;
     }
   );
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const reportId = hash.replace("#report-", "");
+      const report = reports.find(r => r.id === reportId);
+      if (report) {
+        setActiveTab(report.status);
+        setTimeout(() => {
+          const element = document.getElementById(hash.substring(1));
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+            setTimeout(() => {
+                 element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+            }, 3000);
+          }
+        }, 100);
+      }
+    }
+  }, [reports]);
 
   const handleUpvote = async (reportId: string) => {
       setOptimisticReports({ type: 'upvote', id: reportId });
@@ -232,8 +254,8 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
   const filteredReports = (status: ReportStatus) => optimisticReports.filter(r => r.status === status);
 
   return (
-    <Tabs defaultValue="PENDING" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-muted">
+    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ReportStatus)} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 bg-muted/50">
             <TabsTrigger value="PENDING" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:shadow-md">Pendentes</TabsTrigger>
             <TabsTrigger value="IN_PROGRESS" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-md">Em Andamento</TabsTrigger>
             <TabsTrigger value="RESOLVED" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:shadow-md">Resolvidos</TabsTrigger>

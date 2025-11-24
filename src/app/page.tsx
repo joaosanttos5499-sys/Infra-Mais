@@ -31,7 +31,7 @@ async function RecentReports() {
         {recentReports.map((report) => {
           const category = getCategory(report.category);
           return (
-            <Link href={`/dashboard`} key={report.id} className="block group">
+            <Link href={`/dashboard#report-${report.id}`} key={report.id} className="block group">
                 <Card className="overflow-hidden flex flex-col h-full transition-all group-hover:shadow-lg group-hover:-translate-y-1">
                 <div className="relative aspect-video">
                     <Image
@@ -124,7 +124,7 @@ export default async function Home() {
                 Reportar um Problema
               </h2>
               <p className="mt-4 text-muted-foreground flex-grow">
-                Informe rapidamente um problema encontrado na sua cidade. Descreva o que aconteceu, envie uma foto e marque no mapa o local exato.
+                Informe rapidamente um problema encontrado na sua cidade. Descreva o que aconteceu, envie uma foto (opcional) e marque no mapa o local exato.
 Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
               </p>
               <Button asChild size="lg" className="mt-6 w-full sm:w-auto self-start bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
@@ -136,7 +136,7 @@ Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
           </div>
         </div>
         
-        <div className="bg-muted">
+        <div className="bg-secondary">
             {/* Mapa */}
             <div className="relative z-20 bg-transparent py-8">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
