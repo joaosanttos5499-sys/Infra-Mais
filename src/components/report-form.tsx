@@ -25,7 +25,7 @@ const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full" disabled={pending} aria-disabled={pending}>
+    <Button type="submit" className="w-full bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500" disabled={pending} aria-disabled={pending}>
       {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       Enviar Relatório
     </Button>
