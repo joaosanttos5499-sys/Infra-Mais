@@ -1,6 +1,6 @@
 
 import {
-  Road,
+  Construction as Road, // Using Construction as Road
   Lightbulb,
   Droplets,
   Trash2,
