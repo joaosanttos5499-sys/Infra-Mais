@@ -79,7 +79,7 @@ export function ReportForm() {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle className="font-headline text-3xl">Preencha o Relatório</CardTitle>
+        <CardTitle className="font-headline text-3xl mb-2">Preencha o Relatório</CardTitle>
         <CardDescription>
           Preencha os detalhes abaixo para enviar um relatório para a cidade. Clique no mapa para selecionar a localização exata.
         </CardDescription>
