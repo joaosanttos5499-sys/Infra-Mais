@@ -31,34 +31,36 @@ async function RecentReports() {
         {recentReports.map((report) => {
           const category = getCategory(report.category);
           return (
-            <Card key={report.id} className="overflow-hidden flex flex-col">
-              <div className="relative aspect-video">
-                <Image
-                  src={report.photoUrl}
-                  alt={report.description}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-                 <div className="absolute top-2 right-2">
-                    <StatusBadge status={report.status} />
+            <Link href={`/dashboard`} key={report.id} className="block group">
+                <Card className="overflow-hidden flex flex-col h-full transition-all group-hover:shadow-lg group-hover:-translate-y-1">
+                <div className="relative aspect-video">
+                    <Image
+                    src={report.photoUrl}
+                    alt={report.description}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                    <div className="absolute top-2 right-2">
+                        <StatusBadge status={report.status} />
+                    </div>
                 </div>
-              </div>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                   {category?.icon && <category.icon className="h-5 w-5 text-primary" />} 
-                   <span>{category?.label || report.category}</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {report.location}
-                </p>
-                 <p className="text-xs text-muted-foreground mt-2">
-                    {formatDistanceToNow(report.createdAt, { addSuffix: true })}
-                </p>
-              </CardContent>
-            </Card>
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                    {category?.icon && <category.icon className="h-5 w-5 text-primary" />} 
+                    <span>{category?.label || report.category}</span>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                    {report.location}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                        {formatDistanceToNow(report.createdAt, { addSuffix: true })}
+                    </p>
+                </CardContent>
+                </Card>
+            </Link>
           );
         })}
       </div>
