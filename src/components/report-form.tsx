@@ -87,7 +87,7 @@ export function ReportForm() {
       <form action={formAction} ref={formRef}>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label>Localização no Mapa</Label>
+            <Label className="font-bold">Clique no mapa para marcar a localização do problema.</Label>
              <div className="rounded-lg overflow-hidden border relative z-0">
                 <LeafletMap 
                     interactive={true} 
@@ -95,12 +95,6 @@ export function ReportForm() {
                     selectedLocation={selectedLocation}
                 />
             </div>
-             {(!selectedLocation) && (
-                <div className="text-sm text-muted-foreground flex items-center gap-2 pt-1">
-                    <MapPin className="h-4 w-4"/>
-                    <span>Clique no mapa para marcar a localização do problema.</span>
-                </div>
-            )}
           </div>
           <input type="hidden" name="latitude" value={selectedLocation?.lat ?? 0} />
           <input type="hidden" name="longitude" value={selectedLocation?.lng ?? 0} />
