@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
-import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport } from "@/lib/data";
+import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport } from "@/lib/data";
 import { type Report, type ReportStatus } from "@/lib/types";
 import { categories } from "./categories";
 
@@ -151,5 +151,16 @@ export async function upvoteReportAction(reportId: string) {
     } catch (error) {
         console.error(error);
         return { success: false, message: "Failed to upvote." };
+    }
+}
+
+export async function downvoteReportAction(reportId: string) {
+    try {
+        await dbDownvoteReport(reportId);
+        revalidatePath("/dashboard");
+        return { success: true };
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: "Failed to downvote." };
     }
 }

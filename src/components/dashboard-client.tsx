@@ -4,7 +4,7 @@
 import { useOptimistic, useState, useRef, useActionState, useEffect } from "react";
 import Image from "next/image";
 import { format, formatDistanceToNow } from "date-fns";
-import { updateReportStatus, upvoteReportAction } from "@/lib/actions";
+import { updateReportStatus, upvoteReportAction, downvoteReportAction } from "@/lib/actions";
 import { type Report, type ReportStatus } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -13,18 +13,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, RefreshCw } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2 } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
+import { cn } from "@/lib/utils";
 
 
 function ReportCard({ 
     report,
-    onUpvote 
+    onUpvote,
+    isUpvoted
 }: { 
     report: Report,
-    onUpvote: (id: string) => void
+    onUpvote: (id: string) => void,
+    isUpvoted: boolean
 }) {
   const category = getCategory(report.category);
   const { toast } = useToast();
@@ -95,12 +98,11 @@ function ReportCard({
                 )}
                 </div>
                 <div className="flex justify-between items-center mt-4">
-                    <Button variant="ghost" size="sm" onClick={() => onUpvote(report.id)}>
-                        <ThumbsUp className="h-4 w-4 mr-2" />
+                    <Button variant={isUpvoted ? "default" : "ghost"} size="sm" onClick={() => onUpvote(report.id)}>
+                        <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
                         Apoiar ({report.upvotes})
                     </Button>
-                    <AccordionTrigger className="p-2 w-auto hover:bg-accent rounded-md [&[data-state=open]>svg]:text-accent">
-                        <span className="text-sm mr-1">Detalhes</span>
+                    <AccordionTrigger className="p-2 w-auto hover:bg-accent rounded-md [&[data-state=open]>svg]:text-accent invisible">
                     </AccordionTrigger>
                 </div>
             </div>
@@ -163,7 +165,7 @@ function ReportCard({
   );
 }
 
-function ReportList({ reports, onUpvote }: { reports: Report[], onUpvote: (id: string) => void }) {
+function ReportList({ reports, onUpvote, upvotedReports }: { reports: Report[], onUpvote: (id: string) => void, upvotedReports: Set<string> }) {
     if (reports.length === 0) {
       return (
           <div className="text-center py-16 border-2 border-dashed rounded-lg">
@@ -176,7 +178,7 @@ function ReportList({ reports, onUpvote }: { reports: Report[], onUpvote: (id: s
   return (
     <div className="space-y-4">
       {reports.map((report) => (
-        <ReportCard key={report.id} report={report} onUpvote={onUpvote} />
+        <ReportCard key={report.id} report={report} onUpvote={onUpvote} isUpvoted={upvotedReports.has(report.id)} />
       ))}
     </div>
   );
@@ -184,11 +186,12 @@ function ReportList({ reports, onUpvote }: { reports: Report[], onUpvote: (id: s
 
 type OptimisticUpdate = 
     | { type: 'status', id: string; status: ReportStatus, photoAfterUrl?: string }
-    | { type: 'upvote', id: string }
+    | { type: 'upvote', id: string, amount: 1 | -1 }
 
 export function DashboardClient({ reports }: { reports: Report[] }) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<ReportStatus>("PENDING");
+  const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
   
   const [optimisticReports, setOptimisticReports] = useOptimistic(
     reports,
@@ -202,7 +205,7 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
           return newState.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       }
       if (update.type === 'upvote') {
-          const newState = state.map((r) => (r.id === update.id ? { ...r, upvotes: r.upvotes + 1 } : r));
+          const newState = state.map((r) => (r.id === update.id ? { ...r, upvotes: r.upvotes + update.amount } : r));
           return newState;
       }
       return state;
@@ -231,15 +234,31 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
   }, [reports]);
 
   const handleUpvote = async (reportId: string) => {
-      setOptimisticReports({ type: 'upvote', id: reportId });
-      const result = await upvoteReportAction(reportId);
-      if (!result?.success) {
-          toast({
-              title: "Falha ao Apoiar",
-              description: result.message || "Não foi possível registrar seu apoio.",
-              variant: "destructive",
-          });
-      }
+    const isAlreadyUpvoted = upvotedReports.has(reportId);
+    const newUpvotedReports = new Set(upvotedReports);
+    let result;
+
+    if (isAlreadyUpvoted) {
+      newUpvotedReports.delete(reportId);
+      setOptimisticReports({ type: 'upvote', id: reportId, amount: -1 });
+      result = await downvoteReportAction(reportId);
+    } else {
+      newUpvotedReports.add(reportId);
+      setOptimisticReports({ type: 'upvote', id: reportId, amount: 1 });
+      result = await upvoteReportAction(reportId);
+    }
+    
+    setUpvotedReports(newUpvotedReports);
+    
+    if (!result?.success) {
+      toast({
+        title: "Falha ao Apoiar",
+        description: result.message || "Não foi possível registrar seu apoio.",
+        variant: "destructive",
+      });
+      // Revert local state if server fails
+      setUpvotedReports(upvotedReports);
+    }
   }
   
   if (reports.length === 0) {
@@ -261,13 +280,13 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
             <TabsTrigger value="RESOLVED" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:shadow-md">Resolvidos</TabsTrigger>
         </TabsList>
         <TabsContent value="PENDING">
-            <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} />
+            <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
         </TabsContent>
         <TabsContent value="IN_PROGRESS">
-            <ReportList reports={filteredReports("IN_PROGRESS")} onUpvote={handleUpvote}/>
+            <ReportList reports={filteredReports("IN_PROGRESS")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
         </TabsContent>
         <TabsContent value="RESOLVED">
-            <ReportList reports={filteredReports("RESOLVED")} onUpvote={handleUpvote}/>
+            <ReportList reports={filteredReports("RESOLVED")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
         </TabsContent>
     </Tabs>
   );

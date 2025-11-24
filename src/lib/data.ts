@@ -103,3 +103,14 @@ export async function upvoteReport(id: string): Promise<Report | undefined> {
     }
     return undefined;
 }
+
+export async function downvoteReport(id: string): Promise<Report | undefined> {
+    const reportIndex = reports.findIndex((r) => r.id === id);
+    if (reportIndex !== -1) {
+        if (reports[reportIndex].upvotes > 0) {
+            reports[reportIndex].upvotes--;
+        }
+        return reports[reportIndex];
+    }
+    return undefined;
+}
