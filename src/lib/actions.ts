@@ -14,7 +14,8 @@ const ReportSchema = z.object({
     message: "Please select a valid category.",
   }),
   bairro: z.string().min(3, "Bairro must be at least 3 characters."),
-  location: z.string().min(3, "Location must be at least 3 characters."),
+  address: z.string().min(3, "Address must be at least 3 characters."),
+  reference: z.string().optional(),
   description: z.string().min(10, "Description must be at least 10 characters."),
   latitude: z.coerce.number().min(-90).max(90),
   longitude: z.coerce.number().min(-180).max(180),
@@ -47,15 +48,20 @@ export async function submitReport(
   const validatedFields = ReportSchema.safeParse({
     category: formData.get("category"),
     bairro: formData.get("bairro"),
-    location: formData.get("location"),
+    address: formData.get("address"),
+    reference: formData.get("reference"),
     description: formData.get("description"),
     latitude: formData.get("latitude"),
     longitude: formData.get("longitude"),
   });
 
   if (!validatedFields.success) {
+    const fieldErrors = validatedFields.error.flatten().fieldErrors;
     return {
-      errors: validatedFields.error.flatten().fieldErrors,
+      errors: {
+          ...fieldErrors,
+          location: fieldErrors.address, // map address error to location
+      },
     };
   }
   
@@ -83,7 +89,9 @@ export async function submitReport(
 
 
   try {
-    const { category, bairro, location, description, latitude, longitude } = validatedFields.data;
+    const { category, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
+    
+    const location = reference ? `${address} (${reference})` : address;
 
     const aiSummary = await summarizeReport({
       category,

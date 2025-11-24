@@ -141,16 +141,24 @@ export function ReportForm() {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location">Endereço ou ponto de referência</Label>
+            <Label htmlFor="address">Endereço</Label>
             <Input
-              id="location"
-              name="location"
-              placeholder="ex: Esquina da Rua Principal com a Av. 2"
+              id="address"
+              name="address"
+              placeholder="ex: Rua Principal, 123"
               required
             />
             {formState?.errors?.location && (
               <p className="text-sm font-medium text-destructive">{formState.errors.location}</p>
             )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="reference">Ponto de Referência (Opcional)</Label>
+            <Input
+              id="reference"
+              name="reference"
+              placeholder="ex: Esquina com a Av. 2, perto do mercado"
+            />
           </div>
           <div className="space-y-2">
             <Label>Foto do Problema (Opcional)</Label>
