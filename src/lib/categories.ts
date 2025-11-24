@@ -6,7 +6,7 @@ import {
   Trash2,
   Trees,
   TrafficCone,
-  Construction,
+  Building,
   Bus,
   type LucideIcon,
 } from "lucide-react";
@@ -25,7 +25,7 @@ export const categories: Category[] = [
   { value: "limpeza_meio_ambiente", label: "Limpeza e Meio Ambiente", icon: Trash2, color: "#84cc16" }, // Lime 500
   { value: "espacos_publicos", label: "Espaços Públicos", icon: Trees, color: "#22c55e" }, // Green 500
   { value: "transito_seguranca", label: "Trânsito e Segurança", icon: TrafficCone, color: "#f97316" }, // Orange 500
-  { value: "obras_estruturas", label: "Obras e Estruturas", icon: Construction, color: "#f59e0b" }, // Amber 500
+  { value: "obras_estruturas", label: "Obras e Estruturas", icon: Building, color: "#f59e0b" }, // Amber 500
   { value: "transporte_publico", label: "Transporte Público", icon: Bus, color: "#a855f7" }, // Purple 500
 ];
 
