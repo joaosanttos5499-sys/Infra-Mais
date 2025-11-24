@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useOptimistic, useState, useRef, useActionState, useEffect } from "react";
+import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition } from "react";
 import Image from "next/image";
 import { format, formatDistanceToNow } from "date-fns";
 import { updateReportStatus, upvoteReportAction, downvoteReportAction } from "@/lib/actions";
@@ -102,8 +102,6 @@ function ReportCard({
                         <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
                         Apoiar ({report.upvotes})
                     </Button>
-                    <AccordionTrigger className="p-2 w-auto hover:bg-accent rounded-md [&[data-state=open]>svg]:text-accent invisible">
-                    </AccordionTrigger>
                 </div>
             </div>
 
@@ -192,6 +190,7 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<ReportStatus>("PENDING");
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
+  const [isPending, startTransition] = useTransition();
   
   const [optimisticReports, setOptimisticReports] = useOptimistic(
     reports,
@@ -234,31 +233,33 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
   }, [reports]);
 
   const handleUpvote = async (reportId: string) => {
-    const isAlreadyUpvoted = upvotedReports.has(reportId);
-    const newUpvotedReports = new Set(upvotedReports);
-    let result;
+    startTransition(async () => {
+      const isAlreadyUpvoted = upvotedReports.has(reportId);
+      const newUpvotedReports = new Set(upvotedReports);
+      let result;
 
-    if (isAlreadyUpvoted) {
-      newUpvotedReports.delete(reportId);
-      setOptimisticReports({ type: 'upvote', id: reportId, amount: -1 });
-      result = await downvoteReportAction(reportId);
-    } else {
-      newUpvotedReports.add(reportId);
-      setOptimisticReports({ type: 'upvote', id: reportId, amount: 1 });
-      result = await upvoteReportAction(reportId);
-    }
-    
-    setUpvotedReports(newUpvotedReports);
-    
-    if (!result?.success) {
-      toast({
-        title: "Falha ao Apoiar",
-        description: result.message || "Não foi possível registrar seu apoio.",
-        variant: "destructive",
-      });
-      // Revert local state if server fails
-      setUpvotedReports(upvotedReports);
-    }
+      if (isAlreadyUpvoted) {
+        newUpvotedReports.delete(reportId);
+        setOptimisticReports({ type: 'upvote', id: reportId, amount: -1 });
+        result = await downvoteReportAction(reportId);
+      } else {
+        newUpvotedReports.add(reportId);
+        setOptimisticReports({ type: 'upvote', id: reportId, amount: 1 });
+        result = await upvoteReportAction(reportId);
+      }
+      
+      setUpvotedReports(newUpvotedReports);
+      
+      if (!result?.success) {
+        toast({
+          title: "Falha ao Apoiar",
+          description: result.message || "Não foi possível registrar seu apoio.",
+          variant: "destructive",
+        });
+        // Revert local state if server fails
+        setUpvotedReports(upvotedReports);
+      }
+    });
   }
   
   if (reports.length === 0) {
