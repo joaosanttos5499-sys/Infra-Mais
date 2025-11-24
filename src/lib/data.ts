@@ -1,3 +1,4 @@
+
 import { type Report, type ReportStatus, type NewReport } from "@/lib/types";
 
 // In-memory store
@@ -24,7 +25,7 @@ if (reports.length === 0) {
       summary: "Buraco perigoso na Rua Principal.",
       status: "PENDING",
       createdAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-      upvotes: 15,
+      upvotes: 0,
       latitude: -6.516,
       longitude: -36.355,
     },
@@ -38,7 +39,7 @@ if (reports.length === 0) {
       summary: "Poste com lâmpada queimada na Vila Nova.",
       status: "IN_PROGRESS",
       createdAt: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-      upvotes: 8,
+      upvotes: 0,
       latitude: -6.512,
       longitude: -36.348,
     },
@@ -52,7 +53,7 @@ if (reports.length === 0) {
       summary: "Lixo acumulado perto do parquinho.",
       status: "RESOLVED",
       createdAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-      upvotes: 22,
+      upvotes: 0,
       latitude: -6.518,
       longitude: -36.351,
       photoAfterUrl: "https://picsum.photos/seed/garbage-resolved/400/300",
