@@ -10,6 +10,7 @@ import { HomeMapClient } from "@/components/home-map-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCategory } from "@/lib/categories";
 import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { StatusBadge } from "@/components/status-badge";
 import { ReportsChart } from "@/components/reports-chart";
 
@@ -56,7 +57,7 @@ async function RecentReports() {
                     {report.location}
                     </p>
                     <p className="text-xs text-muted-foreground mt-2">
-                        {formatDistanceToNow(report.createdAt, { addSuffix: true })}
+                        {formatDistanceToNow(report.createdAt, { addSuffix: true, locale: ptBR })}
                     </p>
                 </CardContent>
                 </Card>

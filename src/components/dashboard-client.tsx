@@ -4,6 +4,7 @@
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition } from "react";
 import Image from "next/image";
 import { format, formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { updateReportStatus, upvoteReportAction, downvoteReportAction } from "@/lib/actions";
 import { type Report, type ReportStatus } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
@@ -114,8 +115,8 @@ function ReportCard({
                     </div>
                     <div>
                         <h4 className="font-semibold text-sm mb-1">Relatado</h4>
-                        <p className="text-sm text-foreground/80" title={format(report.createdAt, "PPPppp")}>
-                            {formatDistanceToNow(report.createdAt, { addSuffix: true })}
+                        <p className="text-sm text-foreground/80" title={format(report.createdAt, "PPPppp", { locale: ptBR })}>
+                            {formatDistanceToNow(report.createdAt, { addSuffix: true, locale: ptBR })}
                         </p>
                     </div>
                     
