@@ -10,7 +10,7 @@ import { type Report, type ReportStatus } from "@/lib/types";
 import { categories } from "./categories";
 import { getAuth } from "firebase-admin/auth";
 import { getApp } from "firebase-admin/app";
-import { differenceInYears } from "date-fns";
+import { differenceInYears, parse } from "date-fns";
 
 const ReportSchema = z.object({
   userId: z.string(),
@@ -210,10 +210,15 @@ const SignupSchema = z.object({
   name: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracteres." }),
   email: z.string().email({ message: "Por favor, insira um e-mail válido." }),
   password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres." }),
-  dateOfBirth: z.string().refine((dob) => new Date(dob).toString() !== 'Invalid Date', {
-    message: "Data de nascimento inválida.",
-  }).refine((dob) => differenceInYears(new Date(), new Date(dob)) >= 18, {
-    message: "Você deve ter pelo menos 18 anos.",
+  dateOfBirth: z.string().refine((dob) => {
+    try {
+      const date = parse(dob, 'dd/MM/yyyy', new Date());
+      return differenceInYears(new Date(), date) >= 18;
+    } catch {
+      return false;
+    }
+  }, {
+    message: "Você deve ter pelo menos 18 anos e a data deve estar no formato DD/MM/AAAA.",
   }),
 });
 

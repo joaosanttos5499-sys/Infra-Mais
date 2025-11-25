@@ -9,12 +9,7 @@ import { signupUser } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
@@ -33,7 +28,7 @@ export function SignupForm() {
   const { toast } = useToast();
   const [formState, formAction, isPending] = useActionState(signupUser, undefined);
   const formRef = useRef<HTMLFormElement>(null);
-  const [date, setDate] = useState<Date | undefined>();
+  const [date, setDate] = useState("");
 
   useEffect(() => {
     if (formState?.success) {
@@ -44,6 +39,17 @@ export function SignupForm() {
       router.push('/');
     }
   }, [formState, router, toast]);
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 2) {
+      value = `${value.slice(0, 2)}/${value.slice(2)}`;
+    }
+    if (value.length > 5) {
+      value = `${value.slice(0, 5)}/${value.slice(5, 9)}`;
+    }
+    setDate(value);
+  };
 
   return (
     <form action={formAction} ref={formRef} className="space-y-4">
@@ -57,34 +63,16 @@ export function SignupForm() {
 
         <div className="space-y-2">
             <Label htmlFor="dateOfBirth">Data de Nascimento</Label>
-            <Popover>
-                <PopoverTrigger asChild>
-                    <Button
-                        variant={"outline"}
-                        className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !date && "text-muted-foreground"
-                        )}
-                        disabled={isPending}
-                    >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date ? format(date, "PPP", { locale: ptBR }) : <span>Escolha uma data</span>}
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                    <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={setDate}
-                        initialFocus
-                        locale={ptBR}
-                        captionLayout="dropdown-buttons"
-                        fromYear={1920}
-                        toYear={new Date().getFullYear()}
-                    />
-                </PopoverContent>
-            </Popover>
-            <input type="hidden" name="dateOfBirth" value={date ? date.toISOString() : ''} />
+            <Input
+              id="dateOfBirth"
+              name="dateOfBirth"
+              placeholder="DD/MM/AAAA"
+              value={date}
+              onChange={handleDateChange}
+              maxLength={10}
+              required
+              disabled={isPending}
+            />
             {formState?.errors?.dateOfBirth && (
                 <p className="text-sm font-medium text-destructive">{formState.errors.dateOfBirth}</p>
             )}
