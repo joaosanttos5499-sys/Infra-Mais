@@ -1,35 +1,32 @@
 
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signupUser, type SignupFormState } from "@/lib/actions";
+import { saveUserProfileAction } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
-import { useFormStatus } from "react-dom";
 import { SignupSchema } from "@/lib/schemas";
+import { useAuth } from "@/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { z } from "zod";
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" className="w-full" disabled={pending}>
-      {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      Criar Conta
-    </Button>
-  );
-}
+
+type SignupFormData = z.infer<typeof SignupSchema>;
 
 export function SignupForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const auth = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const form = useForm({
+  const form = useForm<SignupFormData>({
     resolver: zodResolver(SignupSchema),
     defaultValues: {
       name: "",
@@ -39,33 +36,43 @@ export function SignupForm() {
     },
   });
 
-  const { formState, setError, control } = form;
+  const { control, handleSubmit } = form;
 
-  const handleAction = async (data: FormData): Promise<SignupFormState> => {
-    const result = await signupUser(undefined, data);
-    if (result?.errors) {
-      Object.keys(result.errors).forEach((key) => {
-        const field = key as keyof SignupFormState['errors'];
-        const message = result.errors?.[field]?.join(', ');
-        if(field === '_form') {
-            toast({ variant: 'destructive', title: 'Erro ao criar conta', description: message });
-        } else if (message) {
-            setError(field, { type: 'manual', message });
-        }
-      });
-    }
-    return result;
-  };
+  const handleSignup = async (data: SignupFormData) => {
+    setIsSubmitting(true);
+    try {
+        // 1. Create user with Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+        const user = userCredential.user;
 
-  useEffect(() => {
-    if (formState.isSubmitSuccessful) {
-        toast({
-            title: "Sucesso!",
-            description: "Sua conta foi criada. Você será redirecionado.",
+        // 2. Save additional profile info using a server action
+        const result = await saveUserProfileAction({
+            id: user.uid,
+            name: data.name,
+            email: data.email,
+            dateOfBirth: data.dateOfBirth
         });
-        router.push('/');
+
+        if(result.success) {
+            toast({
+                title: "Sucesso!",
+                description: "Sua conta foi criada. Você será redirecionado.",
+            });
+            router.push('/');
+        } else {
+            throw new Error(result.error || "Falha ao salvar o perfil.");
+        }
+
+    } catch (error: any) {
+        let errorMessage = "Ocorreu um erro inesperado.";
+        if (error.code === 'auth/email-already-in-use') {
+            errorMessage = "Este e-mail já está em uso por outra conta.";
+        }
+        toast({ variant: 'destructive', title: 'Erro ao criar conta', description: errorMessage });
+    } finally {
+        setIsSubmitting(false);
     }
-  }, [formState.isSubmitSuccessful, router, toast]);
+  }
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -81,16 +88,7 @@ export function SignupForm() {
 
   return (
     <Form {...form}>
-      <form action={() => form.handleSubmit(() => {
-          const formData = new FormData();
-          const values = form.getValues();
-          Object.keys(values).forEach(key => {
-            formData.append(key, values[key as keyof typeof values]);
-          })
-          handleAction(formData);
-        })()} 
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit(handleSignup)} className="space-y-4">
         <FormField
           control={control}
           name="name"
@@ -149,7 +147,10 @@ export function SignupForm() {
           )}
         />
         
-        <SubmitButton />
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Criar Conta
+        </Button>
         
         <p className="text-center text-sm text-muted-foreground">
             Já tem uma conta?{" "}

@@ -6,9 +6,7 @@ import { z } from "zod";
 import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
 import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport, saveUser } from "@/lib/data";
 import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
-import { getAuth } from "firebase-admin/auth";
-import { getApp } from "firebase-admin/app";
-import { ReportSchema, SignupSchema } from "./schemas";
+import { ReportSchema } from "./schemas";
 
 
 export type FormState = {
@@ -182,50 +180,13 @@ export async function downvoteReportAction(reportId: string) {
     }
 }
 
-export type SignupFormState = {
-  success?: boolean;
-  errors?: {
-    name?: string[];
-    email?: string[];
-    password?: string[];
-    dateOfBirth?: string[];
-    _form?: string[];
-  };
-};
-
-export async function signupUser(
-  prevState: SignupFormState | undefined,
-  formData: FormData
-): Promise<SignupFormState> {
-  const validatedFields = SignupSchema.safeParse(Object.fromEntries(formData.entries()));
-
-  if (!validatedFields.success) {
-    return { errors: validatedFields.error.flatten().fieldErrors };
-  }
-
-  const { email, password, name, dateOfBirth } = validatedFields.data;
-
+export async function saveUserProfileAction(userProfile: UserProfile): Promise<{ success: boolean, error?: string }> {
   try {
-    const auth = getAuth(getApp());
-    const userCredential = await auth.createUser({ email, password, displayName: name });
-
-    const newUser = {
-      id: userCredential.uid,
-      name,
-      email,
-      dateOfBirth,
-    };
-    
-    await saveUser(newUser);
-
+    await saveUser(userProfile);
     revalidatePath('/');
     return { success: true };
-
-  } catch (error: any) {
-    let errorMessage = "Ocorreu um erro inesperado.";
-    if (error.code === 'auth/email-already-in-use') {
-      errorMessage = "Este e-mail já está em uso por outra conta.";
-    }
-    return { errors: { _form: [errorMessage] } };
+  } catch (error) {
+    console.error("Failed to save user profile:", error);
+    return { success: false, error: "Não foi possível salvar os dados do perfil." };
   }
 }
