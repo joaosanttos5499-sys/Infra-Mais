@@ -62,17 +62,22 @@ function ReportCard({
                     <div>
                     <div className="flex items-start gap-3 mb-2">
                         {category?.icon && <category.icon className="h-6 w-6 hidden sm:block mt-1" style={{ color: category.color }} />}
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
+                        <div className="flex-1 space-y-1">
+                            <div className="flex items-center gap-2">
                                 <p className="font-semibold">{category?.label || report.category}</p>
                                 <StatusBadge status={report.status} />
                             </div>
-                            <p className="text-sm font-medium text-foreground/90">{problem?.label || report.problem}</p>
-                            <p className="text-sm text-muted-foreground">{report.bairro} - {report.location}</p>
+                            <p className="text-sm font-medium text-foreground/90">
+                                <span className="font-semibold">Problema:</span> {problem?.label || report.problem}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                <span className="font-semibold text-foreground/90">Endereço:</span> {report.bairro} - {report.location}
+                            </p>
                         </div>
                     </div>
                     </div>
-                    <div className="mt-4">
+                    <div className="mt-3 space-y-1">
+                        <p className="text-sm font-semibold">Descrição:</p>
                         <p className="text-sm text-foreground/80 line-clamp-3">{report.description}</p>
                     </div>
                 </div>
