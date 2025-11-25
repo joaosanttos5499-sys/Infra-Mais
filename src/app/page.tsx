@@ -89,7 +89,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
     <div className="bg-transparent py-16">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-4">
+          <div className="space-y-4 text-center md:text-left">
             <h2 className="text-3xl font-headline font-bold text-foreground">
               Sobre o Infra Mais
             </h2>
@@ -122,17 +122,17 @@ export default async function Home() {
     <>
       <main>
         {/* Card "Reportar um Problema" */}
-        <div className="py-16">
+        <div className="py-12 md:py-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:max-w-xl">
-              <h2 className="text-5xl font-headline font-bold text-foreground mb-2">
+            <div className="text-center md:text-left md:max-w-xl">
+              <h2 className="text-4xl md:text-5xl font-headline font-bold text-foreground mb-2">
                 Reportar um Problema
               </h2>
               <p className="mt-4 text-muted-foreground flex-grow">
                 Informe rapidamente um problema encontrado na sua cidade. Descreva o que aconteceu, envie uma foto (opcional) e marque no mapa o local exato.
 Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
               </p>
-              <Button asChild size="lg" className="mt-6 w-full sm:w-auto self-start bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
+              <Button asChild size="lg" className="mt-6 w-full sm:w-auto self-center md:self-start bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
                 <Link href="/report/new">
                   Relatar um Problema <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -145,8 +145,8 @@ Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
             {/* Mapa */}
             <div className="relative z-20 bg-transparent py-8">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="bg-card p-8 rounded-lg shadow-lg border">
-                <h2 className="text-3xl font-headline font-bold text-foreground mb-4">
+                <div className="bg-card p-4 sm:p-8 rounded-lg shadow-lg border">
+                <h2 className="text-3xl font-headline font-bold text-foreground mb-4 text-center md:text-left">
                     Mapa em Tempo Real
                 </h2>
                 <Separator className="mb-6" />
@@ -158,7 +158,7 @@ Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
             {/* Problemas Recentes */}
             <div className="bg-transparent py-8 pb-16">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="mb-8 text-left">
+                <div className="mb-8 text-center md:text-left">
                     <h2 className="text-3xl font-headline font-bold text-foreground">
                         Problemas Recentes
                     </h2>

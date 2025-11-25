@@ -46,7 +46,7 @@ export default function SupportPage() {
       <main className="flex-1 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold font-headline">
+            <h1 className="text-3xl md:text-4xl font-bold font-headline">
               Central de Suporte
             </h1>
             <p className="text-muted-foreground mt-2">
@@ -62,8 +62,8 @@ export default function SupportPage() {
               <Accordion type="single" collapsible className="w-full">
                 {faqs.map((faq, index) => (
                   <AccordionItem value={`item-${index}`} key={index}>
-                    <AccordionTrigger className="text-left font-semibold">{faq.question}</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground whitespace-pre-wrap">
+                    <AccordionTrigger className="text-left font-semibold text-base md:text-lg">{faq.question}</AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground whitespace-pre-wrap text-sm md:text-base">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>

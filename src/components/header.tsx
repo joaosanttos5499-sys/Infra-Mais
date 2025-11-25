@@ -1,8 +1,24 @@
+
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Separator } from "./ui/separator";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "./ui/button";
+import { Menu, Home, FileText, Users, LifeBuoy } from "lucide-react";
+import { useState } from "react";
+
+const navLinks = [
+  { href: "/", label: "Início", icon: Home },
+  { href: "/dashboard", label: "Relatos", icon: FileText },
+  { href: "/funcionarios", label: "Funcionários", icon: Users },
+  { href: "/support", label: "Suporte", icon: LifeBuoy },
+];
 
 export function Header() {
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
   return (
     <header className="bg-card text-primary sticky top-0 z-50 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,35 +34,48 @@ export function Header() {
               Infra Mais
             </span>
           </Link>
-          <nav className="flex items-center gap-4 text-sm font-medium">
-            <Link
-              href="/"
-              className="opacity-90 hover:opacity-100 transition-opacity"
-            >
-              Início
-            </Link>
-            <Separator orientation="vertical" className="h-4 bg-primary/50" />
-            <Link
-              href="/dashboard"
-              className="opacity-90 hover:opacity-100 transition-opacity"
-            >
-              Relatos
-            </Link>
-            <Separator orientation="vertical" className="h-4 bg-primary/50" />
-            <Link
-              href="/funcionarios"
-              className="opacity-90 hover:opacity-100 transition-opacity"
-            >
-              Funcionários
-            </Link>
-            <Separator orientation="vertical" className="h-4 bg-primary/50" />
-            <Link
-              href="/support"
-              className="opacity-90 hover:opacity-100 transition-opacity"
-            >
-              Suporte
-            </Link>
+          
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-4 text-sm font-medium">
+            {navLinks.map((link, index) => (
+                <div key={link.href} className="flex items-center gap-4">
+                    <Link
+                    href={link.href}
+                    className="opacity-90 hover:opacity-100 transition-opacity"
+                    >
+                    {link.label}
+                    </Link>
+                    {index < navLinks.length - 1 && <Separator orientation="vertical" className="h-4 bg-primary/50" />}
+                </div>
+            ))}
           </nav>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden">
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Abrir menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right">
+                <nav className="flex flex-col gap-4 mt-8">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="flex items-center gap-3 p-2 rounded-md hover:bg-muted text-base font-medium"
+                      onClick={() => setIsSheetOpen(false)}
+                    >
+                      <link.icon className="h-5 w-5" />
+                      {link.label}
+                    </Link>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </header>

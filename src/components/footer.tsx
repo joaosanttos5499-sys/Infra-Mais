@@ -5,7 +5,7 @@ export function Footer() {
   return (
     <footer className="bg-primary text-primary-foreground mt-auto">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <Image
               src="/img/logo1.png"
@@ -17,7 +17,7 @@ export function Footer() {
               Infra Mais
             </span>
           </div>
-          <div className="text-sm">
+          <div className="text-sm text-center sm:text-right">
             <p>&copy; {new Date().getFullYear()} Infra Mais. Todos os direitos reservados.</p>
           </div>
         </div>

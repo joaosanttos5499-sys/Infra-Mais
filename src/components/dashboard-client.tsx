@@ -74,7 +74,7 @@ function ReportCard({
         <Accordion type="single" collapsible disabled={showUpvote}>
           <AccordionItem value={report.id} className="border-b-0">
             <div className="p-4">
-                <div className="grid md:grid-cols-[2fr_1fr] gap-4">
+                <div className="grid md:grid-cols-[2fr_1fr] gap-4 md:gap-6">
                 <div className="flex flex-col">
                     <div className="flex items-start gap-3 mb-4">
                         {category?.icon && <category.icon className="h-6 w-6 hidden sm:block mt-1 flex-shrink-0" style={{ color: category?.color }} />}
@@ -125,14 +125,14 @@ function ReportCard({
                     </div>
                 )}
                 </div>
-                <div className="flex justify-end items-center mt-4">
+                <div className="flex justify-end items-center mt-4 px-4 pb-2">
                     {showUpvote ? (
                         <Button variant={isUpvoted ? "default" : "ghost"} size="sm" onClick={() => onUpvote(report.id)}>
                             <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
                             Apoiar ({report.upvotes})
                         </Button>
                     ) : (
-                     <AccordionTrigger className="py-0 px-4 text-sm">
+                     <AccordionTrigger className="py-2 px-4 text-sm -mr-4">
                        Ver detalhes e atualizar
                     </AccordionTrigger>
                     )}
@@ -165,7 +165,7 @@ function ReportCard({
                       <Input id={`photoAfter-${report.id}`} name="photoAfter" type="file" accept="image/*" className="file:text-primary file:font-semibold text-xs" onChange={handlePhotoChange} />
                     </div>
 
-                    <div className="flex items-end gap-4">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4">
                       <div className="space-y-2 flex-1">
                           <Label htmlFor={`status-${report.id}`}>Atualizar Status</Label>
                           <Select name="status" defaultValue={report.status}>
@@ -179,7 +179,7 @@ function ReportCard({
                               </SelectContent>
                           </Select>
                       </div>
-                      <Button type="submit" disabled={isPending} className="bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
+                      <Button type="submit" disabled={isPending} className="bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500 w-full sm:w-auto">
                         {isPending ? <Loader2 className="animate-spin" /> : <Upload />}
                         <span className="ml-2">Atualizar</span>
                       </Button>
@@ -315,18 +315,17 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
   return (
     <>
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ReportStatus)} className="w-full">
-          <div className="flex justify-between items-center mb-4 gap-4">
-            <TabsList className="grid flex-1 grid-cols-3 bg-card p-1 rounded-lg">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+            <TabsList className="grid flex-1 w-full grid-cols-3 bg-card p-1 rounded-lg">
                 <TabsTrigger value="PENDING" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:shadow-md">Pendentes</TabsTrigger>
                 <TabsTrigger value="IN_PROGRESS" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-md">Em Andamento</TabsTrigger>
                 <TabsTrigger value="RESOLVED" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:shadow-md">Resolvidos</TabsTrigger>
             </TabsList>
-            <div>
+            <div className="self-end sm:self-center">
               <Select onValueChange={(value) => setSortBy(value as typeof sortBy)} defaultValue={sortBy}>
-                <SelectTrigger className="bg-white h-10 w-10 p-0 justify-center shadow-sm">
-                  <SelectValue>
-                    <Filter className="h-4 w-4" />
-                  </SelectValue>
+                <SelectTrigger className="bg-white h-10 w-auto sm:w-40 shadow-sm pr-3">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue className="hidden sm:inline-block" placeholder="Ordenar por..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="newest">Mais Recentes</SelectItem>

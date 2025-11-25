@@ -78,7 +78,7 @@ export function ReportForm() {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle className="font-headline text-4xl mb-4">Preencha o Relatório</CardTitle>
+        <CardTitle className="font-headline text-3xl md:text-4xl mb-4">Preencha o Relatório</CardTitle>
         <CardDescription>
           Preencha os detalhes abaixo para enviar um relatório para a cidade.
         </CardDescription>
@@ -213,8 +213,8 @@ export function ReportForm() {
             </Alert>
           )}
         </CardContent>
-        <CardFooter className="flex justify-end gap-2">
-            <Button variant="outline" type="button" onClick={resetForm}>
+        <CardFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <Button variant="outline" type="button" onClick={resetForm} className="w-full sm:w-auto">
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Resetar
             </Button>
@@ -224,5 +224,3 @@ export function ReportForm() {
     </Card>
   );
 }
-
-    
