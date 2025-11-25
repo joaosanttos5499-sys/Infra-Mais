@@ -58,27 +58,30 @@ function ReportCard({
           <AccordionItem value={report.id} className="border-b-0">
             <div className="p-4">
                 <div className="grid md:grid-cols-[2fr_1fr] gap-4">
-                <div className="flex flex-col justify-between">
-                    <div>
-                    <div className="flex items-start gap-3 mb-2">
-                        {category?.icon && <category.icon className="h-6 w-6 hidden sm:block mt-1" style={{ color: category.color }} />}
+                <div className="flex flex-col">
+                    <div className="flex items-start gap-3 mb-4">
+                        {category?.icon && <category.icon className="h-6 w-6 hidden sm:block mt-1 flex-shrink-0" style={{ color: category.color }} />}
                         <div className="flex-1 space-y-1">
-                            <div className="flex items-center gap-2">
-                                <p className="font-semibold">{category?.label || report.category}</p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <p className="font-semibold text-lg">{category?.label || report.category}</p>
                                 <StatusBadge status={report.status} />
                             </div>
-                            <p className="text-sm font-medium text-foreground/90">
-                                <span className="font-semibold">Problema:</span> {problem?.label || report.problem}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                                <span className="font-semibold text-foreground/90">Endereço:</span> {report.bairro} - {report.location}
-                            </p>
                         </div>
                     </div>
-                    </div>
-                    <div className="mt-3 space-y-1">
-                        <p className="text-sm font-semibold">Descrição:</p>
-                        <p className="text-sm text-foreground/80 line-clamp-3">{report.description}</p>
+
+                    <div className="space-y-2">
+                        <div>
+                            <p className="text-sm font-semibold">Problema:</p>
+                            <p className="text-sm text-foreground/80">{problem?.label || report.problem}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold">Endereço:</p>
+                            <p className="text-sm text-foreground/80">{report.bairro} - {report.location}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold">Descrição:</p>
+                            <p className="text-sm text-foreground/80 line-clamp-3">{report.description}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -299,3 +302,5 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
     </Tabs>
   );
 }
+
+    
