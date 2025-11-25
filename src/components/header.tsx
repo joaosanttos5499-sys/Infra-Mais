@@ -22,7 +22,7 @@ export function Header() {
               href="/"
               className="opacity-90 hover:opacity-100 transition-opacity"
             >
-              Home
+              Início
             </Link>
             <Link
               href="/dashboard"
