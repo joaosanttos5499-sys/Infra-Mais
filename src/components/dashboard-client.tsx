@@ -35,7 +35,7 @@ function ReportCard({
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
   const { toast } = useToast();
-  const [formState, formAction, isPending] = useActionState(updateReportStatus, undefined, report.id);
+  const [formState, formAction, isPending] = useActionState(updateReportStatus, { success: true });
   const formRef = useRef<HTMLFormElement>(null);
   const [photoAfterPreview, setPhotoAfterPreview] = useState<string | null>(null);
 
@@ -51,6 +51,21 @@ function ReportCard({
       setPhotoAfterPreview(null);
     }
   };
+
+  useEffect(() => {
+    if (formState?.success === false && formState.message) {
+      toast({
+        title: "Erro ao Atualizar",
+        description: formState.message,
+        variant: "destructive",
+      });
+    } else if (formState?.success === true && formState.message) {
+         toast({
+            title: "Sucesso",
+            description: formState.message,
+        });
+    }
+  }, [formState, toast]);
 
 
   return (
@@ -124,7 +139,7 @@ function ReportCard({
             </div>
 
             <AccordionContent className="bg-muted/50">
-              <form action={formAction} ref={formRef}>
+              <form action={(formData) => formAction({ reportId: report.id, formData })} ref={formRef}>
                 <div className="p-6 space-y-4">
                     <div>
                         <h4 className="font-semibold text-sm mb-1">Relatado</h4>
@@ -196,9 +211,7 @@ function ReportList({ reports, onUpvote, upvotedReports, showUpvote }: { reports
   );
 }
 
-type OptimisticUpdate = 
-    | { type: 'status', id: string; status: ReportStatus, photoAfterUrl?: string }
-    | { type: 'upvote', id: string, amount: 1 | -1 }
+type OptimisticUpdate = { type: 'upvote', id: string, amount: 1 | -1 }
 
 export function DashboardClient({ reports, showUpvote = true }: { reports: Report[], showUpvote?: boolean }) {
   const { toast } = useToast();
@@ -210,14 +223,6 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
   const [optimisticReports, setOptimisticReports] = useOptimistic(
     reports,
     (state, update: OptimisticUpdate) => {
-      if (update.type === 'status') {
-          const newState = state.map((r) => 
-            (r.id === update.id 
-                ? { ...r, status: update.status, photoAfterUrl: update.photoAfterUrl || r.photoAfterUrl } 
-                : r
-            ));
-          return newState.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-      }
       if (update.type === 'upvote') {
           const newState = state.map((r) => (r.id === update.id ? { ...r, upvotes: r.upvotes + update.amount } : r));
           return newState;

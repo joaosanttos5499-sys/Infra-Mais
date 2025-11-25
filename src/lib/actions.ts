@@ -131,10 +131,16 @@ export async function submitReport(
   redirect("/dashboard");
 }
 
+type UpdateActionState = {
+  success: boolean;
+  message?: string;
+};
+
 export async function updateReportStatus(
-  reportId: string,
-  formData: FormData,
-) {
+  prevState: UpdateActionState,
+  payload: { reportId: string, formData: FormData }
+): Promise<UpdateActionState> {
+  const { reportId, formData } = payload;
   const status = formData.get("status") as ReportStatus;
   const photoAfterFile = formData.get("photoAfter") as File | null;
   
@@ -152,7 +158,7 @@ export async function updateReportStatus(
     revalidatePath("/");
     revalidatePath("/dashboard");
     revalidatePath("/funcionarios");
-    return { success: true };
+    return { success: true, message: "Status do relatório atualizado com sucesso!" };
   } catch (error) {
     console.error(error);
     return { success: false, message: "Falha ao atualizar status." };
