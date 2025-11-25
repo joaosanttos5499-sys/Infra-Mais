@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
 import { Menu, Home, FileText, Users, LifeBuoy, User } from "lucide-react";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
 
 const navLinks = [
@@ -58,6 +58,12 @@ export function Header() {
                 </Button>
               </DialogTrigger>
               <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Acessar Plataforma</DialogTitle>
+                  <DialogDescription>
+                    Use seu e-mail e senha para entrar ou criar uma conta.
+                  </DialogDescription>
+                </DialogHeader>
                 <AuthForm />
               </DialogContent>
             </Dialog>
@@ -73,6 +79,12 @@ export function Header() {
                 </Button>
               </DialogTrigger>
               <DialogContent>
+                 <DialogHeader>
+                  <DialogTitle>Acessar Plataforma</DialogTitle>
+                  <DialogDescription>
+                    Use seu e-mail e senha para entrar ou criar uma conta.
+                  </DialogDescription>
+                </DialogHeader>
                 <AuthForm />
               </DialogContent>
             </Dialog>

@@ -65,14 +65,8 @@ export function AuthForm() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Acessar Plataforma</CardTitle>
-        <CardDescription>
-          Use seu e-mail e senha para entrar ou criar uma conta.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="mt-4">
+      <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">E-mail</Label>
           <Input
@@ -95,8 +89,8 @@ export function AuthForm() {
             disabled={isSubmitting}
           />
         </div>
-      </CardContent>
-      <CardFooter className="flex flex-col gap-4">
+      </div>
+      <div className="flex flex-col gap-4 mt-6">
         <div className="flex w-full gap-2">
           <Button
             onClick={() => handleAuthAction('signIn')}
@@ -116,7 +110,7 @@ export function AuthForm() {
             Criar Conta
           </Button>
         </div>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
