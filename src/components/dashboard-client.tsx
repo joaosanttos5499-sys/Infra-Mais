@@ -24,11 +24,13 @@ import { cn } from "@/lib/utils";
 function ReportCard({ 
     report,
     onUpvote,
-    isUpvoted
+    isUpvoted,
+    showUpvote,
 }: { 
     report: Report,
     onUpvote: (id: string) => void,
-    isUpvoted: boolean
+    isUpvoted: boolean,
+    showUpvote: boolean
 }) {
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
@@ -109,10 +111,12 @@ function ReportCard({
                 )}
                 </div>
                 <div className="flex justify-between items-center mt-4">
-                    <Button variant={isUpvoted ? "default" : "ghost"} size="sm" onClick={() => onUpvote(report.id)}>
-                        <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
-                        Apoiar ({report.upvotes})
-                    </Button>
+                    {showUpvote ? (
+                        <Button variant={isUpvoted ? "default" : "ghost"} size="sm" onClick={() => onUpvote(report.id)}>
+                            <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
+                            Apoiar ({report.upvotes})
+                        </Button>
+                    ) : <div />}
                      <AccordionTrigger className="py-0 px-4 text-sm">
                        Ver detalhes e atualizar
                     </AccordionTrigger>
@@ -173,7 +177,7 @@ function ReportCard({
   );
 }
 
-function ReportList({ reports, onUpvote, upvotedReports }: { reports: Report[], onUpvote: (id: string) => void, upvotedReports: Set<string> }) {
+function ReportList({ reports, onUpvote, upvotedReports, showUpvote }: { reports: Report[], onUpvote: (id: string) => void, upvotedReports: Set<string>, showUpvote: boolean }) {
     if (reports.length === 0) {
       return (
           <div className="text-center py-16 border-2 border-dashed rounded-lg">
@@ -186,7 +190,7 @@ function ReportList({ reports, onUpvote, upvotedReports }: { reports: Report[], 
   return (
     <div className="space-y-4">
       {reports.map((report) => (
-        <ReportCard key={report.id} report={report} onUpvote={onUpvote} isUpvoted={upvotedReports.has(report.id)} />
+        <ReportCard key={report.id} report={report} onUpvote={onUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} />
       ))}
     </div>
   );
@@ -196,7 +200,7 @@ type OptimisticUpdate =
     | { type: 'status', id: string; status: ReportStatus, photoAfterUrl?: string }
     | { type: 'upvote', id: string, amount: 1 | -1 }
 
-export function DashboardClient({ reports }: { reports: Report[] }) {
+export function DashboardClient({ reports, showUpvote = true }: { reports: Report[], showUpvote?: boolean }) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<ReportStatus>("PENDING");
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
@@ -319,13 +323,13 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
             </div>
           </div>
           <TabsContent value="PENDING">
-              <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
+              <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} upvotedReports={upvotedReports} showUpvote={showUpvote} />
           </TabsContent>
           <TabsContent value="IN_PROGRESS">
-              <ReportList reports={filteredReports("IN_PROGRESS")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
+              <ReportList reports={filteredReports("IN_PROGRESS")} onUpvote={handleUpvote} upvotedReports={upvotedReports} showUpvote={showUpvote} />
           </TabsContent>
           <TabsContent value="RESOLVED">
-              <ReportList reports={filteredReports("RESOLVED")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
+              <ReportList reports={filteredReports("RESOLVED")} onUpvote={handleUpvote} upvotedReports={upvotedReports} showUpvote={showUpvote} />
           </TabsContent>
       </Tabs>
     </>

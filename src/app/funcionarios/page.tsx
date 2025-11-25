@@ -29,7 +29,7 @@ export default async function FuncionariosPage() {
             </p>
           </div>
           <Suspense fallback={<DashboardSkeleton />}>
-            <DashboardClient reports={reports} />
+            <DashboardClient reports={reports} showUpvote={false} />
           </Suspense>
         </div>
       </main>
