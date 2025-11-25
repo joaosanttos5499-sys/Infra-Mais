@@ -298,27 +298,27 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
 
   return (
     <>
-      <div className="flex justify-end mb-4">
-        <div className="w-full max-w-xs">
-           <Select onValueChange={(value) => setSortBy(value as typeof sortBy)} defaultValue={sortBy}>
-            <SelectTrigger>
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Ordenar por..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Mais Recentes</SelectItem>
-              <SelectItem value="oldest">Mais Antigos</SelectItem>
-              <SelectItem value="upvotes">Mais Apoiados</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ReportStatus)} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-card p-1 rounded-lg">
-              <TabsTrigger value="PENDING" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:shadow-md">Pendentes</TabsTrigger>
-              <TabsTrigger value="IN_PROGRESS" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-md">Em Andamento</TabsTrigger>
-              <TabsTrigger value="RESOLVED" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:shadow-md">Resolvidos</TabsTrigger>
-          </TabsList>
+          <div className="flex justify-between items-center mb-4 gap-4">
+            <TabsList className="grid w-full grid-cols-3 bg-card p-1 rounded-lg">
+                <TabsTrigger value="PENDING" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:shadow-md">Pendentes</TabsTrigger>
+                <TabsTrigger value="IN_PROGRESS" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-md">Em Andamento</TabsTrigger>
+                <TabsTrigger value="RESOLVED" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:shadow-md">Resolvidos</TabsTrigger>
+            </TabsList>
+            <div className="w-full max-w-48">
+              <Select onValueChange={(value) => setSortBy(value as typeof sortBy)} defaultValue={sortBy}>
+                <SelectTrigger className="bg-white h-10 shadow-sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Ordenar por..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Mais Recentes</SelectItem>
+                  <SelectItem value="oldest">Mais Antigos</SelectItem>
+                  <SelectItem value="upvotes">Mais Apoiados</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <TabsContent value="PENDING">
               <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
           </TabsContent>
