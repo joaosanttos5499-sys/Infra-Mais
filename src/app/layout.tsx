@@ -5,6 +5,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { SocialsHeader } from "@/components/socials-header";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -25,6 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", poppins.variable)}>
+        <SocialsHeader />
         <Header />
         <div className="flex-grow">
           {children}
