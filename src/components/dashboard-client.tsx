@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2 } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
@@ -200,6 +200,7 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<ReportStatus>("PENDING");
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'upvotes'>('newest');
   const [isPending, startTransition] = useTransition();
   
   const [optimisticReports, setOptimisticReports] = useOptimistic(
@@ -281,26 +282,53 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
       )
   }
 
-  const filteredReports = (status: ReportStatus) => optimisticReports.filter(r => r.status === status);
+  const sortedReports = [...optimisticReports].sort((a, b) => {
+    switch (sortBy) {
+      case 'oldest':
+        return a.createdAt.getTime() - b.createdAt.getTime();
+      case 'upvotes':
+        return b.upvotes - a.upvotes;
+      case 'newest':
+      default:
+        return b.createdAt.getTime() - a.createdAt.getTime();
+    }
+  });
+
+  const filteredReports = (status: ReportStatus) => sortedReports.filter(r => r.status === status);
 
   return (
-    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ReportStatus)} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-card p-1 rounded-lg">
-            <TabsTrigger value="PENDING" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:shadow-md">Pendentes</TabsTrigger>
-            <TabsTrigger value="IN_PROGRESS" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-md">Em Andamento</TabsTrigger>
-            <TabsTrigger value="RESOLVED" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:shadow-md">Resolvidos</TabsTrigger>
-        </TabsList>
-        <TabsContent value="PENDING">
-            <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
-        </TabsContent>
-        <TabsContent value="IN_PROGRESS">
-            <ReportList reports={filteredReports("IN_PROGRESS")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
-        </TabsContent>
-        <TabsContent value="RESOLVED">
-            <ReportList reports={filteredReports("RESOLVED")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
-        </TabsContent>
-    </Tabs>
+    <>
+      <div className="flex justify-end mb-4">
+        <div className="w-full max-w-xs">
+           <Select onValueChange={(value) => setSortBy(value as typeof sortBy)} defaultValue={sortBy}>
+            <SelectTrigger>
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Ordenar por..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Mais Recentes</SelectItem>
+              <SelectItem value="oldest">Mais Antigos</SelectItem>
+              <SelectItem value="upvotes">Mais Apoiados</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ReportStatus)} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 bg-card p-1 rounded-lg">
+              <TabsTrigger value="PENDING" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:shadow-md">Pendentes</TabsTrigger>
+              <TabsTrigger value="IN_PROGRESS" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-md">Em Andamento</TabsTrigger>
+              <TabsTrigger value="RESOLVED" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:shadow-md">Resolvidos</TabsTrigger>
+          </TabsList>
+          <TabsContent value="PENDING">
+              <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
+          </TabsContent>
+          <TabsContent value="IN_PROGRESS">
+              <ReportList reports={filteredReports("IN_PROGRESS")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
+          </TabsContent>
+          <TabsContent value="RESOLVED">
+              <ReportList reports={filteredReports("RESOLVED")} onUpvote={handleUpvote} upvotedReports={upvotedReports} />
+          </TabsContent>
+      </Tabs>
+    </>
   );
 }
-
-    
