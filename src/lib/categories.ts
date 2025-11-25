@@ -1,6 +1,6 @@
 
 import {
-  Construction as Road,
+  Construction,
   Lightbulb,
   Droplets,
   Trash2,
@@ -28,7 +28,7 @@ export const categories: Category[] = [
   { 
     value: "vias_publicas", 
     label: "Vias Públicas", 
-    icon: Road, 
+    icon: Construction, 
     color: "#fb923c",
     problems: [
         { value: "buracos_rua", label: "Buracos na rua" },
