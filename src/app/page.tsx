@@ -84,6 +84,7 @@ async function RecentReports() {
 function AboutSection({ reports }: { reports: Report[] }) {
   const totalReports = reports.length;
   const resolvedReports = reports.filter(r => r.status === 'RESOLVED').length;
+  const inProgressReports = reports.filter(r => r.status === 'IN_PROGRESS').length;
 
   return (
     <div className="bg-transparent py-16">
@@ -104,7 +105,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
                     <CardTitle>Visão Geral dos Relatórios</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <ReportsChart total={totalReports} resolved={resolvedReports} />
+                    <ReportsChart total={totalReports} resolved={resolvedReports} inProgress={inProgressReports} />
                 </CardContent>
             </Card>
           </div>

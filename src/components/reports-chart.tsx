@@ -7,33 +7,37 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
 } from "@/components/ui/chart"
 
 interface ReportsChartProps {
     total: number;
     resolved: number;
+    inProgress: number;
 }
 
-export function ReportsChart({ total, resolved }: ReportsChartProps) {
-    const pending = total - resolved;
+export function ReportsChart({ total, resolved, inProgress }: ReportsChartProps) {
+    const pending = total - resolved - inProgress;
     const chartData = [
-        { status: "Resolvidos", count: resolved, fill: "hsl(var(--chart-2))" },
         { status: "Pendentes", count: pending, fill: "hsl(var(--chart-1))" },
-    ];
+        { status: "Em Andamento", count: inProgress, fill: "hsl(var(--chart-3))" },
+        { status: "Resolvidos", count: resolved, fill: "hsl(var(--chart-2))" },
+    ].filter(item => item.count > 0); // Don't show segments with 0 count
 
     const chartConfig = {
         count: {
             label: "Count",
         },
-        Resolvidos: {
-            label: "Resolvidos",
-            color: "hsl(var(--chart-2))",
-        },
         Pendentes: {
             label: "Pendentes",
             color: "hsl(var(--chart-1))",
+        },
+        "Em Andamento": {
+            label: "Em Andamento",
+            color: "hsl(var(--chart-3))",
+        },
+        Resolvidos: {
+            label: "Resolvidos",
+            color: "hsl(var(--chart-2))",
         },
     }
 
