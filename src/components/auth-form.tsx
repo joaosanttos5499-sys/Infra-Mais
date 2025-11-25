@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
-export function AuthForm({ onAuthSuccess }: { onAuthSuccess: () => void }) {
+export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
   const auth = useAuth();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
@@ -37,7 +37,7 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess: () => void }) {
           title: 'Bem-vindo(a) de volta!',
         });
       }
-      onAuthSuccess();
+      if (onAuthSuccess) onAuthSuccess();
     } catch (err: any) {
       setError(err.message);
       toast({
