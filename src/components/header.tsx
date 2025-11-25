@@ -6,8 +6,10 @@ import Image from "next/image";
 import { Separator } from "./ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Menu, Home, FileText, Users, LifeBuoy } from "lucide-react";
+import { Menu, Home, FileText, Users, LifeBuoy, User } from "lucide-react";
 import { useState } from "react";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { AuthForm } from "./auth-form";
 
 const navLinks = [
   { href: "/", label: "Início", icon: Home },
@@ -48,10 +50,32 @@ export function Header() {
                     {index < navLinks.length - 1 && <Separator orientation="vertical" className="h-4 bg-primary/50" />}
                 </div>
             ))}
+             <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                  <span className="sr-only">Login</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <AuthForm />
+              </DialogContent>
+            </Dialog>
           </nav>
 
           {/* Mobile Navigation */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                  <span className="sr-only">Login</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <AuthForm />
+              </DialogContent>
+            </Dialog>
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">

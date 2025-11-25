@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
@@ -6,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { SocialsHeader } from "@/components/socials-header";
+import { FirebaseClientProvider } from "@/firebase";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -26,13 +28,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", poppins.variable)}>
-        <SocialsHeader />
-        <Header />
-        <div className="flex-grow">
-          {children}
-        </div>
-        <Toaster />
-        <Footer />
+        <FirebaseClientProvider>
+          <SocialsHeader />
+          <Header />
+          <div className="flex-grow">
+            {children}
+          </div>
+          <Toaster />
+          <Footer />
+        </FirebaseClientProvider>
       </body>
     </html>
   );
