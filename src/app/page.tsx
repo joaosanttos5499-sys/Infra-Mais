@@ -1,6 +1,4 @@
 
-"use client";
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,21 +9,9 @@ import { type Report } from "@/lib/types";
 import { HomeMapClient } from "@/components/home-map-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCategory } from "@/lib/categories";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { StatusBadge } from "@/components/status-badge";
 import { ReportsChart } from "@/components/reports-chart";
-import { useEffect, useState } from "react";
-
-function ReportTime({ date }: { date: Date }) {
-  const [timeAgo, setTimeAgo] = useState("");
-
-  useEffect(() => {
-    setTimeAgo(formatDistanceToNow(date, { addSuffix: true, locale: ptBR }));
-  }, [date]);
-
-  return <>{timeAgo}</>;
-}
+import { ReportTime } from "@/components/report-time";
 
 
 async function RecentReports() {
