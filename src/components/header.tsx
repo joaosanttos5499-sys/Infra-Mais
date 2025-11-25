@@ -25,7 +25,7 @@ export function Header() {
               Início
             </Link>
             <Link
-              href="/dashboard"
+              href="/funcionarios"
               className="opacity-90 hover:opacity-100 transition-opacity"
             >
               Funcionários
