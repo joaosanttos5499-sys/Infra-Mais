@@ -60,7 +60,7 @@ function ReportCard({
                 <div className="flex flex-col justify-between">
                     <div>
                     <div className="flex items-center gap-3 mb-2">
-                        {category?.icon && <category.icon className="h-6 w-6 text-primary hidden sm:block" />}
+                        {category?.icon && <category.icon className="h-6 w-6 hidden sm:block" style={{ color: category.color }} />}
                         <div className="flex-1">
                         <p className="font-semibold">{category?.label || report.category}</p>
                         <p className="text-sm text-muted-foreground">{report.bairro} - {report.location}</p>
