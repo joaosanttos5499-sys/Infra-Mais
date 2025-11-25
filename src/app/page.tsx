@@ -31,6 +31,7 @@ async function RecentReports() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {recentReports.map((report) => {
           const category = getCategory(report.category);
+          const problem = category?.problems.find(p => p.value === report.problem);
           return (
             <Link href={`/dashboard#report-${report.id}`} key={report.id} className="block group">
                 <Card className="overflow-hidden flex flex-col h-full transition-all group-hover:shadow-lg group-hover:-translate-y-1">
@@ -52,11 +53,14 @@ async function RecentReports() {
                     <span>{category?.label || report.category}</span>
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="flex-grow">
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                    {report.location}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
+                <CardContent className="flex-grow flex flex-col">
+                    <div className="flex-grow">
+                        <p className="font-semibold text-sm line-clamp-1">{problem?.label || report.problem}</p>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                        {report.location}
+                        </p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
                         {formatDistanceToNow(report.createdAt, { addSuffix: true, locale: ptBR })}
                     </p>
                 </CardContent>
