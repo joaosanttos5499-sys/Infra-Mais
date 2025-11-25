@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import React, { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -32,7 +33,7 @@ export function SignupForm() {
   const { toast } = useToast();
   const [formState, formAction, isPending] = useActionState(signupUser, undefined);
   const formRef = useRef<HTMLFormElement>(null);
-  const [date, setDate] = React.useState<Date | undefined>();
+  const [date, setDate] = useState<Date | undefined>();
 
   useEffect(() => {
     if (formState?.success) {
