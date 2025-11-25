@@ -120,6 +120,7 @@ export async function submitReport(
     addReport(newReport);
 
     revalidatePath("/dashboard");
+    revalidatePath("/");
   } catch (e) {
     console.error(e);
     return {
@@ -148,7 +149,9 @@ export async function updateReportStatus(
     }
 
     await dbUpdateReportStatus(reportId, status, photoAfterUrl);
+    revalidatePath("/");
     revalidatePath("/dashboard");
+    revalidatePath("/funcionarios");
     return { success: true };
   } catch (error) {
     console.error(error);
@@ -159,7 +162,9 @@ export async function updateReportStatus(
 export async function upvoteReportAction(reportId: string) {
     try {
         await dbUpvoteReport(reportId);
+        revalidatePath("/");
         revalidatePath("/dashboard");
+        revalidatePath("/funcionarios");
         return { success: true };
     } catch (error) {
         console.error(error);
@@ -170,7 +175,9 @@ export async function upvoteReportAction(reportId: string) {
 export async function downvoteReportAction(reportId: string) {
     try {
         await dbDownvoteReport(reportId);
+        revalidatePath("/");
         revalidatePath("/dashboard");
+        revalidatePath("/funcionarios");
         return { success: true };
     } catch (error) {
         console.error(error);
