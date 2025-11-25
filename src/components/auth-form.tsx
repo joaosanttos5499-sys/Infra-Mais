@@ -10,18 +10,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
-export function AuthForm() {
+export function AuthForm({ onAuthSuccess }: { onAuthSuccess: () => void }) {
   const auth = useAuth();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
@@ -45,6 +37,7 @@ export function AuthForm() {
           title: 'Bem-vindo(a) de volta!',
         });
       }
+      onAuthSuccess();
     } catch (err: any) {
       setError(err.message);
       toast({
