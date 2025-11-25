@@ -3,6 +3,7 @@ export type ReportStatus = "PENDING" | "IN_PROGRESS" | "RESOLVED";
 
 export interface Report {
   id: string;
+  userId: string;
   category: string;
   problem: string;
   bairro: string;

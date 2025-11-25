@@ -17,6 +17,7 @@ if (reports.length === 0) {
   reports.push(
     {
       id: String(idCounter++),
+      userId: "user1",
       category: "vias_publicas",
       problem: "buracos_rua",
       bairro: "Centro",
@@ -32,6 +33,7 @@ if (reports.length === 0) {
     },
     {
       id: String(idCounter++),
+      userId: "user2",
       category: "iluminacao",
       problem: "lampada_queimada",
       bairro: "Vila Nova",
@@ -47,6 +49,7 @@ if (reports.length === 0) {
     },
     {
       id: String(idCounter++),
+      userId: "user1",
       category: "limpeza_meio_ambiente",
       problem: "acumulo_lixo",
       bairro: "Jardim América",

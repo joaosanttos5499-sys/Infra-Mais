@@ -8,8 +8,11 @@ import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
 import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport } from "@/lib/data";
 import { type Report, type ReportStatus } from "@/lib/types";
 import { categories } from "./categories";
+import { getAuth } from "firebase-admin/auth";
+import { getApp } from "firebase-admin/app";
 
 const ReportSchema = z.object({
+  userId: z.string(),
   category: z.string().refine(val => categories.some(c => c.value === val), {
     message: "Please select a valid category.",
   }),
@@ -47,7 +50,18 @@ export async function submitReport(
   prevState: FormState | undefined,
   formData: FormData
 ): Promise<FormState> {
+
+   const auth = getAuth(getApp());
+   const user = auth.currentUser;
+
+   if (!user) {
+    return {
+      errors: { _form: ["You must be logged in to submit a report."] },
+    };
+  }
+
   const validatedFields = ReportSchema.safeParse({
+    userId: user.uid,
     category: formData.get("category"),
     problem: formData.get("problem"),
     bairro: formData.get("bairro"),
@@ -92,7 +106,7 @@ export async function submitReport(
 
 
   try {
-    const { category, problem, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
+    const { userId, category, problem, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
     
     const location = reference ? `${address} (${reference})` : address;
 
@@ -106,6 +120,7 @@ export async function submitReport(
     });
 
     const newReport: Omit<Report, "id" | "createdAt" | "status" | "upvotes" | "photoAfterUrl"> = {
+      userId,
       category,
       problem,
       bairro,

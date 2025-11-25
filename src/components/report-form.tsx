@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import dynamic from 'next/dynamic';
+import { useUser } from "@/firebase";
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
@@ -38,6 +39,7 @@ export function ReportForm() {
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const { user } = useUser();
 
   useEffect(() => {
     if (formState?.errors?._form) {
@@ -85,6 +87,7 @@ export function ReportForm() {
       </CardHeader>
       <form action={formAction} ref={formRef}>
         <CardContent className="space-y-6">
+          <input type="hidden" name="userId" value={user?.uid ?? ''} />
           <div className="space-y-2">
             <Label className="font-bold">Clique no mapa para marcar a localização do problema.</Label>
              <div className="rounded-lg overflow-hidden border relative z-0">
