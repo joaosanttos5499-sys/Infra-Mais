@@ -162,7 +162,7 @@ function ReportCard({
                               </SelectContent>
                           </Select>
                       </div>
-                      <Button type="submit" disabled={isPending}>
+                      <Button type="submit" disabled={isPending} className="bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
                         {isPending ? <Loader2 className="animate-spin" /> : <Upload />}
                         <span className="ml-2">Atualizar</span>
                       </Button>
