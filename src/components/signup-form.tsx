@@ -1,17 +1,20 @@
 
 "use client";
 
-import React, { useActionState, useEffect, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signupUser } from "@/lib/actions";
+import { signupUser, type SignupFormState, SignupSchema } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
+import { useFormStatus } from "react-dom";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -26,19 +29,44 @@ function SubmitButton() {
 export function SignupForm() {
   const router = useRouter();
   const { toast } = useToast();
-  const [formState, formAction, isPending] = useActionState(signupUser, undefined);
-  const formRef = useRef<HTMLFormElement>(null);
-  const [date, setDate] = useState("");
+  
+  const form = useForm({
+    resolver: zodResolver(SignupSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      dateOfBirth: "",
+    },
+  });
+
+  const { formState, setError, control } = form;
+
+  const handleAction = async (data: FormData): Promise<SignupFormState> => {
+    const result = await signupUser(undefined, data);
+    if (result?.errors) {
+      Object.keys(result.errors).forEach((key) => {
+        const field = key as keyof SignupFormState['errors'];
+        const message = result.errors?.[field]?.join(', ');
+        if(field === '_form') {
+            toast({ variant: 'destructive', title: 'Erro ao criar conta', description: message });
+        } else if (message) {
+            setError(field, { type: 'manual', message });
+        }
+      });
+    }
+    return result;
+  };
 
   useEffect(() => {
-    if (formState?.success) {
-      toast({
-        title: "Sucesso!",
-        description: "Sua conta foi criada. Você será redirecionado.",
-      });
-      router.push('/');
+    if (formState.isSubmitSuccessful) {
+        toast({
+            title: "Sucesso!",
+            description: "Sua conta foi criada. Você será redirecionado.",
+        });
+        router.push('/');
     }
-  }, [formState, router, toast]);
+  }, [formState.isSubmitSuccessful, router, toast]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -48,59 +76,80 @@ export function SignupForm() {
     if (value.length > 5) {
       value = `${value.slice(0, 5)}/${value.slice(5, 9)}`;
     }
-    setDate(value);
+    e.target.value = value;
+    return value;
   };
 
   return (
-    <form action={formAction} ref={formRef} className="space-y-4">
-        <div className="space-y-2">
-            <Label htmlFor="name">Nome Completo</Label>
-            <Input id="name" name="name" placeholder="Seu nome" required disabled={isPending} />
-            {formState?.errors?.name && (
-                <p className="text-sm font-medium text-destructive">{formState.errors.name}</p>
-            )}
-        </div>
-
-        <div className="space-y-2">
-            <Label htmlFor="dateOfBirth">Data de Nascimento</Label>
-            <Input
-              id="dateOfBirth"
-              name="dateOfBirth"
-              placeholder="DD/MM/AAAA"
-              value={date}
-              onChange={handleDateChange}
-              maxLength={10}
-              required
-              disabled={isPending}
-            />
-            {formState?.errors?.dateOfBirth && (
-                <p className="text-sm font-medium text-destructive">{formState.errors.dateOfBirth}</p>
-            )}
-        </div>
-
-        <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
-            <Input id="email" name="email" type="email" placeholder="seu@email.com" required disabled={isPending} />
-            {formState?.errors?.email && (
-                <p className="text-sm font-medium text-destructive">{formState.errors.email}</p>
-            )}
-        </div>
-
-        <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
-            <Input id="password" name="password" type="password" placeholder="********" required disabled={isPending} />
-            {formState?.errors?.password && (
-                <p className="text-sm font-medium text-destructive">{formState.errors.password}</p>
-            )}
-        </div>
-
-        {formState?.errors?._form && (
-            <Alert variant="destructive">
-                <AlertTitle>Erro ao Criar Conta</AlertTitle>
-                <AlertDescription>{formState.errors._form.join(", ")}</AlertDescription>
-            </Alert>
-        )}
-
+    <Form {...form}>
+      <form action={() => form.handleSubmit(() => {
+          const formData = new FormData();
+          const values = form.getValues();
+          Object.keys(values).forEach(key => {
+            formData.append(key, values[key as keyof typeof values]);
+          })
+          handleAction(formData);
+        })()} 
+        className="space-y-4"
+      >
+        <FormField
+          control={control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome Completo</FormLabel>
+              <FormControl>
+                <Input placeholder="Seu nome" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="dateOfBirth"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Data de Nascimento</FormLabel>
+              <FormControl>
+                 <Input 
+                    placeholder="DD/MM/AAAA" 
+                    {...field}
+                    onChange={(e) => field.onChange(handleDateChange(e))}
+                    maxLength={10}
+                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>E-mail</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="seu@email.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Senha</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="********" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
         <SubmitButton />
         
         <p className="text-center text-sm text-muted-foreground">
@@ -109,6 +158,7 @@ export function SignupForm() {
                 Faça login
             </Link>
         </p>
-    </form>
+      </form>
+    </Form>
   );
 }

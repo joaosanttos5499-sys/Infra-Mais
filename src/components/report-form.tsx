@@ -1,11 +1,11 @@
 
 "use client";
 
-import { useEffect, useRef, useState, useActionState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Image from "next/image";
-import { Camera, Loader2, RefreshCw, MapPin } from "lucide-react";
-import { submitReport } from "@/lib/actions";
+import { Camera, Loader2, RefreshCw } from "lucide-react";
+import { submitReport, ReportSchema, type FormState } from "@/lib/actions";
 import { categories, getCategory } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +17,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import dynamic from 'next/dynamic';
 import { useUser } from "@/firebase";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
+import { z } from "zod";
+import { useRouter } from "next/navigation";
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
@@ -32,50 +37,91 @@ function SubmitButton() {
   );
 }
 
+const ClientReportSchema = ReportSchema.extend({
+    photo: z.instanceof(File).optional().refine(file => !file || file.size <= 4 * 1024 * 1024, 'O tamanho da foto não pode exceder 4MB.'),
+})
+
 export function ReportForm() {
-  const [formState, formAction] = useActionState(submitReport, undefined);
   const { toast } = useToast();
-  const formRef = useRef<HTMLFormElement>(null);
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const { user } = useUser();
+  const router = useRouter();
+  
+  const form = useForm<z.infer<typeof ClientReportSchema>>({
+    resolver: zodResolver(ClientReportSchema),
+    defaultValues: {
+      userId: user?.uid ?? '',
+      category: '',
+      problem: '',
+      bairro: '',
+      address: '',
+      reference: '',
+      description: '',
+      latitude: 0,
+      longitude: 0,
+      photo: undefined,
+    },
+  });
+
+  const { formState, setError, setValue, watch, control } = form;
+
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const selectedCategory = watch('category');
+  const problems = getCategory(selectedCategory)?.problems || [];
+
+  const handleAction = async (data: FormData): Promise<FormState> => {
+    const result = await submitReport(undefined, data);
+    if (result?.errors) {
+      Object.keys(result.errors).forEach((key) => {
+        const field = key as keyof FormState['errors'];
+        const message = result.errors?.[field]?.join(', ');
+        if(field === '_form') {
+            toast({ variant: 'destructive', title: 'Erro ao enviar relatório', description: message });
+        } else if (message) {
+            setError(field, { type: 'manual', message });
+        }
+      });
+    } else if (result?.success) {
+      toast({ title: "Relatório enviado!", description: "Seu relatório foi enviado com sucesso."});
+      router.push('/dashboard');
+    }
+    return result;
+  };
 
   useEffect(() => {
-    if (formState?.errors?._form) {
-      toast({
-        title: "Erro",
-        description: formState.errors._form.join(", "),
-        variant: "destructive",
-      });
+    if (user) {
+      setValue('userId', user.uid);
     }
-  }, [formState, toast]);
+  }, [user, setValue]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setValue('photo', file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     } else {
+      setValue('photo', undefined);
       setPhotoPreview(null);
     }
   };
 
   const handleMapClick = (lat: number, lng: number) => {
-    setSelectedLocation({ lat, lng });
+    setValue('latitude', lat, { shouldValidate: true });
+    setValue('longitude', lng, { shouldValidate: true });
   };
   
   const resetForm = () => {
-      formRef.current?.reset();
+      form.reset();
       setPhotoPreview(null);
-      setSelectedLocation(null);
-      setSelectedCategory('');
   }
-
-  const problems = getCategory(selectedCategory)?.problems || [];
+  
+  const selectedLocation = watch(['latitude', 'longitude']);
+  const locationObject = selectedLocation[0] !== 0 && selectedLocation[1] !== 0 
+    ? { lat: selectedLocation[0], lng: selectedLocation[1]} 
+    : null;
 
   return (
     <Card className="w-full max-w-2xl">
@@ -85,145 +131,181 @@ export function ReportForm() {
           Preencha os detalhes abaixo para enviar um relatório para a cidade.
         </CardDescription>
       </CardHeader>
-      <form action={formAction} ref={formRef}>
-        <CardContent className="space-y-6">
-          <input type="hidden" name="userId" value={user?.uid ?? ''} />
-          <div className="space-y-2">
-            <Label className="font-bold">Clique no mapa para marcar a localização do problema.</Label>
-             <div className="rounded-lg overflow-hidden border relative z-0">
-                <LeafletMap 
-                    interactive={true} 
-                    onLocationSelect={handleMapClick}
-                    selectedLocation={selectedLocation}
-                />
+      <Form {...form}>
+        <form action={() => form.handleSubmit(() => {
+            const formData = new FormData();
+            const values = form.getValues();
+            Object.keys(values).forEach(key => {
+              const formKey = key as keyof typeof values;
+              const value = values[formKey];
+              if (value !== undefined && value !== null) {
+                formData.append(formKey, value as string | Blob);
+              }
+            });
+            handleAction(formData);
+        })()}
+        >
+          <CardContent className="space-y-6">
+            <input type="hidden" {...form.register('userId')} />
+            <div className="space-y-2">
+              <Label className="font-bold">Clique no mapa para marcar a localização do problema.</Label>
+              <div className="rounded-lg overflow-hidden border relative z-0">
+                  <LeafletMap 
+                      interactive={true} 
+                      onLocationSelect={handleMapClick}
+                      selectedLocation={locationObject}
+                  />
+              </div>
             </div>
-          </div>
-          <input type="hidden" name="latitude" value={selectedLocation?.lat ?? 0} />
-          <input type="hidden" name="longitude" value={selectedLocation?.lng ?? 0} />
-          <div className="space-y-2">
-            <Label htmlFor="category">Categoria</Label>
-            <Select name="category" required onValueChange={setSelectedCategory}>
-              <SelectTrigger id="category" aria-label="Selecione a categoria">
-                <SelectValue placeholder="Selecione o tipo de problema" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Categorias de Problemas</SelectLabel>
-                  {categories.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      <div className="flex items-center gap-2">
-                        <category.icon className="h-4 w-4 text-muted-foreground" />
-                        <span>{category.label}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            {formState?.errors?.category && (
-              <p className="text-sm font-medium text-destructive">{formState.errors.category}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="problem">Problema</Label>
-            <Select name="problem" required disabled={!selectedCategory}>
-              <SelectTrigger id="problem" aria-label="Selecione o problema específico">
-                <SelectValue placeholder={selectedCategory ? "Selecione o problema específico" : "Escolha uma categoria primeiro"} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Problemas Específicos</SelectLabel>
-                  {problems.map((problem) => (
-                    <SelectItem key={problem.value} value={problem.value}>
-                      {problem.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            {formState?.errors?.problem && (
-              <p className="text-sm font-medium text-destructive">{formState.errors.problem}</p>
-            )}
-          </div>
+            <input type="hidden" {...form.register('latitude')} />
+            <input type="hidden" {...form.register('longitude')} />
+            
+            <FormField
+              control={control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Categoria</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger aria-label="Selecione a categoria">
+                            <SelectValue placeholder="Selecione o tipo de problema" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectGroup>
+                            <SelectLabel>Categorias de Problemas</SelectLabel>
+                            {categories.map((category) => (
+                                <SelectItem key={category.value} value={category.value}>
+                                <div className="flex items-center gap-2">
+                                    <category.icon className="h-4 w-4 text-muted-foreground" />
+                                    <span>{category.label}</span>
+                                </div>
+                                </SelectItem>
+                            ))}
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            
+            <FormField
+              control={control}
+              name="problem"
+              render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Problema</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
+                        <FormControl>
+                        <SelectTrigger aria-label="Selecione o problema específico">
+                            <SelectValue placeholder={selectedCategory ? "Selecione o problema específico" : "Escolha uma categoria primeiro"} />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectLabel>Problemas Específicos</SelectLabel>
+                                {problems.map((problem) => (
+                                    <SelectItem key={problem.value} value={problem.value}>
+                                    {problem.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
 
-           <div className="space-y-2">
-            <Label htmlFor="bairro">Bairro</Label>
-            <Input
-              id="bairro"
+            <FormField
+              control={control}
               name="bairro"
-              placeholder="ex: Centro, Vila Madalena"
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bairro</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ex: Centro, Vila Madalena" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {formState?.errors?.bairro && (
-              <p className="text-sm font-medium text-destructive">{formState.errors.bairro}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="address">Localização</Label>
-            <Input
-              id="address"
+            
+            <FormField
+              control={control}
               name="address"
-              placeholder="ex: Rua Principal, 123"
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Localização</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ex: Rua Principal, 123" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {formState?.errors?.location && (
-              <p className="text-sm font-medium text-destructive">{formState.errors.location}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="reference">Ponto de Referência (Opcional)</Label>
-            <Input
-              id="reference"
+
+            <FormField
+              control={control}
               name="reference"
-              placeholder="ex: Esquina com a Av. 2, perto do mercado"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ponto de Referência (Opcional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ex: Esquina com a Av. 2, perto do mercado" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-2">
-            <Label>Foto do Problema (Opcional)</Label>
-            <div className="aspect-video rounded-md border border-dashed flex items-center justify-center relative overflow-hidden bg-muted/50">
-                {photoPreview ? (
-                    <Image src={photoPreview} alt="Pré-visualização da foto enviada" fill className="object-cover" />
-                ) : (
-                    <div className="text-center text-muted-foreground p-4">
-                        <Camera className="mx-auto h-12 w-12" />
-                        <p className="mt-2 text-sm">Carregar uma foto</p>
-                    </div>
+
+            <div className="space-y-2">
+                <Label>Foto do Problema (Opcional)</Label>
+                <div className="aspect-video rounded-md border border-dashed flex items-center justify-center relative overflow-hidden bg-muted/50">
+                    {photoPreview ? (
+                        <Image src={photoPreview} alt="Pré-visualização da foto enviada" fill className="object-cover" />
+                    ) : (
+                        <div className="text-center text-muted-foreground p-4">
+                            <Camera className="mx-auto h-12 w-12" />
+                            <p className="mt-2 text-sm">Carregar uma foto</p>
+                        </div>
+                    )}
+                </div>
+                <Input id="photo" type="file" accept="image/*" className="file:text-primary file:font-semibold" onChange={handlePhotoChange} />
+                {formState.errors?.photo && (
+                <p className="text-sm font-medium text-destructive">{formState.errors.photo.message}</p>
                 )}
             </div>
-            <Input id="photo" name="photo" type="file" accept="image/*" className="file:text-primary file:font-semibold" onChange={handlePhotoChange} />
-             {formState?.errors?.photo && (
-              <p className="text-sm font-medium text-destructive">{formState.errors.photo}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
-            <Textarea
-              id="description"
+            
+            <FormField
+              control={control}
               name="description"
-              placeholder="Forneça uma descrição detalhada do problema."
-              required
-              rows={5}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição</FormLabel>
+                  <FormControl>
+                    <Textarea
+                        placeholder="Forneça uma descrição detalhada do problema."
+                        rows={5}
+                        {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {formState?.errors?.description && (
-              <p className="text-sm font-medium text-destructive">{formState.errors.description}</p>
-            )}
-          </div>
-           {formState?.errors?._form && (
-            <Alert variant="destructive">
-              <AlertTitle>Falha no Envio</AlertTitle>
-              <AlertDescription>{formState.errors._form.join(', ')}</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-        <CardFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
-            <Button variant="outline" type="button" onClick={resetForm} className="w-full sm:w-auto">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Resetar
-            </Button>
-            <SubmitButton />
-        </CardFooter>
-      </form>
+          </CardContent>
+          <CardFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+              <Button variant="outline" type="button" onClick={resetForm} className="w-full sm:w-auto">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Resetar
+              </Button>
+              <SubmitButton />
+          </CardFooter>
+        </form>
+      </Form>
     </Card>
   );
 }

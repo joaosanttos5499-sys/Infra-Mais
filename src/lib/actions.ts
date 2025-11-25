@@ -6,28 +6,29 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
 import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport, saveUser } from "@/lib/data";
-import { type Report, type ReportStatus } from "@/lib/types";
+import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
 import { categories } from "./categories";
 import { getAuth } from "firebase-admin/auth";
 import { getApp } from "firebase-admin/app";
 import { differenceInYears, parse } from "date-fns";
 
-const ReportSchema = z.object({
-  userId: z.string(),
+export const ReportSchema = z.object({
+  userId: z.string().min(1, 'Você precisa estar logado para criar um relatório.'),
   category: z.string().refine(val => categories.some(c => c.value === val), {
-    message: "Please select a valid category.",
+    message: "Por favor, selecione uma categoria válida.",
   }),
-  problem: z.string().min(1, "Please select a specific problem."),
-  bairro: z.string().min(3, "Bairro must be at least 3 characters."),
-  address: z.string().min(3, "Address must be at least 3 characters."),
+  problem: z.string().min(1, "Por favor, selecione um problema específico."),
+  bairro: z.string().min(3, "O bairro deve ter pelo menos 3 caracteres."),
+  address: z.string().min(3, "A localização deve ter pelo menos 3 caracteres."),
   reference: z.string().optional(),
-  description: z.string().min(10, "Description must be at least 10 characters."),
+  description: z.string().min(10, "A descrição deve ter pelo menos 10 caracteres."),
   latitude: z.coerce.number().min(-90).max(90),
   longitude: z.coerce.number().min(-180).max(180),
 });
 
-type FormState = {
+export type FormState = {
   message?: string | null;
+  success?: boolean;
   errors?: {
     category?: string[];
     problem?: string[];
@@ -37,6 +38,7 @@ type FormState = {
     photo?: string[];
     latitude?: string[];
     longitude?: string[];
+    address?: string[];
     _form?: string[];
   };
 };
@@ -51,16 +53,8 @@ export async function submitReport(
   prevState: FormState | undefined,
   formData: FormData
 ): Promise<FormState> {
-
-   const userId = formData.get('userId') as string;
-   if (!userId) {
-    return {
-      errors: { _form: ["Você precisa estar logado para criar um relatório."] },
-    };
-  }
-
   const validatedFields = ReportSchema.safeParse({
-    userId: userId,
+    userId: formData.get("userId"),
     category: formData.get("category"),
     problem: formData.get("problem"),
     bairro: formData.get("bairro"),
@@ -76,7 +70,7 @@ export async function submitReport(
     return {
       errors: {
           ...fieldErrors,
-          location: fieldErrors.address, // map address error to location
+          location: fieldErrors.address,
       },
     };
   }
@@ -84,7 +78,7 @@ export async function submitReport(
   if(validatedFields.data.latitude === 0 && validatedFields.data.longitude === 0) {
       return {
           errors: {
-              _form: ["Please select a location on the map."]
+              _form: ["Por favor, selecione uma localização no mapa."]
           }
       }
   }
@@ -95,14 +89,13 @@ export async function submitReport(
   if (photoFile && photoFile.size > 0) {
     // Limit file size to 4MB
     if (photoFile.size > 4 * 1024 * 1024) {
-      return { errors: { photo: ["Photo size must be less than 4MB."] } };
+      return { errors: { photo: ["O tamanho da foto deve ser menor que 4MB."] } };
     }
     photoDataUri = await fileToDataUri(photoFile);
   } else {
     // Use a placeholder if no photo is uploaded
     photoDataUri = "https://picsum.photos/seed/placeholder/400/300";
   }
-
 
   try {
     const { userId, category, problem, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
@@ -135,14 +128,13 @@ export async function submitReport(
 
     revalidatePath("/dashboard");
     revalidatePath("/");
+    return { success: true };
   } catch (e) {
     console.error(e);
     return {
-      errors: { _form: ["An unexpected error occurred. Please try again."] },
+      errors: { _form: ["Ocorreu um erro inesperado. Por favor, tente novamente."] },
     };
   }
-
-  redirect("/dashboard");
 }
 
 type UpdateActionState = {
@@ -206,7 +198,7 @@ export async function downvoteReportAction(reportId: string) {
 }
 
 
-const SignupSchema = z.object({
+export const SignupSchema = z.object({
   name: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracteres." }),
   email: z.string().email({ message: "Por favor, insira um e-mail válido." }),
   password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres." }),
@@ -223,7 +215,7 @@ const SignupSchema = z.object({
 });
 
 
-type SignupFormState = {
+export type SignupFormState = {
   success?: boolean;
   errors?: {
     name?: string[];
@@ -264,7 +256,7 @@ export async function signupUser(
 
   } catch (error: any) {
     let errorMessage = "Ocorreu um erro inesperado.";
-    if (error.code === 'auth/email-already-exists') {
+    if (error.code === 'auth/email-already-in-use') {
       errorMessage = "Este e-mail já está em uso por outra conta.";
     }
     return { errors: { _form: [errorMessage] } };
