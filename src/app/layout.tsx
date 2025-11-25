@@ -4,7 +4,6 @@ import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/header";
-import { SocialsHeader } from "@/components/socials-header";
 import { Footer } from "@/components/footer";
 
 const poppins = Poppins({
@@ -26,7 +25,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", poppins.variable)}>
-        <SocialsHeader />
         <Header />
         <div className="flex-grow">
           {children}
