@@ -25,6 +25,12 @@ export function Header() {
               Início
             </Link>
             <Link
+              href="/dashboard"
+              className="opacity-90 hover:opacity-100 transition-opacity"
+            >
+              Relatos
+            </Link>
+            <Link
               href="/funcionarios"
               className="opacity-90 hover:opacity-100 transition-opacity"
             >
