@@ -63,17 +63,17 @@ function ReportCard({
                     <div className="flex items-start gap-3 mb-2">
                         {category?.icon && <category.icon className="h-6 w-6 hidden sm:block mt-1" style={{ color: category.color }} />}
                         <div className="flex-1">
-                        <p className="font-semibold">{category?.label || report.category}</p>
-                        <p className="text-sm font-medium text-foreground/90">{problem?.label || report.problem}</p>
-                        <p className="text-sm text-muted-foreground">{report.bairro} - {report.location}</p>
+                            <div className="flex items-center gap-2 mb-1">
+                                <p className="font-semibold">{category?.label || report.category}</p>
+                                <StatusBadge status={report.status} />
+                            </div>
+                            <p className="text-sm font-medium text-foreground/90">{problem?.label || report.problem}</p>
+                            <p className="text-sm text-muted-foreground">{report.bairro} - {report.location}</p>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <StatusBadge status={report.status} />
                     </div>
                     </div>
                     <div className="mt-4">
-                        <p className="text-sm text-foreground/80">{report.description}</p>
+                        <p className="text-sm text-foreground/80 line-clamp-3">{report.description}</p>
                     </div>
                 </div>
 
