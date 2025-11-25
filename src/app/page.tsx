@@ -49,7 +49,7 @@ async function RecentReports() {
                 </div>
                 <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2">
-                    {category?.icon && <category.icon className="h-5 w-5 text-primary" />} 
+                    {category?.icon && <category.icon className="h-5 w-5" style={{ color: category.color }} />} 
                     <span>{category?.label || report.category}</span>
                     </CardTitle>
                 </CardHeader>
