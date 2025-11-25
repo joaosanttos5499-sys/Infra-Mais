@@ -6,12 +6,13 @@ import { type Report } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
 import Image from "next/image";
 import { StatusBadge } from "@/components/status-badge";
 import { ReportTime } from "@/components/report-time";
+import { Button } from "@/components/ui/button";
 
 function MyReportsList({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
@@ -19,9 +20,9 @@ function MyReportsList({ reports }: { reports: Report[] }) {
             <div className="text-center text-muted-foreground py-8 border-2 border-dashed rounded-lg">
                 <h3 className="text-lg font-semibold">Você ainda não relatou nenhum problema.</h3>
                 <p className="mt-2">Quando você relatar um problema, ele aparecerá aqui.</p>
-                <Link href="/report/new">
-                    <button className="mt-4 bg-primary text-primary-foreground px-4 py-2 rounded-md">Relatar um Problema</button>
-                </Link>
+                <Button asChild className="mt-4">
+                    <Link href="/report/new">Relatar um Problema</Link>
+                </Button>
             </div>
         );
     }
@@ -81,7 +82,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     useEffect(() => {
         if (!isUserLoading && !user) {
-            router.push('/');
+            router.push('/report/auth');
         } else if (user) {
             const filteredReports = allReports.filter(report => report.userId === user.uid);
             setUserReports(filteredReports);
@@ -100,6 +101,25 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     return (
         <div className="space-y-8">
+             <Card>
+                <CardHeader>
+                    <CardTitle>Meus Dados</CardTitle>
+                    <CardDescription>Visualizar e atualizar informações da sua conta.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        <div>
+                            <p className="text-sm font-medium text-muted-foreground">Nome</p>
+                            <p>{user.displayName || 'Não informado'}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-muted-foreground">Email</p>
+                            <p>{user.email}</p>
+                        </div>
+                         <Button disabled>Atualizar Dados (em breve)</Button>
+                    </div>
+                </CardContent>
+            </Card>
             <Card>
                 <CardHeader>
                     <CardTitle>Meus Relatórios</CardTitle>

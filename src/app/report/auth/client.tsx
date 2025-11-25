@@ -44,8 +44,8 @@ export function AuthReportClient() {
     return (
         <Card className="w-full max-w-md">
             <CardHeader>
-                <CardTitle>Relatar Problema</CardTitle>
-                <CardDescription>Faça login ou crie uma conta para que seus relatórios fiquem salvos. Ou, se preferir, relate anonimamente.</CardDescription>
+                <CardTitle>Entrar</CardTitle>
+                <CardDescription>Faça login para que seus relatórios fiquem salvos em sua conta.</CardDescription>
             </CardHeader>
             <CardContent>
                 <AuthForm onAuthSuccess={() => router.push('/report/new')} />

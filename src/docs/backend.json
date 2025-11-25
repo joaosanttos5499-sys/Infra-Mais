@@ -1,0 +1,132 @@
+
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the CityFix application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user.",
+          "format": "email"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the user."
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "description": "User's date of birth in ISO 8601 format.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "name",
+        "dateOfBirth"
+      ]
+    },
+    "Report": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Report",
+      "type": "object",
+      "description": "Represents a report of an infrastructure problem.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Report entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Report)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the infrastructure problem."
+        },
+        "latitude": {
+          "type": "number",
+          "description": "Latitude of the infrastructure problem location."
+        },
+        "longitude": {
+          "type": "number",
+          "description": "Longitude of the infrastructure problem location."
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the infrastructure problem (e.g., potholes, broken streetlights)."
+        },
+        "summary": {
+          "type": "string",
+          "description": "AI generated summary of the problem reported."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the reported issue."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "description",
+        "latitude",
+        "longitude",
+        "category"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. Uses path-based ownership for private user data.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/reports/{reportId}",
+        "definition": {
+          "entityName": "Report",
+          "schema": {
+            "$ref": "#/backend/entities/Report"
+          },
+          "description": "Stores reports submitted by users. Path-based ownership is used to link reports to the user who created them.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            },
+            {
+              "name": "reportId",
+              "description": "Unique identifier for the report."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support the CityFix application, focusing on user management and infrastructure problem reporting. It prioritizes authorization independence by using path-based ownership for user data and reports. This eliminates the need for `get()` calls in security rules, enhancing security and scalability.\n\nThe structure segregates user data and reports into separate collections under the `/users/{userId}` path. This structural segregation ensures that each collection has a homogeneous security posture, simplifying security rule management.\n\nThe design supports required QAPs (Queries are not Filters) by clearly defining ownership via path structure."
+  }
+}

@@ -148,7 +148,7 @@ export function Header() {
           <DialogHeader>
             <DialogTitle>Acessar Plataforma</DialogTitle>
             <DialogDescription>
-              Use seu e-mail e senha para entrar ou criar uma conta.
+              Use seu e-mail e senha para entrar.
             </DialogDescription>
           </DialogHeader>
           <AuthForm onAuthSuccess={() => setIsAuthModalOpen(false)} />

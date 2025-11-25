@@ -1,13 +1,18 @@
 
-import { type Report, type ReportStatus, type NewReport } from "@/lib/types";
+import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
 
 // In-memory store
 const globalForReports = globalThis as unknown as {
   reports: Report[] | undefined;
+  users: UserProfile[] | undefined;
 };
 
 const reports = globalForReports.reports ?? [];
-if (process.env.NODE_ENV !== "production") globalForReports.reports = reports;
+const users = globalForReports.users ?? [];
+if (process.env.NODE_ENV !== "production") {
+    globalForReports.reports = reports;
+    globalForReports.users = users;
+}
 
 let idCounter = reports.length > 0 ? Math.max(...reports.map(r => parseInt(r.id))) + 1 : 1;
 
@@ -119,4 +124,14 @@ export async function downvoteReport(id: string): Promise<Report | undefined> {
         return reports[reportIndex];
     }
     return undefined;
+}
+
+export async function saveUser(user: UserProfile): Promise<UserProfile> {
+    const existingUserIndex = users.findIndex(u => u.id === user.id);
+    if (existingUserIndex > -1) {
+        users[existingUserIndex] = user;
+    } else {
+        users.push(user);
+    }
+    return user;
 }

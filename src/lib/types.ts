@@ -20,3 +20,10 @@ export interface Report {
 }
 
 export type NewReport = Omit<Report, "id" | "createdAt" | "status" | "upvotes" | "photoAfterUrl">;
+
+export interface UserProfile {
+    id: string;
+    name: string;
+    email: string;
+    dateOfBirth: string;
+}

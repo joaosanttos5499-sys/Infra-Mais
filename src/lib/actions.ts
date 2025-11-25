@@ -5,11 +5,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
-import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport } from "@/lib/data";
+import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport, saveUser } from "@/lib/data";
 import { type Report, type ReportStatus } from "@/lib/types";
 import { categories } from "./categories";
 import { getAuth } from "firebase-admin/auth";
 import { getApp } from "firebase-admin/app";
+import { differenceInYears } from "date-fns";
 
 const ReportSchema = z.object({
   userId: z.string(),
@@ -51,17 +52,15 @@ export async function submitReport(
   formData: FormData
 ): Promise<FormState> {
 
-   const auth = getAuth(getApp());
-   const user = auth.currentUser;
-
-   if (!user) {
+   const userId = formData.get('userId') as string;
+   if (!userId) {
     return {
-      errors: { _form: ["You must be logged in to submit a report."] },
+      errors: { _form: ["Você precisa estar logado para criar um relatório."] },
     };
   }
 
   const validatedFields = ReportSchema.safeParse({
-    userId: user.uid,
+    userId: userId,
     category: formData.get("category"),
     problem: formData.get("problem"),
     bairro: formData.get("bairro"),
@@ -204,4 +203,65 @@ export async function downvoteReportAction(reportId: string) {
         console.error(error);
         return { success: false, message: "Failed to downvote." };
     }
+}
+
+
+const SignupSchema = z.object({
+  name: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracteres." }),
+  email: z.string().email({ message: "Por favor, insira um e-mail válido." }),
+  password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres." }),
+  dateOfBirth: z.string().refine((dob) => new Date(dob).toString() !== 'Invalid Date', {
+    message: "Data de nascimento inválida.",
+  }).refine((dob) => differenceInYears(new Date(), new Date(dob)) >= 18, {
+    message: "Você deve ter pelo menos 18 anos.",
+  }),
+});
+
+
+type SignupFormState = {
+  success?: boolean;
+  errors?: {
+    name?: string[];
+    email?: string[];
+    password?: string[];
+    dateOfBirth?: string[];
+    _form?: string[];
+  };
+};
+
+export async function signupUser(
+  prevState: SignupFormState | undefined,
+  formData: FormData
+): Promise<SignupFormState> {
+  const validatedFields = SignupSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (!validatedFields.success) {
+    return { errors: validatedFields.error.flatten().fieldErrors };
+  }
+
+  const { email, password, name, dateOfBirth } = validatedFields.data;
+
+  try {
+    const auth = getAuth(getApp());
+    const userCredential = await auth.createUser({ email, password, displayName: name });
+
+    const newUser = {
+      id: userCredential.uid,
+      name,
+      email,
+      dateOfBirth,
+    };
+    
+    await saveUser(newUser);
+
+    revalidatePath('/');
+    return { success: true };
+
+  } catch (error: any) {
+    let errorMessage = "Ocorreu um erro inesperado.";
+    if (error.code === 'auth/email-already-exists') {
+      errorMessage = "Este e-mail já está em uso por outra conta.";
+    }
+    return { errors: { _form: [errorMessage] } };
+  }
 }
