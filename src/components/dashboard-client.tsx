@@ -20,6 +20,21 @@ import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
 import { cn } from "@/lib/utils";
 
+function ReportCreationTime({ date }: { date: Date }) {
+    const [timeString, setTimeString] = useState("");
+
+    useEffect(() => {
+        setTimeString(format(date, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }));
+    }, [date]);
+
+    if (!timeString) return null;
+
+    return (
+        <span className="text-xs text-muted-foreground">
+            {timeString}
+        </span>
+    );
+}
 
 function ReportCard({ 
     report,
@@ -64,6 +79,7 @@ function ReportCard({
             title: "Sucesso",
             description: formState.message,
         });
+        // Clear accordion content after successful update if needed
     }
   }, [formState, toast]);
 
@@ -82,9 +98,7 @@ function ReportCard({
                             <div className="flex items-center gap-2 flex-wrap">
                                 <p className="font-semibold text-lg">{category?.label || report.category}</p>
                                 <StatusBadge status={report.status} />
-                                <span className="text-xs text-muted-foreground">
-                                    {format(report.createdAt, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                                </span>
+                                <ReportCreationTime date={report.createdAt} />
                             </div>
                         </div>
                     </div>
@@ -217,7 +231,7 @@ function ReportList({ reports, onUpvote, upvotedReports, showUpvote }: { reports
   );
 }
 
-type OptimisticUpdate = { type: 'upvote', id: string, amount: 1 | -1 } | { type: 'status', report: Report, newStatus: ReportStatus };
+type OptimisticUpdate = { type: 'upvote', id: string, amount: 1 | -1 } | { type: 'status', reportId: string, newStatus: ReportStatus };
 
 export function DashboardClient({ reports, showUpvote = true }: { reports: Report[], showUpvote?: boolean }) {
   const { toast } = useToast();
@@ -231,8 +245,8 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
       if (update.type === 'upvote') {
           return state.map((r) => (r.id === update.id ? { ...r, upvotes: r.upvotes + update.amount } : r));
       }
-      if (update.type === 'status') {
-          return state.map((r) => (r.id === update.report.id ? { ...r, status: update.newStatus } : r));
+       if (update.type === 'status') {
+          return state.map((r) => (r.id === update.reportId ? { ...r, status: update.newStatus } : r));
       }
       return state;
     }

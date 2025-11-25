@@ -1,11 +1,13 @@
 
+"use client";
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getReports } from "@/lib/data";
-import { type Report, type ReportStatus } from "@/lib/types";
+import { type Report } from "@/lib/types";
 import { HomeMapClient } from "@/components/home-map-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCategory } from "@/lib/categories";
@@ -13,6 +15,18 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { StatusBadge } from "@/components/status-badge";
 import { ReportsChart } from "@/components/reports-chart";
+import { useEffect, useState } from "react";
+
+function ReportTime({ date }: { date: Date }) {
+  const [timeAgo, setTimeAgo] = useState("");
+
+  useEffect(() => {
+    setTimeAgo(formatDistanceToNow(date, { addSuffix: true, locale: ptBR }));
+  }, [date]);
+
+  return <>{timeAgo}</>;
+}
+
 
 async function RecentReports() {
   const reports = await getReports();
@@ -61,7 +75,7 @@ async function RecentReports() {
                         </p>
                     </div>
                     <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
-                        {formatDistanceToNow(report.createdAt, { addSuffix: true, locale: ptBR })}
+                        <ReportTime date={report.createdAt} />
                     </p>
                 </CardContent>
                 </Card>
