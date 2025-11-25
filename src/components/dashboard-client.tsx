@@ -76,7 +76,7 @@ function ReportCard({
                         </div>
                         <div>
                             <p className="text-sm font-semibold">Localização:</p>
-                            <p className="text-sm text-foreground/80">{report.bairro} - {report.location}</p>
+                            <p className="text-sm text-foreground/80">{report.location}</p>
                         </div>
                         <div>
                             <p className="text-sm font-semibold">Descrição:</p>
@@ -300,16 +300,15 @@ export function DashboardClient({ reports }: { reports: Report[] }) {
     <>
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ReportStatus)} className="w-full">
           <div className="flex justify-between items-center mb-4 gap-4">
-            <TabsList className="grid w-full grid-cols-3 bg-card p-1 rounded-lg">
+            <TabsList className="grid flex-1 grid-cols-3 bg-card p-1 rounded-lg">
                 <TabsTrigger value="PENDING" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:shadow-md">Pendentes</TabsTrigger>
                 <TabsTrigger value="IN_PROGRESS" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-md">Em Andamento</TabsTrigger>
                 <TabsTrigger value="RESOLVED" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:shadow-md">Resolvidos</TabsTrigger>
             </TabsList>
-            <div className="w-full max-w-48">
+            <div>
               <Select onValueChange={(value) => setSortBy(value as typeof sortBy)} defaultValue={sortBy}>
-                <SelectTrigger className="bg-white h-10 shadow-sm">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Ordenar por..." />
+                <SelectTrigger className="bg-white h-10 w-10 p-0 justify-center shadow-sm">
+                  <SelectValue placeholder={<Filter className="h-4 w-4" />} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="newest">Mais Recentes</SelectItem>
