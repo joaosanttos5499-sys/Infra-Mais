@@ -6,15 +6,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signupUser, type SignupFormState, SignupSchema } from "@/lib/actions";
+import { signupUser, type SignupFormState } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { useFormStatus } from "react-dom";
+import { SignupSchema } from "@/lib/schemas";
 
 function SubmitButton() {
   const { pending } = useFormStatus();

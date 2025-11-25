@@ -1,11 +1,11 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Image from "next/image";
 import { Camera, Loader2, RefreshCw } from "lucide-react";
-import { submitReport, ReportSchema, type FormState } from "@/lib/actions";
+import { submitReport, type FormState } from "@/lib/actions";
 import { categories, getCategory } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import dynamic from 'next/dynamic';
 import { useUser } from "@/firebase";
 import { useForm } from "react-hook-form";
@@ -22,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import { ReportSchema } from "@/lib/schemas";
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
