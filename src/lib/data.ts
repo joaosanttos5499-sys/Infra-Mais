@@ -17,7 +17,8 @@ if (reports.length === 0) {
   reports.push(
     {
       id: String(idCounter++),
-      category: "pothole",
+      category: "vias_publicas",
+      problem: "buracos_rua",
       bairro: "Centro",
       location: "Rua Principal, em frente ao nº 123",
       description: "Buraco grande e perigoso na via, causando risco para motoristas e ciclistas.",
@@ -31,7 +32,8 @@ if (reports.length === 0) {
     },
     {
       id: String(idCounter++),
-      category: "streetlight",
+      category: "iluminacao",
+      problem: "lampada_queimada",
       bairro: "Vila Nova",
       location: "Poste na esquina da Av. Brasil com a Rua das Flores",
       description: "A lâmpada do poste está queimada há mais de uma semana, deixando a rua muito escura e insegura.",
@@ -45,7 +47,8 @@ if (reports.length === 0) {
     },
     {
       id: String(idCounter++),
-      category: "garbage",
+      category: "limpeza_meio_ambiente",
+      problem: "acumulo_lixo",
       bairro: "Jardim América",
       location: "Em frente ao parquinho infantil",
       description: "Acúmulo de lixo na calçada, atraindo insetos e com mau cheiro.",

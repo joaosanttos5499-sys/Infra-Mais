@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -21,6 +22,7 @@ const SummarizeReportInputSchema = z.object({
   bairro: z.string().describe('The neighborhood of the infrastructure problem.'),
   location: z.string().describe('The location of the infrastructure problem.'),
   category: z.string().describe('The category of the infrastructure problem (e.g., potholes, broken streetlights, water leaks).'),
+  problem: z.string().describe('The specific problem reported within the category.'),
 });
 export type SummarizeReportInput = z.infer<typeof SummarizeReportInputSchema>;
 
@@ -39,9 +41,10 @@ const summarizeReportPrompt = ai.definePrompt({
   output: { schema: SummarizeReportOutputSchema },
   prompt: `You are a city employee who needs to understand infrastructure problems reported by citizens.
 
-  Please summarize the following report so that another city employee can quickly understand the issue.
+  Please summarize the following report so that another city employee can quickly understand the issue. The summary should be concise and direct.
 
   Category: {{{category}}}
+  Problem: {{{problem}}}
   Bairro: {{{bairro}}}
   Location: {{{location}}}
   Description: {{{description}}}

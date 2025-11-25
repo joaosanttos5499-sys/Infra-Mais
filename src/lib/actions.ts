@@ -13,6 +13,7 @@ const ReportSchema = z.object({
   category: z.string().refine(val => categories.some(c => c.value === val), {
     message: "Please select a valid category.",
   }),
+  problem: z.string().min(1, "Please select a specific problem."),
   bairro: z.string().min(3, "Bairro must be at least 3 characters."),
   address: z.string().min(3, "Address must be at least 3 characters."),
   reference: z.string().optional(),
@@ -25,6 +26,7 @@ type FormState = {
   message?: string | null;
   errors?: {
     category?: string[];
+    problem?: string[];
     bairro?: string[];
     location?: string[];
     description?: string[];
@@ -47,6 +49,7 @@ export async function submitReport(
 ): Promise<FormState> {
   const validatedFields = ReportSchema.safeParse({
     category: formData.get("category"),
+    problem: formData.get("problem"),
     bairro: formData.get("bairro"),
     address: formData.get("address"),
     reference: formData.get("reference"),
@@ -89,12 +92,13 @@ export async function submitReport(
 
 
   try {
-    const { category, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
+    const { category, problem, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
     
     const location = reference ? `${address} (${reference})` : address;
 
     const aiSummary = await summarizeReport({
       category,
+      problem,
       bairro,
       location,
       description,
@@ -103,6 +107,7 @@ export async function submitReport(
 
     const newReport: Omit<Report, "id" | "createdAt" | "status" | "upvotes" | "photoAfterUrl"> = {
       category,
+      problem,
       bairro,
       location,
       description,

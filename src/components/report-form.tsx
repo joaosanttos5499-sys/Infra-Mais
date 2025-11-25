@@ -6,7 +6,7 @@ import { useFormStatus } from "react-dom";
 import Image from "next/image";
 import { Camera, Loader2, RefreshCw, MapPin } from "lucide-react";
 import { submitReport } from "@/lib/actions";
-import { categories } from "@/lib/categories";
+import { categories, getCategory } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import dynamic from 'next/dynamic';
 
@@ -36,10 +35,9 @@ export function ReportForm() {
   const [formState, formAction] = useActionState(submitReport, undefined);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const photoInputRef = useRef<HTMLInputElement>(null);
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
-
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
 
   useEffect(() => {
     if (formState?.errors?._form) {
@@ -72,16 +70,17 @@ export function ReportForm() {
       formRef.current?.reset();
       setPhotoPreview(null);
       setSelectedLocation(null);
+      setSelectedCategory('');
   }
 
-  const photoPlaceholder = PlaceHolderImages.find(p => p.id === 'report-photo-placeholder')?.imageUrl || "https://picsum.photos/seed/placeholder/400/300";
+  const problems = getCategory(selectedCategory)?.problems || [];
 
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
         <CardTitle className="font-headline text-4xl mb-4">Preencha o Relatório</CardTitle>
         <CardDescription>
-          Preencha os detalhes abaixo para enviar um relatório para a cidade. Clique no mapa para selecionar a localização exata.
+          Preencha os detalhes abaixo para enviar um relatório para a cidade.
         </CardDescription>
       </CardHeader>
       <form action={formAction} ref={formRef}>
@@ -100,7 +99,7 @@ export function ReportForm() {
           <input type="hidden" name="longitude" value={selectedLocation?.lng ?? 0} />
           <div className="space-y-2">
             <Label htmlFor="category">Categoria</Label>
-            <Select name="category" required>
+            <Select name="category" required onValueChange={setSelectedCategory}>
               <SelectTrigger id="category" aria-label="Selecione a categoria">
                 <SelectValue placeholder="Selecione o tipo de problema" />
               </SelectTrigger>
@@ -122,6 +121,29 @@ export function ReportForm() {
               <p className="text-sm font-medium text-destructive">{formState.errors.category}</p>
             )}
           </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="problem">Problema</Label>
+            <Select name="problem" required disabled={!selectedCategory}>
+              <SelectTrigger id="problem" aria-label="Selecione o problema específico">
+                <SelectValue placeholder={selectedCategory ? "Selecione o problema específico" : "Escolha uma categoria primeiro"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Problemas Específicos</SelectLabel>
+                  {problems.map((problem) => (
+                    <SelectItem key={problem.value} value={problem.value}>
+                      {problem.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            {formState?.errors?.problem && (
+              <p className="text-sm font-medium text-destructive">{formState.errors.problem}</p>
+            )}
+          </div>
+
            <div className="space-y-2">
             <Label htmlFor="bairro">Bairro</Label>
             <Input
@@ -166,7 +188,7 @@ export function ReportForm() {
                     </div>
                 )}
             </div>
-            <Input id="photo" name="photo" type="file" accept="image/*" className="file:text-primary file:font-semibold" onChange={handlePhotoChange} ref={photoInputRef} />
+            <Input id="photo" name="photo" type="file" accept="image/*" className="file:text-primary file:font-semibold" onChange={handlePhotoChange} />
              {formState?.errors?.photo && (
               <p className="text-sm font-medium text-destructive">{formState.errors.photo}</p>
             )}

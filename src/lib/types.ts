@@ -1,8 +1,10 @@
+
 export type ReportStatus = "PENDING" | "IN_PROGRESS" | "RESOLVED";
 
 export interface Report {
   id: string;
   category: string;
+  problem: string;
   bairro: string;
   location: string;
   description: string;
