@@ -31,6 +31,7 @@ function ReportCard({
     isUpvoted: boolean
 }) {
   const category = getCategory(report.category);
+  const problem = category?.problems.find(p => p.value === report.problem);
   const { toast } = useToast();
   const [formState, formAction, isPending] = useActionState(updateReportStatus, undefined, report.id);
   const formRef = useRef<HTMLFormElement>(null);
@@ -59,10 +60,11 @@ function ReportCard({
                 <div className="grid md:grid-cols-[2fr_1fr] gap-4">
                 <div className="flex flex-col justify-between">
                     <div>
-                    <div className="flex items-center gap-3 mb-2">
-                        {category?.icon && <category.icon className="h-6 w-6 hidden sm:block" style={{ color: category.color }} />}
+                    <div className="flex items-start gap-3 mb-2">
+                        {category?.icon && <category.icon className="h-6 w-6 hidden sm:block mt-1" style={{ color: category.color }} />}
                         <div className="flex-1">
                         <p className="font-semibold">{category?.label || report.category}</p>
+                        <p className="text-sm font-medium text-foreground/90">{problem?.label || report.problem}</p>
                         <p className="text-sm text-muted-foreground">{report.bairro} - {report.location}</p>
                         </div>
                     </div>
@@ -71,7 +73,7 @@ function ReportCard({
                     </div>
                     </div>
                     <div className="mt-4">
-                        <p className="text-sm text-foreground/80">{report.summary}</p>
+                        <p className="text-sm text-foreground/80">{report.description}</p>
                     </div>
                 </div>
 
@@ -103,16 +105,15 @@ function ReportCard({
                         <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
                         Apoiar ({report.upvotes})
                     </Button>
+                     <AccordionTrigger className="py-0 px-4 text-sm">
+                       Ver detalhes e atualizar
+                    </AccordionTrigger>
                 </div>
             </div>
 
             <AccordionContent className="bg-muted/50">
               <form action={formAction} ref={formRef}>
                 <div className="p-6 space-y-4">
-                    <div>
-                        <h4 className="font-semibold text-sm mb-1">Descrição Completa</h4>
-                        <p className="text-sm text-foreground/80">{report.description}</p>
-                    </div>
                     <div>
                         <h4 className="font-semibold text-sm mb-1">Relatado</h4>
                         <p className="text-sm text-foreground/80" title={format(report.createdAt, "PPPppp", { locale: ptBR })}>
