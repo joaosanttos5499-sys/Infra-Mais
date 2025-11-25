@@ -44,6 +44,10 @@ export function ReportsChart({ total, resolved, inProgress }: ReportsChartProps)
     const totalCount = React.useMemo(() => {
         return chartData.reduce((acc, curr) => acc + curr.count, 0)
     }, [chartData]);
+    
+    const activeIndex = React.useMemo(() => {
+        return chartData.findIndex((item) => item.status === "Resolvidos");
+    }, [chartData]);
 
 
     if (total === 0) {
@@ -71,7 +75,7 @@ export function ReportsChart({ total, resolved, inProgress }: ReportsChartProps)
                 nameKey="status"
                 innerRadius={60}
                 strokeWidth={5}
-                activeIndex={0}
+                activeIndex={activeIndex}
                 activeShape={({ outerRadius = 0, ...props }) => (
                     <g>
                         <Sector {...props} outerRadius={outerRadius + 8} />
@@ -113,3 +117,4 @@ export function ReportsChart({ total, resolved, inProgress }: ReportsChartProps)
       </div>
   )
 }
+
