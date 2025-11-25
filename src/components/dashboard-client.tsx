@@ -340,7 +340,7 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
             </TabsList>
             <div className="flex-shrink-0">
               <Select onValueChange={(value) => setSortBy(value as typeof sortBy)} defaultValue={sortBy}>
-                <SelectTrigger className="w-10 h-10 p-0">
+                <SelectTrigger className="w-10 h-10 p-0 bg-card">
                     <span className="sr-only">Ordenar por</span>
                     <Filter className="h-4 w-4 mx-auto"/>
                 </SelectTrigger>
