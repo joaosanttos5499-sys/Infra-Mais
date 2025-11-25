@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Separator } from "./ui/separator";
 
 export function Header() {
   return (
@@ -24,18 +25,21 @@ export function Header() {
             >
               Início
             </Link>
+            <Separator orientation="vertical" className="h-4 bg-primary/50" />
             <Link
               href="/dashboard"
               className="opacity-90 hover:opacity-100 transition-opacity"
             >
               Relatos
             </Link>
+            <Separator orientation="vertical" className="h-4 bg-primary/50" />
             <Link
               href="/funcionarios"
               className="opacity-90 hover:opacity-100 transition-opacity"
             >
               Funcionários
             </Link>
+            <Separator orientation="vertical" className="h-4 bg-primary/50" />
             <Link
               href="/support"
               className="opacity-90 hover:opacity-100 transition-opacity"
