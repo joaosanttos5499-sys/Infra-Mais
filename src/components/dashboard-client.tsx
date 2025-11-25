@@ -75,7 +75,7 @@ function ReportCard({
                             <p className="text-sm text-foreground/80">{problem?.label || report.problem}</p>
                         </div>
                         <div>
-                            <p className="text-sm font-semibold">Endereço:</p>
+                            <p className="text-sm font-semibold">Localização:</p>
                             <p className="text-sm text-foreground/80">{report.bairro} - {report.location}</p>
                         </div>
                         <div>

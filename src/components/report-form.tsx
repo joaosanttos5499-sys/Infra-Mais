@@ -157,7 +157,7 @@ export function ReportForm() {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="address">Endereço</Label>
+            <Label htmlFor="address">Localização</Label>
             <Input
               id="address"
               name="address"
@@ -224,3 +224,5 @@ export function ReportForm() {
     </Card>
   );
 }
+
+    
