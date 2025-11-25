@@ -60,7 +60,7 @@ function ReportCard({
                 <div className="grid md:grid-cols-[2fr_1fr] gap-4">
                 <div className="flex flex-col">
                     <div className="flex items-start gap-3 mb-4">
-                        {category?.icon && <category.icon className="h-6 w-6 hidden sm:block mt-1 flex-shrink-0" style={{ color: category.color }} />}
+                        {category?.icon && <category.icon className="h-6 w-6 hidden sm:block mt-1 flex-shrink-0" style={{ color: category?.color }} />}
                         <div className="flex-1 space-y-1">
                             <div className="flex items-center gap-2 flex-wrap">
                                 <p className="font-semibold text-lg">{category?.label || report.category}</p>
