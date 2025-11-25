@@ -323,9 +323,8 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
             </TabsList>
             <div className="self-end sm:self-center">
               <Select onValueChange={(value) => setSortBy(value as typeof sortBy)} defaultValue={sortBy}>
-                <SelectTrigger className="bg-white h-10 w-auto sm:w-40 shadow-sm pr-3">
-                  <Filter className="h-4 w-4" />
-                  <SelectValue className="hidden sm:inline-block" placeholder="Ordenar por..." />
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Ordenar por..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="newest">Mais Recentes</SelectItem>
