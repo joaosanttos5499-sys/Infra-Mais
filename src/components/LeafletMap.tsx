@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -57,6 +58,8 @@ export default function LeafletMap({
       reports.forEach(report => {
           const category = getCategory(report.category);
           const IconComponent = category?.icon;
+          
+          const problemLabel = category?.problems.find(p => p.value === report.problem)?.label || report.problem;
 
           const iconHtml = IconComponent 
             ? renderToString(<IconComponent className="h-5 w-5 text-white" />)
@@ -72,7 +75,7 @@ export default function LeafletMap({
           
           const reportMarker = L.marker([report.latitude, report.longitude], { icon: customIcon })
               .addTo(map)
-              .bindPopup(`<b>${report.category}</b><br>${report.location}`);
+              .bindPopup(`<b>${problemLabel}</b><br>${report.location}`);
           reportMarkers.current.push(reportMarker);
       });
     }
