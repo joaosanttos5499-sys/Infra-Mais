@@ -125,14 +125,13 @@ function ReportCard({
                     </div>
                 )}
                 </div>
-                <div className="flex justify-between items-center mt-4">
+                <div className="flex justify-end items-center mt-4">
                     {showUpvote ? (
                         <Button variant={isUpvoted ? "default" : "ghost"} size="sm" onClick={() => onUpvote(report.id)}>
                             <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
                             Apoiar ({report.upvotes})
                         </Button>
-                    ) : <div />}
-                    {!showUpvote && (
+                    ) : (
                      <AccordionTrigger className="py-0 px-4 text-sm">
                        Ver detalhes e atualizar
                     </AccordionTrigger>
