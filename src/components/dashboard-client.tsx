@@ -82,6 +82,9 @@ function ReportCard({
                             <div className="flex items-center gap-2 flex-wrap">
                                 <p className="font-semibold text-lg">{category?.label || report.category}</p>
                                 <StatusBadge status={report.status} />
+                                <span className="text-xs text-muted-foreground">
+                                    {format(report.createdAt, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -315,16 +318,17 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
   return (
     <>
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ReportStatus)} className="w-full">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+          <div className="flex flex-row justify-between items-center mb-4 gap-2">
             <TabsList className="grid flex-1 w-full grid-cols-3 bg-card p-1 rounded-lg">
                 <TabsTrigger value="PENDING" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:shadow-md">Pendentes</TabsTrigger>
                 <TabsTrigger value="IN_PROGRESS" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-md">Em Andamento</TabsTrigger>
                 <TabsTrigger value="RESOLVED" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:shadow-md">Resolvidos</TabsTrigger>
             </TabsList>
-            <div className="self-end sm:self-center">
+            <div className="flex-shrink-0">
               <Select onValueChange={(value) => setSortBy(value as typeof sortBy)} defaultValue={sortBy}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Ordenar por..." />
+                <SelectTrigger className="w-10 h-10 p-0">
+                    <span className="sr-only">Ordenar por</span>
+                    <Filter className="h-4 w-4 mx-auto"/>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="newest">Mais Recentes</SelectItem>
@@ -347,3 +351,5 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
     </>
   );
 }
+
+    
