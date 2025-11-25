@@ -35,7 +35,7 @@ function ReportCard({
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
   const { toast } = useToast();
-  const [formState, formAction, isPending] = useActionState(updateReportStatus, { success: true });
+  const [formState, formAction, isPending] = useActionState(updateReportStatus, undefined);
   const formRef = useRef<HTMLFormElement>(null);
   const [photoAfterPreview, setPhotoAfterPreview] = useState<string | null>(null);
 
@@ -53,14 +53,14 @@ function ReportCard({
   };
 
   useEffect(() => {
-    if (formState?.success === false && formState.message) {
-      toast({
-        title: "Erro ao Atualizar",
-        description: formState.message,
-        variant: "destructive",
-      });
+    if(formState?.success === false && formState.message) {
+        toast({
+            title: "Erro ao Atualizar",
+            description: formState.message,
+            variant: "destructive",
+        });
     } else if (formState?.success === true && formState.message) {
-         toast({
+        toast({
             title: "Sucesso",
             description: formState.message,
         });
@@ -71,7 +71,7 @@ function ReportCard({
   return (
     <Card className="overflow-hidden" id={`report-${report.id}`}>
       <CardContent className="p-0">
-        <Accordion type="single" collapsible>
+        <Accordion type="single" collapsible disabled={showUpvote}>
           <AccordionItem value={report.id} className="border-b-0">
             <div className="p-4">
                 <div className="grid md:grid-cols-[2fr_1fr] gap-4">
@@ -132,12 +132,15 @@ function ReportCard({
                             Apoiar ({report.upvotes})
                         </Button>
                     ) : <div />}
+                    {!showUpvote && (
                      <AccordionTrigger className="py-0 px-4 text-sm">
                        Ver detalhes e atualizar
                     </AccordionTrigger>
+                    )}
                 </div>
             </div>
-
+            
+            {!showUpvote && (
             <AccordionContent className="bg-muted/50">
               <form action={(formData) => formAction({ reportId: report.id, formData })} ref={formRef}>
                 <div className="p-6 space-y-4">
@@ -185,6 +188,7 @@ function ReportCard({
                 </div>
               </form>
             </AccordionContent>
+            )}
           </AccordionItem>
         </Accordion>
       </CardContent>
@@ -211,21 +215,22 @@ function ReportList({ reports, onUpvote, upvotedReports, showUpvote }: { reports
   );
 }
 
-type OptimisticUpdate = { type: 'upvote', id: string, amount: 1 | -1 }
+type OptimisticUpdate = { type: 'upvote', id: string, amount: 1 | -1 } | { type: 'status', report: Report, newStatus: ReportStatus };
 
 export function DashboardClient({ reports, showUpvote = true }: { reports: Report[], showUpvote?: boolean }) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<ReportStatus>("PENDING");
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'upvotes'>('newest');
-  const [isPending, startTransition] = useTransition();
   
   const [optimisticReports, setOptimisticReports] = useOptimistic(
     reports,
     (state, update: OptimisticUpdate) => {
       if (update.type === 'upvote') {
-          const newState = state.map((r) => (r.id === update.id ? { ...r, upvotes: r.upvotes + update.amount } : r));
-          return newState;
+          return state.map((r) => (r.id === update.id ? { ...r, upvotes: r.upvotes + update.amount } : r));
+      }
+      if (update.type === 'status') {
+          return state.map((r) => (r.id === update.report.id ? { ...r, status: update.newStatus } : r));
       }
       return state;
     }
@@ -252,7 +257,7 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
     }
   }, [reports]);
 
-  const handleUpvote = async (reportId: string) => {
+  const handleUpvote = (reportId: string) => {
     startTransition(async () => {
       const isAlreadyUpvoted = upvotedReports.has(reportId);
       const newUpvotedReports = new Set(upvotedReports);
@@ -278,9 +283,12 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
         });
         // Revert local state if server fails
         setUpvotedReports(upvotedReports);
+        setOptimisticReports({ type: 'upvote', id: reportId, amount: isAlreadyUpvoted ? 1 : -1 });
       }
     });
   }
+
+  const [isUpvotePending, startTransition] = useTransition();
   
   if (reports.length === 0) {
       return (
@@ -317,7 +325,9 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
             <div>
               <Select onValueChange={(value) => setSortBy(value as typeof sortBy)} defaultValue={sortBy}>
                 <SelectTrigger className="bg-white h-10 w-10 p-0 justify-center shadow-sm">
-                  <SelectValue placeholder={<Filter className="h-4 w-4" />} />
+                  <SelectValue>
+                    <Filter className="h-4 w-4" />
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="newest">Mais Recentes</SelectItem>
