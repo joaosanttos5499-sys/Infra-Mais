@@ -134,7 +134,9 @@ function ReportCard({
                             className="object-cover"
                             sizes="(max-width: 768px) 50vw, 17vw"
                           />
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Antes</div>
+                           {report.status === 'RESOLVED' && report.photoAfterUrl && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Antes</div>
+                          )}
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <Expand className="h-8 w-8 text-white" />
                           </div>
