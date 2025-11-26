@@ -14,11 +14,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Expand } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 
 function ReportCreationTime({ date }: { date: Date }) {
     const [timeString, setTimeString] = useState("");
@@ -119,28 +120,59 @@ function ReportCard({
                     </div>
                 </div>
 
-                {report.status === 'RESOLVED' ? (
-                     <div className="grid grid-cols-2 gap-2 self-start">
-                        <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm">
-                            <Image src={report.photoUrl} alt="Antes" fill className="object-cover" sizes="(max-width: 768px) 50vw, 17vw"/>
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Antes</div>
-                        </div>
-                        <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm">
-                            <Image src={report.photoAfterUrl || 'https://picsum.photos/seed/resolved-placeholder/400/300'} alt="Depois" fill className="object-cover" sizes="(max-width: 768px) 50vw, 17vw"/>
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Depois</div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm self-start">
+                <div className="space-y-2 self-start">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm cursor-pointer group">
                         <Image
+                          src={report.photoUrl}
+                          alt={`Problema em ${report.location}`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Expand className="h-8 w-8 text-white" />
+                        </div>
+                      </div>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl p-2">
+                        <div className="relative aspect-video">
+                           <Image
                             src={report.photoUrl}
                             alt={`Problema em ${report.location}`}
                             fill
-                            className="object-cover"
-                            sizes="(max-width: 768px) 100vw, 33vw"
-                            />
-                    </div>
-                )}
+                            className="object-contain"
+                           />
+                        </div>
+                    </DialogContent>
+                  </Dialog>
+                  
+                  {report.status === 'RESOLVED' && report.photoAfterUrl && (
+                     <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm cursor-pointer group">
+                            <Image src={report.photoAfterUrl} alt="Depois" fill className="object-cover" sizes="(max-width: 768px) 50vw, 17vw"/>
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Depois</div>
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Expand className="h-8 w-8 text-white" />
+                            </div>
+                        </div>
+                      </DialogTrigger>
+                       <DialogContent className="max-w-4xl p-2">
+                        <div className="relative aspect-video">
+                           <Image
+                            src={report.photoAfterUrl}
+                            alt="Foto da solução"
+                            fill
+                            className="object-contain"
+                           />
+                        </div>
+                    </DialogContent>
+                     </Dialog>
+                  )}
+                </div>
+
                 </div>
                 <div className="flex justify-end items-center mt-4 px-4 pb-2">
                     {showUpvote ? (
@@ -365,5 +397,3 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
     </>
   );
 }
-
-    
