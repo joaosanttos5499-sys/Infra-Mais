@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useUser } from "@/firebase";
-import { type Report } from "@/lib/types";
+import { useUser, useFirestore, useMemoFirebase } from "@/firebase";
+import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -13,6 +13,9 @@ import Image from "next/image";
 import { StatusBadge } from "@/components/status-badge";
 import { ReportTime } from "@/components/report-time";
 import { Button } from "@/components/ui/button";
+import { doc } from "firebase/firestore";
+import { useDoc } from "@/firebase/firestore/use-doc";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function MyReportsList({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
@@ -74,10 +77,38 @@ function MyReportsList({ reports }: { reports: Report[] }) {
     )
 }
 
+function UserDataSkeleton() {
+    return (
+        <div className="space-y-4">
+            <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-5 w-48" />
+            </div>
+            <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-5 w-64" />
+            </div>
+             <div className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-5 w-32" />
+            </div>
+        </div>
+    )
+}
+
 
 export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const { user, isUserLoading } = useUser();
     const router = useRouter();
+    const firestore = useFirestore();
+
+    const userProfileRef = useMemoFirebase(() => {
+        if (!user?.uid) return null;
+        return doc(firestore, 'users', user.uid);
+    }, [user?.uid, firestore]);
+    
+    const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userProfileRef);
+
     const [userReports, setUserReports] = useState<Report[]>([]);
 
     useEffect(() => {
@@ -104,20 +135,29 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
              <Card>
                 <CardHeader>
                     <CardTitle>Meus Dados</CardTitle>
-                    <CardDescription>Visualizar e atualizar informações da sua conta.</CardDescription>
+                    <CardDescription>Visualize as informações da sua conta.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-4">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Nome</p>
-                            <p>{user.displayName || 'Não informado'}</p>
+                    {isProfileLoading ? (
+                        <UserDataSkeleton />
+                    ) : userProfile ? (
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Nome Completo</p>
+                                <p>{userProfile.name}</p>
+                            </div>
+                             <div>
+                                <p className="text-sm font-medium text-muted-foreground">Data de Nascimento</p>
+                                <p>{userProfile.dateOfBirth}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Email</p>
+                                <p>{userProfile.email}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Email</p>
-                            <p>{user.email}</p>
-                        </div>
-                         <Button disabled>Atualizar Dados (em breve)</Button>
-                    </div>
+                    ) : (
+                        <p className="text-sm text-muted-foreground">Não foi possível carregar os dados do seu perfil.</p>
+                    )}
                 </CardContent>
             </Card>
             <Card>
