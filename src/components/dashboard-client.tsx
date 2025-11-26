@@ -120,7 +120,7 @@ function ReportCard({
                     </div>
                 </div>
 
-                <div className="space-y-2 self-start">
+                <div className="grid grid-cols-2 gap-2 self-start">
                   <Dialog>
                     <DialogTrigger asChild>
                       <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm cursor-pointer group">
@@ -129,8 +129,9 @@ function ReportCard({
                           alt={`Problema em ${report.location}`}
                           fill
                           className="object-cover"
-                          sizes="(max-width: 768px) 100vw, 33vw"
+                          sizes="(max-width: 768px) 50vw, 17vw"
                         />
+                         <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Antes</div>
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <Expand className="h-8 w-8 text-white" />
                         </div>
