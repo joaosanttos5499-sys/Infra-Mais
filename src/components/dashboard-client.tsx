@@ -120,65 +120,68 @@ function ReportCard({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 self-start">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm cursor-pointer group">
-                        <Image
-                          src={report.photoUrl}
-                          alt={`Problema em ${report.location}`}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 50vw, 17vw"
-                        />
-                         <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Antes</div>
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Expand className="h-8 w-8 text-white" />
-                        </div>
-                      </div>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl p-2">
-                        <DialogHeader>
-                          <DialogTitle className="sr-only">Visualização da imagem do problema</DialogTitle>
-                        </DialogHeader>
-                        <div className="relative aspect-video">
-                           <Image
+                 <div className="grid grid-cols-2 gap-2 self-start">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className={cn(
+                          "aspect-video rounded-lg overflow-hidden relative border shadow-sm cursor-pointer group",
+                          report.status === 'RESOLVED' && report.photoAfterUrl ? "col-span-1" : "col-span-2"
+                        )}>
+                          <Image
                             src={report.photoUrl}
                             alt={`Problema em ${report.location}`}
                             fill
-                            className="object-contain"
-                           />
-                        </div>
-                    </DialogContent>
-                  </Dialog>
-                  
-                  {report.status === 'RESOLVED' && report.photoAfterUrl && (
-                     <Dialog>
-                      <DialogTrigger asChild>
-                        <div className="aspect-video rounded-lg overflow-hidden relative border shadow-sm cursor-pointer group">
-                            <Image src={report.photoAfterUrl} alt="Depois" fill className="object-cover" sizes="(max-width: 768px) 50vw, 17vw"/>
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Depois</div>
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Expand className="h-8 w-8 text-white" />
-                            </div>
+                            className="object-cover"
+                            sizes="(max-width: 768px) 50vw, 17vw"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Antes</div>
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Expand className="h-8 w-8 text-white" />
+                          </div>
                         </div>
                       </DialogTrigger>
-                       <DialogContent className="max-w-4xl p-2">
-                         <DialogHeader>
-                          <DialogTitle className="sr-only">Visualização da imagem da solução</DialogTitle>
-                        </DialogHeader>
-                        <div className="relative aspect-video">
-                           <Image
-                            src={report.photoAfterUrl}
-                            alt="Foto da solução"
-                            fill
-                            className="object-contain"
-                           />
-                        </div>
-                    </DialogContent>
-                     </Dialog>
-                  )}
-                </div>
+                      <DialogContent className="max-w-4xl p-2">
+                          <DialogHeader>
+                            <DialogTitle className="sr-only">Visualização da imagem do problema</DialogTitle>
+                          </DialogHeader>
+                          <div className="relative aspect-video">
+                            <Image
+                              src={report.photoUrl}
+                              alt={`Problema em ${report.location}`}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                      </DialogContent>
+                    </Dialog>
+                    
+                    {report.status === 'RESOLVED' && report.photoAfterUrl && (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <div className="col-span-1 aspect-video rounded-lg overflow-hidden relative border shadow-sm cursor-pointer group">
+                              <Image src={report.photoAfterUrl} alt="Depois" fill className="object-cover" sizes="(max-width: 768px) 50vw, 17vw"/>
+                              <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Depois</div>
+                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Expand className="h-8 w-8 text-white" />
+                              </div>
+                          </div>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl p-2">
+                          <DialogHeader>
+                            <DialogTitle className="sr-only">Visualização da imagem da solução</DialogTitle>
+                          </DialogHeader>
+                          <div className="relative aspect-video">
+                            <Image
+                              src={report.photoAfterUrl}
+                              alt="Foto da solução"
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
 
                 </div>
                 <div className="flex justify-end items-center mt-4 px-4 pb-2">
