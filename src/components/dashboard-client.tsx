@@ -19,7 +19,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 
 function ReportCreationTime({ date }: { date: Date }) {
     const [timeString, setTimeString] = useState("");
@@ -137,6 +137,9 @@ function ReportCard({
                       </div>
                     </DialogTrigger>
                     <DialogContent className="max-w-4xl p-2">
+                        <DialogHeader>
+                          <DialogTitle className="sr-only">Visualização da imagem do problema</DialogTitle>
+                        </DialogHeader>
                         <div className="relative aspect-video">
                            <Image
                             src={report.photoUrl}
@@ -160,6 +163,9 @@ function ReportCard({
                         </div>
                       </DialogTrigger>
                        <DialogContent className="max-w-4xl p-2">
+                         <DialogHeader>
+                          <DialogTitle className="sr-only">Visualização da imagem da solução</DialogTitle>
+                        </DialogHeader>
                         <div className="relative aspect-video">
                            <Image
                             src={report.photoAfterUrl}
