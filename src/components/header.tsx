@@ -4,7 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Separator } from "./ui/separator";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
 import { Menu, Home, FileText, Users, LifeBuoy, User, LogOut } from "lucide-react";
 import { useState } from "react";
@@ -126,6 +126,9 @@ export function Header() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right">
+                    <SheetHeader>
+                        <SheetTitle className="sr-only">Navegação</SheetTitle>
+                    </SheetHeader>
                   <nav className="flex flex-col gap-4 mt-8">
                     {filteredNavLinks.map((link) => (
                       <Link
