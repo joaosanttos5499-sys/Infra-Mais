@@ -242,8 +242,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                             <FormItem className="flex flex-col items-center gap-4">
                               <Avatar className="h-24 w-24">
-                                <AvatarImage src={photoPreview || userProfile?.photoURL || createAvatarSvg(userProfile?.name || '')} />
-                                <AvatarFallback>{userProfile?.name?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                                <AvatarImage src={photoPreview || userProfile?.photoURL || createAvatarSvg(userProfile?.name || userProfile?.email || '')} />
+                                <AvatarFallback>{userProfile?.name?.charAt(0).toUpperCase() || userProfile?.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
                               </Avatar>
                               <FormControl>
                                 <Input id="photo-upload" type="file" accept="image/*" className="sr-only" onChange={handlePhotoChange} />
@@ -297,8 +297,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                         <div className="space-y-6">
                             <div className="flex items-center gap-4">
                                <Avatar className="h-20 w-20">
-                                  <AvatarImage src={userProfile.photoURL || createAvatarSvg(userProfile.name || '')} alt={userProfile.name || 'Avatar do usuário'} />
-                                  <AvatarFallback>{userProfile.name?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                                  <AvatarImage src={userProfile.photoURL || createAvatarSvg(userProfile.name || userProfile.email || '')} alt={userProfile.name || 'Avatar do usuário'} />
+                                  <AvatarFallback>{userProfile.name?.charAt(0).toUpperCase() || userProfile.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
                                 </Avatar>
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">Nome Completo</p>
