@@ -2,11 +2,12 @@
 'use client';
 
 import { AuthForm } from "@/components/auth-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUser } from "@/firebase";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Separator } from "@/components/ui/separator";
 
 export function AuthReportClient() {
     const { user, isUserLoading } = useUser();
@@ -30,11 +31,11 @@ export function AuthReportClient() {
 
     return (
         <Card className="w-full max-w-md">
-            <CardHeader>
-                <CardTitle>Entrar ou Criar Conta</CardTitle>
-                <CardDescription>Faça login ou crie uma conta para que seus relatórios fiquem salvos.</CardDescription>
+            <CardHeader className="pb-4">
+                <CardTitle>Entrar</CardTitle>
             </CardHeader>
             <CardContent>
+                <Separator className="mb-6" />
                 <AuthForm onAuthSuccess={() => router.push('/report/new')} />
             </CardContent>
         </Card>
