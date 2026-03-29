@@ -24,11 +24,11 @@ export const SignupSchema = z.object({
   dateOfBirth: z.string().refine((dob) => {
     try {
       const date = parse(dob, 'dd/MM/yyyy', new Date());
-      return differenceInYears(new Date(), date) >= 18;
+      return differenceInYears(new Date(), date) >= 16;
     } catch {
       return false;
     }
   }, {
-    message: "Você deve ter pelo menos 18 anos e a data deve estar no formato DD/MM/AAAA.",
+    message: "Você deve ter pelo menos 16 anos e a data deve estar no formato DD/MM/AAAA.",
   }),
 });
