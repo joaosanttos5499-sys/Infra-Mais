@@ -31,7 +31,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   }
 
   if (user) {
-    const avatarSrc = user.photoURL || (user.displayName ? createAvatarSvg(user.displayName) : undefined);
+    const avatarSrc = user.photoURL || createAvatarSvg(user.displayName || '');
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
