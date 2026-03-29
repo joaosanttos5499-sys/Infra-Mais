@@ -32,3 +32,8 @@ export const SignupSchema = z.object({
     message: "Você deve ter pelo menos 16 anos e a data deve estar no formato DD/MM/AAAA.",
   }),
 });
+
+export const UpdateProfileSchema = z.object({
+  name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres."),
+  photo: z.any().optional(),
+});

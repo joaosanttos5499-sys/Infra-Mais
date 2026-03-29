@@ -26,4 +26,5 @@ export interface UserProfile {
     name: string;
     email: string;
     dateOfBirth: string;
+    photoURL?: string;
 }

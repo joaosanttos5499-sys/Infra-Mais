@@ -4,9 +4,9 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
-import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport, saveUser } from "@/lib/data";
+import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport, saveUser, getUserById } from "@/lib/data";
 import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
-import { ReportSchema } from "./schemas";
+import { ReportSchema, UpdateProfileSchema } from "./schemas";
 
 
 export type FormState = {
@@ -188,5 +188,58 @@ export async function saveUserProfileAction(userProfile: UserProfile): Promise<{
   } catch (error) {
     console.error("Failed to save user profile:", error);
     return { success: false, error: "Não foi possível salvar os dados do perfil." };
+  }
+}
+
+export async function updateUserProfileAction(userId: string, formData: FormData): Promise<{ success: boolean, error?: string, photoURL?: string }> {
+  if (!userId) {
+    return { success: false, error: "Usuário não autenticado." };
+  }
+  
+  const validatedFields = UpdateProfileSchema.safeParse({
+    name: formData.get("name"),
+    photo: formData.get("photo"),
+  });
+
+  if (!validatedFields.success) {
+    const fieldErrors = validatedFields.error.flatten().fieldErrors;
+    return {
+      success: false,
+      error: fieldErrors.name?.[0] || fieldErrors.photo?.[0] || "Dados inválidos."
+    };
+  }
+
+  try {
+    const existingProfile = await getUserById(userId);
+    if (!existingProfile) {
+      return { success: false, error: "Perfil do usuário não encontrado." };
+    }
+
+    const { name } = validatedFields.data;
+    const photoFile = formData.get("photo") as File;
+    let photoDataUri = existingProfile.photoURL;
+
+    if (photoFile && photoFile.size > 0) {
+      if (photoFile.size > 2 * 1024 * 1024) { // 2MB
+        return { success: false, error: "A foto deve ter no máximo 2MB." };
+      }
+      photoDataUri = await fileToDataUri(photoFile);
+    }
+
+    const updatedProfile: UserProfile = {
+      ...existingProfile,
+      name,
+      photoURL: photoDataUri,
+    };
+
+    await saveUser(updatedProfile);
+    
+    revalidatePath('/minha-conta');
+    
+    return { success: true, photoURL: photoDataUri };
+
+  } catch (error) {
+    console.error("Failed to update user profile:", error);
+    return { success: false, error: "Não foi possível atualizar os dados do perfil." };
   }
 }
