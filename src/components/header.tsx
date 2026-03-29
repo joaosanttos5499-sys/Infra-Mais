@@ -14,6 +14,7 @@ import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { createAvatarSvg } from "@/lib/avatar";
 
 const navLinks = [
   { href: "/", label: "Início", icon: Home, public: true },
@@ -30,13 +31,14 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   }
 
   if (user) {
+    const avatarSrc = user.photoURL || (user.displayName ? createAvatarSvg(user.displayName) : undefined);
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user.photoURL || undefined} alt={user.displayName || user.email || 'User'} />
-              <AvatarFallback>{user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+              <AvatarImage src={avatarSrc} alt={user.displayName || user.email || 'User'} />
+              <AvatarFallback>{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>

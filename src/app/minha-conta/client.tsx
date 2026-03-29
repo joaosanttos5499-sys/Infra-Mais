@@ -27,6 +27,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { createAvatarSvg } from "@/lib/avatar";
 
 
 function MyReportsList({ reports }: { reports: Report[] }) {
@@ -241,7 +242,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                             <FormItem className="flex flex-col items-center gap-4">
                               <Avatar className="h-24 w-24">
-                                <AvatarImage src={photoPreview || userProfile?.photoURL || user?.photoURL || undefined} />
+                                <AvatarImage src={photoPreview || userProfile?.photoURL || (userProfile?.name ? createAvatarSvg(userProfile.name) : undefined)} />
                                 <AvatarFallback>{userProfile?.name?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
                               </Avatar>
                               <FormControl>
@@ -296,7 +297,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                         <div className="space-y-6">
                             <div className="flex items-center gap-4">
                                <Avatar className="h-20 w-20">
-                                  <AvatarImage src={userProfile.photoURL || user?.photoURL || undefined} alt={userProfile.name} />
+                                  <AvatarImage src={userProfile.photoURL || (userProfile.name ? createAvatarSvg(userProfile.name) : undefined)} alt={userProfile.name} />
                                   <AvatarFallback>{userProfile.name.charAt(0).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                 <div>
