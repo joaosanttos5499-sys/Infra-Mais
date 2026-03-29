@@ -18,7 +18,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 const navLinks = [
   { href: "/", label: "Início", icon: Home, public: true },
   { href: "/dashboard", label: "Relatos", icon: FileText, public: true },
-  { href: "/funcionarios", label: "Funcionários", icon: Users, public: false },
   { href: "/support", label: "Suporte", icon: LifeBuoy, public: true },
 ];
 
