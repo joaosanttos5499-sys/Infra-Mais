@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { SignupSchema } from "@/lib/schemas";
 import { useAuth } from "@/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { z } from "zod";
 
 
@@ -54,6 +54,14 @@ export function SignupForm() {
         });
 
         if(result.success) {
+            // Update auth profile with name and generated/uploaded photo
+            if (auth.currentUser) {
+              await updateProfile(auth.currentUser, {
+                displayName: data.name,
+                photoURL: result.photoURL,
+              });
+            }
+
             toast({
                 title: "Sucesso!",
                 description: "Sua conta foi criada. Você será redirecionado.",

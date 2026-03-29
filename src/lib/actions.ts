@@ -180,11 +180,42 @@ export async function downvoteReportAction(reportId: string) {
     }
 }
 
-export async function saveUserProfileAction(userProfile: UserProfile): Promise<{ success: boolean, error?: string }> {
+const defaultAvatarColors = [
+  '#22c55e', // green
+  '#3b82f6', // blue
+  '#ec4899', // pink
+  '#a855f7', // purple
+  '#06b6d4', // cyan
+  '#ef4444', // red
+  '#78716c', // gray
+  '#f97316', // orange
+];
+
+const createAvatarSvg = (name: string, color: string): string => {
+  const firstLetter = name.charAt(0).toUpperCase();
+  const svg = `<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="${color}" /><text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="sans-serif" font-size="50" fill="white">${firstLetter}</text></svg>`;
+  const base64 = Buffer.from(svg).toString('base64');
+  return `data:image/svg+xml;base64,${base64}`;
+};
+
+export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'photoURL'> & { photoURL?: string }): Promise<{ success: boolean; error?: string; photoURL?: string; }> {
   try {
-    await saveUser(userProfile);
+    let finalUserProfile: UserProfile;
+
+    if (!userProfile.photoURL) {
+      const randomColor = defaultAvatarColors[Math.floor(Math.random() * defaultAvatarColors.length)];
+      const avatarSvg = createAvatarSvg(userProfile.name, randomColor);
+      finalUserProfile = {
+        ...userProfile,
+        photoURL: avatarSvg,
+      };
+    } else {
+        finalUserProfile = userProfile as UserProfile;
+    }
+    
+    await saveUser(finalUserProfile);
     revalidatePath('/');
-    return { success: true };
+    return { success: true, photoURL: finalUserProfile.photoURL };
   } catch (error) {
     console.error("Failed to save user profile:", error);
     return { success: false, error: "Não foi possível salvar os dados do perfil." };
