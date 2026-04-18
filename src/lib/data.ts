@@ -7,14 +7,15 @@ const globalForReports = globalThis as unknown as {
   users: UserProfile[] | undefined;
 };
 
-const reports = globalForReports.reports ?? [];
+const reports: Report[] = [];
 const users: UserProfile[] = [];
+
 if (process.env.NODE_ENV !== "production") {
     globalForReports.reports = reports;
     globalForReports.users = users;
 }
 
-let idCounter = reports.length > 0 ? Math.max(...reports.map(r => parseInt(r.id))) + 1 : 1;
+let idCounter = 1;
 
 export async function getReports(): Promise<Report[]> {
   // Return a sorted copy
