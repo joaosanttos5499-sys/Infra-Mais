@@ -20,7 +20,7 @@ async function RecentReports() {
 
   if (recentReports.length === 0) {
     return (
-      <div className="text-center text-muted-foreground py-8">
+      <div className="bg-card p-8 rounded-lg shadow-sm text-center text-muted-foreground">
         Nenhum problema relatado recentemente.
       </div>
     );
