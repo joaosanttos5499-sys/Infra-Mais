@@ -8,7 +8,7 @@ const globalForReports = globalThis as unknown as {
 };
 
 const reports = globalForReports.reports ?? [];
-const users = globalForReports.users ?? [];
+const users: UserProfile[] = [];
 if (process.env.NODE_ENV !== "production") {
     globalForReports.reports = reports;
     globalForReports.users = users;
