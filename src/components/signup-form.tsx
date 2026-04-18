@@ -74,7 +74,7 @@ export function SignupForm() {
     } catch (error: any) {
         let errorMessage = "Ocorreu um erro inesperado.";
         if (error.code === 'auth/email-already-in-use') {
-            errorMessage = "Este e-mail já está em uso por outra conta.";
+            errorMessage = "Este e-mail já está em uso. Se você já possui uma conta, por favor, faça login.";
         }
         toast({ variant: 'destructive', title: 'Erro ao criar conta', description: errorMessage });
     } finally {
