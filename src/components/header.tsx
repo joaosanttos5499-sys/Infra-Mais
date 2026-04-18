@@ -15,6 +15,7 @@ import { signOut } from "firebase/auth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { createAvatarSvg } from "@/lib/avatar";
+import { useRouter } from "next/navigation";
 
 const navLinks = [
   { href: "/", label: "Início", icon: Home, public: true },
@@ -80,8 +81,14 @@ export function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { user } = useUser();
+  const router = useRouter();
 
   const filteredNavLinks = navLinks.filter(link => link.public || !!user);
+
+  const handleLoginSuccess = () => {
+    setIsAuthModalOpen(false);
+    router.push('/');
+  }
 
   return (
     <header className="bg-card text-primary sticky top-0 z-50 shadow-md">
@@ -155,7 +162,7 @@ export function Header() {
               Use seu e-mail e senha para entrar.
             </DialogDescription>
           </DialogHeader>
-          <AuthForm onAuthSuccess={() => setIsAuthModalOpen(false)} />
+          <AuthForm onAuthSuccess={handleLoginSuccess} />
         </DialogContent>
       </Dialog>
     </header>
