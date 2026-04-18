@@ -142,7 +142,7 @@ Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
           </div>
         </div>
         
-        <div className="bg-secondary">
+        <div>
             {/* Mapa */}
             <div className="relative z-20 bg-transparent py-8">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
