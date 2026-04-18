@@ -7,6 +7,7 @@ const globalForReports = globalThis as unknown as {
   users: UserProfile[] | undefined;
 };
 
+// By defining these as empty arrays, we are effectively clearing the data on application start/restart.
 const reports: Report[] = [];
 const users: UserProfile[] = [];
 
