@@ -50,6 +50,7 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
   const handlePasswordReset = async () => {
     setIsSubmitting(true);
     try {
+        auth.languageCode = 'pt';
         await sendPasswordResetEmail(auth, email);
         setView('resetSuccess');
     } catch (err: any) {
