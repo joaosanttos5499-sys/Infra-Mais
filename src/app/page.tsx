@@ -70,7 +70,7 @@ async function RecentReports() {
         })}
       </div>
        <div className="text-center">
-          <Button asChild className="bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
+          <Button asChild className="w-full sm:w-auto bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
             <Link href="/dashboard">
               Ver todos os problemas
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -95,7 +95,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
               Sobre o Infra Mais
             </h2>
             <Separator className="my-4" />
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-base">
               O Infra Mais é uma plataforma criada para facilitar a comunicação entre os cidadãos e a prefeitura, permitindo o registro rápido e organizado de problemas relacionados à infraestrutura da cidade. O objetivo do site é tornar o processo de identificação, envio e acompanhamento de solicitações mais simples, transparente e eficiente.
             </p>
           </div>
@@ -126,14 +126,14 @@ export default async function Home() {
         <div className="py-12 md:py-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center md:text-left md:max-w-xl">
-              <h2 className="text-4xl md:text-5xl font-headline font-bold text-foreground mb-2">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline font-bold text-foreground mb-2">
                 Reportar um Problema
               </h2>
-              <p className="mt-4 text-muted-foreground flex-grow">
+              <p className="mt-4 text-muted-foreground text-base">
                 Informe rapidamente um problema encontrado na sua cidade. Descreva o que aconteceu, envie uma foto (opcional) e marque no mapa o local exato.
 Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
               </p>
-              <Button asChild size="lg" className="mt-6 w-full sm:w-auto self-center md:self-start bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
+              <Button asChild size="lg" className="mt-6 w-full sm:w-auto bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
                 <Link href="/report/auth">
                   Relatar um Problema <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>

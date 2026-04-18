@@ -59,7 +59,7 @@ export function ReportsChart({ total, resolved, inProgress }: ReportsChartProps)
     }
 
     return (
-      <div className="flex items-center">
+      <div className="flex flex-col sm:flex-row items-center gap-6">
         <ChartContainer
             config={chartConfig}
             className="mx-auto aspect-square h-48"
@@ -117,4 +117,3 @@ export function ReportsChart({ total, resolved, inProgress }: ReportsChartProps)
       </div>
   )
 }
-

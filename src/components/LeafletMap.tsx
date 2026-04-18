@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import { type Report } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
 import { renderToString } from 'react-dom/server';
+import { cn } from "@/lib/utils";
 
 // Define a interface para as props
 interface LeafletMapProps {
@@ -118,8 +119,7 @@ export default function LeafletMap({
   return (
     <div
       ref={mapRef}
-      style={{ width: "100%", height: "300px" }}
-      className={interactive ? 'cursor-pointer' : ''}
+      className={cn('w-full h-[300px] md:h-[400px]', interactive ? 'cursor-pointer' : '')}
     />
   );
 }
