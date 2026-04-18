@@ -5,12 +5,13 @@ import Link from 'next/link';
 import { useAuth } from '@/firebase';
 import {
   signInWithEmailAndPassword,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 
 export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
   const auth = useAuth();
@@ -19,6 +20,7 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<'signIn' | 'resetPassword'>('signIn');
 
   const handleSignIn = async () => {
     setIsSubmitting(true);
@@ -30,21 +32,79 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
       });
       if (onAuthSuccess) onAuthSuccess();
     } catch (err: any) {
+      let errorMessage = 'Ocorreu um erro. Tente novamente.';
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        errorMessage = 'E-mail ou senha incorretos.';
+      } else if (err.code === 'auth/user-not-found') {
+        errorMessage = 'Nenhuma conta encontrada com este e-mail.';
+      }
       setError(err.message);
       toast({
         title: 'Erro de Autenticação',
-        description:
-          err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential'
-            ? 'E-mail ou senha incorretos.'
-            : err.code === 'auth/user-not-found'
-            ? 'Usuário não encontrado.'
-            : 'Ocorreu um erro. Tente novamente.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+  
+  const handlePasswordReset = async () => {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+        await sendPasswordResetEmail(auth, email);
+        toast({
+            title: "Link Enviado",
+            description: "Verifique seu e-mail para redefinir sua senha.",
+        });
+        setView('signIn');
+    } catch (err: any) {
+        setError(err.message);
+        toast({
+            title: "Erro",
+            description: err.code === 'auth/user-not-found' ? 'Nenhuma conta encontrada com este e-mail.' : 'Ocorreu um erro ao enviar o e-mail.',
+            variant: "destructive",
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
+  if (view === 'resetPassword') {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-4">
+            <p className='text-sm text-muted-foreground'>Digite seu e-mail para receber um link de redefinição de senha.</p>
+          <div className="space-y-2">
+            <Label htmlFor="email-reset">E-mail</Label>
+            <Input
+              id="email-reset"
+              type="email"
+              placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isSubmitting}
+            />
+          </div>
+        </div>
+        
+        <Button
+            onClick={handlePasswordReset}
+            disabled={isSubmitting || !email}
+            className="w-full"
+        >
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Enviar link de redefinição
+        </Button>
+
+        <Button variant="link" className="w-full" onClick={() => setView('signIn')}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para o login
+        </Button>
+      </div>
+    );
+  }
+
 
   return (
     <div className="space-y-6">
@@ -70,6 +130,15 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
             onChange={(e) => setPassword(e.target.value)}
             disabled={isSubmitting}
           />
+           <div className="flex justify-end">
+             <Button 
+                variant="link" 
+                className="p-0 h-auto text-xs text-muted-foreground" 
+                onClick={() => setView('resetPassword')}
+             >
+                Esqueci minha senha
+             </Button>
+           </div>
         </div>
       </div>
       
