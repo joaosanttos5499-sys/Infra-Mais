@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UpdateProfileSchema } from "@/lib/schemas";
-import { updateUserProfileAction, fetchUserProfileAction } from "@/lib/actions";
+import { updateUserProfileAction, fetchUserProfileAction, saveUserProfileAction } from "@/lib/actions";
 import { updateProfile } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -149,8 +149,30 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                     if (result.success && result.data) {
                         setUserProfile(result.data);
                         form.reset({ name: result.data.name });
+                    } else if (user?.uid && user.email) {
+                        // User exists in Auth, but not in our DB. Let's create their profile.
+                        // This handles the case for users who signed up before profile persistence was fixed.
+                        const newProfileData = {
+                            id: user.uid,
+                            name: user.displayName || user.email.split('@')[0],
+                            email: user.email,
+                            // Specific fix for the user as requested
+                            dateOfBirth: user.email === 'joaosanttos528@gmail.com' ? '04/06/2008' : 'Data não informada',
+                        };
+
+                        saveUserProfileAction(newProfileData).then(creationResult => {
+                            if (creationResult.success && creationResult.photoURL) {
+                                const finalProfile = { ...newProfileData, photoURL: creationResult.photoURL };
+                                setUserProfile(finalProfile);
+                                form.reset({ name: finalProfile.name });
+                                toast({ title: "Perfil Criado!", description: "Criamos seu perfil com as informações da sua conta." });
+                            } else {
+                                setUserProfile(null);
+                                console.error("Could not create user profile:", creationResult.error);
+                            }
+                        });
                     } else {
-                        // If profile is not found, it's a genuine issue.
+                        // If profile is not found, and we can't create it, it's a genuine issue.
                         // We show the "could not load" message in the UI.
                         setUserProfile(null);
                         console.error("User profile could not be loaded:", result.error);
@@ -162,7 +184,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         } else if (!isUserLoading) {
             setIsProfileLoading(false);
         }
-    }, [user, isUserLoading, form]);
+    }, [user, isUserLoading, form, toast]);
 
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -311,3 +333,5 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         </div>
     )
 }
+
+    
