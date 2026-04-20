@@ -17,7 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UpdateProfileSchema } from "@/lib/schemas";
-import { updateUserProfileAction, fetchUserProfileAction } from "@/lib/actions";
+import { updateUserProfileAction, fetchUserProfileAction, saveUserProfileAction } from "@/lib/actions";
 import { updateProfile } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -149,8 +149,30 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                         setUserProfile(result.data);
                         form.reset({ name: result.data.name });
                     } else {
-                        setUserProfile(null);
-                        console.error(result.error);
+                        // Profile not found, create it on the fly.
+                        if (user && user.uid && user.email) {
+                            const newProfileData = {
+                                id: user.uid,
+                                name: user.displayName || user.email.split('@')[0] || 'Novo Usuário',
+                                email: user.email,
+                                dateOfBirth: '01/01/1990', // Placeholder, not editable by user
+                            };
+
+                            saveUserProfileAction(newProfileData).then(creationResult => {
+                                if (creationResult.success) {
+                                    const finalProfile: UserProfile = {
+                                        ...newProfileData,
+                                        photoURL: creationResult.photoURL,
+                                    };
+                                    setUserProfile(finalProfile);
+                                    form.reset({ name: finalProfile.name });
+                                } else {
+                                    setUserProfile(null);
+                                }
+                            });
+                        } else {
+                             setUserProfile(null);
+                        }
                     }
                 })
                 .finally(() => {
@@ -159,7 +181,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         } else if (!isUserLoading) {
             setIsProfileLoading(false);
         }
-    }, [user?.uid, isUserLoading, form]);
+    }, [user, isUserLoading, form]);
 
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
