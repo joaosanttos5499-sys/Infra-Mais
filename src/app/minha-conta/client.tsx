@@ -313,7 +313,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                       <Input {...field} />
                                     </FormControl>
                                   ) : (
-                                    <Input value={field.value} disabled className="h-10" />
+                                    <Input value={field.value} disabled className="disabled:opacity-100" />
                                   )}
                                   <FormMessage />
                                 </FormItem>
@@ -328,13 +328,13 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             
                             <FormItem>
                                 <FormLabel>Data de Nascimento</FormLabel>
-                                <Input value={userProfile.dateOfBirth} disabled />
+                                <Input value={userProfile.dateOfBirth} disabled className="disabled:opacity-100" />
                                 <p className="text-xs text-muted-foreground pt-1">Não pode ser alterada.</p>
                             </FormItem>
                             
                             <FormItem>
                                 <FormLabel>Email</FormLabel>
-                                <Input value={userProfile.email} disabled />
+                                <Input value={userProfile.email} disabled className="disabled:opacity-100" />
                                 <p className="text-xs text-muted-foreground pt-1">Não pode ser alterado.</p>
                             </FormItem>
 
