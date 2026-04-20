@@ -128,7 +128,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
       resolver: zodResolver(ClientUpdateProfileSchema),
       defaultValues: {
         name: "",
-        dateOfBirth: "",
         photo: undefined,
       },
     });
@@ -149,7 +148,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 .then(result => {
                     if (result.success && result.data) {
                         setUserProfile(result.data);
-                        form.reset({ name: result.data.name, dateOfBirth: result.data.dateOfBirth });
+                        form.reset({ name: result.data.name });
                     } else if (user?.uid && user.email) {
                         // User exists in Auth, but not in our DB. Let's create their profile.
                         // This handles the case for users who signed up before profile persistence was fixed.
@@ -165,7 +164,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             if (creationResult.success && creationResult.photoURL) {
                                 const finalProfile = { ...newProfileData, photoURL: creationResult.photoURL };
                                 setUserProfile(finalProfile);
-                                form.reset({ name: finalProfile.name, dateOfBirth: finalProfile.dateOfBirth });
+                                form.reset({ name: finalProfile.name });
                                 toast({ title: "Perfil Criado!", description: "Criamos seu perfil com as informações da sua conta." });
                             } else {
                                 setUserProfile(null);
@@ -220,7 +219,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
   
       const formData = new FormData();
       formData.append('name', data.name);
-      formData.append('dateOfBirth', data.dateOfBirth);
       if (data.photo) {
         formData.append('photo', data.photo);
       }
@@ -234,7 +232,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
               displayName: data.name,
               photoURL: result.photoURL,
             });
-            setUserProfile(prev => prev ? { ...prev, name: data.name, dateOfBirth: data.dateOfBirth, photoURL: result.photoURL! } : null);
+            setUserProfile(prev => prev ? { ...prev, name: data.name, photoURL: result.photoURL || prev.photoURL } : null);
           } catch(e) {
              console.error("Error updating firebase auth profile:", e)
           }
@@ -248,7 +246,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     const handleCancel = () => {
       if (userProfile) {
-        form.reset({ name: userProfile.name, dateOfBirth: userProfile.dateOfBirth });
+        form.reset({ name: userProfile.name });
       }
       setPhotoPreview(null);
     }
@@ -312,27 +310,13 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 </AlertDescription>
                             </Alert>
                             
-                             <FormField
-                              control={form.control}
-                              name="dateOfBirth"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Data de Nascimento</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="DD/MM/AAAA"
-                                      {...field}
-                                      onChange={(e) => field.onChange(handleDateChange(e))}
-                                      maxLength={10}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                             <div>
+                                <p className="text-sm font-medium">Data de Nascimento</p>
+                                <p className="text-sm text-gray-500">{userProfile.dateOfBirth} (não pode ser alterada)</p>
+                            </div>
                             
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Email</p>
+                                <p className="text-sm font-medium">Email</p>
                                 <p className="text-sm text-gray-500">{userProfile.email} (não pode ser alterado)</p>
                             </div>
 
@@ -361,5 +345,3 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         </div>
     )
 }
-
-    
