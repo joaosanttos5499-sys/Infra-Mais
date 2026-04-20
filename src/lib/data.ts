@@ -1,22 +1,22 @@
 
 import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
 
-// In-memory store
-const globalForReports = globalThis as unknown as {
+// In-memory store to persist data across hot-reloads in development
+const globalForStore = globalThis as unknown as {
   reports: Report[] | undefined;
   users: UserProfile[] | undefined;
+  idCounter: number | undefined;
 };
 
-// By defining these as empty arrays, we are effectively clearing the data on application start/restart.
-const reports: Report[] = [];
-const users: UserProfile[] = [];
+const reports = globalForStore.reports ?? [];
+const users = globalForStore.users ?? [];
+let idCounter = globalForStore.idCounter ?? 1;
 
+// In development, save the in-memory store to the global object to survive hot-reloads.
 if (process.env.NODE_ENV !== "production") {
-    globalForReports.reports = reports;
-    globalForReports.users = users;
+  globalForStore.reports = reports;
+  globalForStore.users = users;
 }
-
-let idCounter = 1;
 
 export async function getReports(): Promise<Report[]> {
   // Return a sorted copy
@@ -32,6 +32,9 @@ export async function addReport(report: NewReport): Promise<Report> {
     upvotes: 0,
   };
   reports.push(newReport);
+  if (process.env.NODE_ENV !== 'production') {
+    globalForStore.idCounter = idCounter;
+  }
   return newReport;
 }
 
