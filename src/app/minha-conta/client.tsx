@@ -5,7 +5,7 @@ import { useUser, useFirestore, useMemoFirebase, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, Edit, Loader2, Save, X } from "lucide-react";
+import { Camera, Loader2, Save, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -120,7 +120,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const firestore = useFirestore();
     const { toast } = useToast();
 
-    const [isEditing, setIsEditing] = useState(false);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
     const userProfileRef = useMemoFirebase(() => {
@@ -150,10 +149,10 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     }, [user, isUserLoading, allReports, router]);
     
     useEffect(() => {
-      if (userProfile && isEditing) {
+      if (userProfile) {
         form.reset({ name: userProfile.name });
       }
-    }, [userProfile, form, isEditing]);
+    }, [userProfile, form]);
 
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -194,7 +193,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
           }
         }
         toast({ title: "Sucesso!", description: "Seu perfil foi atualizado." });
-        setIsEditing(false);
         setPhotoPreview(null);
       } else {
         toast({ variant: 'destructive', title: 'Erro', description: result.error || "Não foi possível atualizar o perfil." });
@@ -205,7 +203,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
       if (userProfile) {
         form.reset({ name: userProfile.name });
       }
-      setIsEditing(false);
       setPhotoPreview(null);
     }
 
@@ -222,24 +219,18 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     return (
         <div className="space-y-8">
              <Card>
-                <CardHeader className="flex flex-row items-start sm:items-center justify-between">
+                <CardHeader>
                     <div>
                         <CardTitle>Meus Dados</CardTitle>
                         <CardDescription>Visualize e edite as informações da sua conta.</CardDescription>
                     </div>
-                    {!isEditing && (
-                        <Button variant="outline" onClick={() => setIsEditing(true)}>
-                            <Edit className="h-4 w-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Editar Perfil</span>
-                        </Button>
-                    )}
                 </CardHeader>
                 <CardContent>
                     {isProfileLoading ? (
                         <UserDataSkeleton />
                     ) : !userProfile ? (
                         <p className="text-sm text-muted-foreground">Não foi possível carregar os dados do seu perfil.</p>
-                    ) : isEditing ? (
+                    ) : (
                         <Form {...form}>
                           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                             <FormItem className="flex flex-col items-center gap-4">
@@ -295,27 +286,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             </div>
                           </form>
                         </Form>
-                    ) : (
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-4">
-                               <Avatar className="h-20 w-20">
-                                  <AvatarImage src={userProfile.photoURL || createAvatarSvg(userProfile.name || userProfile.email || '')} alt={userProfile.name || 'Avatar do usuário'} />
-                                  <AvatarFallback>{userProfile.name?.charAt(0).toUpperCase() || userProfile.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="text-sm font-medium text-muted-foreground">Nome Completo</p>
-                                    <p className="text-lg font-semibold">{userProfile.name}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Data de Nascimento</p>
-                                <p>{userProfile.dateOfBirth}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Email</p>
-                                <p>{userProfile.email}</p>
-                            </div>
-                        </div>
                     )}
                 </CardContent>
             </Card>
