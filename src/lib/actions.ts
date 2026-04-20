@@ -29,7 +29,7 @@ export type FormState = {
 const fileToDataUri = async (file: File) => {
   const buffer = await file.arrayBuffer();
   const base64 = Buffer.from(buffer).toString("base64");
-  return `data:${file.type};base64,${base64}`;
+  return `data:\${file.type};base64,\${base64}`;
 };
 
 export async function submitReport(
@@ -83,7 +83,7 @@ export async function submitReport(
   try {
     const { userId, category, problem, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
     
-    const location = reference ? `${address} (${reference})` : address;
+    const location = reference ? `\${address} (\${reference})` : address;
 
     const aiSummary = await summarizeReport({
       category,
@@ -205,9 +205,9 @@ const createAvatarSvg = (name: string): string => {
   const hash = stringToHash(name);
   const color = defaultAvatarColors[hash % defaultAvatarColors.length];
   const firstLetter = name.charAt(0).toUpperCase();
-  const svg = `<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="${color}" /><text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="sans-serif" font-size="50" fill="white">${firstLetter}</text></svg>`;
+  const svg = `<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="\${color}" /><text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="sans-serif" font-size="50" fill="white">\${firstLetter}</text></svg>`;
   const base64 = Buffer.from(svg).toString('base64');
-  return `data:image/svg+xml;base64,${base64}`;
+  return `data:image/svg+xml;base64,\${base64}`;
 };
 
 export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'photoURL'> & { photoURL?: string }): Promise<{ success: boolean; error?: string; photoURL?: string; }> {
@@ -240,6 +240,7 @@ export async function updateUserProfileAction(userId: string, formData: FormData
   
   const validatedFields = UpdateProfileSchema.safeParse({
     name: formData.get("name"),
+    dateOfBirth: formData.get("dateOfBirth"),
     photo: formData.get("photo"),
   });
 
@@ -247,7 +248,7 @@ export async function updateUserProfileAction(userId: string, formData: FormData
     const fieldErrors = validatedFields.error.flatten().fieldErrors;
     return {
       success: false,
-      error: fieldErrors.name?.[0] || fieldErrors.photo?.[0] || "Dados inválidos."
+      error: fieldErrors.name?.[0] || fieldErrors.dateOfBirth?.[0] || fieldErrors.photo?.[0] || "Dados inválidos."
     };
   }
 
@@ -257,7 +258,7 @@ export async function updateUserProfileAction(userId: string, formData: FormData
       return { success: false, error: "Perfil do usuário não encontrado." };
     }
 
-    const { name } = validatedFields.data;
+    const { name, dateOfBirth } = validatedFields.data;
     const photoFile = formData.get("photo") as File;
     let photoDataUri = existingProfile.photoURL;
 
@@ -271,6 +272,7 @@ export async function updateUserProfileAction(userId: string, formData: FormData
     const updatedProfile: UserProfile = {
       ...existingProfile,
       name,
+      dateOfBirth,
       photoURL: photoDataUri,
     };
 
