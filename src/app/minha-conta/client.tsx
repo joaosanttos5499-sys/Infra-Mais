@@ -237,13 +237,13 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 <CardContent>
                     {isProfileLoading ? (
                         <UserDataSkeleton />
-                    ) : isEditing ? (
+                    ) : isEditing && userProfile ? (
                         <Form {...form}>
                           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                             <FormItem className="flex flex-col items-center gap-4">
                               <Avatar className="h-24 w-24">
-                                <AvatarImage src={photoPreview || userProfile?.photoURL || createAvatarSvg(userProfile?.name || userProfile?.email || '')} />
-                                <AvatarFallback>{userProfile?.name?.charAt(0).toUpperCase() || userProfile?.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                                <AvatarImage src={photoPreview || userProfile.photoURL || createAvatarSvg(userProfile.name || userProfile.email || '')} />
+                                <AvatarFallback>{userProfile.name?.charAt(0).toUpperCase() || userProfile.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
                               </Avatar>
                               <FormControl>
                                 <Input id="photo-upload" type="file" accept="image/*" className="sr-only" onChange={handlePhotoChange} />
@@ -274,12 +274,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Data de Nascimento</p>
-                                <p className="text-sm text-gray-500">{userProfile?.dateOfBirth} (não pode ser alterada)</p>
+                                <p className="text-sm text-gray-500">{userProfile.dateOfBirth} (não pode ser alterada)</p>
                             </div>
                             
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Email</p>
-                                <p className="text-sm text-gray-500">{userProfile?.email} (não pode ser alterado)</p>
+                                <p className="text-sm text-gray-500">{userProfile.email} (não pode ser alterado)</p>
                             </div>
 
                              <div className="flex justify-end gap-2 pt-4">
