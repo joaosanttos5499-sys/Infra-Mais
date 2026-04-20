@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createAvatarSvg } from "@/lib/avatar";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 
 function MyReportsList({ reports }: { reports: Report[] }) {
@@ -119,6 +120,10 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const [isEditingName, setIsEditingName] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isConfirmEnabled, setIsConfirmEnabled] = useState(false);
+    const [countdown, setCountdown] = useState(3);
+
 
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [isProfileLoading, setIsProfileLoading] = useState(true);
@@ -187,6 +192,32 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         }
     }, [user, isUserLoading, form, toast]);
 
+    useEffect(() => {
+        if (isConfirmOpen) {
+            setIsConfirmEnabled(false);
+            setCountdown(3);
+            
+            const countdownInterval = setInterval(() => {
+                setCountdown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(countdownInterval);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+
+            const enableTimeout = setTimeout(() => {
+                setIsConfirmEnabled(true);
+            }, 3000);
+
+            return () => {
+                clearInterval(countdownInterval);
+                clearTimeout(enableTimeout);
+            };
+        }
+    }, [isConfirmOpen]);
+
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -244,6 +275,23 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
       } else {
         toast({ variant: 'destructive', title: 'Erro', description: result.error || "Não foi possível atualizar o perfil." });
       }
+      setIsConfirmOpen(false);
+    };
+
+    const handleSaveClick = () => {
+        form.trigger().then(isValid => {
+            if (!isValid) return;
+
+            const { name, photo } = form.formState.dirtyFields;
+            
+            if (name) {
+                setIsConfirmOpen(true);
+            } else if (photo) {
+                form.handleSubmit(onSubmit)();
+            } else {
+                setIsEditingName(false);
+            }
+        });
     };
 
     const handleCancel = () => {
@@ -251,6 +299,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         form.reset({ name: userProfile.name });
       }
       setPhotoPreview(null);
+      form.clearErrors();
       setIsEditingName(false);
     }
 
@@ -280,18 +329,20 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                         <p className="text-sm text-muted-foreground">Não foi possível carregar os dados do seu perfil.</p>
                     ) : (
                         <Form {...form}>
-                          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                          <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                             <FormItem className="flex flex-col items-center gap-4">
                               <Avatar className="h-24 w-24">
                                 <AvatarImage src={photoPreview || userProfile.photoURL || createAvatarSvg(userProfile.name || userProfile.email || '')} />
                                 <AvatarFallback>{userProfile.name?.charAt(0).toUpperCase() || userProfile.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
                               </Avatar>
                               <FormControl>
-                                <Input id="photo-upload" type="file" accept="image/*" className="sr-only" onChange={handlePhotoChange} />
+                                <Input id="photo-upload" type="file" accept="image/*" className="sr-only" onChange={handlePhotoChange} disabled={!isEditingName} />
                               </FormControl>
-                              <FormLabel htmlFor="photo-upload" className="cursor-pointer text-sm font-medium text-primary hover:underline flex items-center gap-2">
-                                <Camera className="h-4 w-4" /> Mudar foto de perfil
-                              </FormLabel>
+                              {isEditingName && (
+                                <FormLabel htmlFor="photo-upload" className="cursor-pointer text-sm font-medium text-primary hover:underline flex items-center gap-2">
+                                  <Camera className="h-4 w-4" /> Mudar foto de perfil
+                                </FormLabel>
+                              )}
                                <FormMessage>{form.formState.errors.photo?.message as string}</FormMessage>
                             </FormItem>
                             
@@ -308,13 +359,9 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                       </Button>
                                     )}
                                   </div>
-                                  {isEditingName ? (
-                                    <FormControl>
-                                      <Input {...field} />
-                                    </FormControl>
-                                  ) : (
-                                    <Input value={field.value} disabled className="disabled:opacity-100" />
-                                  )}
+                                  <FormControl>
+                                      <Input {...field} disabled={!isEditingName} className="disabled:opacity-100 disabled:cursor-not-allowed" />
+                                  </FormControl>
                                   <FormMessage />
                                 </FormItem>
                               )}
@@ -338,20 +385,40 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 <p className="text-xs text-muted-foreground pt-1">Não pode ser alterado.</p>
                             </FormItem>
 
-                             <div className="flex justify-end gap-2 pt-4">
-                                <Button type="button" variant="outline" onClick={handleCancel}>
-                                    <X className="mr-2 h-4 w-4" /> Cancelar
-                                </Button>
-                                <Button type="submit" disabled={form.formState.isSubmitting}>
-                                    {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                    Salvar
-                                </Button>
-                            </div>
+                            {isEditingName && (
+                                <div className="flex justify-end gap-2 pt-4">
+                                    <Button type="button" variant="outline" onClick={handleCancel}>
+                                        <X className="mr-2 h-4 w-4" /> Cancelar
+                                    </Button>
+                                    <Button type="button" onClick={handleSaveClick} disabled={form.formState.isSubmitting || !form.formState.isDirty}>
+                                        {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                        Salvar
+                                    </Button>
+                                </div>
+                            )}
                           </form>
                         </Form>
                     )}
                 </CardContent>
             </Card>
+
+            <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Aviso de Alteração de Nome</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Você só pode alterar seu nome uma vez por semana. Deseja continuar?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={!isConfirmEnabled || form.formState.isSubmitting}>
+                           {isConfirmEnabled ? 'Estou ciente' : `Estou ciente (${countdown})`}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             <Card>
                 <CardHeader>
                     <CardTitle>Meus Relatórios</CardTitle>
