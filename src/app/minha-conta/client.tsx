@@ -206,10 +206,10 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value.replace(/\D/g, '');
       if (value.length > 2) {
-        value = `${value.slice(0, 2)}/${value.slice(2)}`;
+        value = `${''}${value.slice(0, 2)}/${value.slice(2)}`;
       }
       if (value.length > 5) {
-        value = `${value.slice(0, 5)}/${value.slice(5, 9)}`;
+        value = `${''}${value.slice(0, 5)}/${value.slice(5, 9)}`;
       }
       e.target.value = value;
       return value;
@@ -313,7 +313,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                       <Input {...field} />
                                     </FormControl>
                                   ) : (
-                                    <p className="text-sm text-muted-foreground h-10 flex items-center">{field.value || userProfile?.name}</p>
+                                    <Input value={field.value} disabled className="h-10" />
                                   )}
                                   <FormMessage />
                                 </FormItem>
@@ -326,15 +326,17 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 </AlertDescription>
                             </Alert>
                             
-                             <div>
-                                <p className="text-sm font-medium">Data de Nascimento</p>
-                                <p className="text-sm text-gray-500">{userProfile.dateOfBirth} (não pode ser alterada)</p>
-                            </div>
+                            <FormItem>
+                                <FormLabel>Data de Nascimento</FormLabel>
+                                <Input value={userProfile.dateOfBirth} disabled />
+                                <p className="text-xs text-muted-foreground pt-1">Não pode ser alterada.</p>
+                            </FormItem>
                             
-                            <div>
-                                <p className="text-sm font-medium">Email</p>
-                                <p className="text-sm text-gray-500">{userProfile.email} (não pode ser alterado)</p>
-                            </div>
+                            <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <Input value={userProfile.email} disabled />
+                                <p className="text-xs text-muted-foreground pt-1">Não pode ser alterado.</p>
+                            </FormItem>
 
                              <div className="flex justify-end gap-2 pt-4">
                                 <Button type="button" variant="outline" onClick={handleCancel}>
