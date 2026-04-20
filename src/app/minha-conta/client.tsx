@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useUser, useFirestore, useMemoFirebase, useAuth } from "@/firebase";
+import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -13,14 +12,12 @@ import Image from "next/image";
 import { StatusBadge } from "@/components/status-badge";
 import { ReportTime } from "@/components/report-time";
 import { Button } from "@/components/ui/button";
-import { doc } from "firebase/firestore";
-import { useDoc } from "@/firebase/firestore/use-doc";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UpdateProfileSchema } from "@/lib/schemas";
-import { updateUserProfileAction } from "@/lib/actions";
+import { updateUserProfileAction, fetchUserProfileAction } from "@/lib/actions";
 import { updateProfile } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -117,17 +114,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const { user, isUserLoading } = useUser();
     const auth = useAuth();
     const router = useRouter();
-    const firestore = useFirestore();
     const { toast } = useToast();
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
-    const userProfileRef = useMemoFirebase(() => {
-        if (!user?.uid) return null;
-        return doc(firestore, 'users', user.uid);
-    }, [user?.uid, firestore]);
-    
-    const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userProfileRef);
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+    const [isProfileLoading, setIsProfileLoading] = useState(true);
 
     const [userReports, setUserReports] = useState<Report[]>([]);
 
@@ -149,10 +141,25 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     }, [user, isUserLoading, allReports, router]);
     
     useEffect(() => {
-      if (userProfile) {
-        form.reset({ name: userProfile.name });
-      }
-    }, [userProfile, form]);
+        if (user?.uid) {
+            setIsProfileLoading(true);
+            fetchUserProfileAction(user.uid)
+                .then(result => {
+                    if (result.success && result.data) {
+                        setUserProfile(result.data);
+                        form.reset({ name: result.data.name });
+                    } else {
+                        setUserProfile(null);
+                        console.error(result.error);
+                    }
+                })
+                .finally(() => {
+                    setIsProfileLoading(false);
+                });
+        } else if (!isUserLoading) {
+            setIsProfileLoading(false);
+        }
+    }, [user?.uid, isUserLoading, form]);
 
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -188,6 +195,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
               displayName: data.name,
               photoURL: result.photoURL,
             });
+            setUserProfile(prev => prev ? { ...prev, name: data.name, photoURL: result.photoURL! } : null);
           } catch(e) {
              console.error("Error updating firebase auth profile:", e)
           }

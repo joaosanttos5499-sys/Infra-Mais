@@ -285,3 +285,19 @@ export async function updateUserProfileAction(userId: string, formData: FormData
     return { success: false, error: "Não foi possível atualizar os dados do perfil." };
   }
 }
+
+export async function fetchUserProfileAction(userId: string): Promise<{ success: boolean; data?: UserProfile; error?: string }> {
+  if (!userId) {
+    return { success: false, error: "O ID do usuário é obrigatório." };
+  }
+  try {
+    const userProfile = await getUserById(userId);
+    if (!userProfile) {
+      return { success: false, error: "Perfil de usuário não encontrado." };
+    }
+    return { success: true, data: userProfile };
+  } catch (error) {
+    console.error("Falha ao buscar o perfil do usuário:", error);
+    return { success: false, error: "Falha ao buscar o perfil do usuário." };
+  }
+}
