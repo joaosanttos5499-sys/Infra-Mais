@@ -118,6 +118,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const { toast } = useToast();
 
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+    const [isEditingName, setIsEditingName] = useState(false);
 
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [isProfileLoading, setIsProfileLoading] = useState(true);
@@ -239,6 +240,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         }
         toast({ title: "Sucesso!", description: "Seu perfil foi atualizado." });
         setPhotoPreview(null);
+        setIsEditingName(false);
       } else {
         toast({ variant: 'destructive', title: 'Erro', description: result.error || "Não foi possível atualizar o perfil." });
       }
@@ -249,6 +251,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         form.reset({ name: userProfile.name });
       }
       setPhotoPreview(null);
+      setIsEditingName(false);
     }
 
 
@@ -297,8 +300,21 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               name="name"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Nome Completo</FormLabel>
-                                  <FormControl><Input {...field} /></FormControl>
+                                  <div className="flex justify-between items-center">
+                                    <FormLabel>Nome Completo</FormLabel>
+                                    {!isEditingName && (
+                                      <Button type="button" variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => setIsEditingName(true)}>
+                                        Alterar
+                                      </Button>
+                                    )}
+                                  </div>
+                                  {isEditingName ? (
+                                    <FormControl>
+                                      <Input {...field} />
+                                    </FormControl>
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground h-10 flex items-center">{field.value || userProfile?.name}</p>
+                                  )}
                                   <FormMessage />
                                 </FormItem>
                               )}
