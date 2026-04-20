@@ -237,7 +237,9 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 <CardContent>
                     {isProfileLoading ? (
                         <UserDataSkeleton />
-                    ) : isEditing && userProfile ? (
+                    ) : !userProfile ? (
+                        <p className="text-sm text-muted-foreground">Não foi possível carregar os dados do seu perfil.</p>
+                    ) : isEditing ? (
                         <Form {...form}>
                           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                             <FormItem className="flex flex-col items-center gap-4">
@@ -293,7 +295,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             </div>
                           </form>
                         </Form>
-                    ) : userProfile ? (
+                    ) : (
                         <div className="space-y-6">
                             <div className="flex items-center gap-4">
                                <Avatar className="h-20 w-20">
@@ -314,8 +316,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 <p>{userProfile.email}</p>
                             </div>
                         </div>
-                    ) : (
-                        <p className="text-sm text-muted-foreground">Não foi possível carregar os dados do seu perfil.</p>
                     )}
                 </CardContent>
             </Card>
