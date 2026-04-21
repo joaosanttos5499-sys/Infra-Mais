@@ -8,6 +8,7 @@ import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as 
 import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
 import { ReportSchema, UpdateProfileSchema } from "./schemas";
 import { createAvatarSvg } from "./avatar";
+import { redirect } from "next/navigation";
 
 
 export type FormState = {
@@ -76,7 +77,7 @@ export async function submitReport(
 
   // Limit file size to 4MB
   if (photoFile.size > 4 * 1024 * 1024) {
-    return { errors: { photo: ["O tamanho da foto deve ser menor que 4MB."] } };
+    return { errors: { photo: ["O tamanho da foto não pode exceder 4MB."] } };
   }
   photoDataUri = await fileToDataUri(photoFile);
 
@@ -110,16 +111,16 @@ export async function submitReport(
     };
 
     addReport(newReport);
-
-    revalidatePath("/dashboard");
-    revalidatePath("/");
-    return { success: true };
   } catch (e) {
     console.error(e);
     return {
       errors: { _form: ["Ocorreu um erro inesperado. Por favor, tente novamente."] },
     };
   }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/");
+  redirect('/dashboard');
 }
 
 type UpdateActionState = {
