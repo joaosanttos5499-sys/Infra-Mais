@@ -153,8 +153,16 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             fetchUserProfileAction(user.uid)
                 .then(result => {
                     if (result.success && result.data) {
-                        setUserProfile(result.data);
-                        form.reset({ name: result.data.name });
+                        // Specific patch for the user as requested, to correct existing profiles.
+                        if (result.data.email === 'joaosanttos528@gmail.com' && result.data.dateOfBirth !== '04/06/2008') {
+                            const correctedProfile = { ...result.data, dateOfBirth: '04/06/2008' };
+                            saveUserProfileAction(correctedProfile); // Persist the correction
+                            setUserProfile(correctedProfile);
+                            form.reset({ name: correctedProfile.name });
+                        } else {
+                            setUserProfile(result.data);
+                            form.reset({ name: result.data.name });
+                        }
                     } else if (user?.uid && user.email) {
                         // User exists in Auth, but not in our DB. Let's create their profile.
                         // This handles the case for users who signed up before profile persistence was fixed.
@@ -435,5 +443,3 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         </div>
     )
 }
-
-    
