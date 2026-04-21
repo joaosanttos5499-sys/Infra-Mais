@@ -35,5 +35,4 @@ export const SignupSchema = z.object({
 
 export const UpdateProfileSchema = z.object({
   name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres."),
-  photo: z.any().optional(),
 });

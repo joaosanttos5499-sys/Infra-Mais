@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, Loader2, Save, X } from "lucide-react";
+import { Loader2, Save, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -109,17 +108,12 @@ function UserDataSkeleton() {
     )
 }
 
-const ClientUpdateProfileSchema = UpdateProfileSchema.extend({
-  photo: z.instanceof(File).optional().refine(file => !file || file.size <= 10 * 1024 * 1024, 'A foto deve ter no máximo 10MB.'),
-});
-
 export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const { user, isUserLoading } = useUser();
     const auth = useAuth();
     const router = useRouter();
     const { toast } = useToast();
 
-    const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const [isEditingName, setIsEditingName] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isConfirmEnabled, setIsConfirmEnabled] = useState(false);
@@ -131,11 +125,10 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     const [userReports, setUserReports] = useState<Report[]>([]);
 
-    const form = useForm<z.infer<typeof ClientUpdateProfileSchema>>({
-      resolver: zodResolver(ClientUpdateProfileSchema),
+    const form = useForm<z.infer<typeof UpdateProfileSchema>>({
+      resolver: zodResolver(UpdateProfileSchema),
       defaultValues: {
         name: "",
-        photo: undefined,
       },
     });
 
@@ -249,22 +242,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             };
         }
     }, [isConfirmOpen]);
-
-
-    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        form.setValue('photo', file, { shouldValidate: true });
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setPhotoPreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        form.setValue('photo', undefined);
-        setPhotoPreview(null);
-      }
-    };
     
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value.replace(/\D/g, '');
@@ -278,31 +255,23 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
       return value;
     };
 
-    const onSubmit = async (data: z.infer<typeof ClientUpdateProfileSchema>) => {
+    const onSubmit = async (data: z.infer<typeof UpdateProfileSchema>) => {
       if (!user) return;
   
-      const formData = new FormData();
-      formData.append('name', data.name);
-      if (data.photo) {
-        formData.append('photo', data.photo);
-      }
-  
-      const result = await updateUserProfileAction(user.uid, formData);
+      const result = await updateUserProfileAction(user.uid, { name: data.name });
   
       if (result.success) {
         if (auth.currentUser) {
           try {
             await updateProfile(auth.currentUser, {
               displayName: data.name,
-              photoURL: result.photoURL,
             });
-            setUserProfile(prev => prev ? { ...prev, name: data.name, photoURL: result.photoURL || prev.photoURL } : null);
+            setUserProfile(prev => prev ? { ...prev, name: data.name } : null);
           } catch(e) {
              console.error("Error updating firebase auth profile:", e)
           }
         }
         toast({ title: "Sucesso!", description: "Seu perfil foi atualizado." });
-        setPhotoPreview(null);
         setIsEditingName(false);
       } else {
         toast({ variant: 'destructive', title: 'Erro', description: result.error || "Não foi possível atualizar o perfil." });
@@ -314,12 +283,10 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         form.trigger().then(isValid => {
             if (!isValid) return;
 
-            const { name, photo } = form.formState.dirtyFields;
+            const { name } = form.formState.dirtyFields;
             
             if (name) {
                 setIsConfirmOpen(true);
-            } else if (photo) {
-                form.handleSubmit(onSubmit)();
             } else {
                 setIsEditingName(false);
             }
@@ -330,7 +297,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
       if (userProfile) {
         form.reset({ name: userProfile.name });
       }
-      setPhotoPreview(null);
       form.clearErrors();
       setIsEditingName(false);
     }
@@ -363,18 +329,9 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                             <FormItem className="flex flex-col items-center gap-4">
                               <Avatar className="h-24 w-24">
-                                <AvatarImage src={photoPreview || userProfile.photoURL || createAvatarSvg(userProfile.name || userProfile.email || '')} />
+                                <AvatarImage src={userProfile.photoURL || createAvatarSvg(userProfile.name || userProfile.email || '')} />
                                 <AvatarFallback>{userProfile.name?.charAt(0).toUpperCase() || userProfile.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
                               </Avatar>
-                              <FormControl>
-                                <Input id="photo-upload" type="file" accept="image/*" className="sr-only" onChange={handlePhotoChange} disabled={!isEditingName} />
-                              </FormControl>
-                              {isEditingName && (
-                                <FormLabel htmlFor="photo-upload" className="cursor-pointer text-sm font-medium text-primary hover:underline flex items-center gap-2">
-                                  <Camera className="h-4 w-4" /> Mudar foto de perfil
-                                </FormLabel>
-                              )}
-                               <FormMessage>{form.formState.errors.photo?.message as string}</FormMessage>
                             </FormItem>
                             
                             <FormField
@@ -466,7 +423,3 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         </div>
     )
 }
-
-    
-
-    

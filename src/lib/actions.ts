@@ -204,21 +204,18 @@ export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'phot
   }
 }
 
-export async function updateUserProfileAction(userId: string, formData: FormData): Promise<{ success: boolean, error?: string, photoURL?: string }> {
+export async function updateUserProfileAction(userId: string, data: { name: string }): Promise<{ success: boolean, error?: string }> {
   if (!userId) {
     return { success: false, error: "Usuário não autenticado." };
   }
   
-  const validatedFields = UpdateProfileSchema.safeParse({
-    name: formData.get("name"),
-    photo: formData.get("photo"),
-  });
+  const validatedFields = UpdateProfileSchema.safeParse(data);
 
   if (!validatedFields.success) {
     const fieldErrors = validatedFields.error.flatten().fieldErrors;
     return {
       success: false,
-      error: fieldErrors.name?.[0] || fieldErrors.photo?.[0] || "Dados inválidos."
+      error: fieldErrors.name?.[0] || "Dados inválidos."
     };
   }
 
@@ -245,20 +242,10 @@ export async function updateUserProfileAction(userId: string, formData: FormData
       }
     }
     
-    const photoFile = formData.get("photo") as File;
-    let photoDataUri = existingProfile.photoURL;
-
-    if (photoFile && photoFile.size > 0) {
-      if (photoFile.size > 10 * 1024 * 1024) { // 10MB
-        return { success: false, error: "A foto deve ter no máximo 10MB." };
-      }
-      photoDataUri = await fileToDataUri(photoFile);
-    }
-
     const updatedProfile: UserProfile = {
       ...existingProfile,
       name,
-      photoURL: photoDataUri,
+      photoURL: existingProfile.photoURL,
       nameLastUpdatedAt: name !== existingProfile.name ? new Date() : existingProfile.nameLastUpdatedAt,
     };
 
@@ -266,7 +253,7 @@ export async function updateUserProfileAction(userId: string, formData: FormData
     
     revalidatePath('/minha-conta');
     
-    return { success: true, photoURL: photoDataUri };
+    return { success: true };
 
   } catch (error) {
     console.error("Failed to update user profile:", error);
