@@ -8,8 +8,6 @@ import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as 
 import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
 import { ReportSchema, UpdateProfileSchema } from "./schemas";
 import { createAvatarSvg } from "./avatar";
-import { redirect } from "next/navigation";
-
 
 export type FormState = {
   message?: string | null;
@@ -75,7 +73,6 @@ export async function submitReport(
     return { errors: { photo: ["A foto do problema é obrigatória."] } };
   }
 
-  // Limit file size to 4MB
   if (photoFile.size > 4 * 1024 * 1024) {
     return { errors: { photo: ["O tamanho da foto não pode exceder 4MB."] } };
   }
@@ -118,9 +115,9 @@ export async function submitReport(
     };
   }
 
-  // The redirect will handle fetching the new data on the dashboard page.
-  // Revalidating the path here is redundant and can cause conflicts.
-  redirect('/dashboard');
+  revalidatePath('/dashboard');
+  revalidatePath('/');
+  return { success: true };
 }
 
 type UpdateActionState = {
