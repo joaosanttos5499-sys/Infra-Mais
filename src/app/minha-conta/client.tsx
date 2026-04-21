@@ -109,7 +109,7 @@ function UserDataSkeleton() {
 }
 
 const ClientUpdateProfileSchema = UpdateProfileSchema.extend({
-  photo: z.instanceof(File).optional().refine(file => !file || file.size <= 2 * 1024 * 1024, 'A foto deve ter no máximo 2MB.'),
+  photo: z.instanceof(File).optional().refine(file => !file || file.size <= 10 * 1024 * 1024, 'A foto deve ter no máximo 10MB.'),
 });
 
 export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
@@ -435,3 +435,5 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         </div>
     )
 }
+
+    

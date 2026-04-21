@@ -278,8 +278,8 @@ export async function updateUserProfileAction(userId: string, formData: FormData
     let photoDataUri = existingProfile.photoURL;
 
     if (photoFile && photoFile.size > 0) {
-      if (photoFile.size > 2 * 1024 * 1024) { // 2MB
-        return { success: false, error: "A foto deve ter no máximo 2MB." };
+      if (photoFile.size > 10 * 1024 * 1024) { // 10MB
+        return { success: false, error: "A foto deve ter no máximo 10MB." };
       }
       photoDataUri = await fileToDataUri(photoFile);
     }
@@ -318,3 +318,5 @@ export async function fetchUserProfileAction(userId: string): Promise<{ success:
     return { success: false, error: "Falha ao buscar o perfil do usuário." };
   }
 }
+
+    
