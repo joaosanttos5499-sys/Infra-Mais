@@ -374,15 +374,19 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             </Alert>
                             
                             <FormItem>
-                                <FormLabel>Data de Nascimento</FormLabel>
+                                <FormLabel>
+                                    Data de Nascimento
+                                    {isEditingName && <span className="text-xs text-destructive/90 font-normal ml-2">(Não pode ser alterada)</span>}
+                                </FormLabel>
                                 <Input value={userProfile.dateOfBirth} disabled className="disabled:opacity-100" />
-                                <p className="text-xs text-muted-foreground pt-1">Não pode ser alterada.</p>
                             </FormItem>
                             
                             <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>
+                                  Email
+                                  {isEditingName && <span className="text-xs text-destructive/90 font-normal ml-2">(Não pode ser alterado)</span>}
+                                </FormLabel>
                                 <Input value={userProfile.email} disabled className="disabled:opacity-100" />
-                                <p className="text-xs text-muted-foreground pt-1">Não pode ser alterado.</p>
                             </FormItem>
 
                             {isEditingName && (
