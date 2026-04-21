@@ -154,15 +154,28 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             fetchUserProfileAction(user.uid)
                 .then(result => {
                     if (result.success && result.data) {
+                        const firestoreProfile = result.data;
+
+                        // Self-healing: Ensure the Firebase Auth user object is in sync with our DB profile.
+                        // This fixes the inconsistent avatar problem for existing users.
+                        if (auth.currentUser && (auth.currentUser.photoURL !== firestoreProfile.photoURL || auth.currentUser.displayName !== firestoreProfile.name)) {
+                            updateProfile(auth.currentUser, {
+                                displayName: firestoreProfile.name,
+                                photoURL: firestoreProfile.photoURL,
+                            }).catch(e => {
+                                console.error("Failed to sync profile to Firebase Auth:", e);
+                            });
+                        }
+
                         // Specific patch for the user as requested, to correct existing profiles.
-                        if (result.data.email === 'joaosanttos528@gmail.com' && result.data.dateOfBirth !== '04/06/2008') {
-                            const correctedProfile = { ...result.data, dateOfBirth: '04/06/2008' };
+                        if (firestoreProfile.email === 'joaosanttos528@gmail.com' && firestoreProfile.dateOfBirth !== '04/06/2008') {
+                            const correctedProfile = { ...firestoreProfile, dateOfBirth: '04/06/2008' };
                             saveUserProfileAction(correctedProfile); // Persist the correction
                             setUserProfile(correctedProfile);
                             form.reset({ name: correctedProfile.name });
                         } else {
-                            setUserProfile(result.data);
-                            form.reset({ name: result.data.name });
+                            setUserProfile(firestoreProfile);
+                            form.reset({ name: firestoreProfile.name });
                         }
                     } else if (user?.uid && user.email) {
                         // User exists in Auth, but not in our DB. Let's create their profile.
@@ -453,5 +466,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         </div>
     )
 }
+
+    
 
     
