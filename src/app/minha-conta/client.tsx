@@ -181,6 +181,16 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 setUserProfile(finalProfile);
                                 form.reset({ name: finalProfile.name });
                                 toast({ title: "Perfil Criado!", description: "Criamos seu perfil com as informações da sua conta." });
+
+                                // Sync the newly created photoURL with the Firebase Auth user object
+                                if (auth.currentUser) {
+                                    updateProfile(auth.currentUser, {
+                                        displayName: newProfileData.name,
+                                        photoURL: creationResult.photoURL
+                                    }).catch(e => {
+                                        console.error("Failed to update Firebase Auth profile in real-time:", e);
+                                    });
+                                }
                             } else {
                                 setUserProfile(null);
                                 console.error("Could not create user profile:", creationResult.error);
@@ -199,7 +209,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         } else if (!isUserLoading) {
             setIsProfileLoading(false);
         }
-    }, [user, isUserLoading, form, toast]);
+    }, [user, isUserLoading, form, toast, auth]);
 
     useEffect(() => {
         if (isConfirmOpen) {
