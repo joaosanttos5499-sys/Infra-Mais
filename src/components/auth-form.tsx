@@ -6,13 +6,15 @@ import Link from 'next/link';
 import { useAuth } from '@/firebase';
 import {
   signInWithEmailAndPassword,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  updateProfile
 } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft, Check } from 'lucide-react';
+import { fetchUserProfileAction } from '@/lib/actions';
 
 export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
   const auth = useAuth();
@@ -25,7 +27,27 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
   const handleSignIn = async () => {
     setIsSubmitting(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Sync profile from our DB to Firebase Auth on login
+      try {
+        const profileResult = await fetchUserProfileAction(user.uid);
+        if (profileResult.success && profileResult.data) {
+          const ourProfile = profileResult.data;
+          if (user.displayName !== ourProfile.name || user.photoURL !== ourProfile.photoURL) {
+            await updateProfile(user, {
+              displayName: ourProfile.name,
+              photoURL: ourProfile.photoURL
+            });
+          }
+        }
+      } catch (syncError) {
+        // Log the error, but don't block the user from logging in.
+        // The sync can be attempted again on the "Minha Conta" page.
+        console.error("Failed to sync profile on login:", syncError);
+      }
+      
       toast({
         title: 'Bem-vindo(a) de volta!',
       });
