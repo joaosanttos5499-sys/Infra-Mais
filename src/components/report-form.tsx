@@ -40,7 +40,7 @@ function SubmitButton() {
 const ClientReportSchema = ReportSchema.extend({
     photo: z.instanceof(File, { message: 'A foto é obrigatória.'})
         .refine(file => file.size > 0, 'A foto é obrigatória.')
-        .refine(file => file.size <= 1 * 1024 * 1024, 'O tamanho da foto não pode exceder 1MB.'),
+        .refine(file => file.size <= 4 * 1024 * 1024, 'O tamanho da foto não pode exceder 4MB.'),
 });
 
 export function ReportForm() {

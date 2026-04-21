@@ -74,9 +74,9 @@ export async function submitReport(
     return { errors: { photo: ["A foto do problema é obrigatória."] } };
   }
 
-  // Limit file size to 1MB
-  if (photoFile.size > 1 * 1024 * 1024) {
-    return { errors: { photo: ["O tamanho da foto deve ser menor que 1MB."] } };
+  // Limit file size to 4MB
+  if (photoFile.size > 4 * 1024 * 1024) {
+    return { errors: { photo: ["O tamanho da foto deve ser menor que 4MB."] } };
   }
   photoDataUri = await fileToDataUri(photoFile);
 
