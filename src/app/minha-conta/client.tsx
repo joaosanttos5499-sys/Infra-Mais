@@ -27,6 +27,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createAvatarSvg } from "@/lib/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Separator } from "@/components/ui/separator";
 
 
 function MyReportsList({ reports }: { reports: Report[] }) {
@@ -325,12 +326,11 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         <div className="space-y-8">
              <Card>
                 <CardHeader>
-                    <div>
-                        <CardTitle>Meus Dados</CardTitle>
-                        <CardDescription>Visualize e edite as informações da sua conta.</CardDescription>
-                    </div>
+                    <CardTitle>Meus Dados</CardTitle>
+                    <CardDescription>Visualize e edite as informações da sua conta.</CardDescription>
                 </CardHeader>
                 <CardContent>
+                    <Separator className="mb-6" />
                     {isProfileLoading ? (
                         <UserDataSkeleton />
                     ) : !userProfile ? (
