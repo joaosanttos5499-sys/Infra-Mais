@@ -336,7 +336,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     )}
                                   </div>
                                   <FormControl>
-                                      <Input {...field} disabled={!isEditingName} className="disabled:opacity-100 disabled:cursor-not-allowed" />
+                                      <Input {...field} disabled={!isEditingName} className="disabled:opacity-100 disabled:cursor-not-allowed disabled:bg-muted" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -356,7 +356,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     Data de Nascimento
                                     {isEditingName && <span className="text-xs text-destructive/90 font-normal ml-2">(Não pode ser alterada)</span>}
                                 </FormLabel>
-                                <Input value={userProfile.dateOfBirth} disabled className="disabled:opacity-100" />
+                                <Input value={userProfile.dateOfBirth} disabled className="disabled:opacity-100 disabled:bg-muted" />
                             </FormItem>
                             
                             <FormItem>
@@ -364,7 +364,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                   Email
                                   {isEditingName && <span className="text-xs text-destructive/90 font-normal ml-2">(Não pode ser alterado)</span>}
                                 </FormLabel>
-                                <Input value={userProfile.email} disabled className="disabled:opacity-100" />
+                                <Input value={userProfile.email} disabled className="disabled:opacity-100 disabled:bg-muted" />
                             </FormItem>
 
                             {isEditingName && (
