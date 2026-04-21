@@ -246,7 +246,7 @@ export async function updateUserProfileAction(userId: string, data: { name: stri
       ...existingProfile,
       name,
       photoURL: existingProfile.photoURL,
-      nameLastUpdatedAt: name !== existingProfile.name ? new Date() : existingProfile.nameLastUpdatedAt,
+      nameLastUpdatedAt: name !== existingProfile.name ? new Date().toISOString() : existingProfile.nameLastUpdatedAt,
     };
 
     await saveUser(updatedProfile);
@@ -276,5 +276,3 @@ export async function fetchUserProfileAction(userId: string): Promise<{ success:
     return { success: false, error: "Falha ao buscar o perfil do usuário." };
   }
 }
-
-    

@@ -20,7 +20,7 @@ if (process.env.NODE_ENV !== "production") {
 
 export async function getReports(): Promise<Report[]> {
   // Return a sorted copy
-  return [...reports].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  return [...reports].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 export async function addReport(report: NewReport): Promise<Report> {
@@ -28,7 +28,7 @@ export async function addReport(report: NewReport): Promise<Report> {
     ...report,
     id: String(idCounter++),
     status: "PENDING",
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
     upvotes: 0,
   };
   reports.push(newReport);

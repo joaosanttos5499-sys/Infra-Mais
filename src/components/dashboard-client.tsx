@@ -99,7 +99,7 @@ function ReportCard({
                             <div className="flex items-center gap-2 flex-wrap">
                                 <p className="font-semibold text-lg">{category?.label || report.category}</p>
                                 <StatusBadge status={report.status} />
-                                <ReportCreationTime date={report.createdAt} />
+                                <ReportCreationTime date={new Date(report.createdAt)} />
                             </div>
                         </div>
                     </div>
@@ -206,8 +206,8 @@ function ReportCard({
                 <div className="p-6 space-y-4">
                     <div>
                         <h4 className="font-semibold text-sm mb-1">Relatado</h4>
-                        <p className="text-sm text-foreground/80" title={format(report.createdAt, "PPPppp", { locale: ptBR })}>
-                            {formatDistanceToNow(report.createdAt, { addSuffix: true, locale: ptBR })}
+                        <p className="text-sm text-foreground/80" title={format(new Date(report.createdAt), "PPPppp", { locale: ptBR })}>
+                            {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true, locale: ptBR })}
                         </p>
                     </div>
                     
@@ -362,12 +362,12 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
   const sortedReports = [...optimisticReports].sort((a, b) => {
     switch (sortBy) {
       case 'oldest':
-        return a.createdAt.getTime() - b.createdAt.getTime();
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       case 'upvotes':
         return b.upvotes - a.upvotes;
       case 'newest':
       default:
-        return b.createdAt.getTime() - a.createdAt.getTime();
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     }
   });
 

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
@@ -77,7 +78,7 @@ function MyReportsList({ reports }: { reports: Report[] }) {
                                         </p>
                                     </div>
                                     <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
-                                        <ReportTime date={report.createdAt} />
+                                        <ReportTime date={new Date(report.createdAt)} />
                                     </p>
                                 </CardContent>
                             </div>

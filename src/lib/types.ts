@@ -13,7 +13,7 @@ export interface Report {
   photoAfterUrl?: string; // data URI for after image
   summary: string;
   status: ReportStatus;
-  createdAt: Date;
+  createdAt: string;
   upvotes: number;
   latitude: number;
   longitude: number;
@@ -27,5 +27,5 @@ export interface UserProfile {
     email: string;
     dateOfBirth: string;
     photoURL?: string;
-    nameLastUpdatedAt?: Date;
+    nameLastUpdatedAt?: string;
 }
