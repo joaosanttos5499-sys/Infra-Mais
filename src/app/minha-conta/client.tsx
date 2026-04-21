@@ -243,18 +243,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         }
     }, [isConfirmOpen]);
     
-    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 2) {
-        value = `${''}${value.slice(0, 2)}/${value.slice(2)}`;
-      }
-      if (value.length > 5) {
-        value = `${''}${value.slice(0, 5)}/${value.slice(5, 9)}`;
-      }
-      e.target.value = value;
-      return value;
-    };
-
     const onSubmit = async (data: z.infer<typeof UpdateProfileSchema>) => {
       if (!user) return;
   
@@ -271,7 +259,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
              console.error("Error updating firebase auth profile:", e)
           }
         }
-        toast({ title: "Sucesso!", description: "Seu perfil foi atualizado." });
+        toast({ title: "Sucesso!", description: "Seu nome foi atualizado." });
         setIsEditingName(false);
       } else {
         toast({ variant: 'destructive', title: 'Erro', description: result.error || "Não foi possível atualizar o perfil." });
@@ -339,7 +327,14 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               name="name"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Nome Completo</FormLabel>
+                                  <div className="flex justify-between items-center">
+                                    <FormLabel>Nome Completo</FormLabel>
+                                    {!isEditingName && (
+                                        <Button type="button" variant="link" className="p-0 h-auto text-sm" onClick={() => setIsEditingName(true)}>
+                                            Alterar
+                                        </Button>
+                                    )}
+                                  </div>
                                   <FormControl>
                                       <Input {...field} disabled={!isEditingName} className="disabled:opacity-100 disabled:cursor-not-allowed" />
                                   </FormControl>
@@ -372,23 +367,17 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 <Input value={userProfile.email} disabled className="disabled:opacity-100" />
                             </FormItem>
 
-                            <div className="flex justify-end gap-2 pt-4">
-                                {isEditingName ? (
-                                    <>
-                                        <Button type="button" variant="outline" className="bg-card" onClick={handleCancel}>
-                                            <X className="mr-2 h-4 w-4" /> Cancelar
-                                        </Button>
-                                        <Button type="button" onClick={handleSaveClick} disabled={form.formState.isSubmitting || !form.formState.isDirty}>
-                                            {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                            Salvar
-                                        </Button>
-                                    </>
-                                ) : (
-                                    <Button type="button" variant="default" onClick={() => setIsEditingName(true)}>
-                                        Alterar Informações
+                            {isEditingName && (
+                                <div className="flex justify-end gap-2 pt-4">
+                                    <Button type="button" variant="outline" onClick={handleCancel}>
+                                        <X className="mr-2 h-4 w-4" /> Cancelar
                                     </Button>
-                                )}
-                            </div>
+                                    <Button type="button" onClick={handleSaveClick} disabled={form.formState.isSubmitting || !form.formState.isDirty}>
+                                        {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                        Salvar
+                                    </Button>
+                                </div>
+                            )}
                           </form>
                         </Form>
                     )}
