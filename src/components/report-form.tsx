@@ -38,7 +38,9 @@ function SubmitButton() {
 }
 
 const ClientReportSchema = ReportSchema.extend({
-    photo: z.instanceof(File).optional().refine(file => !file || file.size <= 4 * 1024 * 1024, 'O tamanho da foto não pode exceder 4MB.'),
+    photo: z.instanceof(File, { message: 'A foto é obrigatória.'})
+        .refine(file => file.size > 0, 'A foto é obrigatória.')
+        .refine(file => file.size <= 4 * 1024 * 1024, 'O tamanho da foto não pode exceder 4MB.'),
 })
 
 export function ReportForm() {
@@ -96,14 +98,14 @@ export function ReportForm() {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setValue('photo', file);
+      setValue('photo', file, { shouldValidate: true });
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     } else {
-      setValue('photo', undefined);
+      setValue('photo', undefined, { shouldValidate: true });
       setPhotoPreview(null);
     }
   };
@@ -262,7 +264,7 @@ export function ReportForm() {
             />
 
             <div className="space-y-2">
-                <Label>Foto do Problema (Opcional)</Label>
+                <Label>Foto do Problema</Label>
                 <div className="aspect-video rounded-md border border-dashed flex items-center justify-center relative overflow-hidden bg-muted/50">
                     {photoPreview ? (
                         <Image src={photoPreview} alt="Pré-visualização da foto enviada" fill className="object-cover" />
@@ -284,7 +286,7 @@ export function ReportForm() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descrição</FormLabel>
+                  <FormLabel>Descrição (Opcional)</FormLabel>
                   <FormControl>
                     <Textarea
                         placeholder="Forneça uma descrição detalhada do problema."

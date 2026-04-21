@@ -12,7 +12,7 @@ export const ReportSchema = z.object({
   bairro: z.string().min(3, "O bairro deve ter pelo menos 3 caracteres."),
   address: z.string().min(3, "A localização deve ter pelo menos 3 caracteres."),
   reference: z.string().optional(),
-  description: z.string().min(10, "A descrição deve ter pelo menos 10 caracteres."),
+  description: z.string().optional(),
   latitude: z.coerce.number().min(-90).max(90),
   longitude: z.coerce.number().min(-180).max(180),
 });

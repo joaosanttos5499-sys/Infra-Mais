@@ -70,16 +70,16 @@ export async function submitReport(
   const photoFile = formData.get("photo") as File;
   let photoDataUri = "";
 
-  if (photoFile && photoFile.size > 0) {
-    // Limit file size to 4MB
-    if (photoFile.size > 4 * 1024 * 1024) {
-      return { errors: { photo: ["O tamanho da foto deve ser menor que 4MB."] } };
-    }
-    photoDataUri = await fileToDataUri(photoFile);
-  } else {
-    // Use a placeholder if no photo is uploaded
-    photoDataUri = "https://picsum.photos/seed/placeholder/400/300";
+  if (!photoFile || photoFile.size === 0) {
+    return { errors: { photo: ["A foto do problema é obrigatória."] } };
   }
+
+  // Limit file size to 4MB
+  if (photoFile.size > 4 * 1024 * 1024) {
+    return { errors: { photo: ["O tamanho da foto deve ser menor que 4MB."] } };
+  }
+  photoDataUri = await fileToDataUri(photoFile);
+
 
   try {
     const { userId, category, problem, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
@@ -91,7 +91,7 @@ export async function submitReport(
       problem,
       bairro,
       location,
-      description,
+      description: description || "Nenhuma descrição fornecida.",
       photoDataUri,
     });
 
@@ -101,7 +101,7 @@ export async function submitReport(
       problem,
       bairro,
       location,
-      description,
+      description: description || "",
       summary: aiSummary.summary,
       photoUrl: photoDataUri,
       latitude,
