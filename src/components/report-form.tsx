@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useFormContext } from "react-hook-form";
 import Image from "next/image";
 import { Camera, Loader2, RefreshCw } from "lucide-react";
 import { submitReport, type FormState } from "@/lib/actions";
@@ -28,10 +28,10 @@ const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
 });
 
 function SubmitButton() {
-  const { pending } = useFormStatus();
+  const { formState: { isSubmitting } } = useFormContext();
   return (
-    <Button type="submit" className="w-full bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500" disabled={pending} aria-disabled={pending}>
-      {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+    <Button type="submit" className="w-full bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500" disabled={isSubmitting} aria-disabled={isSubmitting}>
+      {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       Enviar Relatório
     </Button>
   );
@@ -41,7 +41,7 @@ const ClientReportSchema = ReportSchema.extend({
     photo: z.instanceof(File, { message: 'A foto é obrigatória.'})
         .refine(file => file.size > 0, 'A foto é obrigatória.')
         .refine(file => file.size <= 4 * 1024 * 1024, 'O tamanho da foto não pode exceder 4MB.'),
-})
+});
 
 export function ReportForm() {
   const { toast } = useToast();
@@ -89,6 +89,18 @@ export function ReportForm() {
     return result;
   };
 
+  const onSubmit = async (values: z.infer<typeof ClientReportSchema>) => {
+    const formData = new FormData();
+    Object.keys(values).forEach(key => {
+      const formKey = key as keyof typeof values;
+      const value = values[formKey];
+      if (value !== undefined && value !== null) {
+        formData.append(formKey, value as string | Blob);
+      }
+    });
+    await handleAction(formData);
+  };
+
   useEffect(() => {
     if (user) {
       setValue('userId', user.uid);
@@ -134,19 +146,7 @@ export function ReportForm() {
         </CardDescription>
       </CardHeader>
       <Form {...form}>
-        <form action={() => form.handleSubmit(() => {
-            const formData = new FormData();
-            const values = form.getValues();
-            Object.keys(values).forEach(key => {
-              const formKey = key as keyof typeof values;
-              const value = values[formKey];
-              if (value !== undefined && value !== null) {
-                formData.append(formKey, value as string | Blob);
-              }
-            });
-            handleAction(formData);
-        })()}
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-6">
             <input type="hidden" {...form.register('userId')} />
             <div className="space-y-2">
