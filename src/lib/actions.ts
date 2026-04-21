@@ -1,4 +1,3 @@
-
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -86,14 +85,15 @@ export async function submitReport(
     
     const location = reference ? `${address} (${reference})` : address;
 
-    const aiSummary = await summarizeReport({
-      category,
-      problem,
-      bairro,
-      location,
-      description: description || "Nenhuma descrição fornecida.",
-      photoDataUri,
-    });
+    // Temporarily disabled AI summarization to fix submission error.
+    // const aiSummary = await summarizeReport({
+    //   category,
+    //   problem,
+    //   bairro,
+    //   location,
+    //   description: description || "Nenhuma descrição fornecida.",
+    //   photoDataUri,
+    // });
 
     const newReport: Omit<Report, "id" | "createdAt" | "status" | "upvotes" | "photoAfterUrl"> = {
       userId,
@@ -102,7 +102,7 @@ export async function submitReport(
       bairro,
       location,
       description: description || "",
-      summary: aiSummary.summary,
+      summary: "O resumo do IA está temporariamente desativado.", // Using a placeholder
       photoUrl: photoDataUri,
       latitude,
       longitude,
