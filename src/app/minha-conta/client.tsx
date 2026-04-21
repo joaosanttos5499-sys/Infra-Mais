@@ -396,8 +396,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                         </Button>
                                     </>
                                 ) : (
-                                    <Button type="button" variant="outline" className="bg-card" onClick={() => setIsEditingName(true)}>
-                                        Alterar
+                                    <Button type="button" variant="default" onClick={() => setIsEditingName(true)}>
+                                        Alterar Informações
                                     </Button>
                                 )}
                             </div>
