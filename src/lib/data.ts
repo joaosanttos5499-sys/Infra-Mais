@@ -23,7 +23,7 @@ export async function getReports(): Promise<Report[]> {
   return [...reports].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-export async function addReport(report: NewReport): Promise<Report> {
+export function addReport(report: NewReport): Report {
   const newReport: Report = {
     ...report,
     id: String(idCounter++),

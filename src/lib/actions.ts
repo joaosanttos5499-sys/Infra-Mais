@@ -109,7 +109,7 @@ export async function submitReport(
       longitude,
     };
 
-    await addReport(newReport);
+    addReport(newReport);
 
     revalidatePath("/dashboard");
     revalidatePath("/");
