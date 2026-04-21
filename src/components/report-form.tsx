@@ -40,7 +40,7 @@ function SubmitButton() {
 const ClientReportSchema = ReportSchema.extend({
     photo: z.instanceof(File, { message: 'A foto é obrigatória.'})
         .refine(file => file.size > 0, 'A foto é obrigatória.')
-        .refine(file => file.size <= 4 * 1024 * 1024, 'O tamanho da foto não pode exceder 4MB.'),
+        .refine(file => file.size <= 1 * 1024 * 1024, 'O tamanho da foto não pode exceder 1MB.'),
 });
 
 export function ReportForm() {
@@ -70,25 +70,6 @@ export function ReportForm() {
   const selectedCategory = watch('category');
   const problems = getCategory(selectedCategory)?.problems || [];
 
-  const handleAction = async (data: FormData): Promise<FormState> => {
-    const result = await submitReport(undefined, data);
-    if (result?.errors) {
-      Object.keys(result.errors).forEach((key) => {
-        const field = key as keyof FormState['errors'];
-        const message = result.errors?.[field]?.join(', ');
-        if(field === '_form') {
-            toast({ variant: 'destructive', title: 'Erro ao enviar relatório', description: message });
-        } else if (message) {
-            setError(field, { type: 'manual', message });
-        }
-      });
-    } else if (result?.success) {
-      toast({ title: "Relatório enviado!", description: "Seu relatório foi enviado com sucesso."});
-      router.push('/dashboard');
-    }
-    return result;
-  };
-
   const onSubmit = async (values: z.infer<typeof ClientReportSchema>) => {
     const formData = new FormData();
     Object.keys(values).forEach(key => {
@@ -98,7 +79,23 @@ export function ReportForm() {
         formData.append(formKey, value as string | Blob);
       }
     });
-    await handleAction(formData);
+
+    const result = await submitReport(undefined, formData);
+
+    if (result?.errors) {
+      Object.keys(result.errors).forEach((key) => {
+        const field = key as keyof FormState['errors'];
+        const message = result.errors?.[field]?.join(', ');
+        if (field === '_form') {
+          toast({ variant: 'destructive', title: 'Erro ao enviar relatório', description: message });
+        } else if (field && message) {
+          setError(field, { type: 'manual', message });
+        }
+      });
+    } else if (result?.success) {
+      toast({ title: "Relatório enviado!", description: "Seu relatório foi enviado com sucesso."});
+      router.push('/dashboard');
+    }
   };
 
   useEffect(() => {

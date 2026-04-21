@@ -74,9 +74,9 @@ export async function submitReport(
     return { errors: { photo: ["A foto do problema é obrigatória."] } };
   }
 
-  // Limit file size to 4MB
-  if (photoFile.size > 4 * 1024 * 1024) {
-    return { errors: { photo: ["O tamanho da foto deve ser menor que 4MB."] } };
+  // Limit file size to 1MB
+  if (photoFile.size > 1 * 1024 * 1024) {
+    return { errors: { photo: ["O tamanho da foto deve ser menor que 1MB."] } };
   }
   photoDataUri = await fileToDataUri(photoFile);
 
@@ -96,7 +96,7 @@ export async function submitReport(
     //   photoDataUri,
     // });
 
-    const newReport: Omit<Report, "id" | "createdAt" | "status" | "upvotes" | "photoAfterUrl"> = {
+    const newReport: NewReport = {
       userId,
       category,
       problem,
@@ -246,7 +246,7 @@ export async function updateUserProfileAction(userId: string, data: { name: stri
     const updatedProfile: UserProfile = {
       ...existingProfile,
       name,
-      photoURL: existingProfile.photoURL,
+      photoURL: createAvatarSvg(name),
       nameLastUpdatedAt: name !== existingProfile.name ? new Date().toISOString() : existingProfile.nameLastUpdatedAt,
     };
 
