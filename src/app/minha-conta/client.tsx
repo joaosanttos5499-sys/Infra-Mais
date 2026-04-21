@@ -327,10 +327,10 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
              <Card>
                 <CardHeader>
                     <CardTitle>Meus Dados</CardTitle>
+                    <Separator/>
                     <CardDescription>Visualize e edite as informações da sua conta.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Separator className="mb-6" />
                     {isProfileLoading ? (
                         <UserDataSkeleton />
                     ) : !userProfile ? (
@@ -443,3 +443,5 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         </div>
     )
 }
+
+    
