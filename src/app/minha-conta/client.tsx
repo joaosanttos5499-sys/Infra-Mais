@@ -367,11 +367,13 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               )}
                             />
 
-                            <Alert variant="default" className="bg-amber-50 border-amber-200">
-                                <AlertDescription className="text-amber-800 text-xs">
-                                Você só pode alterar seu nome uma vez por semana.
-                                </AlertDescription>
-                            </Alert>
+                            {isEditingName && (
+                                <Alert variant="default" className="bg-amber-50 border-amber-200">
+                                    <AlertDescription className="text-amber-800 text-xs">
+                                    Você só pode alterar seu nome uma vez por semana.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                             
                             <FormItem>
                                 <FormLabel>
