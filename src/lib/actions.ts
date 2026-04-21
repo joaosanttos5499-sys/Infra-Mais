@@ -1,3 +1,4 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -108,7 +109,7 @@ export async function submitReport(
       longitude,
     };
 
-    addReport(newReport);
+    await addReport(newReport);
 
     revalidatePath("/dashboard");
     revalidatePath("/");
