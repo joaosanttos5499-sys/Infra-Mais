@@ -351,14 +351,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               name="name"
                               render={({ field }) => (
                                 <FormItem>
-                                  <div className="flex justify-between items-center">
-                                    <FormLabel>Nome Completo</FormLabel>
-                                    {!isEditingName && (
-                                      <Button type="button" variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => setIsEditingName(true)}>
-                                        Alterar
-                                      </Button>
-                                    )}
-                                  </div>
+                                  <FormLabel>Nome Completo</FormLabel>
                                   <FormControl>
                                       <Input {...field} disabled={!isEditingName} className="disabled:opacity-100 disabled:cursor-not-allowed" />
                                   </FormControl>
@@ -391,17 +384,23 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 <Input value={userProfile.email} disabled className="disabled:opacity-100" />
                             </FormItem>
 
-                            {isEditingName && (
-                                <div className="flex justify-end gap-2 pt-4">
-                                    <Button type="button" variant="outline" onClick={handleCancel}>
-                                        <X className="mr-2 h-4 w-4" /> Cancelar
+                            <div className="flex justify-end gap-2 pt-4">
+                                {isEditingName ? (
+                                    <>
+                                        <Button type="button" variant="outline" className="bg-card" onClick={handleCancel}>
+                                            <X className="mr-2 h-4 w-4" /> Cancelar
+                                        </Button>
+                                        <Button type="button" onClick={handleSaveClick} disabled={form.formState.isSubmitting || !form.formState.isDirty}>
+                                            {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                            Salvar
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <Button type="button" variant="outline" className="bg-card" onClick={() => setIsEditingName(true)}>
+                                        Alterar
                                     </Button>
-                                    <Button type="button" onClick={handleSaveClick} disabled={form.formState.isSubmitting || !form.formState.isDirty}>
-                                        {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                        Salvar
-                                    </Button>
-                                </div>
-                            )}
+                                )}
+                            </div>
                           </form>
                         </Form>
                     )}
