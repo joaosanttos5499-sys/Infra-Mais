@@ -118,8 +118,8 @@ export async function submitReport(
     };
   }
 
-  revalidatePath("/dashboard");
-  revalidatePath("/");
+  // The redirect will handle fetching the new data on the dashboard page.
+  // Revalidating the path here is redundant and can cause conflicts.
   redirect('/dashboard');
 }
 
