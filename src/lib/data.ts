@@ -17,9 +17,10 @@ if (process.env.NODE_ENV !== "production") {
   globalForStore.users = users;
 }
 
-export async function getReports(): Promise<Report[]> {
+export async function getReports(limit?: number): Promise<Report[]> {
   // Return a sorted copy
-  return [...reports].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const sorted = [...reports].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return limit ? sorted.slice(0, limit) : sorted;
 }
 
 export function addReport(report: NewReport): Report {

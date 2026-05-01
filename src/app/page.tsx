@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -15,8 +14,7 @@ import { ReportTime } from "@/components/report-time";
 
 
 async function RecentReports() {
-  const reports = await getReports();
-  const recentReports = reports.slice(0, 3);
+  const recentReports = await getReports(3);
 
   if (recentReports.length === 0) {
     return (

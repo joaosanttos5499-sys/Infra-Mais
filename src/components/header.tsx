@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -6,7 +5,7 @@ import Image from "next/image";
 import { Separator } from "./ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Menu, Home, FileText, Users, LifeBuoy, User, LogOut } from "lucide-react";
+import { Menu, Home, FileText, LifeBuoy, User, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
@@ -101,6 +100,7 @@ export function Header() {
                   alt="Infra Mais Logo"
                   width={40}
                   height={40}
+                  priority
                 />
               <span className="text-2xl font-bold font-headline text-primary">
                 Infra Mais
