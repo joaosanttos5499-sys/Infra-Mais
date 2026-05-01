@@ -1,26 +1,78 @@
 
-import { Suspense } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import { DashboardClient } from "@/components/dashboard-client";
 import { getReports } from "@/lib/data";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldAlert } from "lucide-react";
+import { useUser } from "@/firebase";
+import { isEmailEmployee } from "@/lib/config";
+import { useRouter } from "next/navigation";
+import { type Report } from "@/lib/types";
 
-function DashboardSkeleton() {
+function LoadingScreen() {
   return (
-    <div className="flex items-center justify-center p-12">
+    <div className="flex items-center justify-center p-12 min-h-[60vh]">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <p className="ml-4 text-muted-foreground">Carregando relatórios...</p>
+      <p className="ml-4 text-muted-foreground">Verificando credenciais...</p>
     </div>
   );
 }
 
-export default async function FuncionariosPage() {
-  const reports = await getReports();
+function AccessDenied() {
+    return (
+        <div className="flex flex-col items-center justify-center p-12 text-center min-h-[60vh]">
+            <ShieldAlert className="h-16 w-16 text-destructive mb-4" />
+            <h1 className="text-2xl font-bold text-foreground">Acesso Negado</h1>
+            <p className="text-muted-foreground mt-2 max-w-md">
+                Esta área é restrita a funcionários credenciados do Infra Mais.
+                Se você acredita que deveria ter acesso, entre em contato com o administrador.
+            </p>
+            <button 
+                onClick={() => window.location.href = '/'}
+                className="mt-6 px-6 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity"
+            >
+                Voltar para o Início
+            </button>
+        </div>
+    );
+}
+
+export default function FuncionariosPage() {
+  const { user, isUserLoading } = useUser();
+  const [reports, setReports] = useState<Report[]>([]);
+  const [isLoadingReports, setIsLoadingReports] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Busca os relatórios apenas se o usuário for carregado e for funcionário
+    if (!isUserLoading && user && isEmailEmployee(user.email)) {
+      getReports().then(data => {
+        setReports(data);
+        setIsLoadingReports(false);
+      });
+    } else if (!isUserLoading && (!user || !isEmailEmployee(user.email))) {
+        setIsLoadingReports(false);
+    }
+  }, [user, isUserLoading]);
+
+  // Enquanto carrega o usuário
+  if (isUserLoading) return <LoadingScreen />;
+
+  // Se não estiver logado ou não for funcionário
+  if (!user || !isEmailEmployee(user.email)) {
+    return <AccessDenied />;
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 text-center md:text-left">
+            <div className="flex items-center gap-3 mb-2 justify-center md:justify-start">
+                <ShieldAlert className="h-6 w-6 text-blue-600" />
+                <span className="text-sm font-bold text-blue-600 uppercase tracking-wider">Acesso Restrito</span>
+            </div>
             <h1 className="text-3xl md:text-4xl font-bold font-headline">
               Painel do Funcionário
             </h1>
@@ -28,9 +80,15 @@ export default async function FuncionariosPage() {
               Visualize, gerencie e atualize os problemas de infraestrutura relatados pelos cidadãos.
             </p>
           </div>
-          <Suspense fallback={<DashboardSkeleton />}>
+          
+          {isLoadingReports ? (
+              <div className="flex items-center justify-center p-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="ml-4 text-muted-foreground">Carregando relatórios...</p>
+              </div>
+          ) : (
             <DashboardClient reports={reports} showUpvote={false} />
-          </Suspense>
+          )}
         </div>
       </main>
     </div>

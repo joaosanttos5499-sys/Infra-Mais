@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -5,8 +6,8 @@ import Image from "next/image";
 import { Separator } from "./ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Menu, Home, FileText, LifeBuoy, User, LogOut } from "lucide-react";
-import { useState } from "react";
+import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
 import { useUser, useAuth } from "@/firebase";
@@ -15,6 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { createAvatarSvg } from "@/lib/avatar";
 import { useRouter } from "next/navigation";
+import { isEmailEmployee } from "@/lib/config";
 
 const navLinks = [
   { href: "/", label: "Início", icon: Home, public: true },
@@ -31,6 +33,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   }
 
   if (user) {
+    const isEmployee = isEmailEmployee(user.email);
     const avatarSrc = user.photoURL || createAvatarSvg(user.displayName || user.email || '');
     return (
       <DropdownMenu>
@@ -52,6 +55,17 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+          {isEmployee && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/funcionarios" className="text-blue-600 font-semibold">
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                  <span>Área do Funcionário</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
           <DropdownMenuItem asChild>
             <Link href="/minha-conta">
               <User className="mr-2 h-4 w-4" />
@@ -82,7 +96,13 @@ export function Header() {
   const { user } = useUser();
   const router = useRouter();
 
-  const filteredNavLinks = navLinks.filter(link => link.public || !!user);
+  const isEmployee = isEmailEmployee(user?.email);
+  const filteredNavLinks = [...navLinks];
+  
+  // Adiciona o link do funcionário se autorizado
+  if (isEmployee) {
+    filteredNavLinks.push({ href: "/funcionarios", label: "Gestão", icon: ShieldCheck, public: false });
+  }
 
   const handleLoginSuccess = () => {
     setIsAuthModalOpen(false);
@@ -113,7 +133,7 @@ export function Header() {
                   <div key={link.href} className="flex items-center gap-4">
                       <Link
                       href={link.href}
-                      className="opacity-90 hover:opacity-100 transition-opacity"
+                      className={`opacity-90 hover:opacity-100 transition-opacity ${link.href === '/funcionarios' ? 'text-blue-600 font-bold' : ''}`}
                       >
                       {link.label}
                       </Link>
@@ -142,7 +162,7 @@ export function Header() {
                       <Link
                         key={link.href}
                         href={link.href}
-                        className="flex items-center gap-3 p-2 rounded-md hover:bg-muted text-base font-medium"
+                        className={`flex items-center gap-3 p-2 rounded-md hover:bg-muted text-base font-medium ${link.href === '/funcionarios' ? 'text-blue-600' : ''}`}
                         onClick={() => setIsSheetOpen(false)}
                       >
                         <link.icon className="h-5 w-5" />

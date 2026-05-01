@@ -8,6 +8,7 @@ import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as 
 import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
 import { ReportSchema, UpdateProfileSchema } from "./schemas";
 import { createAvatarSvg } from "./avatar";
+import { isEmailEmployee } from "./config";
 
 export type FormState = {
   message?: string | null;
@@ -200,8 +201,9 @@ export async function deleteReportAction(reportId: string) {
   }
 }
 
-export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'photoURL'> & { photoURL?: string }): Promise<{ success: boolean; error?: string; photoURL?: string; }> {
+export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'photoURL' | 'role'> & { photoURL?: string }): Promise<{ success: boolean; error?: string; photoURL?: string; }> {
   try {
+    const role = isEmailEmployee(userProfile.email) ? "EMPLOYEE" : "USER";
     let finalUserProfile: UserProfile;
 
     if (!userProfile.photoURL) {
@@ -209,9 +211,10 @@ export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'phot
       finalUserProfile = {
         ...userProfile,
         photoURL: avatarSvg,
+        role,
       };
     } else {
-        finalUserProfile = userProfile as UserProfile;
+        finalUserProfile = { ...userProfile, role } as UserProfile;
     }
     
     await saveUser(finalUserProfile);

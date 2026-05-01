@@ -1,4 +1,6 @@
+
 import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
+import { isEmailEmployee } from "./config";
 
 // In-memory store to persist data across hot-reloads in development
 const globalForStore = globalThis as unknown as {
@@ -84,13 +86,17 @@ export async function deleteReport(id: string): Promise<boolean> {
 }
 
 export async function saveUser(user: UserProfile): Promise<UserProfile> {
+    // Forçamos a verificação da role baseada no e-mail sempre que salvar
+    const role = isEmailEmployee(user.email) ? "EMPLOYEE" : "USER";
+    const userToSave = { ...user, role };
+
     const existingUserIndex = users.findIndex(u => u.id === user.id);
     if (existingUserIndex > -1) {
-        users[existingUserIndex] = user;
+        users[existingUserIndex] = userToSave;
     } else {
-        users.push(user);
+        users.push(userToSave);
     }
-    return user;
+    return userToSave;
 }
 
 export async function getUserById(id: string): Promise<UserProfile | undefined> {

@@ -22,6 +22,8 @@ export interface Report {
 
 export type NewReport = Omit<Report, "id" | "createdAt" | "status" | "upvotes" | "photoAfterUrl">;
 
+export type UserRole = "USER" | "EMPLOYEE";
+
 export interface UserProfile {
     id: string;
     name: string;
@@ -29,4 +31,5 @@ export interface UserProfile {
     dateOfBirth: string;
     photoURL?: string;
     nameLastUpdatedAt?: string;
+    role: UserRole;
 }
