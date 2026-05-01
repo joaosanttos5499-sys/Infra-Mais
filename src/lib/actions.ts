@@ -73,9 +73,9 @@ export async function submitReport(
     return { errors: { photo: ["A foto do problema é obrigatória."] } };
   }
 
-  // O limite agora é validado contra 4MB, mas o servidor aceita até 10MB para segurança
-  if (photoFile.size > 4 * 1024 * 1024) {
-    return { errors: { photo: ["O tamanho da foto não pode exceder 4MB."] } };
+  // Aumentado para 5MB conforme solicitado
+  if (photoFile.size > 5 * 1024 * 1024) {
+    return { errors: { photo: ["O tamanho da foto não pode exceder 5MB."] } };
   }
   photoDataUri = await fileToDataUri(photoFile);
 
@@ -85,7 +85,7 @@ export async function submitReport(
     
     const location = reference ? `${address} (${reference})` : address;
 
-    // Reativando a sumarização por IA agora que o limite de dados foi aumentado
+    // Reativando a sumarização por IA
     const aiSummary = await summarizeReport({
       category,
       problem,
@@ -139,8 +139,8 @@ export async function updateReportStatus(
 
   try {
      if (photoAfterFile && photoAfterFile.size > 0) {
-      if (photoAfterFile.size > 4 * 1024 * 1024) {
-         return { success: false, message: "A foto da solução deve ter menos de 4MB." };
+      if (photoAfterFile.size > 5 * 1024 * 1024) {
+         return { success: false, message: "A foto da solução deve ter menos de 5MB." };
       }
       photoAfterUrl = await fileToDataUri(photoAfterFile);
     }
