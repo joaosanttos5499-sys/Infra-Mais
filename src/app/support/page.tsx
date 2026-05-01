@@ -12,52 +12,52 @@ export default function SupportPage() {
     {
       question: "O que é o Infra Mais?",
       answer:
-        "O Infra Mais é uma plataforma de zeladoria urbana que conecta os cidadãos de Picuí à prefeitura. Ela permite o registro geolocalizado de problemas de infraestrutura (como buracos, iluminação ou vazamentos), facilitando a comunicação e agilizando a resolução das demandas da comunidade.",
+        "O Infra Mais é uma plataforma independente de zeladoria urbana que visa facilitar a comunicação entre os cidadãos e os órgãos responsáveis pela manutenção das cidades. Ela permite o registro geolocalizado de problemas de infraestrutura, servindo como uma ferramenta de cidadania para cobrar e acompanhar melhorias no espaço público.",
+    },
+    {
+      question: "O site é oficial de alguma prefeitura?",
+      answer:
+        "Não. O Infra Mais é uma plataforma privada e independente. Atuamos como um canal facilitador para que as demandas cheguem de forma organizada às gestões municipais, mas não somos um órgão governamental e não possuímos vínculo oficial com nenhuma prefeitura.",
     },
     {
       question: "Preciso de uma conta para relatar um problema?",
       answer:
-        "Sim. Para garantir a autenticidade dos relatos e permitir que você acompanhe suas solicitações, é necessário criar uma conta ou fazer login. Usuários anônimos podem visualizar o mapa e os relatos, mas não podem enviar novas demandas.",
+        "Sim. Para garantir a seriedade dos relatos e permitir que você acompanhe o progresso das suas solicitações, é necessário criar uma conta. Isso ajuda a evitar dados falsos e mantém a integridade da plataforma.",
     },
     {
       question: "Como eu relato um problema?",
       answer:
-        'Após fazer login, clique em "Relatar um Problema". No formulário: \n1. Marque o local exato no mapa. \n2. Escolha a categoria e o problema específico. \n3. Selecione o bairro (em Picuí) e digite o endereço. \n4. Anexe obrigatoriamente uma foto do problema (até 5MB). \n5. Adicione uma descrição se desejar.',
+        'Após fazer login, clique em "Relatar um Problema". No formulário: \n1. Marque o local exato no mapa. \n2. Escolha a categoria e o problema específico. \n3. Selecione a cidade e o bairro correspondente. \n4. Anexe obrigatoriamente uma foto do problema (até 5MB). \n5. Adicione uma descrição detalhada se desejar.',
     },
     {
       question: "Por que a foto é obrigatória?",
       answer:
-        "A foto é essencial para que a equipe técnica da prefeitura avalie a gravidade e o tipo de equipamento necessário para o conserto antes mesmo de ir ao local. Isso economiza tempo e recursos públicos.",
+        "A foto é a principal evidência da demanda. Ela permite que os gestores e a comunidade avaliem visualmente a gravidade e o tipo de reparo necessário, garantindo que o relato seja fundamentado em fatos reais.",
     },
     {
       question: "O que acontece depois que eu envio um relatório?",
       answer:
-        "Seu relatório é processado por uma Inteligência Artificial que gera um resumo conciso para os funcionários da cidade. O relato fica visível no mapa e no painel público. A equipe da prefeitura atualizará o status conforme o progresso: 'Pendente', 'Em Andamento' ou 'Resolvido'.",
+        "Seu relatório é processado por uma Inteligência Artificial que gera um resumo conciso para otimizar a leitura dos gestores. O relato fica visível publicamente para que outros cidadãos possam apoiar. Embora o site seja independente, as informações são estruturadas para que possam ser facilmente utilizadas pelas equipes de manutenção das cidades parceiras ou notificadas via canais públicos.",
     },
     {
       question: "Para que serve o botão 'Apoiar'?",
       answer:
-        "Se você encontrar um problema já relatado que também te afeta, use o botão 'Apoiar'. Quanto mais apoios um relato recebe, maior é a visibilidade dele no painel, ajudando a prefeitura a identificar as demandas mais críticas para a comunidade.",
+        "O botão 'Apoiar' serve para dar relevância a um problema que afeta mais pessoas. Quanto mais apoios um relato recebe, maior é o destaque dele no painel, sinalizando para as autoridades que aquela é uma demanda prioritária da comunidade.",
     },
     {
       question: "Posso excluir um relatório que eu enviei?",
       answer:
-        "Sim. Se você enviou algo por engano ou o problema foi resolvido de outra forma, você pode excluir seu relato. Vá em 'Minha Conta' ou encontre seu card no painel de 'Relatos' e clique no ícone de lixeira. A exclusão removerá o problema do mapa e de todas as listagens do site.",
+        "Sim. Você tem total controle sobre seus relatos. Se enviou algo por engano ou o problema foi resolvido, basta ir em 'Minha Conta' e clicar no ícone de lixeira no card do relatório correspondente.",
     },
     {
-      question: "Como vejo se o problema foi realmente resolvido?",
+      question: "Quais cidades o Infra Mais atende?",
       answer:
-        "Quando um problema é marcado como 'Resolvido', os funcionários podem anexar uma foto do 'Depois'. Você pode ver essa foto clicando no card do problema no painel, permitindo uma prestação de contas transparente.",
+        "Atualmente, a plataforma está focada na cidade de Picuí-PB como projeto piloto. Nossa meta é expandir para o máximo de cidades possível, permitindo que cada vez mais cidadãos tenham uma ferramenta eficiente para colaborar com a melhoria de seus bairros.",
     },
     {
       question: "Por que não consigo alterar meu nome no perfil novamente?",
       answer:
-        "Para evitar abusos e manter a consistência dos dados, o Infra Mais permite a alteração do nome de exibição apenas uma vez a cada 7 dias. Se você alterou recentemente, precisará aguardar esse prazo para uma nova mudança.",
-    },
-    {
-      question: "O Infra Mais atende outras cidades além de Picuí?",
-      answer:
-        "No momento, o sistema está configurado especificamente para a cidade de Picuí, incluindo a listagem oficial de seus bairros para garantir a precisão dos dados enviados à gestão municipal.",
+        "Para manter a consistência e a responsabilidade dos dados, a alteração do nome de exibição é permitida apenas uma vez a cada 7 dias.",
     },
   ];
 
@@ -70,7 +70,7 @@ export default function SupportPage() {
               Central de Suporte
             </h1>
             <p className="text-muted-foreground mt-2">
-              Tudo o que você precisa saber para ajudar a melhorar nossa cidade.
+              Tudo o que você precisa saber sobre o Infra Mais.
             </p>
           </div>
 
@@ -97,7 +97,7 @@ export default function SupportPage() {
           <div className="mt-12 p-6 bg-amber-50 rounded-lg border border-amber-200 text-center">
             <h3 className="text-lg font-bold text-amber-800 mb-2">Ainda tem dúvidas?</h3>
             <p className="text-amber-700 text-sm">
-              Se você encontrou algum problema técnico no site ou tem uma sugestão, entre em contato com a equipe de TI da prefeitura ou visite a sede administrativa.
+              Se você encontrou algum problema técnico no site ou deseja propor uma parceria em sua cidade, entre em contato conosco através de nossas redes sociais ou via e-mail de suporte da plataforma.
             </p>
           </div>
         </div>
