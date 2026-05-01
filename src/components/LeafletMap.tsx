@@ -61,6 +61,7 @@ export default function LeafletMap({
           const IconComponent = category?.icon;
           
           const problemLabel = category?.problems.find(p => p.value === report.problem)?.label || report.problem;
+          const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
 
           const iconHtml = IconComponent 
             ? renderToString(<IconComponent className="h-5 w-5 text-white" />)
@@ -73,10 +74,41 @@ export default function LeafletMap({
               iconAnchor: [16, 16],
               popupAnchor: [0, -16]
           });
+
+          const popupContent = `
+            <div style="min-width: 200px; font-family: sans-serif; padding: 4px;">
+              <div style="margin-bottom: 8px;">
+                <span style="background-color: ${category?.color || '#3b82f6'}; color: white; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase;">
+                  ${category?.label || 'Problema'}
+                </span>
+              </div>
+              <h3 style="margin: 0 0 4px 0; font-size: 15px; font-weight: bold; color: #111827; line-height: 1.2;">
+                ${problemLabel}
+              </h3>
+              <p style="margin: 0 0 12px 0; font-size: 12px; color: #4b5563; line-height: 1.4;">
+                <span style="font-weight: 600; color: #374151;">${displayCity} - ${report.bairro}</span><br/>
+                ${report.location}
+              </p>
+              <a href="/dashboard#report-${report.id}" style="
+                display: block;
+                text-align: center;
+                background-color: #fb923c;
+                color: white;
+                padding: 8px 12px;
+                border-radius: 6px;
+                text-decoration: none;
+                font-size: 12px;
+                font-weight: bold;
+                transition: background-color 0.2s;
+              " onmouseover="this.style.backgroundColor='#f97316'" onmouseout="this.style.backgroundColor='#fb923c'">
+                Ver Detalhes no Painel
+              </a>
+            </div>
+          `;
           
           const reportMarker = L.marker([report.latitude, report.longitude], { icon: customIcon })
               .addTo(map)
-              .bindPopup(`<b>${problemLabel}</b><br>${report.location}`);
+              .bindPopup(popupContent);
           reportMarkers.current.push(reportMarker);
       });
     }
