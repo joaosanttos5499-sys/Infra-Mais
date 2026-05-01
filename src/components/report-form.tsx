@@ -93,10 +93,8 @@ export function ReportForm() {
         }
       });
     } else if (result?.success) {
-      toast({ title: "Relatório enviado!", description: "Seu relatório foi enviado com sucesso. Redirecionando..."});
-      // This forces a full page reload, which is more robust for loading large data
-      // than the standard Next.js router navigation.
-      window.location.href = '/dashboard';
+      toast({ title: "Relatório enviado!", description: "Seu relatório foi enviado com sucesso."});
+      router.push('/dashboard');
     }
   };
 

@@ -73,6 +73,7 @@ export async function submitReport(
     return { errors: { photo: ["A foto do problema é obrigatória."] } };
   }
 
+  // O limite agora é validado contra 4MB, mas o servidor aceita até 10MB para segurança
   if (photoFile.size > 4 * 1024 * 1024) {
     return { errors: { photo: ["O tamanho da foto não pode exceder 4MB."] } };
   }
@@ -84,15 +85,15 @@ export async function submitReport(
     
     const location = reference ? `${address} (${reference})` : address;
 
-    // Temporarily disabled AI summarization to fix submission error.
-    // const aiSummary = await summarizeReport({
-    //   category,
-    //   problem,
-    //   bairro,
-    //   location,
-    //   description: description || "Nenhuma descrição fornecida.",
-    //   photoDataUri,
-    // });
+    // Reativando a sumarização por IA agora que o limite de dados foi aumentado
+    const aiSummary = await summarizeReport({
+      category,
+      problem,
+      bairro,
+      location,
+      description: description || "Nenhuma descrição fornecida.",
+      photoDataUri,
+    });
 
     const newReport: NewReport = {
       userId,
@@ -101,23 +102,24 @@ export async function submitReport(
       bairro,
       location,
       description: description || "",
-      summary: "O resumo do IA está temporariamente desativado.", // Using a placeholder
+      summary: aiSummary.summary,
       photoUrl: photoDataUri,
       latitude,
       longitude,
     };
 
     addReport(newReport);
+    
+    revalidatePath('/dashboard');
+    revalidatePath('/');
+    
+    return { success: true };
   } catch (e) {
-    console.error(e);
+    console.error("Erro ao processar relatório:", e);
     return {
-      errors: { _form: ["Ocorreu um erro inesperado. Por favor, tente novamente."] },
+      errors: { _form: ["Ocorreu um erro ao processar seu relatório pela IA. Tente novamente."] },
     };
   }
-
-  revalidatePath('/dashboard');
-  revalidatePath('/');
-  return { success: true };
 }
 
 type UpdateActionState = {
