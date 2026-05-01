@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getReports } from "@/lib/data";
 import { type Report } from "@/lib/types";
@@ -32,6 +32,8 @@ async function RecentReports() {
         {recentReports.map((report) => {
           const category = getCategory(report.category);
           const problem = category?.problems.find(p => p.value === report.problem);
+          const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
+          
           return (
             <Link href={`/dashboard#report-${report.id}`} key={report.id} className="block group">
                 <Card className="overflow-hidden flex flex-col h-full transition-all group-hover:shadow-lg group-hover:-translate-y-1">
@@ -56,8 +58,12 @@ async function RecentReports() {
                 <CardContent className="flex-grow flex flex-col">
                     <div className="flex-grow">
                         <p className="font-semibold text-sm line-clamp-1">{problem?.label || report.problem}</p>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                        {report.location}
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                            <MapPin className="h-3 w-3" />
+                            <span>{displayCity} - {report.bairro}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                          {report.location}
                         </p>
                     </div>
                     <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">

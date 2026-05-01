@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition } from "react";
@@ -13,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Expand, Trash2 } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Expand, Trash2, MapPin } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
@@ -101,6 +102,7 @@ function ReportCard({
   };
 
   const isOwner = user?.uid === report.userId;
+  const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
 
   return (
     <Card className="overflow-hidden" id={`report-${report.id}`}>
@@ -128,6 +130,10 @@ function ReportCard({
                         </div>
                         <div>
                             <p className="text-sm font-semibold">Localização:</p>
+                            <div className="flex items-center gap-1 text-sm text-foreground/80">
+                                <MapPin className="h-3 w-3" />
+                                <span>{displayCity} - {report.bairro}</span>
+                            </div>
                             <p className="text-sm text-foreground/80">{report.location}</p>
                         </div>
                         <div>

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import Image from "next/image";
 import { Camera, Loader2, RefreshCw } from "lucide-react";
@@ -43,6 +43,16 @@ const ClientReportSchema = ReportSchema.extend({
         .refine(file => file.size <= 5 * 1024 * 1024, 'O tamanho da foto não pode exceder 5MB.'),
 });
 
+const PICUI_NEIGHBORHOODS = [
+  "Cenecista",
+  "JK",
+  "Limeira",
+  "Monte Santo",
+  "Pedro Salustino de Lima",
+  "Pedro Tomáz Dantas",
+  "São José"
+].sort((a, b) => a.localeCompare(b));
+
 export function ReportForm() {
   const { toast } = useToast();
   const { user } = useUser();
@@ -54,6 +64,7 @@ export function ReportForm() {
       userId: user?.uid ?? '',
       category: '',
       problem: '',
+      city: '',
       bairro: '',
       address: '',
       reference: '',
@@ -68,6 +79,7 @@ export function ReportForm() {
 
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const selectedCategory = watch('category');
+  const selectedCity = watch('city');
   const problems = getCategory(selectedCategory)?.problems || [];
 
   const onSubmit = async (values: z.infer<typeof ClientReportSchema>) => {
@@ -94,7 +106,7 @@ export function ReportForm() {
       });
     } else if (result?.success) {
       toast({ title: "Relatório enviado!", description: "Seu relatório foi enviado com sucesso."});
-      router.push('/dashboard');
+      window.location.href = '/dashboard';
     }
   };
 
@@ -220,13 +232,54 @@ export function ReportForm() {
 
             <FormField
               control={control}
+              name="city"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cidade</FormLabel>
+                  <Select onValueChange={(val) => {
+                    field.onChange(val);
+                    if (val === 'Picui') {
+                      setValue('bairro', '');
+                    }
+                  }} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a cidade" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Picui">Picuí</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
               name="bairro"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Bairro</FormLabel>
-                  <FormControl>
-                    <Input placeholder="ex: Centro, Vila Madalena" {...field} />
-                  </FormControl>
+                  {selectedCity === 'Picui' ? (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o bairro" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {PICUI_NEIGHBORHOODS.map((bairro) => (
+                          <SelectItem key={bairro} value={bairro}>{bairro}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <FormControl>
+                      <Input placeholder="ex: Centro, Vila Madalena" {...field} />
+                    </FormControl>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}

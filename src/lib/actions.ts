@@ -1,3 +1,4 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -14,6 +15,7 @@ export type FormState = {
   errors?: {
     category?: string[];
     problem?: string[];
+    city?: string[];
     bairro?: string[];
     location?: string[];
     description?: string[];
@@ -39,6 +41,7 @@ export async function submitReport(
     userId: formData.get("userId"),
     category: formData.get("category"),
     problem: formData.get("problem"),
+    city: formData.get("city"),
     bairro: formData.get("bairro"),
     address: formData.get("address"),
     reference: formData.get("reference"),
@@ -80,7 +83,7 @@ export async function submitReport(
 
 
   try {
-    const { userId, category, problem, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
+    const { userId, category, problem, city, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
     
     const location = reference ? `${address} (${reference})` : address;
 
@@ -88,6 +91,7 @@ export async function submitReport(
     const aiSummary = await summarizeReport({
       category,
       problem,
+      city,
       bairro,
       location,
       description: description || "Nenhuma descrição fornecida.",
@@ -98,6 +102,7 @@ export async function submitReport(
       userId,
       category,
       problem,
+      city,
       bairro,
       location,
       description: description || "",
@@ -108,9 +113,6 @@ export async function submitReport(
     };
 
     addReport(newReport);
-    
-    revalidatePath('/dashboard');
-    revalidatePath('/');
     
     return { success: true };
   } catch (e) {

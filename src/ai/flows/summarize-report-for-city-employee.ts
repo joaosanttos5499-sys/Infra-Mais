@@ -19,6 +19,7 @@ const SummarizeReportInputSchema = z.object({
     .describe(
       'A photo of the infrastructure problem, as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.'
     ),
+  city: z.string().describe('The city where the problem is located.'),
   bairro: z.string().describe('The neighborhood of the infrastructure problem.'),
   location: z.string().describe('The location of the infrastructure problem.'),
   category: z.string().describe('The category of the infrastructure problem (e.g., potholes, broken streetlights, water leaks).'),
@@ -45,6 +46,7 @@ const summarizeReportPrompt = ai.definePrompt({
 
   Category: {{{category}}}
   Problem: {{{problem}}}
+  City: {{{city}}}
   Bairro: {{{bairro}}}
   Location: {{{location}}}
   Description: {{{description}}}

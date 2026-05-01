@@ -6,6 +6,7 @@ export interface Report {
   userId: string;
   category: string;
   problem: string;
+  city: string;
   bairro: string;
   location: string;
   description: string;
