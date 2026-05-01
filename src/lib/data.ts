@@ -1,4 +1,3 @@
-
 import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
 
 // In-memory store to persist data across hot-reloads in development
@@ -72,6 +71,15 @@ export async function downvoteReport(id: string): Promise<Report | undefined> {
         return reports[reportIndex];
     }
     return undefined;
+}
+
+export async function deleteReport(id: string): Promise<boolean> {
+  const index = reports.findIndex(r => r.id === id);
+  if (index !== -1) {
+    reports.splice(index, 1);
+    return true;
+  }
+  return false;
 }
 
 export async function saveUser(user: UserProfile): Promise<UserProfile> {

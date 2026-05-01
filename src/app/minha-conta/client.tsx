@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, X } from "lucide-react";
+import { Loader2, Save, X, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -18,7 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UpdateProfileSchema } from "@/lib/schemas";
-import { updateUserProfileAction, fetchUserProfileAction, saveUserProfileAction } from "@/lib/actions";
+import { updateUserProfileAction, fetchUserProfileAction, saveUserProfileAction, deleteReportAction } from "@/lib/actions";
 import { updateProfile } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -26,9 +25,88 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createAvatarSvg } from "@/lib/avatar";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 
+
+function MyReportItem({ report }: { report: Report }) {
+    const { toast } = useToast();
+    const router = useRouter();
+    const [isDeleting, startDeleteTransition] = useTransition();
+    const category = getCategory(report.category);
+    const problem = category?.problems.find(p => p.value === report.problem);
+
+    const handleDelete = async () => {
+        startDeleteTransition(async () => {
+            const result = await deleteReportAction(report.id);
+            if (result.success) {
+                toast({ title: "Relatório excluído", description: "O problema foi removido do sistema." });
+                router.refresh();
+            } else {
+                toast({ variant: "destructive", title: "Erro ao excluir", description: result.message });
+            }
+        });
+    };
+
+    return (
+        <Card className="overflow-hidden flex flex-col sm:flex-row h-full group relative">
+            <Link href={`/dashboard#report-${report.id}`} className="absolute inset-0 z-0" />
+            <div className="relative aspect-video sm:aspect-square sm:w-48 flex-shrink-0 z-10">
+                <Image
+                    src={report.photoUrl}
+                    alt={report.description}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, 192px"
+                />
+                <div className="absolute top-2 right-2">
+                    <StatusBadge status={report.status} />
+                </div>
+            </div>
+            <div className="flex flex-col flex-grow z-10">
+                <CardHeader className="pb-2 flex flex-row items-start justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                        {category?.icon && <category.icon className="h-5 w-5" style={{ color: category.color }} />}
+                        <span>{category?.label || report.category}</span>
+                    </CardTitle>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 -mt-1 -mr-2" onClick={(e) => e.stopPropagation()}>
+                                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                <span className="sr-only">Excluir Relatório</span>
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Esta ação não pode ser desfeita. O relatório será removido permanentemente de todas as páginas.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    Excluir permanentemente
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </CardHeader>
+                <CardContent className="flex-grow flex flex-col">
+                    <div className="flex-grow">
+                        <p className="font-semibold text-sm line-clamp-1">{problem?.label || report.problem}</p>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                            {report.location}
+                        </p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+                        <ReportTime date={new Date(report.createdAt)} />
+                    </p>
+                </CardContent>
+            </div>
+        </Card>
+    );
+}
 
 function MyReportsList({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
@@ -45,47 +123,9 @@ function MyReportsList({ reports }: { reports: Report[] }) {
 
     return (
         <div className="space-y-4">
-            {reports.map((report) => {
-                const category = getCategory(report.category);
-                const problem = category?.problems.find(p => p.value === report.problem);
-                return (
-                    <Link href={`/dashboard#report-${report.id}`} key={report.id} className="block group">
-                        <Card className="overflow-hidden flex flex-col sm:flex-row h-full transition-all group-hover:shadow-lg group-hover:-translate-y-1">
-                            <div className="relative aspect-video sm:aspect-square sm:w-48 flex-shrink-0">
-                                <Image
-                                    src={report.photoUrl}
-                                    alt={report.description}
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 640px) 100vw, 192px"
-                                />
-                                <div className="absolute top-2 right-2">
-                                    <StatusBadge status={report.status} />
-                                </div>
-                            </div>
-                            <div className="flex flex-col flex-grow">
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-lg flex items-center gap-2">
-                                        {category?.icon && <category.icon className="h-5 w-5" style={{ color: category.color }} />}
-                                        <span>{category?.label || report.category}</span>
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="flex-grow flex flex-col">
-                                    <div className="flex-grow">
-                                        <p className="font-semibold text-sm line-clamp-1">{problem?.label || report.problem}</p>
-                                        <p className="text-sm text-muted-foreground line-clamp-2">
-                                            {report.location}
-                                        </p>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
-                                        <ReportTime date={new Date(report.createdAt)} />
-                                    </p>
-                                </CardContent>
-                            </div>
-                        </Card>
-                    </Link>
-                )
-            })}
+            {reports.map((report) => (
+                <MyReportItem key={report.id} report={report} />
+            ))}
         </div>
     )
 }
@@ -151,7 +191,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                         const firestoreProfile = result.data;
 
                         // Self-healing: Ensure the Firebase Auth user object is in sync with our DB profile.
-                        // This fixes the inconsistent avatar problem for existing users.
                         if (auth.currentUser && (auth.currentUser.photoURL !== firestoreProfile.photoURL || auth.currentUser.displayName !== firestoreProfile.name)) {
                             updateProfile(auth.currentUser, {
                                 displayName: firestoreProfile.name,
@@ -173,7 +212,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                         }
                     } else if (user?.uid && user.email) {
                         // User exists in Auth, but not in our DB. Let's create their profile.
-                        // This handles the case for users who signed up before profile persistence was fixed.
                         const newProfileData = {
                             id: user.uid,
                             name: user.displayName || user.email.split('@')[0],
@@ -204,8 +242,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             }
                         });
                     } else {
-                        // If profile is not found, and we can't create it, it's a genuine issue.
-                        // We show the "could not load" message in the UI.
                         setUserProfile(null);
                         console.error("User profile could not be loaded:", result.error);
                     }

@@ -1,11 +1,10 @@
-
 "use client";
 
-import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition } from "react";
+import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition } from "react";
 import Image from "next/image";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { updateReportStatus, upvoteReportAction, downvoteReportAction } from "@/lib/actions";
+import { updateReportStatus, upvoteReportAction, downvoteReportAction, deleteReportAction } from "@/lib/actions";
 import { type Report, type ReportStatus } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -14,12 +13,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Expand } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Expand, Trash2 } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { useUser } from "@/firebase";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
+import { useRouter } from "next/navigation";
 
 function ReportCreationTime({ date }: { date: Date }) {
     const [timeString, setTimeString] = useState("");
@@ -48,9 +50,12 @@ function ReportCard({
     isUpvoted: boolean,
     showUpvote: boolean
 }) {
+  const { user } = useUser();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isDeleting, startDeleteTransition] = useTransition();
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
-  const { toast } = useToast();
   const [formState, formAction, isPending] = useActionState(updateReportStatus, undefined);
   const formRef = useRef<HTMLFormElement>(null);
   const [photoAfterPreview, setPhotoAfterPreview] = useState<string | null>(null);
@@ -80,10 +85,22 @@ function ReportCard({
             title: "Sucesso",
             description: formState.message,
         });
-        // Clear accordion content after successful update if needed
     }
   }, [formState, toast]);
 
+  const handleDelete = async () => {
+    startDeleteTransition(async () => {
+        const result = await deleteReportAction(report.id);
+        if (result.success) {
+            toast({ title: "Relatório excluído", description: "O problema foi removido com sucesso." });
+            router.refresh();
+        } else {
+            toast({ variant: "destructive", title: "Erro ao excluir", description: result.message });
+        }
+    });
+  };
+
+  const isOwner = user?.uid === report.userId;
 
   return (
     <Card className="overflow-hidden" id={`report-${report.id}`}>
@@ -186,17 +203,45 @@ function ReportCard({
                   </div>
 
                 </div>
-                <div className="flex justify-end items-center mt-4 px-4 pb-2">
-                    {showUpvote ? (
-                        <Button variant={isUpvoted ? "default" : "ghost"} size="sm" onClick={() => onUpvote(report.id)}>
-                            <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
-                            Apoiar ({report.upvotes})
-                        </Button>
-                    ) : (
-                     <AccordionTrigger className="py-2 px-4 text-sm -mr-4">
-                       Ver detalhes e atualizar
-                    </AccordionTrigger>
-                    )}
+                <div className="flex justify-between items-center mt-4 px-4 pb-2">
+                    <div>
+                        {isOwner && (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
+                                        {isDeleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                                        Excluir
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Você tem certeza que deseja excluir este relatório? Esta ação não pode ser desfeita.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                            Sim, excluir
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
+                    </div>
+                    <div className="flex gap-2">
+                        {showUpvote ? (
+                            <Button variant={isUpvoted ? "default" : "ghost"} size="sm" onClick={() => onUpvote(report.id)}>
+                                <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
+                                Apoiar ({report.upvotes})
+                            </Button>
+                        ) : (
+                         <AccordionTrigger className="py-2 px-4 text-sm -mr-4">
+                           Ver detalhes e atualizar
+                        </AccordionTrigger>
+                        )}
+                    </div>
                 </div>
             </div>
             

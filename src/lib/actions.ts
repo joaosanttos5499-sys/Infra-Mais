@@ -1,10 +1,9 @@
-
 "use server";
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
-import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport, saveUser, getUserById } from "@/lib/data";
+import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport, saveUser, getUserById, deleteReport as dbDeleteReport } from "@/lib/data";
 import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
 import { ReportSchema, UpdateProfileSchema } from "./schemas";
 import { createAvatarSvg } from "./avatar";
@@ -73,7 +72,7 @@ export async function submitReport(
     return { errors: { photo: ["A foto do problema é obrigatória."] } };
   }
 
-  // Aumentado para 5MB conforme solicitado
+  // Limite de 5MB
   if (photoFile.size > 5 * 1024 * 1024) {
     return { errors: { photo: ["O tamanho da foto não pode exceder 5MB."] } };
   }
@@ -85,7 +84,7 @@ export async function submitReport(
     
     const location = reference ? `${address} (${reference})` : address;
 
-    // Reativando a sumarização por IA
+    // Sumarização por IA
     const aiSummary = await summarizeReport({
       category,
       problem,
@@ -180,6 +179,23 @@ export async function downvoteReportAction(reportId: string) {
         console.error(error);
         return { success: false, message: "Failed to downvote." };
     }
+}
+
+export async function deleteReportAction(reportId: string) {
+  try {
+    const success = await dbDeleteReport(reportId);
+    if (!success) {
+      return { success: false, message: "Relatório não encontrado." };
+    }
+    revalidatePath("/");
+    revalidatePath("/dashboard");
+    revalidatePath("/minha-conta");
+    revalidatePath("/funcionarios");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete report:", error);
+    return { success: false, message: "Erro ao excluir relatório." };
+  }
 }
 
 export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'photoURL'> & { photoURL?: string }): Promise<{ success: boolean; error?: string; photoURL?: string; }> {
