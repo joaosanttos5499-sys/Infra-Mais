@@ -6,8 +6,7 @@
  * Para adicionar ou remover um funcionário, basta editar esta lista.
  */
 export const EMPLOYEE_EMAILS = [
-  // Adicione os e-mails dos funcionários aqui
-  "exemplo@funcionario.com",
+  "joaosanttos528@gmail.com",
 ];
 
 export function isEmailEmployee(email?: string | null): boolean {
