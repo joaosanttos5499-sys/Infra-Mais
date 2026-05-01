@@ -29,7 +29,7 @@ export function addReport(report: NewReport): Report {
   const newReport: Report = {
     ...report,
     id: String(idCounter++),
-    status: "PENDING",
+    status: "UNDER_REVIEW", // Inicia em análise para moderação
     createdAt: new Date().toISOString(),
     upvotes: 0,
   };

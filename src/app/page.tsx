@@ -16,7 +16,9 @@ import { HomeCtaClient } from "@/components/home-cta-client";
 
 
 async function RecentReports() {
-  const recentReports = await getReports(3);
+  const allReports = await getReports();
+  // Mostra apenas relatórios que passaram pela moderação
+  const recentReports = allReports.filter(r => r.status !== 'UNDER_REVIEW').slice(0, 3);
 
   if (recentReports.length === 0) {
     return (
@@ -88,9 +90,11 @@ async function RecentReports() {
 }
 
 function AboutSection({ reports }: { reports: Report[] }) {
-  const totalReports = reports.length;
-  const resolvedReports = reports.filter(r => r.status === 'RESOLVED').length;
-  const inProgressReports = reports.filter(r => r.status === 'IN_PROGRESS').length;
+  // Filtra apenas relatórios públicos para o gráfico da Home
+  const publicReports = reports.filter(r => r.status !== 'UNDER_REVIEW');
+  const totalReports = publicReports.length;
+  const resolvedReports = publicReports.filter(r => r.status === 'RESOLVED').length;
+  const inProgressReports = publicReports.filter(r => r.status === 'IN_PROGRESS').length;
 
   return (
     <div className="bg-transparent py-16">
@@ -123,7 +127,9 @@ function AboutSection({ reports }: { reports: Report[] }) {
 
 
 export default async function Home() {
-  const reports: Report[] = await getReports();
+  const allReports: Report[] = await getReports();
+  // No mapa da home, mostramos apenas o que já foi moderado
+  const publicReports = allReports.filter(r => r.status !== 'UNDER_REVIEW');
 
   return (
     <>
@@ -153,7 +159,7 @@ Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
                     Mapa em Tempo Real
                 </h2>
                 <Separator className="mb-6" />
-                <HomeMapClient reports={reports} />
+                <HomeMapClient reports={publicReports} />
                 </div>
             </div>
             </div>
@@ -172,7 +178,7 @@ Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
             </div>
             </div>
             
-            <AboutSection reports={reports} />
+            <AboutSection reports={allReports} />
         </div>
 
       </main>

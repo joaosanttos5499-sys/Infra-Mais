@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { type ReportStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -6,6 +7,10 @@ export const statusConfig: Record<
   ReportStatus,
   { label: string; className: string }
 > = {
+  UNDER_REVIEW: {
+    label: "Em Análise",
+    className: "bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-100",
+  },
   PENDING: {
     label: "Pendente",
     className: "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100",

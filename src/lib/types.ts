@@ -1,5 +1,5 @@
 
-export type ReportStatus = "PENDING" | "IN_PROGRESS" | "RESOLVED";
+export type ReportStatus = "UNDER_REVIEW" | "PENDING" | "IN_PROGRESS" | "RESOLVED";
 
 export interface Report {
   id: string;

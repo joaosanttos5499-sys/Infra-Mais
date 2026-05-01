@@ -330,7 +330,8 @@ type OptimisticUpdate = { type: 'upvote', id: string, amount: 1 | -1 } | { type:
 
 export function DashboardClient({ reports, showUpvote = true }: { reports: Report[], showUpvote?: boolean }) {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<ReportStatus>("PENDING");
+  // Se for funcionário (showUpvote=false), começa pela aba de moderação
+  const [activeTab, setActiveTab] = useState<ReportStatus>(showUpvote ? "PENDING" : "UNDER_REVIEW");
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'upvotes'>('newest');
   
@@ -428,7 +429,10 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
     <>
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ReportStatus)} className="w-full">
           <div className="flex flex-row justify-between items-center mb-4 gap-2">
-            <TabsList className="grid flex-1 w-full grid-cols-3 bg-card p-1 rounded-lg">
+            <TabsList className={cn("grid flex-1 w-full bg-card p-1 rounded-lg", showUpvote ? "grid-cols-3" : "grid-cols-4")}>
+                {!showUpvote && (
+                    <TabsTrigger value="UNDER_REVIEW" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-800 data-[state=active]:shadow-md">Em Análise</TabsTrigger>
+                )}
                 <TabsTrigger value="PENDING" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:shadow-md">Pendentes</TabsTrigger>
                 <TabsTrigger value="IN_PROGRESS" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-md">Em Andamento</TabsTrigger>
                 <TabsTrigger value="RESOLVED" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:shadow-md">Resolvidos</TabsTrigger>
@@ -447,6 +451,11 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
               </Select>
             </div>
           </div>
+          {!showUpvote && (
+              <TabsContent value="UNDER_REVIEW">
+                  <ReportList reports={filteredReports("UNDER_REVIEW")} onUpvote={handleUpvote} upvotedReports={upvotedReports} showUpvote={showUpvote} />
+              </TabsContent>
+          )}
           <TabsContent value="PENDING">
               <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} upvotedReports={upvotedReports} showUpvote={showUpvote} />
           </TabsContent>
