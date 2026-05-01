@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
+import { isEmailEmployee } from "@/lib/config";
 
 export function AuthReportClient() {
     const { user, isUserLoading } = useUser();
@@ -15,7 +16,11 @@ export function AuthReportClient() {
 
     useEffect(() => {
         if (!isUserLoading && user) {
-            router.push('/report/new');
+            if (isEmailEmployee(user.email)) {
+                router.push('/funcionarios');
+            } else {
+                router.push('/report/new');
+            }
         }
     }, [user, isUserLoading, router]);
 
@@ -36,7 +41,9 @@ export function AuthReportClient() {
             </CardHeader>
             <CardContent>
                 <Separator className="mb-6" />
-                <AuthForm onAuthSuccess={() => router.push('/report/new')} />
+                <AuthForm onAuthSuccess={() => {
+                    // Success callback will handle standard routing if useEffect hasn't triggered yet
+                }} />
             </CardContent>
         </Card>
     )

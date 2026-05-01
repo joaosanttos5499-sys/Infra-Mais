@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import Image from "next/image";
-import { Camera, Loader2, RefreshCw } from "lucide-react";
+import { Camera, Loader2, RefreshCw, ShieldAlert } from "lucide-react";
 import { submitReport, type FormState } from "@/lib/actions";
 import { categories, getCategory } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { ReportSchema } from "@/lib/schemas";
+import { isEmailEmployee } from "@/lib/config";
+import Link from "next/link";
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
@@ -55,7 +57,7 @@ const PICUI_NEIGHBORHOODS = [
 
 export function ReportForm() {
   const { toast } = useToast();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const router = useRouter();
   
   const form = useForm<z.infer<typeof ClientReportSchema>>({
@@ -82,7 +84,14 @@ export function ReportForm() {
   const selectedCity = watch('city');
   const problems = getCategory(selectedCategory)?.problems || [];
 
+  const isEmployee = isEmailEmployee(user?.email);
+
   const onSubmit = async (values: z.infer<typeof ClientReportSchema>) => {
+    if (isEmployee) {
+      toast({ variant: 'destructive', title: 'Ação Bloqueada', description: 'Funcionários não podem enviar relatos.' });
+      return;
+    }
+
     const formData = new FormData();
     Object.keys(values).forEach(key => {
       const formKey = key as keyof typeof values;
@@ -145,6 +154,25 @@ export function ReportForm() {
   const locationObject = selectedLocation[0] !== 0 && selectedLocation[1] !== 0 
     ? { lat: selectedLocation[0], lng: selectedLocation[1]} 
     : null;
+
+  if (!isUserLoading && isEmployee) {
+    return (
+        <Card className="w-full max-w-2xl border-blue-200 bg-blue-50/30">
+            <CardHeader className="text-center">
+                <ShieldAlert className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                <CardTitle className="text-2xl font-bold text-blue-900">Acesso Restrito</CardTitle>
+                <CardDescription className="text-blue-800">
+                    Funcionários do Infra Mais não podem enviar relatos para garantir a imparcialidade e transparência do sistema.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center pb-6">
+                <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                    <Link href="/funcionarios">Ir para Painel de Gestão</Link>
+                </Button>
+            </CardContent>
+        </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-2xl">

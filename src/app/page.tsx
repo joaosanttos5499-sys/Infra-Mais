@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,6 +12,7 @@ import { getCategory } from "@/lib/categories";
 import { StatusBadge } from "@/components/status-badge";
 import { ReportsChart } from "@/components/reports-chart";
 import { ReportTime } from "@/components/report-time";
+import { HomeCtaClient } from "@/components/home-cta-client";
 
 
 async function RecentReports() {
@@ -137,11 +139,7 @@ export default async function Home() {
                 Informe rapidamente um problema encontrado na sua cidade. Descreva o que aconteceu, envie uma foto (opcional) e marque no mapa o local exato.
 Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
               </p>
-              <Button asChild size="lg" className="mt-6 w-full sm:w-auto bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
-                <Link href="/report/auth">
-                  Relatar um Problema <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
+              <HomeCtaClient />
             </div>
           </div>
         </div>
