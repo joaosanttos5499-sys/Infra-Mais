@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { DashboardClient } from "@/components/dashboard-client";
-import { getReports } from "@/lib/data";
+import { getAllReportsAction } from "@/lib/actions";
 import { Loader2, ShieldAlert } from "lucide-react";
 import { useUser } from "@/firebase";
 import { isEmailEmployee } from "@/lib/config";
@@ -42,11 +43,11 @@ export default function FuncionariosPage() {
   const { user, isUserLoading } = useUser();
   const [reports, setReports] = useState<Report[]>([]);
   const [isLoadingReports, setIsLoadingReports] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     if (!isUserLoading && user && isEmailEmployee(user.email)) {
-      getReports().then(data => {
+      // Usamos a Server Action para buscar os dados do servidor com segurança
+      getAllReportsAction().then(data => {
         setReports(data);
         setIsLoadingReports(false);
       });

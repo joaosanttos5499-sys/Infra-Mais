@@ -130,6 +130,12 @@ export async function submitReport(
 
     addReport(newReport);
     
+    // Revalida as rotas para garantir que os novos dados apareçam nos componentes de servidor
+    revalidatePath("/");
+    revalidatePath("/dashboard");
+    revalidatePath("/minha-conta");
+    revalidatePath("/funcionarios");
+    
     return { success: true };
   } catch (e) {
     console.error("Erro ao processar relatório:", e);
@@ -374,4 +380,8 @@ export async function markAllAsReadAction(userId: string) {
     } catch (error) {
         return { success: false };
     }
+}
+
+export async function getAllReportsAction(): Promise<Report[]> {
+  return await getReports();
 }
