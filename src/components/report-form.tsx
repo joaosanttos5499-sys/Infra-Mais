@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { ReportSchema } from "@/lib/schemas";
 import { isEmailEmployee } from "@/lib/config";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
@@ -32,9 +33,25 @@ const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
 function SubmitButton() {
   const { formState: { isSubmitting } } = useFormContext();
   return (
-    <Button type="submit" className="w-full bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500" disabled={isSubmitting} aria-disabled={isSubmitting}>
-      {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      Enviar Relatório
+    <Button 
+      type="submit" 
+      className={cn(
+        "w-full transition-all duration-200",
+        isSubmitting 
+          ? "bg-amber-200 text-amber-900 cursor-not-allowed border-amber-300" 
+          : "bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500"
+      )} 
+      disabled={isSubmitting} 
+      aria-disabled={isSubmitting}
+    >
+      {isSubmitting ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Você está sendo redirecionado...
+        </>
+      ) : (
+        "Enviar Relatório"
+      )}
     </Button>
   );
 }
@@ -118,8 +135,8 @@ export function ReportForm() {
       });
     } else if (result?.success) {
       toast({ 
-        title: "Relatório enviado com sucesso!", 
-        description: "Ele agora está sob análise pela equipe do Infra Mais."
+        title: "Relatório submetido com sucesso!", 
+        description: "Sua solicitação foi devidamente registrada e agora passará por um processo de validação pela nossa equipe técnica. Você poderá acompanhar o progresso em seu painel de controle."
       });
       router.push('/minha-conta#meus-relatorios');
     }
