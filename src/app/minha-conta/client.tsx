@@ -276,6 +276,21 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             };
         }
     }, [isConfirmOpen]);
+
+    const getCooldownInfo = () => {
+        if (!userProfile?.nameLastUpdatedAt) return { onCooldown: false, remainingDays: 0 };
+        const lastUpdate = new Date(userProfile.nameLastUpdatedAt);
+        const nextAvailable = new Date(lastUpdate.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const now = new Date();
+        const diff = nextAvailable.getTime() - now.getTime();
+        
+        if (diff <= 0) return { onCooldown: false, remainingDays: 0 };
+        
+        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+        return { onCooldown: true, remainingDays: days };
+    };
+
+    const cooldown = getCooldownInfo();
     
     const onSubmit = async (data: z.infer<typeof UpdateProfileSchema>) => {
       if (!user) return;
@@ -288,7 +303,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             await updateProfile(auth.currentUser, {
               displayName: data.name,
             });
-            setUserProfile(prev => prev ? { ...prev, name: data.name } : null);
+            setUserProfile(prev => prev ? { ...prev, name: data.name, nameLastUpdatedAt: new Date().toISOString() } : null);
           } catch(e) {
              console.error("Error updating firebase auth profile:", e)
           }
@@ -382,7 +397,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 <CardHeader>
                     <CardTitle>Meus Dados</CardTitle>
                     <Separator className="my-4" />
-                    <CardDescription>Visualize e edite as informações da sua conta.</CardDescription>
+                    <CardDescription className="mt-3">Visualize e edite as informações da sua conta.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {isProfileLoading ? (
@@ -421,9 +436,11 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             />
 
                             {isEditingName && (
-                                <Alert variant="default" className="bg-amber-50 border-amber-200">
-                                    <AlertDescription className="text-amber-800 text-xs">
-                                    Você só pode alterar seu nome uma vez por semana.
+                                <Alert variant="default" className={cn("bg-amber-50 border-amber-200", cooldown.onCooldown && "bg-red-50 border-red-200")}>
+                                    <AlertDescription className={cn("text-amber-800 text-xs", cooldown.onCooldown && "text-red-800")}>
+                                        {cooldown.onCooldown 
+                                            ? `Você deve esperar ${cooldown.remainingDays} ${cooldown.remainingDays === 1 ? 'dia' : 'dias'} para alterar o seu nome novamente.`
+                                            : "Você só pode alterar seu nome uma vez por semana."}
                                     </AlertDescription>
                                 </Alert>
                             )}
@@ -449,7 +466,11 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     <Button type="button" variant="outline" onClick={handleCancel}>
                                         <X className="mr-2 h-4 w-4" /> Cancelar
                                     </Button>
-                                    <Button type="button" onClick={handleSaveClick} disabled={form.formState.isSubmitting || !form.formState.isDirty}>
+                                    <Button 
+                                        type="button" 
+                                        onClick={handleSaveClick} 
+                                        disabled={form.formState.isSubmitting || !form.formState.isDirty || cooldown.onCooldown}
+                                    >
                                         {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                                         Salvar
                                     </Button>
@@ -482,6 +503,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 <Card>
                     <CardHeader>
                         <CardTitle>Meus Relatórios</CardTitle>
+                        <Separator className="my-4" />
                     </CardHeader>
                     <CardContent>
                         <MyReportsList reports={userReports} />
@@ -496,7 +518,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                         Zona de Perigo
                     </CardTitle>
                     <Separator className="my-4" />
-                    <CardDescription>
+                    <CardDescription className="mt-3">
                         Ações irreversíveis que afetam permanentemente sua conta no Infra Mais.
                     </CardDescription>
                 </CardHeader>
