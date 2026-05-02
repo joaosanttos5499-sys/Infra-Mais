@@ -60,6 +60,10 @@ function ReportCard({
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
   
+  const [isStatusConfirmOpen, setIsStatusConfirmOpen] = useState(false);
+  const [statusCountdown, setStatusCountdown] = useState(3);
+  const [isStatusConfirmEnabled, setIsStatusConfirmEnabled] = useState(false);
+
   const [formState, formAction, isPending] = useActionState(async (prev: any, formData: FormData) => {
     const status = formData.get("status") as ReportStatus;
     if (onStatusUpdate) onStatusUpdate(report.id, status);
@@ -96,8 +100,35 @@ function ReportCard({
         });
         if (formRef.current) formRef.current.reset();
         setPhotoAfterPreview(null);
+        setIsStatusConfirmOpen(false);
     }
   }, [formState, toast]);
+
+  useEffect(() => {
+    if (isStatusConfirmOpen) {
+      setIsStatusConfirmEnabled(false);
+      setStatusCountdown(3);
+      
+      const countdownInterval = setInterval(() => {
+        setStatusCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      const enableTimeout = setTimeout(() => {
+        setIsStatusConfirmEnabled(true);
+      }, 3000);
+
+      return () => {
+        clearInterval(countdownInterval);
+        clearTimeout(enableTimeout);
+      };
+    }
+  }, [isStatusConfirmOpen]);
 
   const handleDelete = async () => {
     startDeleteTransition(async () => {
@@ -310,10 +341,31 @@ function ReportCard({
                     </div>
 
                     <div className="flex justify-end pt-2">
-                      <Button type="submit" disabled={isPending} className="bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500 w-full sm:w-auto">
-                        {isPending ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-                        Salvar Alterações
-                      </Button>
+                      <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
+                        <AlertDialogTrigger asChild>
+                          <Button type="button" disabled={isPending} className="bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500 w-full sm:w-auto">
+                            {isPending ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                            Salvar Alterações
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmar Atualização de Status</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Tem certeza que deseja atualizar o status deste relatório? Esta ação enviará uma notificação automática ao cidadão.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => formRef.current?.requestSubmit()}
+                              disabled={!isStatusConfirmEnabled || isPending}
+                            >
+                              {isStatusConfirmEnabled ? "Sim, tenho certeza" : `Sim, tenho certeza (${statusCountdown})`}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                 </div>
               </form>
