@@ -21,7 +21,7 @@
     --accent-foreground: 0 0% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
+    --border: 0 0% 80%; /* Darker gray for better contrast against light background */
     --input: 0 0% 89.8%;
     --ring: 207 88% 68%;
     --chart-1: 38 92% 50%; /* Orange for Pending */
