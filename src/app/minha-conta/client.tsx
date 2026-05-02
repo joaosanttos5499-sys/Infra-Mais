@@ -292,6 +292,18 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     };
 
     const cooldown = getCooldownInfo();
+
+    const handleEditClick = () => {
+        if (cooldown.onCooldown) {
+            toast({
+                variant: "destructive",
+                title: "Alteração Bloqueada",
+                description: `Você deve esperar ${cooldown.remainingDays} ${cooldown.remainingDays === 1 ? 'dia' : 'dias'} para alterar o seu nome novamente.`,
+            });
+            return;
+        }
+        setIsEditingName(true);
+    };
     
     const onSubmit = async (data: z.infer<typeof UpdateProfileSchema>) => {
       if (!user) return;
@@ -423,7 +435,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                   <div className="flex justify-between items-center">
                                     <FormLabel>Nome Completo</FormLabel>
                                     {!isEditingName && (
-                                        <Button type="button" variant="link" className="p-0 h-auto text-sm" onClick={() => setIsEditingName(true)}>
+                                        <Button type="button" variant="link" className="p-0 h-auto text-sm" onClick={handleEditClick}>
                                             Alterar
                                         </Button>
                                     )}
@@ -437,11 +449,9 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             />
 
                             {isEditingName && (
-                                <Alert variant="default" className={cn("bg-amber-50 border-amber-200", cooldown.onCooldown && "bg-red-50 border-red-200")}>
-                                    <AlertDescription className={cn("text-amber-800 text-xs", cooldown.onCooldown && "text-red-800")}>
-                                        {cooldown.onCooldown 
-                                            ? `Você deve esperar ${cooldown.remainingDays} ${cooldown.remainingDays === 1 ? 'dia' : 'dias'} para alterar o seu nome novamente.`
-                                            : "Você só pode alterar seu nome uma vez por semana."}
+                                <Alert variant="default" className="bg-amber-50 border-amber-200">
+                                    <AlertDescription className="text-amber-800 text-xs">
+                                        Você só pode alterar seu nome uma vez por semana.
                                     </AlertDescription>
                                 </Alert>
                             )}
@@ -470,7 +480,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     <Button 
                                         type="button" 
                                         onClick={handleSaveClick} 
-                                        disabled={form.formState.isSubmitting || !form.formState.isDirty || cooldown.onCooldown}
+                                        disabled={form.formState.isSubmitting || !form.formState.isDirty}
                                     >
                                         {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                                         Salvar
