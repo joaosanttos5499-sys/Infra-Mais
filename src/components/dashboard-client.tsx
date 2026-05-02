@@ -24,6 +24,14 @@ import { useUser } from "@/firebase";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
 import { useRouter } from "next/navigation";
 
+// Mapa de progressão estrita de status
+const STATUS_PROGRESSION: Record<ReportStatus, ReportStatus | null> = {
+  UNDER_REVIEW: "PENDING",
+  PENDING: "IN_PROGRESS",
+  IN_PROGRESS: "RESOLVED",
+  RESOLVED: null,
+};
+
 function ReportCreationTime({ date }: { date: Date }) {
     const [timeString, setTimeString] = useState("");
 
@@ -145,6 +153,9 @@ function ReportCard({
   const isOwner = user?.uid === report.userId;
   const canDelete = isOwner && report.status === 'UNDER_REVIEW';
   const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
+
+  const nextAllowedStatus = STATUS_PROGRESSION[report.status];
+  const isFinalStatus = !nextAllowedStatus;
 
   return (
     <Card className="overflow-hidden" id={`report-${report.id}`}>
@@ -288,7 +299,7 @@ function ReportCard({
                          <AccordionTrigger className="py-2 px-4 text-sm -mr-4 hover:no-underline">
                            <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-md font-semibold transition-colors hover:bg-primary/20">
                                 <Settings2 className="h-4 w-4" />
-                                Atualizar Status
+                                {isFinalStatus ? "Visualizar Detalhes" : "Atualizar Status"}
                            </div>
                         </AccordionTrigger>
                         )}
@@ -303,24 +314,41 @@ function ReportCard({
                     <div className="flex flex-col md:flex-row gap-6">
                         <div className="flex-1 space-y-4">
                             <div>
-                                <h4 className="font-semibold text-sm mb-1">Última Atualização</h4>
-                                <p className="text-sm text-foreground/80" title={format(new Date(report.createdAt), "PPPppp", { locale: ptBR })}>
-                                    {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true, locale: ptBR })}
-                                </p>
+                                <h4 className="font-semibold text-sm mb-1">Status Atual</h4>
+                                <div className="flex items-center gap-2">
+                                    <StatusBadge status={report.status} />
+                                    <span className="text-xs text-muted-foreground">
+                                        Última mudança {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true, locale: ptBR })}
+                                    </span>
+                                </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor={`status-${report.id}`}>Novo Status</Label>
-                                <Select name="status" defaultValue={report.status}>
-                                    <SelectTrigger id={`status-${report.id}`} className="bg-background">
+                                <Label htmlFor={`status-${report.id}`}>Próximo Passo</Label>
+                                <Select name="status" defaultValue={nextAllowedStatus || report.status}>
+                                    <SelectTrigger id={`status-${report.id}`} className="bg-background" disabled={isFinalStatus}>
                                         <SelectValue placeholder="Mudar status" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {Object.entries(statusConfig).map(([key, { label }]) => (
-                                            <SelectItem key={key} value={key}>{label}</SelectItem>
-                                        ))}
+                                        {Object.entries(statusConfig).map(([key, { label }]) => {
+                                            const isNext = key === nextAllowedStatus;
+                                            const isCurrent = key === report.status;
+                                            return (
+                                                <SelectItem 
+                                                    key={key} 
+                                                    value={key} 
+                                                    disabled={!isNext}
+                                                    className={cn(!isNext && !isCurrent && "opacity-40 cursor-not-allowed")}
+                                                >
+                                                    {label} {isNext && " (Próximo)"}
+                                                </SelectItem>
+                                            );
+                                        })}
                                     </SelectContent>
                                 </Select>
+                                {isFinalStatus && (
+                                    <p className="text-[10px] text-green-600 font-medium">Este relatório já atingiu o status final.</p>
+                                )}
                             </div>
                         </div>
 
@@ -336,37 +364,47 @@ function ReportCard({
                                     </div>
                                 )}
                             </div>
-                            <Input id={`photoAfter-${report.id}`} name="photoAfter" type="file" accept="image/*" className="file:text-primary file:font-semibold text-xs" onChange={handlePhotoChange} />
+                            <Input 
+                                id={`photoAfter-${report.id}`} 
+                                name="photoAfter" 
+                                type="file" 
+                                accept="image/*" 
+                                className="file:text-primary file:font-semibold text-xs" 
+                                onChange={handlePhotoChange}
+                                disabled={isFinalStatus}
+                            />
                         </div>
                     </div>
 
-                    <div className="flex justify-end pt-2">
-                      <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
-                        <AlertDialogTrigger asChild>
-                          <Button type="button" disabled={isPending} className="bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500 w-full sm:w-auto">
-                            {isPending ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-                            Salvar Alterações
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmar Atualização de Status</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Tem certeza que deseja atualizar o status deste relatório? Esta ação enviará uma notificação automática ao cidadão.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction 
-                              onClick={() => formRef.current?.requestSubmit()}
-                              disabled={!isStatusConfirmEnabled || isPending}
-                            >
-                              {isStatusConfirmEnabled ? "Sim, tenho certeza" : `Sim, tenho certeza (${statusCountdown})`}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
+                    {!isFinalStatus && (
+                        <div className="flex justify-end pt-2">
+                            <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
+                                <AlertDialogTrigger asChild>
+                                    <Button type="button" disabled={isPending} className="bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500 w-full sm:w-auto">
+                                        {isPending ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                                        Salvar Alterações
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Confirmar Atualização de Status</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Tem certeza que deseja mover este relato para o próximo estágio? O cidadão será notificado automaticamente sobre esta mudança.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction 
+                                            onClick={() => formRef.current?.requestSubmit()}
+                                            disabled={!isStatusConfirmEnabled || isPending}
+                                        >
+                                            {isStatusConfirmEnabled ? "Sim, tenho certeza" : `Sim, tenho certeza (${statusCountdown})`}
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    )}
                 </div>
               </form>
             </AccordionContent>
