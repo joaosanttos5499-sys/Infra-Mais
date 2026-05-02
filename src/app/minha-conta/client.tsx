@@ -159,7 +159,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const [isEditingName, setIsEditingName] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isConfirmEnabled, setIsConfirmEnabled] = useState(false);
-    const [countdown, setCountdown] = useState(3);
+    const [countdown, setCountdown] = useState(5);
     const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
 
@@ -254,7 +254,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     useEffect(() => {
         if (isConfirmOpen) {
             setIsConfirmEnabled(false);
-            setCountdown(3);
+            setCountdown(5);
             
             const countdownInterval = setInterval(() => {
                 setCountdown(prev => {
@@ -268,7 +268,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
             const enableTimeout = setTimeout(() => {
                 setIsConfirmEnabled(true);
-            }, 3000);
+            }, 5000);
 
             return () => {
                 clearInterval(countdownInterval);
