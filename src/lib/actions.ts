@@ -1,4 +1,3 @@
-
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -206,8 +205,9 @@ export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'phot
     const role = isEmailEmployee(userProfile.email) ? "EMPLOYEE" : "USER";
     let finalUserProfile: UserProfile;
 
+    // Garante que o avatar seja gerado a partir do e-mail e seja permanente
     if (!userProfile.photoURL) {
-      const avatarSvg = createAvatarSvg(userProfile.name);
+      const avatarSvg = createAvatarSvg(userProfile.email);
       finalUserProfile = {
         ...userProfile,
         photoURL: avatarSvg,
@@ -267,7 +267,7 @@ export async function updateUserProfileAction(userId: string, data: { name: stri
     const updatedProfile: UserProfile = {
       ...existingProfile,
       name,
-      photoURL: createAvatarSvg(name),
+      // Removido o createAvatarSvg(name) para manter o avatar original baseado no e-mail
       nameLastUpdatedAt: name !== existingProfile.name ? new Date().toISOString() : existingProfile.nameLastUpdatedAt,
     };
 

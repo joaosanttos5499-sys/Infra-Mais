@@ -7,6 +7,10 @@ const defaultAvatarColors = [
   '#06b6d4', // cyan
   '#ef4444', // red
   '#78716c', // stone
+  '#10b981', // emerald
+  '#6366f1', // indigo
+  '#f43f5e', // rose
+  '#eab308', // yellow
 ];
 
 /**
@@ -24,9 +28,10 @@ const stringToHash = (str: string): number => {
 
 /**
  * Creates an SVG avatar as a Base64 data URI.
- * Prioritizes the first letter of the provided string (usually email or name).
+ * Strictly uses the first letter of the email for the letter,
+ * and the hash of the full email for the color to ensure uniqueness.
  */
-export const createAvatarSvg = (identifier: string): string => {
+export const createAvatarSvg = (email: string): string => {
   const getBase64 = (svg: string) => {
     if (typeof window !== 'undefined') {
       return window.btoa(unescape(encodeURIComponent(svg)))
@@ -34,10 +39,10 @@ export const createAvatarSvg = (identifier: string): string => {
     return Buffer.from(svg).toString('base64');
   }
 
-  const cleanIdentifier = identifier || 'U';
-  const hash = stringToHash(cleanIdentifier);
+  const cleanEmail = email || 'U';
+  const hash = stringToHash(cleanEmail.toLowerCase());
   const color = defaultAvatarColors[hash % defaultAvatarColors.length];
-  const firstLetter = cleanIdentifier.charAt(0).toUpperCase();
+  const firstLetter = cleanEmail.charAt(0).toUpperCase();
 
   const svg = `<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="${color}" /><text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="50" fill="white">${firstLetter}</text></svg>`;
   

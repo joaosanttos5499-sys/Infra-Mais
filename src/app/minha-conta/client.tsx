@@ -294,6 +294,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             await updateProfile(auth.currentUser, {
               displayName: data.name,
             });
+            // Importante: Mantemos o photoURL do userProfile atual, não geramos um novo do nome
             setUserProfile(prev => prev ? { ...prev, name: data.name } : null);
           } catch(e) {
              console.error("Error updating firebase auth profile:", e)
@@ -339,7 +340,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         )
     }
 
-    const avatarInitial = (user.email || user.displayName || 'U').charAt(0).toUpperCase();
+    // Usamos sempre a primeira letra do e-mail para o fallback caso o photoURL falhe
+    const avatarInitial = (user.email || 'U').charAt(0).toUpperCase();
 
     return (
         <div className="space-y-8">
@@ -359,7 +361,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                             <FormItem className="flex flex-col items-center gap-4">
                               <Avatar className="h-24 w-24">
-                                <AvatarImage src={userProfile.photoURL || createAvatarSvg(userProfile.email || userProfile.name || '')} />
+                                <AvatarImage src={userProfile.photoURL || createAvatarSvg(userProfile.email)} />
                                 <AvatarFallback>{avatarInitial}</AvatarFallback>
                               </Avatar>
                             </FormItem>
