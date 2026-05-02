@@ -30,21 +30,23 @@ const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
 });
 
-function SubmitButton() {
+function SubmitButton({ isRedirecting }: { isRedirecting: boolean }) {
   const { formState: { isSubmitting } } = useFormContext();
+  const isLoading = isSubmitting || isRedirecting;
+
   return (
     <Button 
       type="submit" 
       className={cn(
         "w-full transition-all duration-200",
-        isSubmitting 
-          ? "bg-amber-200 text-amber-900 cursor-not-allowed border-amber-300" 
+        isLoading 
+          ? "bg-amber-100 text-amber-900 cursor-not-allowed border-amber-200 hover:bg-amber-100" 
           : "bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500"
       )} 
-      disabled={isSubmitting} 
-      aria-disabled={isSubmitting}
+      disabled={isLoading} 
+      aria-disabled={isLoading}
     >
-      {isSubmitting ? (
+      {isLoading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Você está sendo redirecionado...
@@ -76,6 +78,7 @@ export function ReportForm() {
   const { toast } = useToast();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
   
   const form = useForm<z.infer<typeof ClientReportSchema>>({
     resolver: zodResolver(ClientReportSchema),
@@ -134,6 +137,7 @@ export function ReportForm() {
         }
       });
     } else if (result?.success) {
+      setIsRedirecting(true);
       toast({ 
         title: "Relatório submetido com sucesso!", 
         description: "Sua solicitação foi devidamente registrada e agora passará por um processo de validação pela nossa equipe técnica. Você poderá acompanhar o progresso em seu painel de controle."
@@ -200,7 +204,7 @@ export function ReportForm() {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle className="font-headline text-3xl md:text-4xl mb-4">Preencha o Relatório</CardTitle>
+        <CardTitle className="font-headline text-3xl md:text-4xl mb-4 text-foreground">Preencha o Relatório</CardTitle>
         <CardDescription>
           Preencha os detalhes abaixo para enviar um relatório para a cidade.
         </CardDescription>
@@ -401,11 +405,11 @@ export function ReportForm() {
             />
           </CardContent>
           <CardFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
-              <Button variant="outline" type="button" onClick={resetForm} className="w-full sm:w-auto">
+              <Button variant="outline" type="button" onClick={resetForm} className="w-full sm:w-auto" disabled={formState.isSubmitting || isRedirecting}>
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Resetar
               </Button>
-              <SubmitButton />
+              <SubmitButton isRedirecting={isRedirecting} />
           </CardFooter>
         </form>
       </Form>
