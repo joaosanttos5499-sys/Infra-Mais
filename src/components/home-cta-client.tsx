@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -32,7 +31,7 @@ export function HomeCtaClient() {
   return (
     <Button asChild size="lg" className="mt-6 w-full sm:w-auto bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
       <Link href="/report/auth">
-        Relatar um Problema <ArrowRight className="ml-2 h-5 w-5" />
+        Enviar Relato <ArrowRight className="ml-2 h-5 w-5" />
       </Link>
     </Button>
   );

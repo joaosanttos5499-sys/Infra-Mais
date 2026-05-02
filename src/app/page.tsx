@@ -133,16 +133,16 @@ export default async function Home() {
   return (
     <>
       <main>
-        {/* Card "Reportar um Problema" */}
+        {/* Card "Relate um Problema na Sua Cidade" */}
         <div className="py-12 md:py-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center md:text-left md:max-w-xl">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline font-bold text-foreground">
-                Reportar um Problema
+                Relate um Problema na Sua Cidade
               </h2>
               <Separator className="my-4" />
               <p className="mt-3 text-muted-foreground text-base">
-                Informe rapidamente um problema de infraestrutura encontrado. Descreva o ocorrido, anexe uma foto e marque o local exato no mapa para que possamos ajudar na resolution.
+                Informe um problema de infraestrutura de forma rápida e precisa. Descreva o ocorrido, anexe uma imagem e marque o local no mapa para facilitar a resolução.
               </p>
               <HomeCtaClient />
             </div>
@@ -155,7 +155,7 @@ export default async function Home() {
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-card p-4 sm:p-8 rounded-lg shadow-lg border">
                 <h2 className="text-3xl font-headline font-bold text-foreground text-center md:text-left">
-                    Mapa em Tempo Real
+                    Mapa de Problemas Reportados
                 </h2>
                 <Separator className="my-4" />
                 <HomeMapClient reports={publicReports} />
