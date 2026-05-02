@@ -1,4 +1,3 @@
-
 import {
   Accordion,
   AccordionContent,
@@ -6,6 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 export default function SupportPage() {
   const faqs = [
@@ -69,6 +69,7 @@ export default function SupportPage() {
             <h1 className="text-3xl md:text-4xl font-bold font-headline">
               Central de Suporte
             </h1>
+            <Separator className="my-4" />
             <p className="text-muted-foreground mt-3">
               Tudo o que você precisa saber sobre como utilizar o Infra Mais.
             </p>

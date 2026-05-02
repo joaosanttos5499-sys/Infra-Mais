@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,6 +8,7 @@ import { useUser } from "@/firebase";
 import { isEmailEmployee } from "@/lib/config";
 import { useRouter } from "next/navigation";
 import { type Report } from "@/lib/types";
+import { Separator } from "@/components/ui/separator";
 
 function LoadingScreen() {
   return (
@@ -73,6 +73,7 @@ export default function FuncionariosPage() {
             <h1 className="text-3xl md:text-4xl font-bold font-headline">
               Painel do Funcionário
             </h1>
+            <Separator className="my-4" />
             <p className="text-muted-foreground mt-3">
               Visualize, gerencie e atualize os problemas de infraestrutura relatados pelos cidadãos.
             </p>

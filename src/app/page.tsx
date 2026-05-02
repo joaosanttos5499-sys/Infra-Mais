@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -141,6 +140,7 @@ export default async function Home() {
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline font-bold text-foreground mb-2">
                 Reportar um Problema
               </h2>
+              <Separator className="my-4" />
               <p className="mt-3 text-muted-foreground text-base">
                 Informe rapidamente um problema de infraestrutura encontrado. Descreva o ocorrido, anexe uma foto e marque o local exato no mapa para que possamos ajudar na resolução.
               </p>
@@ -170,8 +170,8 @@ export default async function Home() {
                     <h2 className="text-3xl font-headline font-bold text-foreground">
                         Problemas Recentes
                     </h2>
+                    <Separator className="my-4" />
                     <p className="text-muted-foreground mt-3">Confira as demandas mais recentes enviadas pela comunidade e acompanhe seu progresso.</p>
-                    <Separator className="mt-4" />
                 </div>
                 <RecentReports />
             </div>

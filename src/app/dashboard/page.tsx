@@ -1,8 +1,8 @@
-
 import { Suspense } from "react";
 import { DashboardClient } from "@/components/dashboard-client";
 import { getReports } from "@/lib/data";
 import { Loader2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 function DashboardSkeleton() {
   return (
@@ -24,6 +24,7 @@ export default async function DashboardPage() {
             <h1 className="text-3xl md:text-4xl font-bold font-headline">
               Painel de Problemas
             </h1>
+            <Separator className="my-4" />
             <p className="text-muted-foreground mt-3">
               Visualize e gerencie todos os problemas de infraestrutura relatados pela comunidade.
             </p>
