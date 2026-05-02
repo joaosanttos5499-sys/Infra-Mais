@@ -79,7 +79,7 @@ async function RecentReports() {
        <div className="text-center">
           <Button asChild className="w-full sm:w-auto bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
             <Link href="/dashboard">
-              Ver todos os problemas
+              Ver todos os relatos
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
@@ -104,9 +104,17 @@ function AboutSection({ reports }: { reports: Report[] }) {
               Sobre o Infra Mais
             </h2>
             <Separator className="my-4" />
-            <p className="text-muted-foreground text-base mt-3">
-              O Infra Mais é uma plataforma independente criada para facilitar a comunicação entre os cidadãos e os órgãos responsáveis, permitindo o registro rápido e organizado de problemas de infraestrutura. Nosso objetivo é tornar a zeladoria urbana mais simples, transparente e eficiente para todos.
-            </p>
+            <div className="text-muted-foreground text-base mt-3 space-y-4">
+              <p>
+                O Infra Mais é uma plataforma criada para aproximar cidadãos e órgãos responsáveis, facilitando o registro de problemas urbanos de forma rápida e organizada.
+              </p>
+              <p>
+                Com o uso de mapas interativos e envio de informações detalhadas, o sistema permite identificar e acompanhar ocorrências com mais precisão.
+              </p>
+              <p>
+                Nosso objetivo é tornar a gestão urbana mais eficiente, transparente e acessível para todos.
+              </p>
+            </div>
           </div>
           <div>
             <Card className="shadow-lg">
@@ -168,10 +176,10 @@ export default async function Home() {
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8 text-center md:text-left">
                     <h2 className="text-3xl font-headline font-bold text-foreground">
-                        Problemas Recentes
+                        Relatos Recentes da Comunidade
                     </h2>
                     <Separator className="my-4" />
-                    <p className="text-muted-foreground mt-3">Confira as demandas mais recentes enviadas pela comunidade e acompanhe seu progresso.</p>
+                    <p className="text-muted-foreground mt-3">Veja os últimos problemas reportados na sua cidade.</p>
                 </div>
                 <RecentReports />
             </div>
