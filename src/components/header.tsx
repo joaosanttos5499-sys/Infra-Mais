@@ -33,7 +33,6 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   }
 
   if (user) {
-    const isEmployee = isEmailEmployee(user.email);
     const avatarSrc = user.photoURL || createAvatarSvg(user.displayName || user.email || '');
     return (
       <DropdownMenu>
@@ -55,17 +54,6 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {isEmployee && (
-            <>
-              <DropdownMenuItem asChild>
-                <Link href="/funcionarios">
-                  <ShieldCheck className="mr-2 h-4 w-4" />
-                  <span>Área do Funcionário</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-            </>
-          )}
           <DropdownMenuItem asChild>
             <Link href="/minha-conta">
               <User className="mr-2 h-4 w-4" />
