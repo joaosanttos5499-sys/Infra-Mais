@@ -71,6 +71,7 @@ function ReportCard({
   const [isStatusConfirmOpen, setIsStatusConfirmOpen] = useState(false);
   const [statusCountdown, setStatusCountdown] = useState(3);
   const [isStatusConfirmEnabled, setIsStatusConfirmEnabled] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<ReportStatus>(report.status);
 
   const [formState, formAction, isPending] = useActionState(async (prev: any, formData: FormData) => {
     const status = formData.get("status") as ReportStatus;
@@ -156,6 +157,7 @@ function ReportCard({
 
   const nextAllowedStatus = STATUS_PROGRESSION[report.status];
   const isFinalStatus = !nextAllowedStatus;
+  const isPhotoEnabled = selectedStatus === 'RESOLVED';
 
   return (
     <Card className="overflow-hidden" id={`report-${report.id}`}>
@@ -324,8 +326,12 @@ function ReportCard({
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor={`status-${report.id}`}>Próximo Passo</Label>
-                                <Select name="status" defaultValue={nextAllowedStatus || report.status}>
+                                <Label htmlFor={`status-${report.id}`}>Novo Status</Label>
+                                <Select 
+                                    name="status" 
+                                    defaultValue={report.status}
+                                    onValueChange={(val) => setSelectedStatus(val as ReportStatus)}
+                                >
                                     <SelectTrigger id={`status-${report.id}`} className="bg-background" disabled={isFinalStatus}>
                                         <SelectValue placeholder="Mudar status" />
                                     </SelectTrigger>
@@ -337,7 +343,7 @@ function ReportCard({
                                                 <SelectItem 
                                                     key={key} 
                                                     value={key} 
-                                                    disabled={!isNext}
+                                                    disabled={!isNext && !isCurrent}
                                                     className={cn(!isNext && !isCurrent && "opacity-40 cursor-not-allowed")}
                                                 >
                                                     {label} {isNext && " (Próximo)"}
@@ -352,8 +358,11 @@ function ReportCard({
                             </div>
                         </div>
 
-                        <div className="flex-1 space-y-2">
-                            <Label htmlFor={`photoAfter-${report.id}`}>Foto da Solução (Opcional)</Label>
+                        <div className={cn("flex-1 space-y-2 transition-opacity", !isPhotoEnabled && "opacity-50 pointer-events-none")}>
+                            <Label htmlFor={`photoAfter-${report.id}`}>
+                                Carregar foto
+                                {isPhotoEnabled && <span className="text-xs text-destructive ml-1">* Obrigatório</span>}
+                            </Label>
                             <div className="aspect-video rounded-md border border-dashed flex items-center justify-center relative overflow-hidden bg-muted/80">
                                 {(photoAfterPreview || report.photoAfterUrl) ? (
                                     <Image src={photoAfterPreview || report.photoAfterUrl!} alt="Pré-visualização da foto da solução" fill className="object-cover" />
@@ -371,7 +380,7 @@ function ReportCard({
                                 accept="image/*" 
                                 className="file:text-primary file:font-semibold text-xs" 
                                 onChange={handlePhotoChange}
-                                disabled={isFinalStatus}
+                                disabled={!isPhotoEnabled || isFinalStatus}
                             />
                         </div>
                     </div>
@@ -380,7 +389,7 @@ function ReportCard({
                         <div className="flex justify-end pt-2">
                             <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
                                 <AlertDialogTrigger asChild>
-                                    <Button type="button" disabled={isPending} className="bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500 w-full sm:w-auto">
+                                    <Button type="button" disabled={isPending || selectedStatus === report.status} className="bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500 w-full sm:w-auto">
                                         {isPending ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
                                         Salvar Alterações
                                     </Button>

@@ -67,10 +67,6 @@ export default function FuncionariosPage() {
       <main className="flex-1 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 text-center md:text-left">
-            <div className="flex items-center gap-3 mb-2 justify-center md:justify-start">
-                <ShieldAlert className="h-6 w-6 text-blue-600" />
-                <span className="text-sm font-bold text-blue-600 uppercase tracking-wider">Acesso Restrito</span>
-            </div>
             <h1 className="text-3xl md:text-4xl font-bold font-headline">
               Painel do Funcionário
             </h1>

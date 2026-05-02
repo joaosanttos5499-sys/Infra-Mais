@@ -161,11 +161,16 @@ export async function updateReportStatus(
   let photoAfterUrl: string | undefined = undefined;
 
   try {
-     if (photoAfterFile && photoAfterFile.size > 0) {
+    if (photoAfterFile && photoAfterFile.size > 0) {
       if (photoAfterFile.size > 5 * 1024 * 1024) {
          return { success: false, message: "A foto da solução deve ter menos de 5MB." };
       }
       photoAfterUrl = await fileToDataUri(photoAfterFile);
+    }
+
+    // Validação de foto obrigatória para status RESOLVED
+    if (status === 'RESOLVED' && !photoAfterUrl) {
+        return { success: false, message: "A foto da solução é obrigatória para finalizar este relato e comprovar o trabalho realizado." };
     }
 
     const updatedReport = await dbUpdateReportStatus(reportId, status, photoAfterUrl);
