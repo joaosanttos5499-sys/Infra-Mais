@@ -1,22 +1,27 @@
 
-import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
+import { type Report, type ReportStatus, type NewReport, type UserProfile, type Notification } from "@/lib/types";
 import { isEmailEmployee } from "./config";
 
 // In-memory store to persist data across hot-reloads in development
 const globalForStore = globalThis as unknown as {
   reports: Report[] | undefined;
   users: UserProfile[] | undefined;
+  notifications: Notification[] | undefined;
   idCounter: number | undefined;
+  notificationCounter: number | undefined;
 };
 
 const reports = globalForStore.reports ?? [];
 const users = globalForStore.users ?? [];
+const notifications = globalForStore.notifications ?? [];
 let idCounter = globalForStore.idCounter ?? 1;
+let notificationCounter = globalForStore.notificationCounter ?? 1;
 
 // In development, save the in-memory store to the global object to survive hot-reloads.
 if (process.env.NODE_ENV !== "production") {
   globalForStore.reports = reports;
   globalForStore.users = users;
+  globalForStore.notifications = notifications;
 }
 
 export async function getReports(limit?: number): Promise<Report[]> {
@@ -114,7 +119,54 @@ export async function deleteUser(id: string): Promise<boolean> {
         reports.splice(i, 1);
       }
     }
+    // Remove todas as notificações deste usuário
+    let j = notifications.length;
+    while (j--) {
+        if (notifications[j].userId === id) {
+            notifications.splice(j, 1);
+        }
+    }
     return true;
   }
   return false;
+}
+
+// Notifications Data Functions
+export async function getNotifications(userId: string): Promise<Notification[]> {
+    return notifications
+        .filter(n => n.userId === userId)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export function addNotification(userId: string, reportId: string, message: string): Notification {
+    const newNotification: Notification = {
+        id: String(notificationCounter++),
+        userId,
+        reportId,
+        message,
+        isRead: false,
+        createdAt: new Date().toISOString(),
+    };
+    notifications.push(newNotification);
+    if (process.env.NODE_ENV !== 'production') {
+        globalForStore.notificationCounter = notificationCounter;
+    }
+    return newNotification;
+}
+
+export async function markNotificationAsRead(id: string): Promise<boolean> {
+    const index = notifications.findIndex(n => n.id === id);
+    if (index !== -1) {
+        notifications[index].isRead = true;
+        return true;
+    }
+    return false;
+}
+
+export async function markAllNotificationsAsRead(userId: string): Promise<void> {
+    notifications.forEach(n => {
+        if (n.userId === userId) {
+            n.isRead = true;
+        }
+    });
 }

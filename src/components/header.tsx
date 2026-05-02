@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -16,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { createAvatarSvg } from "@/lib/avatar";
 import { useRouter } from "next/navigation";
 import { isEmailEmployee } from "@/lib/config";
+import { NotificationsDropdown } from "./notifications-dropdown";
 
 const navLinks = [
   { href: "/", label: "Início", icon: Home, public: true },
@@ -128,10 +130,14 @@ export function Header() {
                       {index < filteredNavLinks.length - 1 && <Separator orientation="vertical" className="h-4 bg-primary/50" />}
                   </div>
               ))}
-              <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
+              <div className="flex items-center gap-2">
+                <NotificationsDropdown />
+                <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
+              </div>
             </nav>
 
-            <div className="md:hidden flex items-center">
+            <div className="md:hidden flex items-center gap-2">
+              <NotificationsDropdown />
               <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
               <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetTrigger asChild>

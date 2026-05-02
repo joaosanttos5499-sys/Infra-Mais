@@ -4,11 +4,26 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
-import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport, saveUser, getUserById, deleteReport as dbDeleteReport, deleteUser as dbDeleteUser, getReports } from "@/lib/data";
+import { 
+    addReport, 
+    updateReportStatus as dbUpdateReportStatus, 
+    upvoteReport as dbUpvoteReport, 
+    downvoteReport as dbDownvoteReport, 
+    saveUser, 
+    getUserById, 
+    deleteReport as dbDeleteReport, 
+    deleteUser as dbDeleteUser, 
+    getReports,
+    addNotification,
+    getNotifications,
+    markNotificationAsRead as dbMarkAsRead,
+    markAllNotificationsAsRead as dbMarkAllAsRead
+} from "@/lib/data";
 import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
 import { ReportSchema, UpdateProfileSchema } from "./schemas";
 import { createAvatarSvg } from "./avatar";
 import { isEmailEmployee } from "./config";
+import { statusConfig } from "@/components/status-badge";
 
 export type FormState = {
   message?: string | null;
@@ -147,7 +162,17 @@ export async function updateReportStatus(
       photoAfterUrl = await fileToDataUri(photoAfterFile);
     }
 
-    await dbUpdateReportStatus(reportId, status, photoAfterUrl);
+    const updatedReport = await dbUpdateReportStatus(reportId, status, photoAfterUrl);
+    
+    if (updatedReport) {
+        const statusLabel = statusConfig[status].label;
+        await addNotification(
+            updatedReport.userId,
+            reportId,
+            `O status do seu relato de ${updatedReport.category} foi alterado para: ${statusLabel}.`
+        );
+    }
+
     revalidatePath("/");
     revalidatePath("/dashboard");
     revalidatePath("/funcionarios");
@@ -319,4 +344,34 @@ export async function deleteAccountAction(userId: string) {
     console.error("Failed to delete account data:", error);
     return { success: false, error: "Erro ao excluir dados do servidor." };
   }
+}
+
+export async function getNotificationsAction(userId: string) {
+    try {
+        const data = await getNotifications(userId);
+        return { success: true, data };
+    } catch (error) {
+        console.error("Failed to get notifications:", error);
+        return { success: false, error: "Failed to load notifications." };
+    }
+}
+
+export async function markAsReadAction(id: string) {
+    try {
+        await dbMarkAsRead(id);
+        revalidatePath('/');
+        return { success: true };
+    } catch (error) {
+        return { success: false };
+    }
+}
+
+export async function markAllAsReadAction(userId: string) {
+    try {
+        await dbMarkAllAsRead(userId);
+        revalidatePath('/');
+        return { success: true };
+    } catch (error) {
+        return { success: false };
+    }
 }

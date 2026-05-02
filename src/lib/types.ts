@@ -33,3 +33,12 @@ export interface UserProfile {
     nameLastUpdatedAt?: string;
     role: UserRole;
 }
+
+export interface Notification {
+  id: string;
+  userId: string;
+  reportId: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
