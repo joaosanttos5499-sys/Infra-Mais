@@ -102,3 +102,19 @@ export async function saveUser(user: UserProfile): Promise<UserProfile> {
 export async function getUserById(id: string): Promise<UserProfile | undefined> {
     return users.find(u => u.id === id);
 }
+
+export async function deleteUser(id: string): Promise<boolean> {
+  const userIndex = users.findIndex(u => u.id === id);
+  if (userIndex !== -1) {
+    users.splice(userIndex, 1);
+    // Remove todos os relatos deste usuário
+    let i = reports.length;
+    while (i--) {
+      if (reports[i].userId === id) {
+        reports.splice(i, 1);
+      }
+    }
+    return true;
+  }
+  return false;
+}

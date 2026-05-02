@@ -1,9 +1,10 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
-import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport, saveUser, getUserById, deleteReport as dbDeleteReport } from "@/lib/data";
+import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport, saveUser, getUserById, deleteReport as dbDeleteReport, deleteUser as dbDeleteUser } from "@/lib/data";
 import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
 import { ReportSchema, UpdateProfileSchema } from "./schemas";
 import { createAvatarSvg } from "./avatar";
@@ -288,5 +289,21 @@ export async function fetchUserProfileAction(userId: string): Promise<{ success:
   } catch (error) {
     console.error("Falha ao buscar o perfil do usuário:", error);
     return { success: false, error: "Falha ao buscar o perfil do usuário." };
+  }
+}
+
+export async function deleteAccountAction(userId: string) {
+  try {
+    const success = await dbDeleteUser(userId);
+    if (!success) return { success: false, error: "Usuário não encontrado." };
+    
+    revalidatePath("/");
+    revalidatePath("/dashboard");
+    revalidatePath("/minha-conta");
+    revalidatePath("/funcionarios");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete account data:", error);
+    return { success: false, error: "Erro ao excluir dados do servidor." };
   }
 }

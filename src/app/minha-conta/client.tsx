@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, X, Trash2 } from "lucide-react";
+import { Loader2, Save, X, Trash2, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -17,8 +18,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UpdateProfileSchema } from "@/lib/schemas";
-import { updateUserProfileAction, fetchUserProfileAction, saveUserProfileAction, deleteReportAction } from "@/lib/actions";
-import { updateProfile } from "firebase/auth";
+import { updateUserProfileAction, fetchUserProfileAction, saveUserProfileAction, deleteReportAction, deleteAccountAction } from "@/lib/actions";
+import { updateProfile, deleteUser as deleteAuthUser, signOut } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -160,6 +161,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isConfirmEnabled, setIsConfirmEnabled] = useState(false);
     const [countdown, setCountdown] = useState(3);
+    const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
 
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -193,18 +195,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                     if (result.success && result.data) {
                         let firestoreProfile = result.data;
 
-                        // Lógica de Autocorreção: Verifica se o avatar corresponde ao e-mail (necessário para corrigir evidenciadetudo@gmail.com)
+                        // Lógica de Autocorreção: Verifica se o avatar corresponde ao e-mail
                         const correctAvatar = createAvatarSvg(firestoreProfile.email);
                         let needsUpdate = false;
 
                         if (firestoreProfile.photoURL !== correctAvatar) {
                             firestoreProfile = { ...firestoreProfile, photoURL: correctAvatar };
-                            needsUpdate = true;
-                        }
-
-                        // Patch específico para data de nascimento conforme solicitado anteriormente
-                        if (firestoreProfile.email === 'joaosanttos528@gmail.com' && firestoreProfile.dateOfBirth !== '04/06/2008') {
-                            firestoreProfile = { ...firestoreProfile, dateOfBirth: '04/06/2008' };
                             needsUpdate = true;
                         }
 
@@ -229,7 +225,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             id: user.uid,
                             name: user.displayName || user.email.split('@')[0],
                             email: user.email,
-                            dateOfBirth: user.email === 'joaosanttos528@gmail.com' ? '04/06/2008' : 'Data não informada',
+                            dateOfBirth: 'Data não informada',
                         };
 
                         saveUserProfileAction(newProfileData).then(creationResult => {
@@ -328,6 +324,41 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
       setIsEditingName(false);
     }
 
+    const handleDeleteAccount = async () => {
+        if (!user || !auth.currentUser) return;
+
+        setIsDeletingAccount(true);
+        try {
+            // 1. Deleta os dados do banco de dados (Perfil + Relatos)
+            const result = await deleteAccountAction(user.uid);
+            
+            if (result.success) {
+                // 2. Deleta o usuário da autenticação do Firebase
+                await deleteAuthUser(auth.currentUser);
+                toast({ title: "Conta excluída", description: "Todos os seus dados foram removidos permanentemente." });
+                router.push('/');
+            } else {
+                toast({ variant: 'destructive', title: 'Erro ao excluir', description: result.error });
+                setIsDeletingAccount(false);
+            }
+        } catch (error: any) {
+            console.error("Auth deletion error:", error);
+            // Se o login for antigo, o Firebase exige reautenticação
+            if (error.code === 'auth/requires-recent-login') {
+                toast({ 
+                    variant: 'destructive', 
+                    title: "Ação Necessária", 
+                    description: "Por segurança, faça login novamente antes de excluir sua conta permanentemente." 
+                });
+                await signOut(auth);
+                router.push('/report/auth');
+            } else {
+                toast({ variant: 'destructive', title: "Erro crítico", description: "Não foi possível remover sua credencial de acesso." });
+                setIsDeletingAccount(false);
+            }
+        }
+    };
+
 
     if (isUserLoading || !user) {
         return (
@@ -345,7 +376,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
              <Card>
                 <CardHeader>
                     <CardTitle>Meus Dados</CardTitle>
-                    <Separator/>
+                    <Separator className="my-4" />
                     <CardDescription>Visualize e edite as informações da sua conta.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -452,6 +483,50 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                     </CardContent>
                 </Card>
             )}
+
+            <Card className="border-destructive/20 bg-destructive/5">
+                <CardHeader>
+                    <CardTitle className="text-destructive flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5" />
+                        Zona de Perigo
+                    </CardTitle>
+                    <Separator className="my-4" />
+                    <CardDescription>
+                        Ações irreversíveis que afetam permanentemente sua conta no Infra Mais.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="space-y-1">
+                            <p className="font-semibold text-sm">Excluir minha conta</p>
+                            <p className="text-xs text-muted-foreground">Isso excluirá seu perfil e todos os problemas relatados por você.</p>
+                        </div>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" size="sm" disabled={isDeletingAccount}>
+                                    {isDeletingAccount ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                                    Excluir Conta
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Excluir sua conta permanentemente?</AlertDialogTitle>
+                                    <AlertDialogDescription className="space-y-3">
+                                        <p>Esta ação é <strong>irreversível</strong>. Todos os seus dados pessoais e relatos enviados serão removidos do sistema.</p>
+                                        <p>Se você tentar entrar novamente com este e-mail, o sistema não reconhecerá mais seu cadastro.</p>
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                        Sim, excluir meus dados
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     )
 }
