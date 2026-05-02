@@ -339,6 +339,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         )
     }
 
+    const avatarInitial = (user.email || user.displayName || 'U').charAt(0).toUpperCase();
+
     return (
         <div className="space-y-8">
              <Card>
@@ -357,8 +359,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                             <FormItem className="flex flex-col items-center gap-4">
                               <Avatar className="h-24 w-24">
-                                <AvatarImage src={userProfile.photoURL || createAvatarSvg(userProfile.name || userProfile.email || '')} />
-                                <AvatarFallback>{userProfile.name?.charAt(0).toUpperCase() || userProfile.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                                <AvatarImage src={userProfile.photoURL || createAvatarSvg(userProfile.email || userProfile.name || '')} />
+                                <AvatarFallback>{avatarInitial}</AvatarFallback>
                               </Avatar>
                             </FormItem>
                             

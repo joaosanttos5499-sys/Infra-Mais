@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -33,14 +32,17 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   }
 
   if (user) {
-    const avatarSrc = user.photoURL || createAvatarSvg(user.displayName || user.email || '');
+    // Prioritize photoURL, then fallback to avatar SVG based on email
+    const avatarSrc = user.photoURL || createAvatarSvg(user.email || user.displayName || 'U');
+    const userInitial = (user.email || user.displayName || 'U').charAt(0).toUpperCase();
+
     return (
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
               <AvatarImage src={avatarSrc} alt={user.displayName || user.email || 'User'} />
-              <AvatarFallback>{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+              <AvatarFallback>{userInitial}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
@@ -87,7 +89,6 @@ export function Header() {
   const isEmployee = isEmailEmployee(user?.email);
   const filteredNavLinks = [...navLinks];
   
-  // Adiciona o link do funcionário se autorizado
   if (isEmployee) {
     filteredNavLinks.push({ href: "/funcionarios", label: "Gestão", icon: ShieldCheck, public: false });
   }
@@ -115,7 +116,6 @@ export function Header() {
               </span>
             </Link>
             
-            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-4 text-sm font-medium">
               {filteredNavLinks.map((link, index) => (
                   <div key={link.href} className="flex items-center gap-4">
@@ -131,7 +131,6 @@ export function Header() {
               <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
             </nav>
 
-            {/* Mobile Navigation */}
             <div className="md:hidden flex items-center">
               <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
               <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
