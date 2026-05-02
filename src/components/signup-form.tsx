@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { saveUserProfileAction } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, MailCheck } from "lucide-react";
+import { Loader2, MailCheck, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { SignupSchema } from "@/lib/schemas";
@@ -25,6 +25,8 @@ export function SignupForm() {
   const auth = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVerificationSent, setIsVerificationSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const form = useForm<SignupFormData>({
     resolver: zodResolver(SignupSchema),
@@ -32,6 +34,7 @@ export function SignupForm() {
       name: "",
       email: "",
       password: "",
+      confirmPassword: "",
       dateOfBirth: "",
     },
   });
@@ -41,19 +44,15 @@ export function SignupForm() {
   const handleSignup = async (data: SignupFormData) => {
     setIsSubmitting(true);
     try {
-        // 1. Create user with Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
         const user = userCredential.user;
 
-        // 2. Send Email Verification
         try {
           await sendEmailVerification(user);
         } catch (verificationError) {
           console.error("Failed to send verification email:", verificationError);
-          // We don't block the process if verification email fails, but we log it
         }
 
-        // 3. Save additional profile info using a server action
         const result = await saveUserProfileAction({
             id: user.uid,
             name: data.name,
@@ -62,7 +61,6 @@ export function SignupForm() {
         });
 
         if(result.success) {
-            // Update auth profile with name and generated/uploaded photo
             if (auth.currentUser) {
               await updateProfile(auth.currentUser, {
                 displayName: data.name,
@@ -177,9 +175,57 @@ export function SignupForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Senha</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="********" {...field} />
-              </FormControl>
+              <div className="relative">
+                <FormControl>
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="********" 
+                    {...field} 
+                    className="pr-10"
+                  />
+                </FormControl>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                  <span className="sr-only">{showPassword ? "Ocultar senha" : "Mostrar senha"}</span>
+                </Button>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirmação da Senha</FormLabel>
+              <div className="relative">
+                <FormControl>
+                  <Input 
+                    type={showConfirmPassword ? "text" : "password"} 
+                    placeholder="********" 
+                    {...field} 
+                    className="pr-10"
+                  />
+                </FormControl>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                  <span className="sr-only">{showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}</span>
+                </Button>
+              </div>
               <FormMessage />
             </FormItem>
           )}

@@ -22,6 +22,7 @@ export const SignupSchema = z.object({
   name: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracteres." }),
   email: z.string().email({ message: "Por favor, insira um e-mail válido." }),
   password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres." }),
+  confirmPassword: z.string().min(1, { message: "A confirmação da senha é obrigatória." }),
   dateOfBirth: z.string().refine((dob) => {
     try {
       const date = parse(dob, 'dd/MM/yyyy', new Date());
@@ -32,6 +33,9 @@ export const SignupSchema = z.object({
   }, {
     message: "Você deve ter pelo menos 16 anos e a data deve estar no formato DD/MM/AAAA.",
   }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem.",
+  path: ["confirmPassword"],
 });
 
 export const UpdateProfileSchema = z.object({
