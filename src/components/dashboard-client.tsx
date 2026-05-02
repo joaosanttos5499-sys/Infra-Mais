@@ -102,6 +102,7 @@ function ReportCard({
   };
 
   const isOwner = user?.uid === report.userId;
+  const canDelete = isOwner && report.status === 'UNDER_REVIEW';
   const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
 
   return (
@@ -211,7 +212,7 @@ function ReportCard({
                 </div>
                 <div className="flex justify-between items-center mt-4 px-4 pb-2">
                     <div>
-                        {isOwner && (
+                        {canDelete && (
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
@@ -222,8 +223,8 @@ function ReportCard({
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            Você tem certeza que deseja excluir este relatório? Esta ação não pode ser desfeita.
+                                        <AlertDialogDescription asChild>
+                                            <div className="pt-2">Você tem certeza que deseja excluir este relatório? Esta ação não pode ser desfeita.</div>
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>

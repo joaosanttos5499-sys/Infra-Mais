@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, X, Trash2, AlertTriangle } from "lucide-react";
+import { Loader2, Save, X, Trash2, AlertTriangle, Info } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -37,6 +38,8 @@ function MyReportItem({ report }: { report: Report }) {
     const [isDeleting, startDeleteTransition] = useTransition();
     const category = getCategory(report.category);
     const problem = category?.problems.find(p => p.value === report.problem);
+
+    const canDelete = report.status === 'UNDER_REVIEW';
 
     const handleDelete = async () => {
         startDeleteTransition(async () => {
@@ -71,28 +74,30 @@ function MyReportItem({ report }: { report: Report }) {
                         {category?.icon && <category.icon className="h-5 w-5" style={{ color: category.color }} />}
                         <span>{category?.label || report.category}</span>
                     </CardTitle>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 -mt-1 -mr-2" onClick={(e) => e.stopPropagation()}>
-                                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                                <span className="sr-only">Excluir Relatório</span>
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    Esta ação não pode ser desfeita. O relatório será removido permanentemente de todas as páginas.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                    Excluir permanentemente
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                    {canDelete && (
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 -mt-1 -mr-2" onClick={(e) => e.stopPropagation()}>
+                                    {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                    <span className="sr-only">Excluir Relatório</span>
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
+                                    <AlertDialogDescription asChild>
+                                        <div className="pt-2">Esta ação não pode ser desfeita. O relatório será removido permanentemente de todas as páginas.</div>
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                        Excluir permanentemente
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )}
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col">
                     <div className="flex-grow">
@@ -101,9 +106,17 @@ function MyReportItem({ report }: { report: Report }) {
                             {report.location}
                         </p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
-                        <ReportTime date={new Date(report.createdAt)} />
-                    </p>
+                    <div className="mt-2 pt-2 border-t flex justify-between items-center">
+                        <p className="text-xs text-muted-foreground">
+                            <ReportTime date={new Date(report.createdAt)} />
+                        </p>
+                        {!canDelete && (
+                            <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground flex items-center gap-1">
+                                <Info className="h-2.5 w-2.5" />
+                                Validado - Não editável
+                            </span>
+                        )}
+                    </div>
                 </CardContent>
             </div>
         </Card>
@@ -449,9 +462,11 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             />
 
                             {isEditingName && (
-                                <Alert variant="default" className="bg-amber-50 border-amber-200">
-                                    <AlertDescription className="text-amber-800 text-xs">
-                                        Você só pode alterar seu nome uma vez por semana.
+                                <Alert variant="default" className={cn("bg-amber-50 border-amber-200", cooldown.onCooldown && "bg-red-50 border-red-200")}>
+                                    <AlertDescription className={cn("text-amber-800 text-xs", cooldown.onCooldown && "text-red-800")}>
+                                        {cooldown.onCooldown 
+                                            ? `Você deve esperar ${cooldown.remainingDays} ${cooldown.remainingDays === 1 ? 'dia' : 'dias'} para alterar o seu nome novamente.`
+                                            : "Você só pode alterar seu nome uma vez por semana."}
                                     </AlertDescription>
                                 </Alert>
                             )}
@@ -497,8 +512,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Aviso de Alteração de Nome</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Você só pode alterar seu nome uma vez por semana. Deseja continuar?
+                        <AlertDialogDescription asChild>
+                            <div className="pt-2">Você só pode alterar seu nome uma vez por semana. Deseja continuar?</div>
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -511,7 +526,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             </AlertDialog>
 
             {!isEmployee && (
-                <Card>
+                <Card id="meus-relatorios">
                     <CardHeader>
                         <CardTitle>Meus Relatórios</CardTitle>
                         <Separator className="my-4" />
@@ -550,7 +565,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Excluir sua conta permanentemente?</AlertDialogTitle>
                                     <AlertDialogDescription asChild>
-                                        <div className="space-y-3">
+                                        <div className="space-y-3 pt-2">
                                             <p>Esta ação é <strong>irreversível</strong>. Todos os seus dados pessoais e relatos enviados serão removidos do sistema.</p>
                                             <p>Se você tentar entrar novamente com este e-mail, o sistema não reconhecerá mais seu cadastro.</p>
                                         </div>

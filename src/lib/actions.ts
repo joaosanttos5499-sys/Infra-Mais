@@ -4,7 +4,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
-import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport, saveUser, getUserById, deleteReport as dbDeleteReport, deleteUser as dbDeleteUser } from "@/lib/data";
+import { addReport, updateReportStatus as dbUpdateReportStatus, upvoteReport as dbUpvoteReport, downvoteReport as dbDownvoteReport, saveUser, getUserById, deleteReport as dbDeleteReport, deleteUser as dbDeleteUser, getReports } from "@/lib/data";
 import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
 import { ReportSchema, UpdateProfileSchema } from "./schemas";
 import { createAvatarSvg } from "./avatar";
@@ -151,6 +151,7 @@ export async function updateReportStatus(
     revalidatePath("/");
     revalidatePath("/dashboard");
     revalidatePath("/funcionarios");
+    revalidatePath("/minha-conta");
     return { success: true, message: "Status do relatório atualizado com sucesso!" };
   } catch (error) {
     console.error(error);
@@ -186,10 +187,22 @@ export async function downvoteReportAction(reportId: string) {
 
 export async function deleteReportAction(reportId: string) {
   try {
-    const success = await dbDeleteReport(reportId);
-    if (!success) {
+    const allReports = await getReports();
+    const report = allReports.find(r => r.id === reportId);
+    
+    if (!report) {
       return { success: false, message: "Relatório não encontrado." };
     }
+
+    if (report.status !== 'UNDER_REVIEW') {
+      return { success: false, message: "Este relatório já foi validado e não pode mais ser excluído." };
+    }
+
+    const success = await dbDeleteReport(reportId);
+    if (!success) {
+      return { success: false, message: "Falha ao remover o registro." };
+    }
+
     revalidatePath("/");
     revalidatePath("/dashboard");
     revalidatePath("/minha-conta");

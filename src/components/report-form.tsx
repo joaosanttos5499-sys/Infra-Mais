@@ -93,11 +93,14 @@ export function ReportForm() {
     }
 
     const formData = new FormData();
+    formData.append('photo', values.photo);
     Object.keys(values).forEach(key => {
       const formKey = key as keyof typeof values;
-      const value = values[formKey];
-      if (value !== undefined && value !== null) {
-        formData.append(formKey, value as string | Blob);
+      if (formKey !== 'photo') {
+        const value = values[formKey];
+        if (value !== undefined && value !== null) {
+          formData.append(formKey, String(value));
+        }
       }
     });
 
@@ -114,8 +117,11 @@ export function ReportForm() {
         }
       });
     } else if (result?.success) {
-      toast({ title: "Relatório enviado!", description: "Seu relatório foi enviado com sucesso."});
-      window.location.href = '/dashboard';
+      toast({ 
+        title: "Relatório enviado com sucesso!", 
+        description: "Ele agora está sob análise pela equipe do Infra Mais."
+      });
+      router.push('/minha-conta#meus-relatorios');
     }
   };
 
