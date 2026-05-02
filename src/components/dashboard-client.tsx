@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Expand, Trash2, MapPin, Settings2, Clock, CheckCircle2 } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Expand, Trash2, MapPin, Settings2, Clock, CheckCircle2, ChevronRight } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
@@ -160,164 +160,127 @@ function ReportCard({
   const isPhotoEnabled = selectedStatus === 'RESOLVED';
 
   return (
-    <Card className="overflow-hidden bg-white border border-gray-100 shadow-sm transition-all hover:shadow-md rounded-2xl" id={`report-${report.id}`}>
+    <Card className="overflow-hidden bg-white border border-gray-200 shadow-sm transition-all hover:shadow-md rounded-xl" id={`report-${report.id}`}>
       <CardContent className="p-0">
         <Accordion type="single" collapsible disabled={showUpvote}>
           <AccordionItem value={report.id} className="border-b-0">
-            <div className="p-6">
-                <div className="grid md:grid-cols-[2fr_1fr] gap-8">
-                <div className="flex flex-col space-y-6">
-                    <div className="flex items-start gap-4">
-                        <div className="p-3 rounded-2xl bg-primary/5 hidden sm:block mt-1">
-                          {category?.icon && <category.icon className="h-6 w-6" style={{ color: category?.color }} />}
-                        </div>
-                        <div className="flex-1 space-y-2">
-                            <div className="flex items-center gap-3 flex-wrap">
-                                <h3 className="font-bold text-xl text-gray-900">{category?.label || report.category}</h3>
-                                <StatusBadge status={report.status} />
-                            </div>
-                            <ReportCreationTime date={new Date(report.createdAt)} />
-                        </div>
+            <div className="p-0 flex flex-col sm:flex-row">
+                {/* Image Section - Following Block pattern */}
+                <div className="relative aspect-video sm:w-72 sm:h-auto overflow-hidden">
+                    <Image
+                        src={report.photoUrl}
+                        alt={`Problema em ${report.location}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 300px"
+                    />
+                    <div className="absolute top-3 left-3 z-10">
+                        <StatusBadge status={report.status} />
                     </div>
+                </div>
 
-                    <div className="grid sm:grid-cols-2 gap-6">
-                        <div className="space-y-1">
-                            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Problema</p>
-                            <p className="text-base font-semibold text-gray-800">{problem?.label || report.problem}</p>
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Localização</p>
-                            <div className="flex items-center gap-1.5 text-base font-semibold text-gray-800">
-                                <MapPin className="h-4 w-4 text-primary" />
-                                <span>{displayCity} - {report.bairro}</span>
-                            </div>
-                            <p className="text-sm text-muted-foreground">{report.location}</p>
-                        </div>
-                    </div>
-                    
+                <div className="p-6 flex flex-col flex-grow space-y-4">
                     <div className="space-y-1">
-                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Descrição do Cidadão</p>
-                        <p className="text-base text-gray-700 leading-relaxed italic border-l-4 border-primary/20 pl-4 py-1">{report.description}</p>
-                    </div>
-                </div>
-
-                 <div className="grid grid-cols-2 gap-3 self-start">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <div className={cn(
-                          "aspect-square rounded-2xl overflow-hidden relative border-2 border-white shadow-lg cursor-pointer group",
-                          report.status === 'RESOLVED' && report.photoAfterUrl ? "col-span-1" : "col-span-2"
-                        )}>
-                          <Image
-                            src={report.photoUrl}
-                            alt={`Problema em ${report.location}`}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-110"
-                            sizes="(max-width: 768px) 50vw, 17vw"
-                          />
-                           {report.status === 'RESOLVED' && report.photoAfterUrl && (
-                            <div className="absolute top-0 left-0 bg-black/60 text-white text-[10px] font-bold px-3 py-1 rounded-br-lg">Antes</div>
-                          )}
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Expand className="h-10 w-10 text-white" />
-                          </div>
+                        {/* Title Highlight */}
+                        <h3 className="font-bold text-xl text-gray-900 leading-tight">
+                            {problem?.label || report.problem}
+                        </h3>
+                        
+                        {/* Category Row */}
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                            {category?.icon && <category.icon className="h-4 w-4" style={{ color: category?.color }} />}
+                            <span>{category?.label || report.category}</span>
                         </div>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl p-2 rounded-3xl overflow-hidden">
-                          <DialogHeader>
-                            <DialogTitle className="sr-only">Visualização da imagem do problema</DialogTitle>
-                          </DialogHeader>
-                          <div className="relative aspect-video">
-                            <Image
-                              src={report.photoUrl}
-                              alt={`Problema em ${report.location}`}
-                              fill
-                              className="object-contain"
-                            />
-                          </div>
-                      </DialogContent>
-                    </Dialog>
-                    
-                    {report.status === 'RESOLVED' && report.photoAfterUrl && (
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <div className="col-span-1 aspect-square rounded-2xl overflow-hidden relative border-2 border-white shadow-lg cursor-pointer group">
-                              <Image src={report.photoAfterUrl} alt="Depois" fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="(max-width: 768px) 50vw, 17vw"/>
-                              <div className="absolute top-0 left-0 bg-emerald-600/90 text-white text-[10px] font-bold px-3 py-1 rounded-br-lg flex items-center gap-1">
-                                <CheckCircle2 className="h-3 w-3" />
-                                Depois
-                              </div>
-                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Expand className="h-10 w-10 text-white" />
-                              </div>
-                          </div>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-4xl p-2 rounded-3xl overflow-hidden">
-                          <DialogHeader>
-                            <DialogTitle className="sr-only">Visualização da imagem da solução</DialogTitle>
-                          </DialogHeader>
-                          <div className="relative aspect-video">
-                            <Image
-                              src={report.photoAfterUrl}
-                              alt="Foto da solução"
-                              fill
-                              className="object-contain"
-                            />
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    )}
-                  </div>
-
-                </div>
-                
-                <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-100">
-                    <div>
-                        {canDelete && (
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 rounded-xl px-4">
-                                        {isDeleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
-                                        Excluir Relato
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent className="rounded-2xl">
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle className="text-2xl font-bold">Excluir Relatório?</AlertDialogTitle>
-                                        <AlertDialogDescription className="text-lg">
-                                            Você tem certeza que deseja excluir este relatório? Esta ação removerá os dados permanentemente de nossos servidores.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter className="mt-6">
-                                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl font-bold">
-                                            Sim, excluir
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        )}
                     </div>
-                    <div className="flex gap-4">
-                        {showUpvote ? (
-                            <Button 
-                              variant={isUpvoted ? "default" : "outline"} 
-                              size="lg" 
-                              onClick={() => onUpvote(report.id)}
-                              className={cn(
-                                "rounded-xl px-6 font-bold transition-all hover:scale-105 active:scale-95",
-                                isUpvoted ? "bg-primary text-white" : "border-gray-200 text-gray-700"
-                              )}
-                            >
-                                <ThumbsUp className={cn("h-5 w-5 mr-3", isUpvoted && "fill-current animate-bounce")} />
-                                Apoiar ({report.upvotes})
-                            </Button>
-                        ) : (
-                         <AccordionTrigger className="py-2 px-6 rounded-xl bg-primary/10 text-primary font-bold hover:bg-primary/20 transition-all hover:no-underline flex items-center gap-2">
-                                <Settings2 className="h-4 w-4" />
-                                {isFinalStatus ? "Detalhes do Relato" : "Gerenciar Status"}
-                        </AccordionTrigger>
-                        )}
+
+                    {/* Location Info */}
+                    <div className="space-y-2 py-2 border-y border-gray-50">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                            <MapPin className="h-4 w-4 text-primary" />
+                            <span>{displayCity} - {report.bairro}</span>
+                        </div>
+                        <div className="pl-6">
+                            <p className="text-xs text-muted-foreground line-clamp-2 italic">
+                              {report.location}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Description Quote */}
+                    <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                        &quot;{report.description}&quot;
+                    </p>
+
+                    <div className="mt-auto pt-4 flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                                <Clock className="h-3.5 w-3.5" />
+                                <ReportTime date={new Date(report.createdAt)} />
+                            </div>
+                            
+                            {report.status === 'RESOLVED' && report.photoAfterUrl && (
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <button className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700">
+                                            <CheckCircle2 className="h-3.5 w-3.5" />
+                                            Ver Solução
+                                        </button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-4xl p-2 rounded-3xl overflow-hidden">
+                                        <div className="relative aspect-video">
+                                            <Image src={report.photoAfterUrl} alt="Solução" fill className="object-contain" />
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+                            )}
+                        </div>
+
+                        <div className="flex gap-2">
+                            {canDelete && (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 h-9 px-3">
+                                            <Trash2 className="h-4 w-4 mr-2" />
+                                            Excluir
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Esta ação removerá os dados permanentemente de nossos servidores.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white">
+                                                Sim, excluir
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
+                            
+                            {showUpvote ? (
+                                <Button 
+                                  variant={isUpvoted ? "default" : "outline"} 
+                                  size="sm" 
+                                  onClick={() => onUpvote(report.id)}
+                                  className={cn(
+                                    "rounded-lg font-bold transition-all h-9 px-4",
+                                    isUpvoted ? "bg-primary text-white" : "border-gray-200 text-gray-700"
+                                  )}
+                                >
+                                    <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
+                                    Apoiar ({report.upvotes})
+                                </Button>
+                            ) : (
+                                <AccordionTrigger className="py-0 px-4 h-9 rounded-lg bg-primary/10 text-primary font-bold hover:bg-primary/20 transition-all hover:no-underline flex items-center gap-2">
+                                    <Settings2 className="h-4 w-4" />
+                                    {isFinalStatus ? "Detalhes" : "Gerenciar"}
+                                </AccordionTrigger>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

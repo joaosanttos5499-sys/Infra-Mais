@@ -4,7 +4,7 @@ import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, X, Trash2, AlertTriangle, Info } from "lucide-react";
+import { Loader2, Save, X, Trash2, AlertTriangle, Info, MapPin, Clock, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -37,6 +37,7 @@ function MyReportItem({ report }: { report: Report }) {
     const [isDeleting, startDeleteTransition] = useTransition();
     const category = getCategory(report.category);
     const problem = category?.problems.find(p => p.value === report.problem);
+    const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
 
     const canDelete = report.status === 'UNDER_REVIEW';
 
@@ -53,30 +54,40 @@ function MyReportItem({ report }: { report: Report }) {
     };
 
     return (
-        <Card className="overflow-hidden flex flex-col sm:flex-row h-full group relative">
+        <Card className="overflow-hidden flex flex-col sm:flex-row h-full border-gray-200 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1 rounded-xl bg-white group relative">
             <Link href={`/dashboard#report-${report.id}`} className="absolute inset-0 z-0" />
-            <div className="relative aspect-video sm:aspect-square sm:w-48 flex-shrink-0 z-10">
+            
+            {/* Image Block */}
+            <div className="relative aspect-video sm:aspect-square sm:w-48 flex-shrink-0 z-10 overflow-hidden">
                 <Image
                     src={report.photoUrl}
                     alt={report.description}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                     sizes="(max-width: 640px) 100vw, 192px"
                 />
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 left-2">
                     <StatusBadge status={report.status} />
                 </div>
             </div>
-            <div className="flex flex-col flex-grow z-10">
-                <CardHeader className="pb-2 flex flex-row items-start justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        {category?.icon && <category.icon className="h-5 w-5" style={{ color: category.color }} />}
-                        <span>{category?.label || report.category}</span>
-                    </CardTitle>
+
+            {/* Content Block */}
+            <div className="flex flex-col flex-grow z-10 p-5 space-y-4">
+                <div className="flex justify-between items-start gap-4">
+                    <div className="space-y-1">
+                        <h3 className="text-lg font-bold text-gray-900 leading-tight">
+                            {problem?.label || report.problem}
+                        </h3>
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                            {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
+                            <span>{category?.label || report.category}</span>
+                        </div>
+                    </div>
+
                     {canDelete && (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 -mt-1 -mr-2" onClick={(e) => e.stopPropagation()}>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 shrink-0" onClick={(e) => e.stopPropagation()}>
                                     {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                                     <span className="sr-only">Excluir Relatório</span>
                                 </Button>
@@ -84,39 +95,42 @@ function MyReportItem({ report }: { report: Report }) {
                             <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
-                                    <AlertDialogDescription asChild>
-                                        <div className="pt-2">Esta ação não pode ser desfeita. O relatório será removido permanentemente de todas as páginas.</div>
-                                    </AlertDialogDescription>
+                                    <AlertDialogDescription>Esta ação não pode ser desfeita. O relatório será removido permanentemente.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white">
                                         Excluir permanentemente
                                     </AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
                     )}
-                </CardHeader>
-                <CardContent className="flex-grow flex flex-col">
-                    <div className="flex-grow">
-                        <p className="font-semibold text-sm line-clamp-1">{problem?.label || report.problem}</p>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                            {report.location}
-                        </p>
+                </div>
+
+                {/* Location */}
+                <div className="space-y-1 border-t border-gray-50 pt-3">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                        <MapPin className="h-3.5 w-3.5 text-primary" />
+                        <span>{displayCity} - {report.bairro}</span>
                     </div>
-                    <div className="mt-2 pt-2 border-t flex justify-between items-center">
-                        <p className="text-xs text-muted-foreground">
-                            <ReportTime date={new Date(report.createdAt)} />
-                        </p>
-                        {!canDelete && (
-                            <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground flex items-center gap-1">
-                                <Info className="h-2.5 w-2.5" />
-                                Validado - Não editável
-                            </span>
-                        )}
+                    <p className="text-xs text-muted-foreground pl-5 line-clamp-1">{report.location}</p>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-auto pt-2 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
+                        <Clock className="h-3 w-3" />
+                        <ReportTime date={new Date(report.createdAt)} />
                     </div>
-                </CardContent>
+                    
+                    {!canDelete && (
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-primary group-hover:gap-1.5 transition-all">
+                            Ver detalhes
+                            <ChevronRight className="h-3 w-3" />
+                        </div>
+                    )}
+                </div>
             </div>
         </Card>
     );
@@ -125,10 +139,10 @@ function MyReportItem({ report }: { report: Report }) {
 function MyReportsList({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
         return (
-            <div className="text-center text-muted-foreground py-8 border-2 border-dashed rounded-lg">
+            <div className="text-center text-muted-foreground py-12 border-2 border-dashed rounded-xl bg-gray-50/50">
                 <h3 className="text-lg font-semibold">Você ainda não relatou nenhum problema.</h3>
-                <p className="mt-2">Quando você relatar um problema, ele aparecerá aqui.</p>
-                <Button asChild className="mt-4">
+                <p className="mt-2 text-sm">Sua colaboração é fundamental para uma cidade melhor.</p>
+                <Button asChild className="mt-6 rounded-xl font-bold shadow-md">
                     <Link href="/report/new">Relatar um Problema</Link>
                 </Button>
             </div>
@@ -136,7 +150,7 @@ function MyReportsList({ reports }: { reports: Report[] }) {
     }
 
     return (
-        <div className="space-y-4">
+        <div className="grid gap-6">
             {reports.map((report) => (
                 <MyReportItem key={report.id} report={report} />
             ))}

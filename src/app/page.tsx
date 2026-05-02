@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, MapPin, CheckCircle2, Users, BarChart3 } from "lucide-react";
+import { ArrowRight, MapPin, CheckCircle2, Users, BarChart3, Clock, ChevronRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getReports } from "@/lib/data";
 import { type Report } from "@/lib/types";
@@ -35,47 +35,63 @@ async function RecentReports() {
           
           return (
             <Link href={`/dashboard#report-${report.id}`} key={report.id} className="block group">
-                <Card className="overflow-hidden flex flex-col h-full border-gray-200 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-2 rounded-2xl bg-white">
-                <div className="relative aspect-video">
-                    <Image
-                    src={report.photoUrl}
-                    alt={report.description}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                    <div className="absolute top-4 right-4 z-10">
-                        <StatusBadge status={report.status} />
-                    </div>
-                </div>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-xl flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      {category?.icon && <category.icon className="h-5 w-5" style={{ color: category.color }} />} 
-                    </div>
-                    <span className="font-bold text-gray-900">{category?.label || report.category}</span>
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow flex flex-col p-6 pt-2">
-                    <div className="flex-grow space-y-3">
-                        <p className="font-bold text-gray-800 line-clamp-1">{problem?.label || report.problem}</p>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded-lg">
-                            <MapPin className="h-4 w-4 text-primary" />
-                            <span>{displayCity} - {report.bairro}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                          {report.location}
-                        </p>
-                    </div>
-                    <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
-                        <span className="text-xs font-medium text-muted-foreground">
-                            <ReportTime date={new Date(report.createdAt)} />
-                        </span>
-                        <div className="text-primary group-hover:translate-x-1 transition-transform">
-                          <ArrowRight className="h-4 w-4" />
-                        </div>
-                    </div>
-                </CardContent>
+                <Card className="overflow-hidden flex flex-col h-full border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 rounded-xl bg-white relative">
+                  {/* Top Image Section */}
+                  <div className="relative h-48 w-full overflow-hidden">
+                      <Image
+                        src={report.photoUrl}
+                        alt={report.description}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                      {/* Badge Over Image */}
+                      <div className="absolute top-3 left-3 z-10">
+                          <StatusBadge status={report.status} />
+                      </div>
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="p-5 flex flex-col flex-grow space-y-4">
+                      <div className="space-y-1">
+                          {/* Title - Main Highlight */}
+                          <h3 className="text-lg font-bold text-gray-900 line-clamp-2 leading-tight">
+                              {problem?.label || report.problem}
+                          </h3>
+                          
+                          {/* Category with Icon */}
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                              {category?.icon && <category.icon className="h-4 w-4" style={{ color: category.color }} />}
+                              <span>{category?.label || report.category}</span>
+                          </div>
+                      </div>
+
+                      {/* Location Blocks */}
+                      <div className="space-y-2 py-2 border-y border-gray-50">
+                          <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                              <MapPin className="h-4 w-4 text-primary" />
+                              <span>{displayCity} - {report.bairro}</span>
+                          </div>
+                          <div className="pl-6">
+                              <p className="text-xs text-muted-foreground line-clamp-1">
+                                {report.location}
+                              </p>
+                          </div>
+                      </div>
+
+                      {/* Footer Info & Action */}
+                      <div className="mt-auto pt-2 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                              <Clock className="h-3.5 w-3.5" />
+                              <ReportTime date={new Date(report.createdAt)} />
+                          </div>
+                          
+                          <div className="flex items-center gap-1 text-sm font-bold text-primary group-hover:gap-2 transition-all">
+                              Ver detalhes
+                              <ChevronRight className="h-4 w-4" />
+                          </div>
+                      </div>
+                  </div>
                 </Card>
             </Link>
           );
@@ -154,7 +170,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
                   </div>
                   <div className="space-y-1">
                     <p className="text-2xl font-bold text-amber-500">{totalReports - resolvedReports - inProgressReports}</p>
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Abertos</p>
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Em aberto</p>
                   </div>
                    <div className="space-y-1">
                     <p className="text-2xl font-bold text-emerald-500">{resolvedReports}</p>
@@ -188,7 +204,7 @@ export default async function Home() {
                 Relate um Problema na <br/><span className="text-primary italic">Sua Cidade</span>
               </h1>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Informe problemas de infraestrutura de forma rápida e precisa. Descreva o ocorrido, anexe uma imagem e marque o local para facilitar a resolução.
+                Informe um problema de infraestrutura de forma rápida e precisa. Descreva o ocorrido, anexe uma imagem e marque o local no mapa para facilitar a resolução.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                 <HomeCtaClient />
@@ -215,12 +231,12 @@ export default async function Home() {
                     <h2 className="text-3xl font-bold text-gray-900">
                         Veja os problemas na sua região
                     </h2>
-                    <p className="text-muted-foreground text-lg">Mapa interativo de demandas reportadas pela comunidade.</p>
+                    <p className="text-muted-foreground text-lg">Mapa de Problemas Reportados pela comunidade.</p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-amber-500" />
-                      <span className="text-sm font-medium">Abertos</span>
+                      <span className="text-sm font-medium">Em aberto</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-emerald-500" />
@@ -243,7 +259,7 @@ export default async function Home() {
                     <h2 className="text-4xl font-bold text-gray-900 tracking-tight">
                         Relatos Recentes da Comunidade
                     </h2>
-                    <p className="text-muted-foreground text-xl max-w-2xl">Acompanhe as últimas atualizações de zeladoria urbana compartilhadas pelos cidadãos.</p>
+                    <p className="text-muted-foreground text-xl max-w-2xl">Veja os últimos problemas reportados na sua cidade.</p>
                 </div>
                 <Button asChild variant="link" className="text-lg font-bold text-primary p-0 h-auto group">
                   <Link href="/dashboard" className="flex items-center gap-2">
