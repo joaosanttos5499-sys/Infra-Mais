@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Check } from 'lucide-react';
+import { Loader2, ArrowLeft, Check, Mail } from 'lucide-react';
 import { fetchUserProfileAction } from '@/lib/actions';
 
 export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
@@ -30,6 +30,15 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // Check if email is verified (Optional: you can warn the user if not)
+      if (!user.emailVerified) {
+        toast({
+          title: 'E-mail não verificado',
+          description: 'Por favor, verifique seu e-mail para ter acesso total a todas as funções.',
+          variant: 'default',
+        });
+      }
+
       // Sync profile from our DB to Firebase Auth on login
       try {
         const profileResult = await fetchUserProfileAction(user.uid);
@@ -43,8 +52,6 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
           }
         }
       } catch (syncError) {
-        // Log the error, but don't block the user from logging in.
-        // The sync can be attempted again on the "Minha Conta" page.
         console.error("Failed to sync profile on login:", syncError);
       }
       
@@ -58,6 +65,8 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
         errorMessage = 'E-mail ou senha incorretos.';
       } else if (err.code === 'auth/user-not-found') {
         errorMessage = 'Nenhuma conta encontrada com este e-mail.';
+      } else if (err.code === 'auth/too-many-requests') {
+        errorMessage = 'Muitas tentativas falhas. Tente novamente mais tarde.';
       }
       toast({
         title: 'Erro de Autenticação',
@@ -70,15 +79,24 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
   };
   
   const handlePasswordReset = async () => {
+    if (!email) {
+      toast({
+        title: "Atenção",
+        description: "Por favor, digite seu e-mail primeiro.",
+        variant: "destructive"
+      });
+      return;
+    }
     setIsSubmitting(true);
     try {
         auth.languageCode = 'pt';
         await sendPasswordResetEmail(auth, email);
         setView('resetSuccess');
     } catch (err: any) {
+        console.error("Reset error:", err);
         toast({
             title: "Erro",
-            description: err.code === 'auth/user-not-found' ? 'Nenhuma conta encontrada com este e-mail.' : 'Ocorreu um erro ao enviar o e-mail.',
+            description: err.code === 'auth/user-not-found' ? 'Nenhuma conta encontrada com este e-mail.' : 'Ocorreu um erro ao enviar o e-mail de recuperação.',
             variant: "destructive",
         });
     } finally {
@@ -88,14 +106,15 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
 
   if (view === 'resetSuccess') {
     return (
-        <div className="space-y-6 text-center">
+        <div className="space-y-6 text-center py-4">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                <Check className="h-6 w-6 text-green-600" />
+                <Mail className="h-6 w-6 text-green-600" />
             </div>
             <div className="space-y-2">
-                <h3 className="text-lg font-medium">Link de redefinição enviado!</h3>
+                <h3 className="text-lg font-medium">Link enviado!</h3>
                 <p className='text-sm text-muted-foreground'>
-                    Se o e-mail <strong>{email}</strong> estiver associado a uma conta, você receberá um link. Verifique sua caixa de entrada e pasta de spam.
+                    Enviamos as instruções para <strong>{email}</strong>. 
+                    Verifique sua caixa de entrada e a pasta de spam.
                 </p>
             </div>
             <Button variant="outline" className="w-full" onClick={() => setView('signIn')}>
@@ -110,7 +129,13 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
     return (
       <div className="space-y-6">
         <div className="space-y-4">
-            <p className='text-sm text-muted-foreground'>Digite seu e-mail para receber um link de redefinição de senha.</p>
+            <div className="flex items-center gap-2 mb-2">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setView('signIn')}>
+                    <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <h3 className="font-semibold text-lg">Recuperar Senha</h3>
+            </div>
+            <p className='text-sm text-muted-foreground'>Digite seu e-mail cadastrado. Enviaremos um link para você criar uma nova senha com segurança.</p>
           <div className="space-y-2">
             <Label htmlFor="email-reset">E-mail</Label>
             <Input
@@ -130,11 +155,7 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
             className="w-full"
         >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Enviar link de redefinição
-        </Button>
-
-        <Button variant="link" className="w-full" onClick={() => setView('signIn')}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para o login
+            Enviar link de recuperação
         </Button>
       </div>
     );
@@ -168,7 +189,7 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
            <div className="flex justify-end">
              <Button 
                 variant="link" 
-                className="p-0 h-auto text-xs text-muted-foreground" 
+                className="p-0 h-auto text-xs text-muted-foreground hover:text-primary" 
                 onClick={() => setView('resetPassword')}
              >
                 Esqueci minha senha
@@ -188,7 +209,7 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
       
       <p className="text-center text-sm text-muted-foreground">
         Não tem uma conta?{' '}
-        <Link href="/signup" className="underline hover:text-primary">
+        <Link href="/signup" className="underline font-medium hover:text-primary transition-colors">
           Crie uma agora
         </Link>
       </p>

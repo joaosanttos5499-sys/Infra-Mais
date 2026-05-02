@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -9,14 +9,13 @@ import { useRouter } from "next/navigation";
 import { saveUserProfileAction } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Loader2, MailCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { SignupSchema } from "@/lib/schemas";
 import { useAuth } from "@/firebase";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
 import { z } from "zod";
-
 
 type SignupFormData = z.infer<typeof SignupSchema>;
 
@@ -25,6 +24,7 @@ export function SignupForm() {
   const { toast } = useToast();
   const auth = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVerificationSent, setIsVerificationSent] = useState(false);
   
   const form = useForm<SignupFormData>({
     resolver: zodResolver(SignupSchema),
@@ -45,7 +45,15 @@ export function SignupForm() {
         const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
         const user = userCredential.user;
 
-        // 2. Save additional profile info using a server action
+        // 2. Send Email Verification
+        try {
+          await sendEmailVerification(user);
+        } catch (verificationError) {
+          console.error("Failed to send verification email:", verificationError);
+          // We don't block the process if verification email fails, but we log it
+        }
+
+        // 3. Save additional profile info using a server action
         const result = await saveUserProfileAction({
             id: user.uid,
             name: data.name,
@@ -63,10 +71,10 @@ export function SignupForm() {
             }
 
             toast({
-                title: "Sucesso!",
-                description: "Sua conta foi criada. Você será redirecionado.",
+                title: "Conta criada com sucesso!",
+                description: "Enviamos um link de verificação para o seu e-mail.",
             });
-            router.push('/');
+            setIsVerificationSent(true);
         } else {
             throw new Error(result.error || "Falha ao salvar o perfil.");
         }
@@ -75,6 +83,8 @@ export function SignupForm() {
         let errorMessage = "Ocorreu um erro inesperado.";
         if (error.code === 'auth/email-already-in-use') {
             errorMessage = "Este e-mail já está em uso. Se você já possui uma conta, por favor, faça login.";
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = "O e-mail informado é inválido.";
         }
         toast({ variant: 'destructive', title: 'Erro ao criar conta', description: errorMessage });
     } finally {
@@ -93,6 +103,26 @@ export function SignupForm() {
     e.target.value = value;
     return value;
   };
+
+  if (isVerificationSent) {
+    return (
+      <div className="text-center space-y-4 py-8">
+        <div className="flex justify-center">
+          <div className="bg-green-100 p-3 rounded-full">
+            <MailCheck className="h-12 w-12 text-green-600" />
+          </div>
+        </div>
+        <h2 className="text-2xl font-bold">Verifique seu e-mail</h2>
+        <p className="text-muted-foreground">
+          Enviamos um link de confirmação para o endereço informado. 
+          Por favor, verifique sua caixa de entrada (e a pasta de spam) para ativar sua conta.
+        </p>
+        <Button asChild className="mt-4">
+          <Link href="/report/auth">Ir para Login</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
