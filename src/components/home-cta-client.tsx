@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, ShieldCheck, Plus } from "lucide-react";
 import { useUser } from "@/firebase";
 import { isEmailEmployee } from "@/lib/config";
 
@@ -12,7 +12,7 @@ export function HomeCtaClient() {
 
   if (isUserLoading) {
       return (
-          <Button size="lg" className="mt-6 w-full sm:w-auto bg-amber-400 text-black opacity-50 cursor-not-allowed">
+          <Button size="lg" disabled className="rounded-xl px-10 h-14 text-lg font-bold opacity-50 bg-primary">
               Carregando...
           </Button>
       );
@@ -20,18 +20,18 @@ export function HomeCtaClient() {
 
   if (isEmployee) {
       return (
-          <Button asChild size="lg" className="mt-6 w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700">
-            <Link href="/funcionarios">
-              Ir para Gestão <ShieldCheck className="ml-2 h-5 w-5" />
+          <Button asChild size="lg" className="rounded-xl px-10 h-14 text-lg font-bold shadow-xl hover:scale-105 transition-all duration-300 bg-blue-600 text-white">
+            <Link href="/funcionarios" className="flex items-center gap-2">
+              Ir para Gestão <ShieldCheck className="h-6 w-6" />
             </Link>
           </Button>
       );
   }
 
   return (
-    <Button asChild size="lg" className="mt-6 w-full sm:w-auto bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500">
-      <Link href="/report/auth">
-        Enviar Relato <ArrowRight className="ml-2 h-5 w-5" />
+    <Button asChild size="lg" className="rounded-xl px-10 h-14 text-lg font-bold shadow-xl hover:scale-105 hover:brightness-110 transition-all duration-300 bg-primary text-white">
+      <Link href="/report/auth" className="flex items-center gap-2">
+        Enviar Relato <Plus className="h-6 w-6" />
       </Link>
     </Button>
   );

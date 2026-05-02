@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Expand, Trash2, MapPin, Settings2 } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Expand, Trash2, MapPin, Settings2, Clock, CheckCircle2 } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
@@ -41,7 +41,8 @@ function ReportCreationTime({ date }: { date: Date }) {
     if (!timeString) return null;
 
     return (
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <Clock className="h-3 w-3" />
             {timeString}
         </span>
     );
@@ -159,67 +160,70 @@ function ReportCard({
   const isPhotoEnabled = selectedStatus === 'RESOLVED';
 
   return (
-    <Card className="overflow-hidden" id={`report-${report.id}`}>
+    <Card className="overflow-hidden bg-white border border-gray-100 shadow-sm transition-all hover:shadow-md rounded-2xl" id={`report-${report.id}`}>
       <CardContent className="p-0">
         <Accordion type="single" collapsible disabled={showUpvote}>
           <AccordionItem value={report.id} className="border-b-0">
-            <div className="p-4">
-                <div className="grid md:grid-cols-[2fr_1fr] gap-4 md:gap-6">
-                <div className="flex flex-col">
-                    <div className="flex items-start gap-3 mb-4">
-                        {category?.icon && <category.icon className="h-6 w-6 hidden sm:block mt-1 flex-shrink-0" style={{ color: category?.color }} />}
-                        <div className="flex-1 space-y-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <p className="font-semibold text-lg">{category?.label || report.category}</p>
+            <div className="p-6">
+                <div className="grid md:grid-cols-[2fr_1fr] gap-8">
+                <div className="flex flex-col space-y-6">
+                    <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-2xl bg-primary/5 hidden sm:block mt-1">
+                          {category?.icon && <category.icon className="h-6 w-6" style={{ color: category?.color }} />}
+                        </div>
+                        <div className="flex-1 space-y-2">
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <h3 className="font-bold text-xl text-gray-900">{category?.label || report.category}</h3>
                                 <StatusBadge status={report.status} />
-                                <ReportCreationTime date={new Date(report.createdAt)} />
                             </div>
+                            <ReportCreationTime date={new Date(report.createdAt)} />
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <div>
-                            <p className="text-sm font-semibold">Problema:</p>
-                            <p className="text-sm text-foreground/80">{problem?.label || report.problem}</p>
+                    <div className="grid sm:grid-cols-2 gap-6">
+                        <div className="space-y-1">
+                            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Problema</p>
+                            <p className="text-base font-semibold text-gray-800">{problem?.label || report.problem}</p>
                         </div>
-                        <div>
-                            <p className="text-sm font-semibold">Localização:</p>
-                            <div className="flex items-center gap-1 text-sm text-foreground/80">
-                                <MapPin className="h-3 w-3" />
+                        <div className="space-y-1">
+                            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Localização</p>
+                            <div className="flex items-center gap-1.5 text-base font-semibold text-gray-800">
+                                <MapPin className="h-4 w-4 text-primary" />
                                 <span>{displayCity} - {report.bairro}</span>
                             </div>
-                            <p className="text-sm text-foreground/80">{report.location}</p>
+                            <p className="text-sm text-muted-foreground">{report.location}</p>
                         </div>
-                        <div>
-                            <p className="text-sm font-semibold">Descrição:</p>
-                            <p className="text-sm text-foreground/80 line-clamp-3">{report.description}</p>
-                        </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Descrição do Cidadão</p>
+                        <p className="text-base text-gray-700 leading-relaxed italic border-l-4 border-primary/20 pl-4 py-1">{report.description}</p>
                     </div>
                 </div>
 
-                 <div className="grid grid-cols-2 gap-2 self-start">
+                 <div className="grid grid-cols-2 gap-3 self-start">
                     <Dialog>
                       <DialogTrigger asChild>
                         <div className={cn(
-                          "aspect-video rounded-lg overflow-hidden relative border shadow-sm cursor-pointer group",
+                          "aspect-square rounded-2xl overflow-hidden relative border-2 border-white shadow-lg cursor-pointer group",
                           report.status === 'RESOLVED' && report.photoAfterUrl ? "col-span-1" : "col-span-2"
                         )}>
                           <Image
                             src={report.photoUrl}
                             alt={`Problema em ${report.location}`}
                             fill
-                            className="object-cover"
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
                             sizes="(max-width: 768px) 50vw, 17vw"
                           />
                            {report.status === 'RESOLVED' && report.photoAfterUrl && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Antes</div>
+                            <div className="absolute top-0 left-0 bg-black/60 text-white text-[10px] font-bold px-3 py-1 rounded-br-lg">Antes</div>
                           )}
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Expand className="h-8 w-8 text-white" />
+                            <Expand className="h-10 w-10 text-white" />
                           </div>
                         </div>
                       </DialogTrigger>
-                      <DialogContent className="max-w-4xl p-2">
+                      <DialogContent className="max-w-4xl p-2 rounded-3xl overflow-hidden">
                           <DialogHeader>
                             <DialogTitle className="sr-only">Visualização da imagem do problema</DialogTitle>
                           </DialogHeader>
@@ -237,15 +241,18 @@ function ReportCard({
                     {report.status === 'RESOLVED' && report.photoAfterUrl && (
                       <Dialog>
                         <DialogTrigger asChild>
-                          <div className="col-span-1 aspect-video rounded-lg overflow-hidden relative border shadow-sm cursor-pointer group">
-                              <Image src={report.photoAfterUrl} alt="Depois" fill className="object-cover" sizes="(max-width: 768px) 50vw, 17vw"/>
-                              <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center p-1">Depois</div>
+                          <div className="col-span-1 aspect-square rounded-2xl overflow-hidden relative border-2 border-white shadow-lg cursor-pointer group">
+                              <Image src={report.photoAfterUrl} alt="Depois" fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="(max-width: 768px) 50vw, 17vw"/>
+                              <div className="absolute top-0 left-0 bg-emerald-600/90 text-white text-[10px] font-bold px-3 py-1 rounded-br-lg flex items-center gap-1">
+                                <CheckCircle2 className="h-3 w-3" />
+                                Depois
+                              </div>
                               <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Expand className="h-8 w-8 text-white" />
+                                <Expand className="h-10 w-10 text-white" />
                               </div>
                           </div>
                         </DialogTrigger>
-                        <DialogContent className="max-w-4xl p-2">
+                        <DialogContent className="max-w-4xl p-2 rounded-3xl overflow-hidden">
                           <DialogHeader>
                             <DialogTitle className="sr-only">Visualização da imagem da solução</DialogTitle>
                           </DialogHeader>
@@ -263,26 +270,27 @@ function ReportCard({
                   </div>
 
                 </div>
-                <div className="flex justify-between items-center mt-4 px-4 pb-2">
+                
+                <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-100">
                     <div>
                         {canDelete && (
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
+                                    <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 rounded-xl px-4">
                                         {isDeleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
-                                        Excluir
+                                        Excluir Relato
                                     </Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent>
+                                <AlertDialogContent className="rounded-2xl">
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
-                                        <AlertDialogDescription asChild>
-                                            <div className="pt-2">Você tem certeza que deseja excluir este relatório? Esta ação não pode ser desfeita.</div>
+                                        <AlertDialogTitle className="text-2xl font-bold">Excluir Relatório?</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-lg">
+                                            Você tem certeza que deseja excluir este relatório? Esta ação removerá os dados permanentemente de nossos servidores.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    <AlertDialogFooter className="mt-6">
+                                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl font-bold">
                                             Sim, excluir
                                         </AlertDialogAction>
                                     </AlertDialogFooter>
@@ -290,18 +298,24 @@ function ReportCard({
                             </AlertDialog>
                         )}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-4">
                         {showUpvote ? (
-                            <Button variant={isUpvoted ? "default" : "ghost"} size="sm" onClick={() => onUpvote(report.id)}>
-                                <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
+                            <Button 
+                              variant={isUpvoted ? "default" : "outline"} 
+                              size="lg" 
+                              onClick={() => onUpvote(report.id)}
+                              className={cn(
+                                "rounded-xl px-6 font-bold transition-all hover:scale-105 active:scale-95",
+                                isUpvoted ? "bg-primary text-white" : "border-gray-200 text-gray-700"
+                              )}
+                            >
+                                <ThumbsUp className={cn("h-5 w-5 mr-3", isUpvoted && "fill-current animate-bounce")} />
                                 Apoiar ({report.upvotes})
                             </Button>
                         ) : (
-                         <AccordionTrigger className="py-2 px-4 text-sm -mr-4 hover:no-underline">
-                           <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-md font-semibold transition-colors hover:bg-primary/20">
+                         <AccordionTrigger className="py-2 px-6 rounded-xl bg-primary/10 text-primary font-bold hover:bg-primary/20 transition-all hover:no-underline flex items-center gap-2">
                                 <Settings2 className="h-4 w-4" />
-                                {isFinalStatus ? "Visualizar Detalhes" : "Atualizar Status"}
-                           </div>
+                                {isFinalStatus ? "Detalhes do Relato" : "Gerenciar Status"}
                         </AccordionTrigger>
                         )}
                     </div>
@@ -309,32 +323,32 @@ function ReportCard({
             </div>
             
             {!showUpvote && (
-            <AccordionContent className="bg-muted/50 border-t">
+            <AccordionContent className="bg-gray-50/50 border-t border-gray-100">
               <form action={formAction} ref={formRef}>
-                <div className="p-6 space-y-4">
-                    <div className="flex flex-col md:flex-row gap-6">
-                        <div className="flex-1 space-y-4">
-                            <div>
-                                <h4 className="font-semibold text-sm mb-1">Status Atual</h4>
-                                <div className="flex items-center gap-2">
+                <div className="p-8 space-y-8 max-w-4xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12">
+                        <div className="space-y-6">
+                            <div className="p-4 rounded-xl bg-white border border-gray-100 shadow-sm">
+                                <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-widest mb-3">Estágio Atual</h4>
+                                <div className="flex items-center gap-3">
                                     <StatusBadge status={report.status} />
-                                    <span className="text-xs text-muted-foreground">
-                                        Última mudança {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true, locale: ptBR })}
+                                    <span className="text-xs font-medium text-muted-foreground">
+                                        Desde {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true, locale: ptBR })}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor={`status-${report.id}`}>Novo Status</Label>
+                            <div className="space-y-3">
+                                <Label htmlFor={`status-${report.id}`} className="text-base font-bold text-gray-900">Novo Status</Label>
                                 <Select 
                                     name="status" 
                                     defaultValue={report.status}
                                     onValueChange={(val) => setSelectedStatus(val as ReportStatus)}
                                 >
-                                    <SelectTrigger id={`status-${report.id}`} className="bg-background" disabled={isFinalStatus}>
+                                    <SelectTrigger id={`status-${report.id}`} className="h-14 rounded-xl bg-white border-gray-200 text-lg font-semibold" disabled={isFinalStatus}>
                                         <SelectValue placeholder="Mudar status" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="rounded-xl shadow-xl">
                                         {Object.entries(statusConfig).map(([key, { label }]) => {
                                             const isNext = key === nextAllowedStatus;
                                             const isCurrent = key === report.status;
@@ -343,7 +357,7 @@ function ReportCard({
                                                     key={key} 
                                                     value={key} 
                                                     disabled={!isNext && !isCurrent}
-                                                    className={cn(!isNext && !isCurrent && "opacity-40 cursor-not-allowed")}
+                                                    className={cn("p-3 font-medium", !isNext && !isCurrent && "opacity-40 cursor-not-allowed")}
                                                 >
                                                     {label} {isNext && " (Próximo)"}
                                                 </SelectItem>
@@ -352,61 +366,66 @@ function ReportCard({
                                     </SelectContent>
                                 </Select>
                                 {isFinalStatus && (
-                                    <p className="text-[10px] text-green-600 font-medium">Este relatório já atingiu o status final.</p>
+                                    <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 p-3 rounded-lg border border-emerald-100">
+                                      <CheckCircle2 className="h-4 w-4" />
+                                      <p className="text-xs font-bold uppercase tracking-wider">Demanda concluída e validada.</p>
+                                    </div>
                                 )}
                             </div>
                         </div>
 
-                        <div className={cn("flex-1 space-y-2 transition-opacity", !isPhotoEnabled && "opacity-50 pointer-events-none")}>
-                            <Label htmlFor={`photoAfter-${report.id}`}>
+                        <div className={cn("space-y-4 transition-all duration-300", !isPhotoEnabled && "opacity-30 pointer-events-none")}>
+                            <Label htmlFor={`photoAfter-${report.id}`} className="text-base font-bold text-gray-900 flex items-center justify-between">
                                 Carregar foto
-                                {isPhotoEnabled && <span className="text-xs text-destructive ml-1">* Obrigatório</span>}
+                                {isPhotoEnabled && <span className="text-[10px] font-bold uppercase tracking-wider bg-destructive/10 text-destructive px-2 py-1 rounded">Obrigatório</span>}
                             </Label>
-                            <div className="aspect-video rounded-md border border-dashed flex items-center justify-center relative overflow-hidden bg-muted/80">
+                            <div className="aspect-video rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center relative overflow-hidden bg-white hover:border-primary/50 transition-colors group">
                                 {(photoAfterPreview || report.photoAfterUrl) ? (
-                                    <Image src={photoAfterPreview || report.photoAfterUrl!} alt="Pré-visualização da foto da solução" fill className="object-cover" />
+                                    <Image src={photoAfterPreview || report.photoAfterUrl!} alt="Foto da solução" fill className="object-cover" />
                                 ) : (
-                                    <div className="text-center text-muted-foreground p-4">
-                                        <Camera className="mx-auto h-8 w-8" />
-                                        <p className="mt-2 text-xs">Carregar evidência da resolução</p>
+                                    <div className="text-center text-muted-foreground p-8">
+                                        <Camera className="mx-auto h-12 w-12 text-gray-300 group-hover:text-primary/50 transition-colors" />
+                                        <p className="mt-3 text-sm font-bold">Clique para carregar foto</p>
+                                        <p className="text-xs mt-1">Evidência fotográfica do reparo</p>
                                     </div>
                                 )}
+                                <Input 
+                                    id={`photoAfter-${report.id}`} 
+                                    name="photoAfter" 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="absolute inset-0 opacity-0 cursor-pointer" 
+                                    onChange={handlePhotoChange}
+                                    disabled={!isPhotoEnabled || isFinalStatus}
+                                />
                             </div>
-                            <Input 
-                                id={`photoAfter-${report.id}`} 
-                                name="photoAfter" 
-                                type="file" 
-                                accept="image/*" 
-                                className="file:text-primary file:font-semibold text-xs" 
-                                onChange={handlePhotoChange}
-                                disabled={!isPhotoEnabled || isFinalStatus}
-                            />
                         </div>
                     </div>
 
                     {!isFinalStatus && (
-                        <div className="flex justify-end pt-2">
+                        <div className="flex justify-end">
                             <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
                                 <AlertDialogTrigger asChild>
-                                    <Button type="button" disabled={isPending || selectedStatus === report.status} className="bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500 w-full sm:w-auto">
-                                        {isPending ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                                    <Button type="button" disabled={isPending || selectedStatus === report.status} className="h-14 rounded-xl px-10 text-lg font-bold shadow-xl bg-primary hover:scale-105 transition-all">
+                                        {isPending ? <Loader2 className="animate-spin h-5 w-5 mr-3" /> : <Upload className="h-5 w-5 mr-3" />}
                                         Salvar Alterações
                                     </Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent>
+                                <AlertDialogContent className="rounded-2xl">
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>Confirmar Atualização de Status</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            Tem certeza que deseja mover este relato para o próximo estágio? O cidadão será notificado automaticamente sobre esta mudança.
+                                        <AlertDialogTitle className="text-2xl font-bold">Confirmar Atualização de Status</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-lg">
+                                            Tem certeza que deseja mover este relato para o próximo estágio? O cidadão será notificado automaticamente sobre esta mudança em seu painel de controle.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogFooter className="mt-8">
+                                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
                                         <AlertDialogAction 
                                             onClick={() => formRef.current?.requestSubmit()}
                                             disabled={!isStatusConfirmEnabled || isPending}
+                                            className="bg-primary text-white rounded-xl font-bold px-8"
                                         >
-                                            {isStatusConfirmEnabled ? "Sim, tenho certeza" : `Sim, tenho certeza (${statusCountdown})`}
+                                            {isStatusConfirmEnabled ? "Sim, tenho certeza" : `Aguarde (${statusCountdown}s)`}
                                         </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -424,49 +443,10 @@ function ReportCard({
   );
 }
 
-function ReportList({ 
-    reports, 
-    onUpvote, 
-    onStatusUpdate,
-    upvotedReports, 
-    showUpvote 
-}: { 
-    reports: Report[], 
-    onUpvote: (id: string) => void, 
-    onStatusUpdate?: (id: string, newStatus: ReportStatus) => void,
-    upvotedReports: Set<string>, 
-    showUpvote: boolean 
-}) {
-    if (reports.length === 0) {
-      return (
-          <div className="text-center py-16 border-2 border-dashed rounded-lg">
-              <h3 className="text-xl font-semibold">Nenhum Relato Encontrado</h3>
-              <p className="text-muted-foreground mt-2">Nenhum relatório corresponde a este status no momento.</p>
-          </div>
-      )
-  }
-
-  return (
-    <div className="space-y-4">
-      {reports.map((report) => (
-        <ReportCard 
-            key={report.id} 
-            report={report} 
-            onUpvote={onUpvote} 
-            onStatusUpdate={onStatusUpdate}
-            isUpvoted={upvotedReports.has(report.id)} 
-            showUpvote={showUpvote} 
-        />
-      ))}
-    </div>
-  );
-}
-
 type OptimisticUpdate = { type: 'upvote', id: string, amount: 1 | -1 } | { type: 'status', reportId: string, newStatus: ReportStatus };
 
 export function DashboardClient({ reports, showUpvote = true }: { reports: Report[], showUpvote?: boolean }) {
   const { toast } = useToast();
-  // Se for funcionário (showUpvote=false), começa pela aba de moderação (Em Análise)
   const [activeTab, setActiveTab] = useState<ReportStatus>(showUpvote ? "PENDING" : "UNDER_REVIEW");
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'upvotes'>('newest');
@@ -495,9 +475,9 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
           const element = document.getElementById(hash.substring(1));
           if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+            element.classList.add('ring-4', 'ring-primary/20', 'ring-offset-2');
             setTimeout(() => {
-                 element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+                 element.classList.remove('ring-4', 'ring-primary/20', 'ring-offset-2');
             }, 3000);
           }
         }, 100);
@@ -543,9 +523,9 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
   
   if (reports.length === 0) {
       return (
-          <div className="text-center py-16 border-2 border-dashed rounded-lg">
-              <h3 className="text-xl font-semibold">Nenhum Relato Encontrado</h3>
-              <p className="text-muted-foreground mt-2">Quando um novo problema for relatado, ele aparecerá aqui.</p>
+          <div className="text-center py-24 border-2 border-dashed border-gray-200 rounded-3xl bg-white shadow-sm">
+              <h3 className="text-2xl font-bold text-gray-900">Nenhum Relato Encontrado</h3>
+              <p className="text-muted-foreground text-lg mt-2">Quando um novo problema for relatado, ele aparecerá aqui para acompanhamento.</p>
           </div>
       )
   }
@@ -565,46 +545,93 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
   const filteredReports = (status: ReportStatus) => sortedReports.filter(r => r.status === status);
 
   return (
-    <>
+    <div className="space-y-12">
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ReportStatus)} className="w-full">
-          <div className="flex flex-row justify-between items-center mb-4 gap-2">
-            <TabsList className={cn("grid flex-1 w-full bg-card p-1 rounded-lg", showUpvote ? "grid-cols-3" : "grid-cols-4")}>
+          <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
+            <TabsList className={cn("inline-flex h-14 w-full md:w-auto bg-white border border-gray-200 p-1 rounded-2xl shadow-sm", showUpvote ? "grid grid-cols-3" : "grid grid-cols-4")}>
                 {!showUpvote && (
-                    <TabsTrigger value="UNDER_REVIEW" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-800 data-[state=active]:shadow-md">Em Análise</TabsTrigger>
+                    <TabsTrigger value="UNDER_REVIEW" className="rounded-xl font-bold text-xs uppercase tracking-widest px-6 data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all">Em Análise</TabsTrigger>
                 )}
-                <TabsTrigger value="PENDING" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:shadow-md">Pendentes</TabsTrigger>
-                <TabsTrigger value="IN_PROGRESS" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:shadow-md">Em Andamento</TabsTrigger>
-                <TabsTrigger value="RESOLVED" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-800 data-[state=active]:shadow-md">Resolvidos</TabsTrigger>
+                <TabsTrigger value="PENDING" className="rounded-xl font-bold text-xs uppercase tracking-widest px-6 data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 transition-all">Em Aberto</TabsTrigger>
+                <TabsTrigger value="IN_PROGRESS" className="rounded-xl font-bold text-xs uppercase tracking-widest px-6 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 transition-all">Em Andamento</TabsTrigger>
+                <TabsTrigger value="RESOLVED" className="rounded-xl font-bold text-xs uppercase tracking-widest px-6 data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-800 transition-all">Resolvidos</TabsTrigger>
             </TabsList>
-            <div className="flex-shrink-0">
+            
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground uppercase tracking-widest mr-2">
+                <Filter className="h-4 w-4" />
+                Ordenar:
+              </div>
               <Select onValueChange={(value) => setSortBy(value as typeof sortBy)} defaultValue={sortBy}>
-                <SelectTrigger className="w-10 h-10 p-0 bg-card">
-                    <span className="sr-only">Ordenar por</span>
-                    <Filter className="h-4 w-4 mx-auto"/>
+                <SelectTrigger className="h-14 w-full md:w-[200px] bg-white border-gray-200 rounded-2xl font-semibold shadow-sm">
+                    <SelectValue placeholder="Ordenar por" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Mais Recentes</SelectItem>
-                  <SelectItem value="oldest">Mais Antigos</SelectItem>
-                  <SelectItem value="upvotes">Mais Apoiados</SelectItem>
+                <SelectContent className="rounded-xl shadow-xl">
+                  <SelectItem value="newest" className="font-medium p-3">Mais Recentes</SelectItem>
+                  <SelectItem value="oldest" className="font-medium p-3">Mais Antigos</SelectItem>
+                  <SelectItem value="upvotes" className="font-medium p-3">Mais Apoiados</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
-          {!showUpvote && (
-              <TabsContent value="UNDER_REVIEW">
-                  <ReportList reports={filteredReports("UNDER_REVIEW")} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} upvotedReports={upvotedReports} showUpvote={showUpvote} />
-              </TabsContent>
-          )}
-          <TabsContent value="PENDING">
-              <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} upvotedReports={upvotedReports} showUpvote={showUpvote} />
-          </TabsContent>
-          <TabsContent value="IN_PROGRESS">
-              <ReportList reports={filteredReports("IN_PROGRESS")} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} upvotedReports={upvotedReports} showUpvote={showUpvote} />
-          </TabsContent>
-          <TabsContent value="RESOLVED">
-              <ReportList reports={filteredReports("RESOLVED")} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} upvotedReports={upvotedReports} showUpvote={showUpvote} />
-          </TabsContent>
+          
+          <div className="min-h-[400px]">
+            {!showUpvote && (
+                <TabsContent value="UNDER_REVIEW" className="mt-0">
+                    <div className="space-y-6">
+                      {filteredReports("UNDER_REVIEW").length > 0 ? (
+                        filteredReports("UNDER_REVIEW").map(r => (
+                          <ReportCard key={r.id} report={r} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} isUpvoted={upvotedReports.has(r.id)} showUpvote={showUpvote} />
+                        ))
+                      ) : (
+                        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+                          <p className="text-muted-foreground font-medium">Nenhum relato aguardando análise no momento.</p>
+                        </div>
+                      )}
+                    </div>
+                </TabsContent>
+            )}
+            <TabsContent value="PENDING" className="mt-0">
+                <div className="space-y-6">
+                  {filteredReports("PENDING").length > 0 ? (
+                    filteredReports("PENDING").map(r => (
+                      <ReportCard key={r.id} report={r} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} isUpvoted={upvotedReports.has(r.id)} showUpvote={showUpvote} />
+                    ))
+                  ) : (
+                    <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+                      <p className="text-muted-foreground font-medium">Nenhum relato em aberto nesta categoria.</p>
+                    </div>
+                  )}
+                </div>
+            </TabsContent>
+            <TabsContent value="IN_PROGRESS" className="mt-0">
+                <div className="space-y-6">
+                  {filteredReports("IN_PROGRESS").length > 0 ? (
+                    filteredReports("IN_PROGRESS").map(r => (
+                      <ReportCard key={r.id} report={r} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} isUpvoted={upvotedReports.has(r.id)} showUpvote={showUpvote} />
+                    ))
+                  ) : (
+                    <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+                      <p className="text-muted-foreground font-medium">Nenhum serviço em andamento no momento.</p>
+                    </div>
+                  )}
+                </div>
+            </TabsContent>
+            <TabsContent value="RESOLVED" className="mt-0">
+                <div className="space-y-6">
+                  {filteredReports("RESOLVED").length > 0 ? (
+                    filteredReports("RESOLVED").map(r => (
+                      <ReportCard key={r.id} report={r} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} isUpvoted={upvotedReports.has(r.id)} showUpvote={showUpvote} />
+                    ))
+                  ) : (
+                    <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+                      <p className="text-muted-foreground font-medium">Nenhum serviço concluído nesta categoria.</p>
+                    </div>
+                  )}
+                </div>
+            </TabsContent>
+          </div>
       </Tabs>
-    </>
+    </div>
   );
 }
