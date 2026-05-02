@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ChevronRight } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2 } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
@@ -462,7 +462,7 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
         return b.upvotes - a.upvotes;
       case 'newest':
       default:
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return new Date(b.createdAt).getTime() - new Date(a.getTime());
     }
   });
 
@@ -474,11 +474,11 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-8">
             <TabsList className="bg-gray-100 p-1 rounded-full inline-flex w-full lg:w-auto h-auto">
                 {!showUpvote && (
-                    <TabsTrigger value="UNDER_REVIEW" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Análise</TabsTrigger>
+                    <TabsTrigger value="UNDER_REVIEW" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Em Análise</TabsTrigger>
                 )}
-                <TabsTrigger value="PENDING" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Em Aberto</TabsTrigger>
+                <TabsTrigger value="PENDING" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Pendente</TabsTrigger>
                 <TabsTrigger value="IN_PROGRESS" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Em Andamento</TabsTrigger>
-                <TabsTrigger value="RESOLVED" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Resolvidos</TabsTrigger>
+                <TabsTrigger value="RESOLVED" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Resolvido</TabsTrigger>
             </TabsList>
             
             <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">

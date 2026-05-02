@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, MapPin, CheckCircle2, Users, BarChart3, Clock, ChevronRight } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 import { getReports } from "@/lib/data";
 import { type Report } from "@/lib/types";
 import { HomeMapClient } from "@/components/home-map-client";
@@ -170,11 +169,11 @@ function AboutSection({ reports }: { reports: Report[] }) {
                   </div>
                   <div className="space-y-1">
                     <p className="text-2xl font-bold text-amber-500">{totalReports - resolvedReports - inProgressReports}</p>
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Em aberto</p>
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Pendente</p>
                   </div>
                    <div className="space-y-1">
                     <p className="text-2xl font-bold text-emerald-500">{resolvedReports}</p>
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Resolvidos</p>
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Resolvido</p>
                   </div>
                 </div>
             </CardContent>
@@ -236,11 +235,11 @@ export default async function Home() {
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-amber-500" />
-                      <span className="text-sm font-medium">Em aberto</span>
+                      <span className="text-sm font-medium">Pendente</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-emerald-500" />
-                      <span className="text-sm font-medium">Resolvidos</span>
+                      <span className="text-sm font-medium">Resolvido</span>
                     </div>
                   </div>
                 </div>

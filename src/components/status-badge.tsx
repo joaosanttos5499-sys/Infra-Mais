@@ -11,7 +11,7 @@ export const statusConfig: Record<
     className: "bg-slate-500 text-white border-transparent hover:bg-slate-600",
   },
   PENDING: {
-    label: "Em aberto",
+    label: "Pendente",
     className: "bg-amber-500 text-white border-transparent hover:bg-amber-600",
   },
   IN_PROGRESS: {
