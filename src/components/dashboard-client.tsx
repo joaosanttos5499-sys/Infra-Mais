@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Expand, Trash2, MapPin } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Expand, Trash2, MapPin, Settings2 } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
@@ -43,11 +43,13 @@ function ReportCreationTime({ date }: { date: Date }) {
 function ReportCard({ 
     report,
     onUpvote,
+    onStatusUpdate,
     isUpvoted,
     showUpvote,
 }: { 
     report: Report,
     onUpvote: (id: string) => void,
+    onStatusUpdate?: (id: string, newStatus: ReportStatus) => void,
     isUpvoted: boolean,
     showUpvote: boolean
 }) {
@@ -57,7 +59,13 @@ function ReportCard({
   const [isDeleting, startDeleteTransition] = useTransition();
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
-  const [formState, formAction, isPending] = useActionState(updateReportStatus, undefined);
+  
+  const [formState, formAction, isPending] = useActionState(async (prev: any, formData: FormData) => {
+    const status = formData.get("status") as ReportStatus;
+    if (onStatusUpdate) onStatusUpdate(report.id, status);
+    return updateReportStatus(prev, { reportId: report.id, formData });
+  }, undefined);
+
   const formRef = useRef<HTMLFormElement>(null);
   const [photoAfterPreview, setPhotoAfterPreview] = useState<string | null>(null);
 
@@ -86,6 +94,8 @@ function ReportCard({
             title: "Sucesso",
             description: formState.message,
         });
+        if (formRef.current) formRef.current.reset();
+        setPhotoAfterPreview(null);
     }
   }, [formState, toast]);
 
@@ -244,8 +254,11 @@ function ReportCard({
                                 Apoiar ({report.upvotes})
                             </Button>
                         ) : (
-                         <AccordionTrigger className="py-2 px-4 text-sm -mr-4">
-                           Ver detalhes e atualizar
+                         <AccordionTrigger className="py-2 px-4 text-sm -mr-4 hover:no-underline">
+                           <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-md font-semibold transition-colors hover:bg-primary/20">
+                                <Settings2 className="h-4 w-4" />
+                                Atualizar Status
+                           </div>
                         </AccordionTrigger>
                         )}
                     </div>
@@ -253,48 +266,53 @@ function ReportCard({
             </div>
             
             {!showUpvote && (
-            <AccordionContent className="bg-muted/50">
-              <form action={(formData) => formAction({ reportId: report.id, formData })} ref={formRef}>
+            <AccordionContent className="bg-muted/50 border-t">
+              <form action={formAction} ref={formRef}>
                 <div className="p-6 space-y-4">
-                    <div>
-                        <h4 className="font-semibold text-sm mb-1">Relatado</h4>
-                        <p className="text-sm text-foreground/80" title={format(new Date(report.createdAt), "PPPppp", { locale: ptBR })}>
-                            {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true, locale: ptBR })}
-                        </p>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor={`photoAfter-${report.id}`}>Foto da Solução (Opcional)</Label>
-                      <div className="aspect-video rounded-md border border-dashed flex items-center justify-center relative overflow-hidden bg-muted/80">
-                          {(photoAfterPreview || report.photoAfterUrl) ? (
-                              <Image src={photoAfterPreview || report.photoAfterUrl!} alt="Pré-visualização da foto da solução" fill className="object-cover" />
-                          ) : (
-                              <div className="text-center text-muted-foreground p-4">
-                                  <Camera className="mx-auto h-10 w-10" />
-                                  <p className="mt-2 text-xs">Carregar foto do "depois"</p>
-                              </div>
-                          )}
-                      </div>
-                      <Input id={`photoAfter-${report.id}`} name="photoAfter" type="file" accept="image/*" className="file:text-primary file:font-semibold text-xs" onChange={handlePhotoChange} />
+                    <div className="flex flex-col md:flex-row gap-6">
+                        <div className="flex-1 space-y-4">
+                            <div>
+                                <h4 className="font-semibold text-sm mb-1">Última Atualização</h4>
+                                <p className="text-sm text-foreground/80" title={format(new Date(report.createdAt), "PPPppp", { locale: ptBR })}>
+                                    {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true, locale: ptBR })}
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor={`status-${report.id}`}>Novo Status</Label>
+                                <Select name="status" defaultValue={report.status}>
+                                    <SelectTrigger id={`status-${report.id}`} className="bg-background">
+                                        <SelectValue placeholder="Mudar status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.entries(statusConfig).map(([key, { label }]) => (
+                                            <SelectItem key={key} value={key}>{label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 space-y-2">
+                            <Label htmlFor={`photoAfter-${report.id}`}>Foto da Solução (Opcional)</Label>
+                            <div className="aspect-video rounded-md border border-dashed flex items-center justify-center relative overflow-hidden bg-muted/80">
+                                {(photoAfterPreview || report.photoAfterUrl) ? (
+                                    <Image src={photoAfterPreview || report.photoAfterUrl!} alt="Pré-visualização da foto da solução" fill className="object-cover" />
+                                ) : (
+                                    <div className="text-center text-muted-foreground p-4">
+                                        <Camera className="mx-auto h-8 w-8" />
+                                        <p className="mt-2 text-xs">Carregar evidência da resolução</p>
+                                    </div>
+                                )}
+                            </div>
+                            <Input id={`photoAfter-${report.id}`} name="photoAfter" type="file" accept="image/*" className="file:text-primary file:font-semibold text-xs" onChange={handlePhotoChange} />
+                        </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4">
-                      <div className="space-y-2 flex-1">
-                          <Label htmlFor={`status-${report.id}`}>Atualizar Status</Label>
-                          <Select name="status" defaultValue={report.status}>
-                              <SelectTrigger id={`status-${report.id}`} className="bg-background">
-                                  <SelectValue placeholder="Mudar status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                  {Object.entries(statusConfig).map(([key, { label }]) => (
-                                      <SelectItem key={key} value={key}>{label}</SelectItem>
-                                  ))}
-                              </SelectContent>
-                          </Select>
-                      </div>
+                    <div className="flex justify-end pt-2">
                       <Button type="submit" disabled={isPending} className="bg-amber-400 text-black hover:bg-amber-400/90 focus-visible:ring-amber-500 w-full sm:w-auto">
-                        {isPending ? <Loader2 className="animate-spin" /> : <Upload />}
-                        <span className="ml-2">Atualizar</span>
+                        {isPending ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                        Salvar Alterações
                       </Button>
                     </div>
                 </div>
@@ -308,12 +326,24 @@ function ReportCard({
   );
 }
 
-function ReportList({ reports, onUpvote, upvotedReports, showUpvote }: { reports: Report[], onUpvote: (id: string) => void, upvotedReports: Set<string>, showUpvote: boolean }) {
+function ReportList({ 
+    reports, 
+    onUpvote, 
+    onStatusUpdate,
+    upvotedReports, 
+    showUpvote 
+}: { 
+    reports: Report[], 
+    onUpvote: (id: string) => void, 
+    onStatusUpdate?: (id: string, newStatus: ReportStatus) => void,
+    upvotedReports: Set<string>, 
+    showUpvote: boolean 
+}) {
     if (reports.length === 0) {
       return (
           <div className="text-center py-16 border-2 border-dashed rounded-lg">
               <h3 className="text-xl font-semibold">Nenhum Relato Encontrado</h3>
-              <p className="text-muted-foreground mt-2">Nenhum relatório corresponde a este status.</p>
+              <p className="text-muted-foreground mt-2">Nenhum relatório corresponde a este status no momento.</p>
           </div>
       )
   }
@@ -321,7 +351,14 @@ function ReportList({ reports, onUpvote, upvotedReports, showUpvote }: { reports
   return (
     <div className="space-y-4">
       {reports.map((report) => (
-        <ReportCard key={report.id} report={report} onUpvote={onUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} />
+        <ReportCard 
+            key={report.id} 
+            report={report} 
+            onUpvote={onUpvote} 
+            onStatusUpdate={onStatusUpdate}
+            isUpvoted={upvotedReports.has(report.id)} 
+            showUpvote={showUpvote} 
+        />
       ))}
     </div>
   );
@@ -331,7 +368,7 @@ type OptimisticUpdate = { type: 'upvote', id: string, amount: 1 | -1 } | { type:
 
 export function DashboardClient({ reports, showUpvote = true }: { reports: Report[], showUpvote?: boolean }) {
   const { toast } = useToast();
-  // Se for funcionário (showUpvote=false), começa pela aba de moderação
+  // Se for funcionário (showUpvote=false), começa pela aba de moderação (Em Análise)
   const [activeTab, setActiveTab] = useState<ReportStatus>(showUpvote ? "PENDING" : "UNDER_REVIEW");
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'upvotes'>('newest');
@@ -394,14 +431,17 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
           description: result.message || "Não foi possível registrar seu apoio.",
           variant: "destructive",
         });
-        // Revert local state if server fails
         setUpvotedReports(upvotedReports);
         setOptimisticReports({ type: 'upvote', id: reportId, amount: isAlreadyUpvoted ? 1 : -1 });
       }
     });
   }
 
-  const [isUpvotePending, startTransition] = useTransition();
+  const handleStatusUpdate = (reportId: string, newStatus: ReportStatus) => {
+      startTransition(() => {
+          setOptimisticReports({ type: 'status', reportId, newStatus });
+      });
+  };
   
   if (reports.length === 0) {
       return (
@@ -454,17 +494,17 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
           </div>
           {!showUpvote && (
               <TabsContent value="UNDER_REVIEW">
-                  <ReportList reports={filteredReports("UNDER_REVIEW")} onUpvote={handleUpvote} upvotedReports={upvotedReports} showUpvote={showUpvote} />
+                  <ReportList reports={filteredReports("UNDER_REVIEW")} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} upvotedReports={upvotedReports} showUpvote={showUpvote} />
               </TabsContent>
           )}
           <TabsContent value="PENDING">
-              <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} upvotedReports={upvotedReports} showUpvote={showUpvote} />
+              <ReportList reports={filteredReports("PENDING")} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} upvotedReports={upvotedReports} showUpvote={showUpvote} />
           </TabsContent>
           <TabsContent value="IN_PROGRESS">
-              <ReportList reports={filteredReports("IN_PROGRESS")} onUpvote={handleUpvote} upvotedReports={upvotedReports} showUpvote={showUpvote} />
+              <ReportList reports={filteredReports("IN_PROGRESS")} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} upvotedReports={upvotedReports} showUpvote={showUpvote} />
           </TabsContent>
           <TabsContent value="RESOLVED">
-              <ReportList reports={filteredReports("RESOLVED")} onUpvote={handleUpvote} upvotedReports={upvotedReports} showUpvote={showUpvote} />
+              <ReportList reports={filteredReports("RESOLVED")} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} upvotedReports={upvotedReports} showUpvote={showUpvote} />
           </TabsContent>
       </Tabs>
     </>
