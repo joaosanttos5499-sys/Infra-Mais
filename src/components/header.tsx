@@ -58,7 +58,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
           {isEmployee && (
             <>
               <DropdownMenuItem asChild>
-                <Link href="/funcionarios" className="text-blue-600 font-semibold">
+                <Link href="/funcionarios">
                   <ShieldCheck className="mr-2 h-4 w-4" />
                   <span>Área do Funcionário</span>
                 </Link>
@@ -133,7 +133,7 @@ export function Header() {
                   <div key={link.href} className="flex items-center gap-4">
                       <Link
                       href={link.href}
-                      className={`opacity-90 hover:opacity-100 transition-opacity ${link.href === '/funcionarios' ? 'text-blue-600 font-bold' : ''}`}
+                      className="opacity-90 hover:opacity-100 transition-opacity"
                       >
                       {link.label}
                       </Link>
@@ -162,7 +162,7 @@ export function Header() {
                       <Link
                         key={link.href}
                         href={link.href}
-                        className={`flex items-center gap-3 p-2 rounded-md hover:bg-muted text-base font-medium ${link.href === '/funcionarios' ? 'text-blue-600' : ''}`}
+                        className="flex items-center gap-3 p-2 rounded-md hover:bg-muted text-base font-medium"
                         onClick={() => setIsSheetOpen(false)}
                       >
                         <link.icon className="h-5 w-5" />
