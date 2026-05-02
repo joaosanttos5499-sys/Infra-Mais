@@ -2,7 +2,7 @@
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition } from "react";
 import Image from "next/image";
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { updateReportStatus, upvoteReportAction, downvoteReportAction, deleteReportAction } from "@/lib/actions";
 import { type Report, type ReportStatus } from "@/lib/types";
@@ -13,15 +13,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Expand, Trash2, MapPin, Settings2, Clock, CheckCircle2, ChevronRight } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2 } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { useUser } from "@/firebase";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
 import { useRouter } from "next/navigation";
+import { ReportTime } from "./report-time";
 
 // Mapa de progressão estrita de status
 const STATUS_PROGRESSION: Record<ReportStatus, ReportStatus | null> = {
@@ -30,23 +31,6 @@ const STATUS_PROGRESSION: Record<ReportStatus, ReportStatus | null> = {
   IN_PROGRESS: "RESOLVED",
   RESOLVED: null,
 };
-
-function ReportCreationTime({ date }: { date: Date }) {
-    const [timeString, setTimeString] = useState("");
-
-    useEffect(() => {
-        setTimeString(format(date, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }));
-    }, [date]);
-
-    if (!timeString) return null;
-
-    return (
-        <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {timeString}
-        </span>
-    );
-}
 
 function ReportCard({ 
     report,
@@ -165,7 +149,7 @@ function ReportCard({
         <Accordion type="single" collapsible disabled={showUpvote}>
           <AccordionItem value={report.id} className="border-b-0">
             <div className="p-0 flex flex-col sm:flex-row">
-                {/* Image Section - Following Block pattern */}
+                {/* Image Section */}
                 <div className="relative aspect-video sm:w-72 sm:h-auto overflow-hidden">
                     <Image
                         src={report.photoUrl}
@@ -181,20 +165,17 @@ function ReportCard({
 
                 <div className="p-6 flex flex-col flex-grow space-y-4">
                     <div className="space-y-1">
-                        {/* Title Highlight */}
                         <h3 className="font-bold text-xl text-gray-900 leading-tight">
                             {problem?.label || report.problem}
                         </h3>
                         
-                        {/* Category Row */}
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                             {category?.icon && <category.icon className="h-4 w-4" style={{ color: category?.color }} />}
                             <span>{category?.label || report.category}</span>
                         </div>
                     </div>
 
-                    {/* Location Info */}
-                    <div className="space-y-2 py-2 border-y border-gray-50">
+                    <div className="space-y-2 py-2 border-y border-gray-100">
                         <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                             <MapPin className="h-4 w-4 text-primary" />
                             <span>{displayCity} - {report.bairro}</span>
@@ -206,7 +187,6 @@ function ReportCard({
                         </div>
                     </div>
 
-                    {/* Description Quote */}
                     <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
                         &quot;{report.description}&quot;
                     </p>
@@ -296,7 +276,7 @@ function ReportCard({
                                 <div className="flex items-center gap-3">
                                     <StatusBadge status={report.status} />
                                     <span className="text-xs font-medium text-muted-foreground">
-                                        Desde {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true, locale: ptBR })}
+                                        Mudar para próximo estágio:
                                     </span>
                                 </div>
                             </div>
