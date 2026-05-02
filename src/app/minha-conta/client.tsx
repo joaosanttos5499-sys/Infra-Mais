@@ -27,6 +27,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createAvatarSvg } from "@/lib/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
+import { isEmailEmployee } from "@/lib/config";
 
 
 function MyReportItem({ report }: { report: Report }) {
@@ -166,6 +167,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     const [userReports, setUserReports] = useState<Report[]>([]);
 
+    const isEmployee = isEmailEmployee(user?.email);
+
     const form = useForm<z.infer<typeof UpdateProfileSchema>>({
       resolver: zodResolver(UpdateProfileSchema),
       defaultValues: {
@@ -176,11 +179,11 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     useEffect(() => {
         if (!isUserLoading && !user) {
             router.push('/report/auth');
-        } else if (user) {
+        } else if (user && !isEmployee) {
             const filteredReports = allReports.filter(report => report.userId === user.uid);
             setUserReports(filteredReports);
         }
-    }, [user, isUserLoading, allReports, router]);
+    }, [user, isUserLoading, allReports, router, isEmployee]);
     
     useEffect(() => {
         if (user?.uid) {
@@ -438,14 +441,16 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 </AlertDialogContent>
             </AlertDialog>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Meus Relatórios</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <MyReportsList reports={userReports} />
-                </CardContent>
-            </Card>
+            {!isEmployee && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Meus Relatórios</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <MyReportsList reports={userReports} />
+                    </CardContent>
+                </Card>
+            )}
         </div>
     )
 }
