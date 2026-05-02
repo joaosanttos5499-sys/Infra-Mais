@@ -1,3 +1,4 @@
+
 import {
   Accordion,
   AccordionContent,
@@ -6,6 +7,9 @@ import {
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search, MessageCircle, HelpCircle } from "lucide-react";
 
 export default function SupportPage() {
   const faqs = [
@@ -63,30 +67,48 @@ export default function SupportPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <main className="flex-1 p-4 md:p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl md:text-4xl font-bold font-headline">
+      <main className="flex-1 p-4 md:p-12">
+        <div className="max-w-3xl mx-auto">
+          {/* Header Section */}
+          <div className="mb-10 text-center md:text-left space-y-2">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">
               Central de Suporte
             </h1>
-            <Separator className="my-4" />
-            <p className="text-muted-foreground mt-3">
+            <p className="text-lg md:text-xl text-muted-foreground">
               Tudo o que você precisa saber sobre como utilizar o Infra Mais.
             </p>
           </div>
 
-          <Card className="shadow-md border-primary/20">
-            <CardHeader className="bg-primary/5">
-              <CardTitle>Perguntas Frequentes (FAQ)</CardTitle>
+          {/* Search Bar */}
+          <div className="relative mb-8">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Input 
+              type="text" 
+              placeholder="Buscar dúvida..." 
+              className="w-full pl-12 pr-4 py-6 rounded-xl border-gray-200 shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-base"
+            />
+          </div>
+
+          {/* FAQ Card */}
+          <Card className="rounded-2xl border-gray-200 shadow-sm overflow-hidden bg-white">
+            <CardHeader className="bg-gray-50/50 border-b border-gray-100 p-6">
+              <CardTitle className="text-xl md:text-2xl font-bold flex items-center gap-2">
+                <HelpCircle className="h-6 w-6 text-primary" />
+                Perguntas Frequentes (FAQ)
+              </CardTitle>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="p-2 md:p-4">
               <Accordion type="single" collapsible className="w-full">
                 {faqs.map((faq, index) => (
-                  <AccordionItem value={`item-${index}`} key={index} className="border-b last:border-0">
-                    <AccordionTrigger className="text-left font-semibold text-base md:text-lg hover:text-primary transition-colors">
+                  <AccordionItem 
+                    value={`item-${index}`} 
+                    key={index} 
+                    className="border-b-0 px-2 rounded-xl transition-all hover:bg-gray-50/80 data-[state=open]:bg-primary/5 data-[state=open]:border data-[state=open]:border-primary/10 mb-1"
+                  >
+                    <AccordionTrigger className="text-left font-bold text-base md:text-lg py-5 px-4 hover:no-underline hover:text-primary transition-colors">
                       {faq.question}
                     </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground whitespace-pre-wrap text-sm md:text-base leading-relaxed">
+                    <AccordionContent className="text-muted-foreground whitespace-pre-wrap text-sm md:text-base leading-relaxed px-4 pb-6">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>
@@ -95,11 +117,24 @@ export default function SupportPage() {
             </CardContent>
           </Card>
           
-          <div className="mt-12 p-6 bg-amber-50 rounded-lg border border-amber-200 text-center">
-            <h3 className="text-lg font-bold text-amber-800 mb-2">Ainda tem dúvidas?</h3>
-            <p className="text-amber-700 text-sm">
-              Se você encontrou algum problema técnico no site ou deseja propor uma parceria em sua cidade, entre em contato conosco através de nossas redes sociais ou via e-mail de suporte da plataforma.
-            </p>
+          {/* Help Extra Section */}
+          <div className="mt-10 p-8 bg-primary/5 rounded-2xl border border-primary/10 text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="bg-primary/10 p-3 rounded-full">
+                <MessageCircle className="h-8 w-8 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-xl font-bold text-gray-900">Ainda tem dúvidas?</h3>
+              <p className="text-muted-foreground text-sm md:text-base max-w-md mx-auto">
+                Se você encontrou um problema técnico ou deseja propor uma parceria em sua cidade, nossa equipe está pronta para ajudar.
+              </p>
+            </div>
+            <div className="pt-2">
+              <Button size="lg" className="rounded-xl font-bold shadow-md px-8">
+                Entrar em contato
+              </Button>
+            </div>
           </div>
         </div>
       </main>
