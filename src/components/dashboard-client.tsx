@@ -141,7 +141,10 @@ function ReportCard({
   const isPhotoEnabled = selectedStatus === 'RESOLVED';
 
   return (
-    <Card className="overflow-hidden bg-white border border-gray-200 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-1 rounded-xl cursor-pointer" id={`report-${report.id}`}>
+    <Card 
+      className="overflow-hidden bg-white border border-gray-200 shadow-sm transition-all duration-500 hover:shadow-md hover:-translate-y-1 rounded-xl cursor-pointer animate-in fade-in slide-in-from-bottom-4" 
+      id={`report-${report.id}`}
+    >
       <CardContent className="p-0">
         <Accordion type="single" collapsible disabled={showUpvote}>
           <AccordionItem value={report.id} className="border-b-0">

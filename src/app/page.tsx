@@ -35,7 +35,7 @@ async function RecentReports() {
           
           return (
             <Link href={`/dashboard#report-${report.id}`} key={report.id} className="block group">
-                <Card className="overflow-hidden flex flex-col h-full border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 rounded-xl bg-white relative">
+                <Card className="overflow-hidden flex flex-col h-full border-gray-200 shadow-sm transition-all duration-500 hover:shadow-lg hover:-translate-y-1 rounded-xl bg-white relative animate-in fade-in slide-in-from-bottom-4">
                   {/* Top Image Section */}
                   <div className="relative h-48 w-full overflow-hidden">
                       <Image

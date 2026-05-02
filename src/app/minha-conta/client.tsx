@@ -54,7 +54,7 @@ function MyReportItem({ report }: { report: Report }) {
     };
 
     return (
-        <Card className="overflow-hidden flex flex-col sm:flex-row h-full border-gray-200 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1 rounded-xl bg-white group relative">
+        <Card className="overflow-hidden flex flex-col sm:flex-row h-full border-gray-200 shadow-sm transition-all duration-500 hover:shadow-md hover:-translate-y-1 rounded-xl bg-white group relative animate-in fade-in slide-in-from-bottom-4">
             <Link href={`/dashboard#report-${report.id}`} className="absolute inset-0 z-0" />
             
             {/* Image Block */}
