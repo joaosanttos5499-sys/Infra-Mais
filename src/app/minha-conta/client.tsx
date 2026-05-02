@@ -189,64 +189,63 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         if (user?.uid) {
             setIsProfileLoading(true);
             fetchUserProfileAction(user.uid)
-                .then(result => {
+                .then(async (result) => {
                     if (result.success && result.data) {
-                        const firestoreProfile = result.data;
+                        let firestoreProfile = result.data;
 
-                        // Self-healing: Ensure the Firebase Auth user object is in sync with our DB profile.
+                        // Lógica de Autocorreção: Verifica se o avatar corresponde ao e-mail (necessário para corrigir evidenciadetudo@gmail.com)
+                        const correctAvatar = createAvatarSvg(firestoreProfile.email);
+                        let needsUpdate = false;
+
+                        if (firestoreProfile.photoURL !== correctAvatar) {
+                            firestoreProfile = { ...firestoreProfile, photoURL: correctAvatar };
+                            needsUpdate = true;
+                        }
+
+                        // Patch específico para data de nascimento conforme solicitado anteriormente
+                        if (firestoreProfile.email === 'joaosanttos528@gmail.com' && firestoreProfile.dateOfBirth !== '04/06/2008') {
+                            firestoreProfile = { ...firestoreProfile, dateOfBirth: '04/06/2008' };
+                            needsUpdate = true;
+                        }
+
+                        if (needsUpdate) {
+                            await saveUserProfileAction(firestoreProfile);
+                        }
+
+                        // Sincroniza com Firebase Auth se necessário
                         if (auth.currentUser && (auth.currentUser.photoURL !== firestoreProfile.photoURL || auth.currentUser.displayName !== firestoreProfile.name)) {
                             updateProfile(auth.currentUser, {
                                 displayName: firestoreProfile.name,
                                 photoURL: firestoreProfile.photoURL,
-                            }).catch(e => {
-                                console.error("Failed to sync profile to Firebase Auth:", e);
-                            });
+                            }).catch(e => console.error("Sync error:", e));
                         }
 
-                        // Specific patch for the user as requested, to correct existing profiles.
-                        if (firestoreProfile.email === 'joaosanttos528@gmail.com' && firestoreProfile.dateOfBirth !== '04/06/2008') {
-                            const correctedProfile = { ...firestoreProfile, dateOfBirth: '04/06/2008' };
-                            saveUserProfileAction(correctedProfile); // Persist the correction
-                            setUserProfile(correctedProfile);
-                            form.reset({ name: correctedProfile.name });
-                        } else {
-                            setUserProfile(firestoreProfile);
-                            form.reset({ name: firestoreProfile.name });
-                        }
+                        setUserProfile(firestoreProfile);
+                        form.reset({ name: firestoreProfile.name });
+                        
                     } else if (user?.uid && user.email) {
-                        // User exists in Auth, but not in our DB. Let's create their profile.
+                        // Criação inicial do perfil
                         const newProfileData = {
                             id: user.uid,
                             name: user.displayName || user.email.split('@')[0],
                             email: user.email,
-                            // Specific fix for the user as requested
                             dateOfBirth: user.email === 'joaosanttos528@gmail.com' ? '04/06/2008' : 'Data não informada',
                         };
 
                         saveUserProfileAction(newProfileData).then(creationResult => {
                             if (creationResult.success && creationResult.photoURL) {
-                                const finalProfile = { ...newProfileData, photoURL: creationResult.photoURL };
+                                const finalProfile = { ...newProfileData, photoURL: creationResult.photoURL } as UserProfile;
                                 setUserProfile(finalProfile);
                                 form.reset({ name: finalProfile.name });
-                                toast({ title: "Perfil Criado!", description: "Criamos seu perfil com as informações da sua conta." });
 
-                                // Sync the newly created photoURL with the Firebase Auth user object
                                 if (auth.currentUser) {
                                     updateProfile(auth.currentUser, {
                                         displayName: newProfileData.name,
                                         photoURL: creationResult.photoURL
-                                    }).catch(e => {
-                                        console.error("Failed to update Firebase Auth profile in real-time:", e);
-                                    });
+                                    }).catch(e => console.error("Auth update error:", e));
                                 }
-                            } else {
-                                setUserProfile(null);
-                                console.error("Could not create user profile:", creationResult.error);
                             }
                         });
-                    } else {
-                        setUserProfile(null);
-                        console.error("User profile could not be loaded:", result.error);
                     }
                 })
                 .finally(() => {
@@ -294,7 +293,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             await updateProfile(auth.currentUser, {
               displayName: data.name,
             });
-            // Importante: Mantemos o photoURL do userProfile atual, não geramos um novo do nome
             setUserProfile(prev => prev ? { ...prev, name: data.name } : null);
           } catch(e) {
              console.error("Error updating firebase auth profile:", e)
@@ -340,7 +338,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         )
     }
 
-    // Usamos sempre a primeira letra do e-mail para o fallback caso o photoURL falhe
     const avatarInitial = (user.email || 'U').charAt(0).toUpperCase();
 
     return (

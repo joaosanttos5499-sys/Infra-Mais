@@ -203,22 +203,19 @@ export async function deleteReportAction(reportId: string) {
 export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'photoURL' | 'role'> & { photoURL?: string }): Promise<{ success: boolean; error?: string; photoURL?: string; }> {
   try {
     const role = isEmailEmployee(userProfile.email) ? "EMPLOYEE" : "USER";
-    let finalUserProfile: UserProfile;
-
-    // Garante que o avatar seja gerado a partir do e-mail e seja permanente
-    if (!userProfile.photoURL) {
-      const avatarSvg = createAvatarSvg(userProfile.email);
-      finalUserProfile = {
-        ...userProfile,
-        photoURL: avatarSvg,
-        role,
-      };
-    } else {
-        finalUserProfile = { ...userProfile, role } as UserProfile;
-    }
+    
+    // Forçamos a geração do avatar a partir do e-mail para garantir a letra correta (E para evidenciadetudo@gmail.com)
+    const avatarSvg = createAvatarSvg(userProfile.email);
+    
+    const finalUserProfile: UserProfile = {
+      ...userProfile,
+      photoURL: avatarSvg, // Sempre sobrescreve com o SVG baseado no e-mail para garantir a lógica permanente
+      role,
+    };
     
     await saveUser(finalUserProfile);
     revalidatePath('/');
+    revalidatePath('/minha-conta');
     return { success: true, photoURL: finalUserProfile.photoURL };
   } catch (error) {
     console.error("Failed to save user profile:", error);
@@ -249,13 +246,10 @@ export async function updateUserProfileAction(userId: string, data: { name: stri
 
     const { name } = validatedFields.data;
 
-    // Check if the name is actually being changed
     if (name !== existingProfile.name) {
-      // It is a name change, so check the timestamp
       if (existingProfile.nameLastUpdatedAt) {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
         const lastUpdateDate = new Date(existingProfile.nameLastUpdatedAt);
 
         if (lastUpdateDate > sevenDaysAgo) {
@@ -267,14 +261,12 @@ export async function updateUserProfileAction(userId: string, data: { name: stri
     const updatedProfile: UserProfile = {
       ...existingProfile,
       name,
-      // Removido o createAvatarSvg(name) para manter o avatar original baseado no e-mail
+      // Mantém o avatar original (que já é garantido ser baseado no e-mail)
       nameLastUpdatedAt: name !== existingProfile.name ? new Date().toISOString() : existingProfile.nameLastUpdatedAt,
     };
 
     await saveUser(updatedProfile);
-    
     revalidatePath('/minha-conta');
-    
     return { success: true };
 
   } catch (error) {
