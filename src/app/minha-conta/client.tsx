@@ -511,9 +511,11 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             <AlertDialogContent>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Excluir sua conta permanentemente?</AlertDialogTitle>
-                                    <AlertDialogDescription className="space-y-3">
-                                        <p>Esta ação é <strong>irreversível</strong>. Todos os seus dados pessoais e relatos enviados serão removidos do sistema.</p>
-                                        <p>Se você tentar entrar novamente com este e-mail, o sistema não reconhecerá mais seu cadastro.</p>
+                                    <AlertDialogDescription asChild>
+                                        <div className="space-y-3">
+                                            <p>Esta ação é <strong>irreversível</strong>. Todos os seus dados pessoais e relatos enviados serão removidos do sistema.</p>
+                                            <p>Se você tentar entrar novamente com este e-mail, o sistema não reconhecerá mais seu cadastro.</p>
+                                        </div>
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
