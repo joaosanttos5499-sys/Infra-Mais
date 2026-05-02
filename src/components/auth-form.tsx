@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Check, Mail } from 'lucide-react';
+import { Loader2, ArrowLeft, Check, Mail, Eye, EyeOff } from 'lucide-react';
 import { fetchUserProfileAction } from '@/lib/actions';
 
 export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
@@ -22,6 +22,7 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [view, setView] = useState<'signIn' | 'resetPassword' | 'resetSuccess'>('signIn');
 
   const handleSignIn = async () => {
@@ -178,14 +179,27 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Senha</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="********"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isSubmitting}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="********"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isSubmitting}
+              className="pr-10"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+              <span className="sr-only">{showPassword ? "Ocultar senha" : "Mostrar senha"}</span>
+            </Button>
+          </div>
            <div className="flex justify-end">
              <Button 
                 variant="link" 
