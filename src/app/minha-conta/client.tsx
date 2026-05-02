@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
@@ -334,28 +333,34 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             
             if (result.success) {
                 // 2. Deleta o usuário da autenticação do Firebase
-                await deleteAuthUser(auth.currentUser);
-                toast({ title: "Conta excluída", description: "Todos os seus dados foram removidos permanentemente." });
-                router.push('/');
+                try {
+                  await deleteAuthUser(auth.currentUser);
+                  toast({ title: "Conta excluída", description: "Todos os seus dados foram removidos permanentemente." });
+                  router.push('/');
+                } catch (authError: any) {
+                  console.error("Auth deletion error:", authError);
+                  // Se o login for antigo, o Firebase exige reautenticação
+                  if (authError.code === 'auth/requires-recent-login') {
+                      toast({ 
+                          variant: 'destructive', 
+                          title: "Ação Necessária", 
+                          description: "Por segurança, você precisa fazer login novamente antes de excluir sua conta permanentemente." 
+                      });
+                      await signOut(auth);
+                      router.push('/report/auth');
+                  } else {
+                      toast({ variant: 'destructive', title: "Erro na credencial", description: "Seus dados foram removidos, mas houve um erro ao deletar seu acesso." });
+                      setIsDeletingAccount(false);
+                  }
+                }
             } else {
                 toast({ variant: 'destructive', title: 'Erro ao excluir', description: result.error });
                 setIsDeletingAccount(false);
             }
         } catch (error: any) {
-            console.error("Auth deletion error:", error);
-            // Se o login for antigo, o Firebase exige reautenticação
-            if (error.code === 'auth/requires-recent-login') {
-                toast({ 
-                    variant: 'destructive', 
-                    title: "Ação Necessária", 
-                    description: "Por segurança, faça login novamente antes de excluir sua conta permanentemente." 
-                });
-                await signOut(auth);
-                router.push('/report/auth');
-            } else {
-                toast({ variant: 'destructive', title: "Erro crítico", description: "Não foi possível remover sua credencial de acesso." });
-                setIsDeletingAccount(false);
-            }
+            console.error("General deletion error:", error);
+            toast({ variant: 'destructive', title: "Erro crítico", description: "Ocorreu um erro inesperado ao tentar excluir sua conta." });
+            setIsDeletingAccount(false);
         }
     };
 
