@@ -2,8 +2,6 @@
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition } from "react";
 import Image from "next/image";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { updateReportStatus, upvoteReportAction, downvoteReportAction, deleteReportAction } from "@/lib/actions";
 import { type Report, type ReportStatus } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
@@ -13,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2 } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ChevronRight } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
@@ -24,7 +22,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useRouter } from "next/navigation";
 import { ReportTime } from "./report-time";
 
-// Mapa de progressão estrita de status
 const STATUS_PROGRESSION: Record<ReportStatus, ReportStatus | null> = {
   UNDER_REVIEW: "PENDING",
   PENDING: "IN_PROGRESS",
@@ -144,56 +141,51 @@ function ReportCard({
   const isPhotoEnabled = selectedStatus === 'RESOLVED';
 
   return (
-    <Card className="overflow-hidden bg-white border border-gray-200 shadow-sm transition-all hover:shadow-md rounded-xl" id={`report-${report.id}`}>
+    <Card className="overflow-hidden bg-white border border-gray-200 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-1 rounded-xl cursor-pointer" id={`report-${report.id}`}>
       <CardContent className="p-0">
         <Accordion type="single" collapsible disabled={showUpvote}>
           <AccordionItem value={report.id} className="border-b-0">
-            <div className="p-0 flex flex-col sm:flex-row">
+            <div className="flex flex-col md:flex-row h-full">
                 {/* Image Section */}
-                <div className="relative aspect-video sm:w-72 sm:h-auto overflow-hidden">
+                <div className="relative w-full md:w-56 h-48 md:h-auto overflow-hidden bg-gray-100 shrink-0">
                     <Image
                         src={report.photoUrl}
-                        alt={`Problema em ${report.location}`}
+                        alt={`Relato: ${problem?.label || report.problem}`}
                         fill
                         className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 300px"
+                        sizes="(max-width: 768px) 100vw, 224px"
                     />
                     <div className="absolute top-3 left-3 z-10">
                         <StatusBadge status={report.status} />
                     </div>
                 </div>
 
-                <div className="p-6 flex flex-col flex-grow space-y-4">
-                    <div className="space-y-1">
-                        <h3 className="font-bold text-xl text-gray-900 leading-tight">
-                            {problem?.label || report.problem}
-                        </h3>
-                        
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                            {category?.icon && <category.icon className="h-4 w-4" style={{ color: category?.color }} />}
-                            <span>{category?.label || report.category}</span>
+                <div className="p-5 md:p-6 flex flex-col flex-grow min-w-0">
+                    <div className="flex justify-between items-start gap-4 mb-2">
+                        <div className="space-y-1 min-w-0">
+                            <h3 className="font-bold text-xl text-gray-900 leading-tight truncate">
+                                {problem?.label || report.problem}
+                            </h3>
+                            <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
+                                {category?.icon && <category.icon className="h-4 w-4" style={{ color: category?.color }} />}
+                                <span>{category?.label || report.category}</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="space-y-2 py-2 border-y border-gray-100">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                    <div className="space-y-1 py-3 border-t border-gray-50 mt-2">
+                        <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
                             <MapPin className="h-4 w-4 text-primary" />
                             <span>{displayCity} - {report.bairro}</span>
                         </div>
-                        <div className="pl-6">
-                            <p className="text-xs text-muted-foreground line-clamp-2 italic">
-                              {report.location}
-                            </p>
-                        </div>
+                        <p className="text-xs text-muted-foreground pl-6 line-clamp-1 italic">
+                            {report.location}
+                        </p>
                     </div>
 
-                    <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                        &quot;{report.description}&quot;
-                    </p>
-
-                    <div className="mt-auto pt-4 flex flex-wrap items-center justify-between gap-4">
+                    <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-50">
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                            <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium uppercase tracking-wider">
                                 <Clock className="h-3.5 w-3.5" />
                                 <ReportTime date={new Date(report.createdAt)} />
                             </div>
@@ -201,40 +193,40 @@ function ReportCard({
                             {report.status === 'RESOLVED' && report.photoAfterUrl && (
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <button className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700">
+                                        <button className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:underline">
                                             <CheckCircle2 className="h-3.5 w-3.5" />
-                                            Ver Solução
+                                            Solução
                                         </button>
                                     </DialogTrigger>
-                                    <DialogContent className="max-w-4xl p-2 rounded-3xl overflow-hidden">
+                                    <DialogContent className="max-w-4xl p-2 rounded-2xl">
                                         <div className="relative aspect-video">
-                                            <Image src={report.photoAfterUrl} alt="Solução" fill className="object-contain" />
+                                            <Image src={report.photoAfterUrl} alt="Trabalho concluído" fill className="object-contain" />
                                         </div>
                                     </DialogContent>
                                 </Dialog>
                             )}
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-2">
                             {canDelete && (
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 h-9 px-3">
-                                            <Trash2 className="h-4 w-4 mr-2" />
-                                            Excluir
+                                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 h-8">
+                                            <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                            Remover
                                         </Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                Esta ação removerá os dados permanentemente de nossos servidores.
+                                                Esta ação é irreversível. O problema deixará de constar no painel da cidade.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white">
-                                                Sim, excluir
+                                                Confirmar exclusão
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
@@ -245,18 +237,21 @@ function ReportCard({
                                 <Button 
                                   variant={isUpvoted ? "default" : "outline"} 
                                   size="sm" 
-                                  onClick={() => onUpvote(report.id)}
+                                  onClick={(e) => {
+                                      e.stopPropagation();
+                                      onUpvote(report.id);
+                                  }}
                                   className={cn(
-                                    "rounded-lg font-bold transition-all h-9 px-4",
-                                    isUpvoted ? "bg-primary text-white" : "border-gray-200 text-gray-700"
+                                    "rounded-full font-bold transition-all h-9 px-5 text-xs",
+                                    isUpvoted ? "bg-primary text-white" : "bg-gray-100 border-transparent text-gray-700 hover:bg-gray-200"
                                   )}
                                 >
-                                    <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
+                                    <ThumbsUp className={cn("h-3.5 w-3.5 mr-2", isUpvoted && "fill-current")} />
                                     Apoiar ({report.upvotes})
                                 </Button>
                             ) : (
-                                <AccordionTrigger className="py-0 px-4 h-9 rounded-lg bg-primary/10 text-primary font-bold hover:bg-primary/20 transition-all hover:no-underline flex items-center gap-2">
-                                    <Settings2 className="h-4 w-4" />
+                                <AccordionTrigger className="py-0 px-4 h-9 rounded-full bg-primary/10 text-primary font-bold hover:bg-primary/20 transition-all hover:no-underline flex items-center gap-2 text-xs">
+                                    <Settings2 className="h-3.5 w-3.5" />
                                     {isFinalStatus ? "Detalhes" : "Gerenciar"}
                                 </AccordionTrigger>
                             )}
@@ -268,27 +263,17 @@ function ReportCard({
             {!showUpvote && (
             <AccordionContent className="bg-gray-50/50 border-t border-gray-100">
               <form action={formAction} ref={formRef}>
-                <div className="p-8 space-y-8 max-w-4xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-12">
+                <div className="p-6 space-y-6 max-w-4xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-8">
                         <div className="space-y-6">
-                            <div className="p-4 rounded-xl bg-white border border-gray-100 shadow-sm">
-                                <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-widest mb-3">Estágio Atual</h4>
-                                <div className="flex items-center gap-3">
-                                    <StatusBadge status={report.status} />
-                                    <span className="text-xs font-medium text-muted-foreground">
-                                        Mudar para próximo estágio:
-                                    </span>
-                                </div>
-                            </div>
-
                             <div className="space-y-3">
-                                <Label htmlFor={`status-${report.id}`} className="text-base font-bold text-gray-900">Novo Status</Label>
+                                <Label htmlFor={`status-${report.id}`} className="text-sm font-bold text-gray-700 uppercase tracking-widest">Novo Status</Label>
                                 <Select 
                                     name="status" 
                                     defaultValue={report.status}
                                     onValueChange={(val) => setSelectedStatus(val as ReportStatus)}
                                 >
-                                    <SelectTrigger id={`status-${report.id}`} className="h-14 rounded-xl bg-white border-gray-200 text-lg font-semibold" disabled={isFinalStatus}>
+                                    <SelectTrigger id={`status-${report.id}`} className="h-12 rounded-xl bg-white border-gray-200 text-base font-semibold" disabled={isFinalStatus}>
                                         <SelectValue placeholder="Mudar status" />
                                     </SelectTrigger>
                                     <SelectContent className="rounded-xl shadow-xl">
@@ -302,34 +287,27 @@ function ReportCard({
                                                     disabled={!isNext && !isCurrent}
                                                     className={cn("p-3 font-medium", !isNext && !isCurrent && "opacity-40 cursor-not-allowed")}
                                                 >
-                                                    {label} {isNext && " (Próximo)"}
+                                                    {label} {isNext && " (Próximo Passo)"}
                                                 </SelectItem>
                                             );
                                         })}
                                     </SelectContent>
                                 </Select>
-                                {isFinalStatus && (
-                                    <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-                                      <CheckCircle2 className="h-4 w-4" />
-                                      <p className="text-xs font-bold uppercase tracking-wider">Demanda concluída e validada.</p>
-                                    </div>
-                                )}
                             </div>
                         </div>
 
-                        <div className={cn("space-y-4 transition-all duration-300", !isPhotoEnabled && "opacity-30 pointer-events-none")}>
-                            <Label htmlFor={`photoAfter-${report.id}`} className="text-base font-bold text-gray-900 flex items-center justify-between">
+                        <div className={cn("space-y-4 transition-all duration-300", !isPhotoEnabled && "opacity-40 pointer-events-none")}>
+                            <Label htmlFor={`photoAfter-${report.id}`} className="text-sm font-bold text-gray-700 uppercase tracking-widest flex items-center justify-between">
                                 Carregar foto
-                                {isPhotoEnabled && <span className="text-[10px] font-bold uppercase tracking-wider bg-destructive/10 text-destructive px-2 py-1 rounded">Obrigatório</span>}
+                                {isPhotoEnabled && <span className="text-[10px] font-bold uppercase tracking-wider bg-destructive/10 text-destructive px-2 py-0.5 rounded">Obrigatório</span>}
                             </Label>
-                            <div className="aspect-video rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center relative overflow-hidden bg-white hover:border-primary/50 transition-colors group">
+                            <div className="aspect-video rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center relative overflow-hidden bg-white hover:border-primary transition-colors group">
                                 {(photoAfterPreview || report.photoAfterUrl) ? (
-                                    <Image src={photoAfterPreview || report.photoAfterUrl!} alt="Foto da solução" fill className="object-cover" />
+                                    <Image src={photoAfterPreview || report.photoAfterUrl!} alt="Preview" fill className="object-cover" />
                                 ) : (
-                                    <div className="text-center text-muted-foreground p-8">
-                                        <Camera className="mx-auto h-12 w-12 text-gray-300 group-hover:text-primary/50 transition-colors" />
-                                        <p className="mt-3 text-sm font-bold">Clique para carregar foto</p>
-                                        <p className="text-xs mt-1">Evidência fotográfica do reparo</p>
+                                    <div className="text-center text-muted-foreground p-4">
+                                        <Camera className="mx-auto h-8 w-8 text-gray-400 group-hover:text-primary transition-colors" />
+                                        <p className="mt-2 text-xs font-bold">Anexar evidência do reparo</p>
                                     </div>
                                 )}
                                 <Input 
@@ -349,19 +327,19 @@ function ReportCard({
                         <div className="flex justify-end">
                             <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
                                 <AlertDialogTrigger asChild>
-                                    <Button type="button" disabled={isPending || selectedStatus === report.status} className="h-14 rounded-xl px-10 text-lg font-bold shadow-xl bg-primary hover:scale-105 transition-all">
+                                    <Button type="button" disabled={isPending || selectedStatus === report.status} className="h-12 rounded-xl px-8 font-bold shadow-md">
                                         {isPending ? <Loader2 className="animate-spin h-5 w-5 mr-3" /> : <Upload className="h-5 w-5 mr-3" />}
                                         Salvar Alterações
                                     </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent className="rounded-2xl">
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle className="text-2xl font-bold">Confirmar Atualização de Status</AlertDialogTitle>
-                                        <AlertDialogDescription className="text-lg">
-                                            Tem certeza que deseja mover este relato para o próximo estágio? O cidadão será notificado automaticamente sobre esta mudança em seu painel de controle.
+                                        <AlertDialogTitle className="text-2xl font-bold">Confirmar Atualização</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-base">
+                                            Você está prestes a atualizar o estágio deste problema. Esta ação notificará o cidadão sobre o progresso da demanda.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
-                                    <AlertDialogFooter className="mt-8">
+                                    <AlertDialogFooter className="mt-6">
                                         <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
                                         <AlertDialogAction 
                                             onClick={() => formRef.current?.requestSubmit()}
@@ -466,9 +444,9 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
   
   if (reports.length === 0) {
       return (
-          <div className="text-center py-24 border-2 border-dashed border-gray-200 rounded-3xl bg-white shadow-sm">
-              <h3 className="text-2xl font-bold text-gray-900">Nenhum Relato Encontrado</h3>
-              <p className="text-muted-foreground text-lg mt-2">Quando um novo problema for relatado, ele aparecerá aqui para acompanhamento.</p>
+          <div className="text-center py-20 bg-white border border-gray-100 rounded-2xl shadow-sm">
+              <h3 className="text-xl font-bold text-gray-900">Nenhum Relato Encontrado</h3>
+              <p className="text-muted-foreground mt-2">A comunidade ainda não registrou ocorrências para esta categoria.</p>
           </div>
       )
   }
@@ -488,87 +466,87 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
   const filteredReports = (status: ReportStatus) => sortedReports.filter(r => r.status === status);
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ReportStatus)} className="w-full">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
-            <TabsList className={cn("inline-flex h-14 w-full md:w-auto bg-white border border-gray-200 p-1 rounded-2xl shadow-sm", showUpvote ? "grid grid-cols-3" : "grid grid-cols-4")}>
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-8">
+            <TabsList className="bg-gray-100 p-1 rounded-full inline-flex w-full lg:w-auto h-auto">
                 {!showUpvote && (
-                    <TabsTrigger value="UNDER_REVIEW" className="rounded-xl font-bold text-xs uppercase tracking-widest px-6 data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all">Em Análise</TabsTrigger>
+                    <TabsTrigger value="UNDER_REVIEW" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Análise</TabsTrigger>
                 )}
-                <TabsTrigger value="PENDING" className="rounded-xl font-bold text-xs uppercase tracking-widest px-6 data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 transition-all">Em Aberto</TabsTrigger>
-                <TabsTrigger value="IN_PROGRESS" className="rounded-xl font-bold text-xs uppercase tracking-widest px-6 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 transition-all">Em Andamento</TabsTrigger>
-                <TabsTrigger value="RESOLVED" className="rounded-xl font-bold text-xs uppercase tracking-widest px-6 data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-800 transition-all">Resolvidos</TabsTrigger>
+                <TabsTrigger value="PENDING" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Em Aberto</TabsTrigger>
+                <TabsTrigger value="IN_PROGRESS" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Em Andamento</TabsTrigger>
+                <TabsTrigger value="RESOLVED" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Resolvidos</TabsTrigger>
             </TabsList>
             
-            <div className="flex items-center gap-4 w-full md:w-auto">
-              <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground uppercase tracking-widest mr-2">
+            <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
+              <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
                 <Filter className="h-4 w-4" />
-                Ordenar:
+                Ordenar por
               </div>
               <Select onValueChange={(value) => setSortBy(value as typeof sortBy)} defaultValue={sortBy}>
-                <SelectTrigger className="h-14 w-full md:w-[200px] bg-white border-gray-200 rounded-2xl font-semibold shadow-sm">
-                    <SelectValue placeholder="Ordenar por" />
+                <SelectTrigger className="h-10 w-[180px] bg-white border-gray-200 rounded-lg text-sm font-semibold">
+                    <SelectValue placeholder="Escolher ordem" />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl shadow-xl">
-                  <SelectItem value="newest" className="font-medium p-3">Mais Recentes</SelectItem>
-                  <SelectItem value="oldest" className="font-medium p-3">Mais Antigos</SelectItem>
-                  <SelectItem value="upvotes" className="font-medium p-3">Mais Apoiados</SelectItem>
+                <SelectContent>
+                  <SelectItem value="newest" className="font-medium">Mais Recentes</SelectItem>
+                  <SelectItem value="oldest" className="font-medium">Mais Antigos</SelectItem>
+                  <SelectItem value="upvotes" className="font-medium">Mais Apoiados</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           
-          <div className="min-h-[400px]">
+          <div className="space-y-4">
             {!showUpvote && (
-                <TabsContent value="UNDER_REVIEW" className="mt-0">
-                    <div className="space-y-6">
+                <TabsContent value="UNDER_REVIEW" className="mt-0 outline-none">
+                    <div className="space-y-5">
                       {filteredReports("UNDER_REVIEW").length > 0 ? (
                         filteredReports("UNDER_REVIEW").map(r => (
                           <ReportCard key={r.id} report={r} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} isUpvoted={upvotedReports.has(r.id)} showUpvote={showUpvote} />
                         ))
                       ) : (
-                        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-                          <p className="text-muted-foreground font-medium">Nenhum relato aguardando análise no momento.</p>
+                        <div className="text-center py-20 bg-gray-50/50 rounded-2xl border-2 border-dashed">
+                          <p className="text-muted-foreground font-medium">Nenhum relato aguardando triagem.</p>
                         </div>
                       )}
                     </div>
                 </TabsContent>
             )}
-            <TabsContent value="PENDING" className="mt-0">
-                <div className="space-y-6">
+            <TabsContent value="PENDING" className="mt-0 outline-none">
+                <div className="space-y-5">
                   {filteredReports("PENDING").length > 0 ? (
                     filteredReports("PENDING").map(r => (
                       <ReportCard key={r.id} report={r} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} isUpvoted={upvotedReports.has(r.id)} showUpvote={showUpvote} />
                     ))
                   ) : (
-                    <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-                      <p className="text-muted-foreground font-medium">Nenhum relato em aberto nesta categoria.</p>
+                    <div className="text-center py-20 bg-gray-50/50 rounded-2xl border-2 border-dashed">
+                      <p className="text-muted-foreground font-medium">Todos os relatos estão em atendimento ou resolvidos.</p>
                     </div>
                   )}
                 </div>
             </TabsContent>
-            <TabsContent value="IN_PROGRESS" className="mt-0">
-                <div className="space-y-6">
+            <TabsContent value="IN_PROGRESS" className="mt-0 outline-none">
+                <div className="space-y-5">
                   {filteredReports("IN_PROGRESS").length > 0 ? (
                     filteredReports("IN_PROGRESS").map(r => (
                       <ReportCard key={r.id} report={r} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} isUpvoted={upvotedReports.has(r.id)} showUpvote={showUpvote} />
                     ))
                   ) : (
-                    <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-                      <p className="text-muted-foreground font-medium">Nenhum serviço em andamento no momento.</p>
+                    <div className="text-center py-20 bg-gray-50/50 rounded-2xl border-2 border-dashed">
+                      <p className="text-muted-foreground font-medium">Nenhuma equipe em campo no momento.</p>
                     </div>
                   )}
                 </div>
             </TabsContent>
-            <TabsContent value="RESOLVED" className="mt-0">
-                <div className="space-y-6">
+            <TabsContent value="RESOLVED" className="mt-0 outline-none">
+                <div className="space-y-5">
                   {filteredReports("RESOLVED").length > 0 ? (
                     filteredReports("RESOLVED").map(r => (
                       <ReportCard key={r.id} report={r} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} isUpvoted={upvotedReports.has(r.id)} showUpvote={showUpvote} />
                     ))
                   ) : (
-                    <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-                      <p className="text-muted-foreground font-medium">Nenhum serviço concluído nesta categoria.</p>
+                    <div className="text-center py-20 bg-gray-50/50 rounded-2xl border-2 border-dashed">
+                      <p className="text-muted-foreground font-medium">Aguardando as primeiras soluções da cidade.</p>
                     </div>
                   )}
                 </div>
