@@ -105,8 +105,8 @@ function AboutSection({ reports }: { reports: Report[] }) {
               Sobre o Infra Mais
             </h2>
             <Separator className="my-4" />
-            <p className="text-muted-foreground text-base">
-              O Infra Mais é uma plataforma criada para facilitar a comunicação entre os cidadãos e a prefeitura, permitindo o registro rápido e organizado de problemas relacionados à infraestrutura da cidade. O objetivo do site é tornar o processo de identificação, envio e acompanhamento de solicitações mais simples, transparente e eficiente.
+            <p className="text-muted-foreground text-base mt-3">
+              O Infra Mais é uma plataforma independente criada para facilitar a comunicação entre os cidadãos e os órgãos responsáveis, permitindo o registro rápido e organizado de problemas de infraestrutura. Nosso objetivo é tornar a zeladoria urbana mais simples, transparente e eficiente para todos.
             </p>
           </div>
           <div>
@@ -141,9 +141,8 @@ export default async function Home() {
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline font-bold text-foreground mb-2">
                 Reportar um Problema
               </h2>
-              <p className="mt-4 text-muted-foreground text-base">
-                Informe rapidamente um problema encontrado na sua cidade. Descreva o que aconteceu, envie uma foto (opcional) e marque no mapa o local exato.
-Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
+              <p className="mt-3 text-muted-foreground text-base">
+                Informe rapidamente um problema de infraestrutura encontrado. Descreva o ocorrido, anexe uma foto e marque o local exato no mapa para que possamos ajudar na resolução.
               </p>
               <HomeCtaClient />
             </div>
@@ -171,7 +170,7 @@ Seu relato ajuda a prefeitura a agir com mais rapidez e precisão.
                     <h2 className="text-3xl font-headline font-bold text-foreground">
                         Problemas Recentes
                     </h2>
-                    <p className="text-muted-foreground mt-2">Veja os últimos problemas relatados pela comunidade.</p>
+                    <p className="text-muted-foreground mt-3">Confira as demandas mais recentes enviadas pela comunidade e acompanhe seu progresso.</p>
                     <Separator className="mt-4" />
                 </div>
                 <RecentReports />

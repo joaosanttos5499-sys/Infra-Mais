@@ -24,7 +24,7 @@ function AccessDenied() {
         <div className="flex flex-col items-center justify-center p-12 text-center min-h-[60vh]">
             <ShieldAlert className="h-16 w-16 text-destructive mb-4" />
             <h1 className="text-2xl font-bold text-foreground">Acesso Negado</h1>
-            <p className="text-muted-foreground mt-2 max-w-md">
+            <p className="text-muted-foreground mt-3 max-w-md">
                 Esta área é restrita a funcionários credenciados do Infra Mais.
                 Se você acredita que deveria ter acesso, entre em contato com o administrador.
             </p>
@@ -45,7 +45,6 @@ export default function FuncionariosPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Busca os relatórios apenas se o usuário for carregado e for funcionário
     if (!isUserLoading && user && isEmailEmployee(user.email)) {
       getReports().then(data => {
         setReports(data);
@@ -56,10 +55,8 @@ export default function FuncionariosPage() {
     }
   }, [user, isUserLoading]);
 
-  // Enquanto carrega o usuário
   if (isUserLoading) return <LoadingScreen />;
 
-  // Se não estiver logado ou não for funcionário
   if (!user || !isEmailEmployee(user.email)) {
     return <AccessDenied />;
   }
@@ -76,7 +73,7 @@ export default function FuncionariosPage() {
             <h1 className="text-3xl md:text-4xl font-bold font-headline">
               Painel do Funcionário
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-muted-foreground mt-3">
               Visualize, gerencie e atualize os problemas de infraestrutura relatados pelos cidadãos.
             </p>
           </div>

@@ -69,8 +69,8 @@ export default function SupportPage() {
             <h1 className="text-3xl md:text-4xl font-bold font-headline">
               Central de Suporte
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Tudo o que você precisa saber sobre o Infra Mais.
+            <p className="text-muted-foreground mt-3">
+              Tudo o que você precisa saber sobre como utilizar o Infra Mais.
             </p>
           </div>
 

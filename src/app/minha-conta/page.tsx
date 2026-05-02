@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 function PageSkeleton() {
     return (
       <div className="flex items-center justify-center p-12">
+        <span className="sr-only">Carregando...</span>
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="ml-4 text-muted-foreground">Carregando seus dados...</p>
       </div>
@@ -24,8 +25,8 @@ export default async function MinhaContaPage() {
                         <h1 className="text-3xl md:text-4xl font-bold font-headline">
                             Minha Conta
                         </h1>
-                        <p className="text-muted-foreground mt-1">
-                            Veja seus relatórios e gerencie seus dados.
+                        <p className="text-muted-foreground mt-3">
+                            Gerencie suas informações pessoais e acompanhe sua atividade na plataforma.
                         </p>
                     </div>
                     <Suspense fallback={<PageSkeleton />}>

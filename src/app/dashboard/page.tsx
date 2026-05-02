@@ -24,8 +24,8 @@ export default async function DashboardPage() {
             <h1 className="text-3xl md:text-4xl font-bold font-headline">
               Painel de Problemas
             </h1>
-            <p className="text-muted-foreground mt-1">
-              Visualize e gerencie todos os problemas de infraestrutura relatados.
+            <p className="text-muted-foreground mt-3">
+              Visualize e gerencie todos os problemas de infraestrutura relatados pela comunidade.
             </p>
           </div>
           <Suspense fallback={<DashboardSkeleton />}>
