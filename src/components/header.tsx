@@ -103,16 +103,15 @@ export function Header() {
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
-            <Link href="/" className="flex items-center gap-3 group transition-transform hover:scale-105">
-              <div className="relative h-10 w-10 overflow-hidden rounded-xl shadow-md border border-primary/20">
-                <Image
-                    src="/img/logo1.png"
-                    alt="Infra Mais Logo"
-                    fill
-                    className="object-contain p-1"
-                    priority
-                  />
-              </div>
+            <Link href="/" className="flex items-center gap-2 group transition-transform hover:scale-105">
+              <Image
+                src="/img/logo1.png"
+                alt="Infra Mais Logo"
+                width={40}
+                height={40}
+                className="object-contain"
+                priority
+              />
               <span className="text-2xl font-bold tracking-tight text-gray-900">
                 Infra <span className="text-primary">Mais</span>
               </span>
