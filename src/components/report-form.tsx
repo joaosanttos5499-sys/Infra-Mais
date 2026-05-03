@@ -66,12 +66,14 @@ const ClientReportSchema = ReportSchema.extend({
 
 const PICUI_NEIGHBORHOODS = [
   "Cenecista",
+  "Centro",
   "JK",
   "Limeira",
   "Monte Santo",
   "Pedro Salustino de Lima",
   "Pedro Tomáz Dantas",
-  "São José"
+  "São José",
+  "Zona Rural"
 ].sort((a, b) => a.localeCompare(b));
 
 export function ReportForm() {
@@ -318,7 +320,7 @@ export function ReportForm() {
                 <FormItem>
                   <FormLabel>Bairro</FormLabel>
                   {selectedCity === 'Picui' ? (
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCity}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o bairro" />
@@ -332,7 +334,11 @@ export function ReportForm() {
                     </Select>
                   ) : (
                     <FormControl>
-                      <Input placeholder="ex: Centro, Vila Madalena" {...field} />
+                      <Input 
+                        placeholder={selectedCity ? "ex: Centro, Vila Madalena" : "Selecione a cidade primeiro"} 
+                        {...field} 
+                        disabled={!selectedCity}
+                      />
                     </FormControl>
                   )}
                   <FormMessage />
