@@ -163,10 +163,10 @@ function ReportCard({
                     </div>
                 </div>
 
-                <div className="p-5 md:p-6 flex flex-col flex-grow min-w-0">
+                <div className="p-4 md:p-6 flex flex-col flex-grow min-w-0">
                     <div className="flex justify-between items-start gap-4 mb-2">
                         <div className="space-y-1 min-w-0">
-                            <h3 className="font-bold text-xl text-gray-900 leading-tight truncate">
+                            <h3 className="font-bold text-lg md:text-xl text-gray-900 leading-tight truncate">
                                 {problem?.label || report.problem}
                             </h3>
                             <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
@@ -186,7 +186,7 @@ function ReportCard({
                         </p>
                     </div>
 
-                    <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-50">
+                    <div className="mt-auto pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border-t border-gray-50 gap-4">
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium uppercase tracking-wider">
                                 <Clock className="h-3.5 w-3.5" />
@@ -210,16 +210,16 @@ function ReportCard({
                             )}
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                             {canDelete && (
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 h-8">
-                                            <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 h-9 px-3">
+                                            <Trash2 className="h-3.5 w-3.5 mr-1.5" />
                                             Remover
                                         </Button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent>
+                                    <AlertDialogContent className="rounded-2xl">
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
                                             <AlertDialogDescription>
@@ -227,8 +227,8 @@ function ReportCard({
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white">
+                                            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white rounded-xl">
                                                 Confirmar exclusão
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
@@ -266,7 +266,7 @@ function ReportCard({
             {!showUpvote && (
             <AccordionContent className="bg-gray-50/50 border-t border-gray-100">
               <form action={formAction} ref={formRef}>
-                <div className="p-6 space-y-6 max-w-4xl mx-auto">
+                <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="space-y-6">
                             <div className="space-y-3">
@@ -330,7 +330,7 @@ function ReportCard({
                         <div className="flex justify-end">
                             <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
                                 <AlertDialogTrigger asChild>
-                                    <Button type="button" disabled={isPending || selectedStatus === report.status} className="h-12 rounded-xl px-8 font-bold shadow-md">
+                                    <Button type="button" disabled={isPending || selectedStatus === report.status} className="h-12 w-full sm:w-auto rounded-xl px-8 font-bold shadow-md">
                                         {isPending ? <Loader2 className="animate-spin h-5 w-5 mr-3" /> : <Upload className="h-5 w-5 mr-3" />}
                                         Salvar Alterações
                                     </Button>
@@ -462,7 +462,7 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
         return b.upvotes - a.upvotes;
       case 'newest':
       default:
-        return new Date(b.createdAt).getTime() - new Date(a.getTime());
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     }
   });
 
@@ -472,25 +472,25 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
     <div className="space-y-8">
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ReportStatus)} className="w-full">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-8">
-            <TabsList className="bg-gray-100 p-1 rounded-full inline-flex w-full lg:w-auto h-auto">
+            <TabsList className="bg-gray-100 p-1 rounded-full inline-flex w-full lg:w-auto h-auto overflow-x-auto no-scrollbar">
                 {!showUpvote && (
-                    <TabsTrigger value="UNDER_REVIEW" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Em Análise</TabsTrigger>
+                    <TabsTrigger value="UNDER_REVIEW" className="rounded-full px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all whitespace-nowrap">Em Análise</TabsTrigger>
                 )}
-                <TabsTrigger value="PENDING" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Pendente</TabsTrigger>
-                <TabsTrigger value="IN_PROGRESS" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Em Andamento</TabsTrigger>
-                <TabsTrigger value="RESOLVED" className="rounded-full px-5 py-2.5 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all">Resolvido</TabsTrigger>
+                <TabsTrigger value="PENDING" className="rounded-full px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all whitespace-nowrap">Pendente</TabsTrigger>
+                <TabsTrigger value="IN_PROGRESS" className="rounded-full px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all whitespace-nowrap">Em Andamento</TabsTrigger>
+                <TabsTrigger value="RESOLVED" className="rounded-full px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-gray-900 text-gray-500 transition-all whitespace-nowrap">Resolvido</TabsTrigger>
             </TabsList>
             
             <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
               <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
                 <Filter className="h-4 w-4" />
-                Ordenar por
+                Ordenar
               </div>
               <Select onValueChange={(value) => setSortBy(value as typeof sortBy)} defaultValue={sortBy}>
-                <SelectTrigger className="h-10 w-[180px] bg-white border-gray-200 rounded-lg text-sm font-semibold">
-                    <SelectValue placeholder="Escolher ordem" />
+                <SelectTrigger className="h-10 w-[160px] sm:w-[180px] bg-white border-gray-200 rounded-lg text-sm font-semibold">
+                    <SelectValue placeholder="Escolher" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   <SelectItem value="newest" className="font-medium">Mais Recentes</SelectItem>
                   <SelectItem value="oldest" className="font-medium">Mais Antigos</SelectItem>
                   <SelectItem value="upvotes" className="font-medium">Mais Apoiados</SelectItem>

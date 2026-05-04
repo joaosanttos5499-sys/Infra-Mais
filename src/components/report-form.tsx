@@ -38,7 +38,7 @@ function SubmitButton({ isRedirecting }: { isRedirecting: boolean }) {
     <Button 
       type="submit" 
       className={cn(
-        "w-full sm:w-auto px-8 transition-all duration-300 shadow-md",
+        "w-full sm:w-auto px-8 transition-all duration-300 shadow-md h-12",
         isLoading 
           ? "opacity-50 cursor-not-allowed" 
           : "bg-primary text-white hover:bg-primary/90 hover:scale-[1.02]"
@@ -187,15 +187,15 @@ export function ReportForm() {
   if (!isUserLoading && isEmployee) {
     return (
         <Card className="w-full max-w-2xl border-primary/20 bg-primary/5 rounded-2xl">
-            <CardHeader className="text-center pt-10">
+            <CardHeader className="text-center pt-10 px-6">
                 <ShieldAlert className="h-16 w-16 text-primary mx-auto mb-4" />
-                <CardTitle className="text-3xl font-bold">Acesso Restrito</CardTitle>
-                <CardDescription className="text-lg">
+                <CardTitle className="text-2xl sm:text-3xl font-bold">Acesso Restrito</CardTitle>
+                <CardDescription className="text-base sm:text-lg">
                     Funcionários do Infra Mais não podem enviar relatos para garantir a imparcialidade do sistema.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex justify-center pb-10 pt-4">
-                <Button asChild size="lg" className="rounded-xl font-bold">
+            <CardContent className="flex justify-center pb-10 pt-4 px-6">
+                <Button asChild size="lg" className="w-full sm:w-auto rounded-xl font-bold h-12 px-8">
                     <Link href="/funcionarios">Ir para Painel de Gestão</Link>
                 </Button>
             </CardContent>
@@ -205,10 +205,10 @@ export function ReportForm() {
 
   return (
     <Card className="w-full border-gray-200 shadow-xl rounded-2xl overflow-hidden bg-white transition-all">
-      <CardHeader className="bg-gray-50/50 border-b border-gray-100 p-8">
+      <CardHeader className="bg-gray-50/50 border-b border-gray-100 p-6 md:p-8">
         <div className="space-y-2">
-            <CardTitle className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">Preencha o Relatório</CardTitle>
-            <CardDescription className="text-gray-500 text-base">
+            <CardTitle className="text-2xl md:text-4xl font-bold text-gray-900 tracking-tight">Preencha o Relatório</CardTitle>
+            <CardDescription className="text-gray-500 text-sm md:text-base">
               Forneça os detalhes do problema para que possamos encaminhar para a solução.
             </CardDescription>
         </div>
@@ -216,7 +216,7 @@ export function ReportForm() {
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="p-8 space-y-10">
+          <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
             <input type="hidden" {...form.register('userId')} />
             
             {/* Seção 1: Mapa */}
@@ -228,7 +228,7 @@ export function ReportForm() {
                   <Label className="text-lg font-bold text-gray-900">Onde está o problema?</Label>
               </div>
               <p className="text-sm text-gray-500 mb-4">Clique no mapa para marcar o local exato do ocorrido.</p>
-              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative z-0 h-[350px] md:h-[400px] hover:shadow-md transition-shadow duration-300">
+              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative z-0 h-[300px] md:h-[400px] hover:shadow-md transition-shadow duration-300">
                   <LeafletMap 
                       interactive={true} 
                       onLocationSelect={handleMapClick}
@@ -257,7 +257,7 @@ export function ReportForm() {
                             <FormLabel className="text-sm font-semibold text-gray-700">Categoria</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
-                                <SelectTrigger className="h-11 rounded-xl border-gray-300 focus:ring-primary/20">
+                                <SelectTrigger className="h-11 rounded-xl border-gray-300 focus:ring-primary/20 text-base">
                                     <SelectValue placeholder="Tipo de problema" />
                                 </SelectTrigger>
                                 </FormControl>
@@ -265,7 +265,7 @@ export function ReportForm() {
                                     <SelectGroup>
                                     <SelectLabel>Categorias</SelectLabel>
                                     {categories.map((category) => (
-                                        <SelectItem key={category.value} value={category.value}>
+                                        <SelectItem key={category.value} value={category.value} className="text-base py-3">
                                         <div className="flex items-center gap-2">
                                             <category.icon className="h-4 w-4 text-muted-foreground" />
                                             <span>{category.label}</span>
@@ -288,15 +288,15 @@ export function ReportForm() {
                             <FormLabel className="text-sm font-semibold text-gray-700">Problema Específico</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
                                 <FormControl>
-                                <SelectTrigger className="h-11 rounded-xl border-gray-300 focus:ring-primary/20">
-                                    <SelectValue placeholder={selectedCategory ? "O que houve?" : "Escolha a categoria primeiro"} />
+                                <SelectTrigger className="h-11 rounded-xl border-gray-300 focus:ring-primary/20 text-base">
+                                    <SelectValue placeholder={selectedCategory ? "O que houve?" : "Escolha a categoria"} />
                                 </SelectTrigger>
                                 </FormControl>
                                 <SelectContent className="rounded-xl">
                                     <SelectGroup>
                                         <SelectLabel>Problemas</SelectLabel>
                                         {problems.map((problem) => (
-                                            <SelectItem key={problem.value} value={problem.value}>
+                                            <SelectItem key={problem.value} value={problem.value} className="text-base py-3">
                                             {problem.label}
                                             </SelectItem>
                                         ))}
@@ -335,12 +335,12 @@ export function ReportForm() {
                             }
                         }} defaultValue={field.value}>
                             <FormControl>
-                            <SelectTrigger className="h-11 rounded-xl border-gray-300 focus:ring-primary/20">
+                            <SelectTrigger className="h-11 rounded-xl border-gray-300 focus:ring-primary/20 text-base">
                                 <SelectValue placeholder="Selecione a cidade" />
                             </SelectTrigger>
                             </FormControl>
                             <SelectContent className="rounded-xl">
-                            <SelectItem value="Picui">Picuí</SelectItem>
+                            <SelectItem value="Picui" className="text-base py-3">Picuí</SelectItem>
                             </SelectContent>
                         </Select>
                         <FormMessage />
@@ -356,13 +356,13 @@ export function ReportForm() {
                         <FormLabel className="text-sm font-semibold text-gray-700">Bairro</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCity}>
                             <FormControl>
-                            <SelectTrigger className="h-11 rounded-xl border-gray-300 focus:ring-primary/20">
-                                <SelectValue placeholder={selectedCity ? "Escolha o bairro" : "Aguardando cidade..."} />
+                            <SelectTrigger className="h-11 rounded-xl border-gray-300 focus:ring-primary/20 text-base">
+                                <SelectValue placeholder={selectedCity ? "Escolha o bairro" : "Escolha a cidade"} />
                             </SelectTrigger>
                             </FormControl>
                             <SelectContent className="rounded-xl">
                                 {PICUI_NEIGHBORHOODS.map((bairro) => (
-                                <SelectItem key={bairro} value={bairro}>{bairro}</SelectItem>
+                                <SelectItem key={bairro} value={bairro} className="text-base py-3">{bairro}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -378,7 +378,7 @@ export function ReportForm() {
                         <FormItem>
                         <FormLabel className="text-sm font-semibold text-gray-700">Rua e Número</FormLabel>
                         <FormControl>
-                            <Input placeholder="ex: Rua Principal, 123" className="h-11 rounded-xl border-gray-300 focus:ring-primary/20" {...field} />
+                            <Input placeholder="ex: Rua Principal, 123" className="h-11 rounded-xl border-gray-300 focus:ring-primary/20 text-base" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -392,7 +392,7 @@ export function ReportForm() {
                         <FormItem>
                         <FormLabel className="text-sm font-semibold text-gray-700">Ponto de Referência</FormLabel>
                         <FormControl>
-                            <Input placeholder="ex: Próximo ao mercado" className="h-11 rounded-xl border-gray-300 focus:ring-primary/20" {...field} />
+                            <Input placeholder="ex: Próximo ao mercado" className="h-11 rounded-xl border-gray-300 focus:ring-primary/20 text-base" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -420,21 +420,19 @@ export function ReportForm() {
                         {photoPreview ? (
                             <Image src={photoPreview} alt="Preview" fill className="object-cover" />
                         ) : (
-                            <div className="text-center p-8">
-                                <div className="bg-white p-4 rounded-full shadow-sm inline-block mb-3 border border-gray-100">
-                                    <Camera className="h-10 w-10 text-gray-400" />
+                            <div className="text-center p-4">
+                                <div className="bg-white p-3 md:p-4 rounded-full shadow-sm inline-block mb-3 border border-gray-100">
+                                    <Camera className="h-8 w-8 md:h-10 md:h-10 text-gray-400" />
                                 </div>
-                                <p className="text-sm font-bold text-gray-700">Clique abaixo para carregar a foto</p>
-                                <p className="text-xs text-gray-400 mt-1">Obrigatório para comprovar o problema.</p>
+                                <p className="text-sm font-bold text-gray-700">Toque aqui para enviar a foto</p>
+                                <p className="text-xs text-gray-400 mt-1">Obrigatório para comprovação.</p>
                             </div>
                         )}
-                    </div>
-                    <div className="flex justify-center">
                         <Input 
                             id="photo" 
                             type="file" 
                             accept="image/*" 
-                            className="max-w-xs cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-primary file:text-white hover:file:bg-primary/90 transition-all" 
+                            className="absolute inset-0 opacity-0 cursor-pointer" 
                             onChange={handlePhotoChange} 
                         />
                     </div>
@@ -462,7 +460,7 @@ export function ReportForm() {
                     <FormItem>
                     <FormControl>
                         <Textarea
-                            placeholder="Descreva detalhes que podem ajudar na resolução (opcional)..."
+                            placeholder="Descreva detalhes adicionais (opcional)..."
                             className="min-h-[120px] rounded-2xl border-gray-300 focus:ring-primary/20 resize-none p-4 text-base"
                             {...field}
                         />
@@ -474,16 +472,16 @@ export function ReportForm() {
             </div>
           </CardContent>
 
-          <CardFooter className="bg-gray-50/50 border-t border-gray-100 p-8 flex flex-col sm:flex-row justify-between gap-4">
+          <CardFooter className="bg-gray-50/50 border-t border-gray-100 p-6 md:p-8 flex flex-col sm:flex-row justify-between gap-4">
               <Button 
                 variant="outline" 
                 type="button" 
                 onClick={resetForm} 
-                className="w-full sm:w-auto h-11 px-6 rounded-xl border-gray-300 text-gray-600 font-bold hover:bg-white" 
+                className="w-full sm:w-auto h-12 px-6 rounded-xl border-gray-300 text-gray-600 font-bold hover:bg-white" 
                 disabled={formState.isSubmitting || isRedirecting}
               >
                   <RefreshCw className="mr-2 h-4 w-4" />
-                  Limpar Formulário
+                  Limpar
               </Button>
               <SubmitButton isRedirecting={isRedirecting} />
           </CardFooter>
