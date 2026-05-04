@@ -4,8 +4,8 @@ import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, X, Trash2, AlertTriangle, Info, MapPin, Clock, ChevronRight } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2, Save, X, Trash2, AlertTriangle, MapPin, Clock, ChevronRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
 import Image from "next/image";
@@ -26,7 +26,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createAvatarSvg } from "@/lib/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Separator } from "@/components/ui/separator";
 import { isEmailEmployee } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
@@ -54,95 +53,79 @@ function MyReportItem({ report }: { report: Report }) {
     };
 
     return (
-        <Card className="overflow-hidden flex flex-col sm:flex-row h-full border-gray-200 shadow-sm transition-all duration-500 hover:shadow-md hover:-translate-y-1 rounded-xl bg-white group relative animate-in fade-in slide-in-from-bottom-4">
+        <div className="flex gap-4 items-center border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 bg-white group relative animate-in fade-in slide-in-from-bottom-4">
             <Link href={`/dashboard#report-${report.id}`} className="absolute inset-0 z-0" />
             
-            {/* Image Block */}
-            <div className="relative aspect-video sm:aspect-square sm:w-48 flex-shrink-0 z-10 overflow-hidden">
+            <div className="relative w-24 h-24 rounded-lg overflow-hidden shrink-0 z-10 shadow-sm">
                 <Image
                     src={report.photoUrl}
                     alt={report.description}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="(max-width: 640px) 100vw, 192px"
                 />
-                <div className="absolute top-2 left-2">
-                    <StatusBadge status={report.status} />
+            </div>
+
+            <div className="flex flex-col flex-grow min-w-0 z-10">
+                <div className="flex justify-between items-start gap-2">
+                    <h3 className="font-semibold text-gray-800 truncate">
+                        {problem?.label || report.problem}
+                    </h3>
+                    <div className="shrink-0">
+                        <StatusBadge status={report.status} />
+                    </div>
+                </div>
+
+                <div className="text-sm text-gray-500 flex items-center gap-1.5 mt-1">
+                    {category?.icon && <category.icon className="h-3 w-3" style={{ color: category.color }} />}
+                    <span className="truncate">{category?.label || report.category}</span>
+                </div>
+
+                <div className="text-sm text-gray-600 flex items-center gap-1.5 mt-1">
+                    <MapPin className="h-3 w-3 text-primary" />
+                    <span className="truncate">{displayCity} - {report.bairro}</span>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs text-gray-400 mt-2">
+                    <Clock className="h-3 w-3" />
+                    <ReportTime date={new Date(report.createdAt)} />
                 </div>
             </div>
 
-            {/* Content Block */}
-            <div className="flex flex-col flex-grow z-10 p-5 space-y-4">
-                <div className="flex justify-between items-start gap-4">
-                    <div className="space-y-1">
-                        <h3 className="text-lg font-bold text-gray-900 leading-tight">
-                            {problem?.label || report.problem}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                            {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
-                            <span>{category?.label || report.category}</span>
-                        </div>
-                    </div>
-
-                    {canDelete && (
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 shrink-0" onClick={(e) => e.stopPropagation()}>
-                                    {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                                    <span className="sr-only">Excluir Relatório</span>
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
-                                    <AlertDialogDescription>Esta ação não pode ser desfeita. O relatório será removido permanentemente.</AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white">
-                                        Excluir permanentemente
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    )}
-                </div>
-
-                {/* Location */}
-                <div className="space-y-1 border-t border-gray-50 pt-3">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                        <MapPin className="h-3.5 w-3.5 text-primary" />
-                        <span>{displayCity} - {report.bairro}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground pl-5 line-clamp-1">{report.location}</p>
-                </div>
-
-                {/* Footer */}
-                <div className="mt-auto pt-2 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
-                        <Clock className="h-3 w-3" />
-                        <ReportTime date={new Date(report.createdAt)} />
-                    </div>
-                    
-                    {!canDelete && (
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-primary group-hover:gap-1.5 transition-all">
-                            Ver detalhes
-                            <ChevronRight className="h-3 w-3" />
-                        </div>
-                    )}
-                </div>
+            <div className="flex flex-col items-center justify-center gap-2 z-10">
+                {canDelete && (
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500 transition shrink-0" onClick={(e) => e.stopPropagation()}>
+                                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                <span className="sr-only">Excluir</span>
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
+                                <AlertDialogDescription>Esta ação não pode ser desfeita. O relatório será removido permanentemente.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white">
+                                    Excluir
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                )}
+                <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-primary transition-colors" />
             </div>
-        </Card>
+        </div>
     );
 }
 
 function MyReportsList({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
         return (
-            <div className="text-center text-muted-foreground py-12 border-2 border-dashed rounded-xl bg-gray-50/50">
-                <h3 className="text-lg font-semibold">Você ainda não relatou nenhum problema.</h3>
-                <p className="mt-2 text-sm">Sua colaboração é fundamental para uma cidade melhor.</p>
-                <Button asChild className="mt-6 rounded-xl font-bold shadow-md">
+            <div className="text-center text-muted-foreground py-10 border-2 border-dashed rounded-2xl bg-gray-50/50">
+                <p className="text-sm">Você ainda não relatou nenhum problema.</p>
+                <Button asChild variant="link" className="mt-2 text-primary font-bold">
                     <Link href="/report/new">Relatar um Problema</Link>
                 </Button>
             </div>
@@ -150,7 +133,7 @@ function MyReportsList({ reports }: { reports: Report[] }) {
     }
 
     return (
-        <div className="grid gap-6">
+        <div className="space-y-4">
             {reports.map((report) => (
                 <MyReportItem key={report.id} report={report} />
             ))}
@@ -163,15 +146,11 @@ function UserDataSkeleton() {
         <div className="space-y-4">
             <div className="space-y-2">
                 <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-10 w-full" />
             </div>
             <div className="space-y-2">
                 <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-5 w-64" />
-            </div>
-             <div className="space-y-2">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-10 w-full" />
             </div>
         </div>
     )
@@ -220,63 +199,15 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 .then(async (result) => {
                     if (result.success && result.data) {
                         let firestoreProfile = result.data;
-
-                        // Lógica de Autocorreção: Verifica se o avatar corresponde ao e-mail
-                        const correctAvatar = createAvatarSvg(firestoreProfile.email);
-                        let needsUpdate = false;
-
-                        if (firestoreProfile.photoURL !== correctAvatar) {
-                            firestoreProfile = { ...firestoreProfile, photoURL: correctAvatar };
-                            needsUpdate = true;
-                        }
-
-                        if (needsUpdate) {
-                            await saveUserProfileAction(firestoreProfile);
-                        }
-
-                        // Sincroniza com Firebase Auth se necessário
-                        if (auth.currentUser && (auth.currentUser.photoURL !== firestoreProfile.photoURL || auth.currentUser.displayName !== firestoreProfile.name)) {
-                            updateProfile(auth.currentUser, {
-                                displayName: firestoreProfile.name,
-                                photoURL: firestoreProfile.photoURL,
-                            }).catch(e => console.error("Sync error:", e));
-                        }
-
                         setUserProfile(firestoreProfile);
                         form.reset({ name: firestoreProfile.name });
-                        
-                    } else if (user?.uid && user.email) {
-                        // Criação inicial do perfil
-                        const newProfileData = {
-                            id: user.uid,
-                            name: user.displayName || user.email.split('@')[0],
-                            email: user.email,
-                            dateOfBirth: 'Data não informada',
-                        };
-
-                        saveUserProfileAction(newProfileData).then(creationResult => {
-                            if (creationResult.success && creationResult.photoURL) {
-                                const finalProfile = { ...newProfileData, photoURL: creationResult.photoURL } as UserProfile;
-                                setUserProfile(finalProfile);
-                                form.reset({ name: finalProfile.name });
-
-                                if (auth.currentUser) {
-                                    updateProfile(auth.currentUser, {
-                                        displayName: newProfileData.name,
-                                        photoURL: creationResult.photoURL
-                                    }).catch(e => console.error("Auth update error:", e));
-                                }
-                            }
-                        });
                     }
                 })
                 .finally(() => {
                     setIsProfileLoading(false);
                 });
-        } else if (!isUserLoading) {
-            setIsProfileLoading(false);
         }
-    }, [user, isUserLoading, form, toast, auth]);
+    }, [user, form]);
 
     useEffect(() => {
         if (isConfirmOpen) {
@@ -310,9 +241,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         const nextAvailable = new Date(lastUpdate.getTime() + 7 * 24 * 60 * 60 * 1000);
         const now = new Date();
         const diff = nextAvailable.getTime() - now.getTime();
-        
         if (diff <= 0) return { onCooldown: false, remainingDays: 0 };
-        
         const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
         return { onCooldown: true, remainingDays: days };
     };
@@ -324,7 +253,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             toast({
                 variant: "destructive",
                 title: "Alteração Bloqueada",
-                description: `Você deve esperar ${cooldown.remainingDays} ${cooldown.remainingDays === 1 ? 'dia' : 'dias'} para alterar o seu nome novamente.`,
+                description: `Aguarde ${cooldown.remainingDays} ${cooldown.remainingDays === 1 ? 'dia' : 'dias'} para alterar o nome novamente.`,
             });
             return;
         }
@@ -333,20 +262,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     
     const onSubmit = async (data: z.infer<typeof UpdateProfileSchema>) => {
       if (!user) return;
-  
       const result = await updateUserProfileAction(user.uid, { name: data.name });
-  
       if (result.success) {
         if (auth.currentUser) {
-          try {
-            await updateProfile(auth.currentUser, {
-              displayName: data.name,
-            });
-            setUserProfile(prev => prev ? { ...prev, name: data.name, nameLastUpdatedAt: new Date().toISOString() } : null);
-          } catch(e) {
-             console.error("Error updating firebase auth profile:", e)
-          }
+          updateProfile(auth.currentUser, { displayName: data.name }).catch(console.error);
         }
+        setUserProfile(prev => prev ? { ...prev, name: data.name, nameLastUpdatedAt: new Date().toISOString() } : null);
         toast({ title: "Sucesso!", description: "Seu nome foi atualizado." });
         setIsEditingName(false);
       } else {
@@ -357,63 +278,30 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     const handleSaveClick = () => {
         form.trigger().then(isValid => {
-            if (!isValid) return;
-
-            const { name } = form.formState.dirtyFields;
-            
-            if (name) {
-                setIsConfirmOpen(true);
-            } else {
-                setIsEditingName(false);
-            }
+            if (isValid && form.formState.isDirty) setIsConfirmOpen(true);
+            else setIsEditingName(false);
         });
     };
 
-    const handleCancel = () => {
-      if (userProfile) {
-        form.reset({ name: userProfile.name });
-      }
-      form.clearErrors();
-      setIsEditingName(false);
-    }
-
     const handleDeleteAccount = async () => {
         if (!user || !auth.currentUser) return;
-
         setIsDeletingAccount(true);
-        try {
-            // 1. Deleta os dados do banco de dados (Perfil + Relatos)
-            const result = await deleteAccountAction(user.uid);
-            
-            if (result.success) {
-                // 2. Deleta o usuário da autenticação do Firebase
-                try {
-                  await deleteAuthUser(auth.currentUser);
-                  toast({ title: "Conta excluída", description: "Todos os seus dados foram removidos permanentemente." });
-                  router.push('/');
-                } catch (authError: any) {
-                  console.error("Auth deletion error:", authError);
-                  // Se o login for antigo, o Firebase exige reautenticação
-                  if (authError.code === 'auth/requires-recent-login') {
-                      toast({ 
-                          variant: 'destructive', 
-                          title: "Ação Necessária", 
-                          description: "Por segurança, você precisa fazer login novamente antes de excluir sua conta permanentemente." 
-                      });
-                      await signOut(auth);
-                      router.push('/report/auth');
-                  } else {
-                      toast({ variant: 'destructive', title: "Erro na credencial", description: "Seus dados foram removidos, mas houve um erro ao deletar seu acesso." });
-                      setIsDeletingAccount(false);
-                  }
+        const result = await deleteAccountAction(user.uid);
+        if (result.success) {
+            try {
+                await deleteAuthUser(auth.currentUser);
+                toast({ title: "Conta excluída", description: "Todos os seus dados foram removidos permanentemente." });
+                router.push('/');
+            } catch (e: any) {
+                if (e.code === 'auth/requires-recent-login') {
+                    toast({ variant: 'destructive', title: "Ação Necessária", description: "Faça login novamente antes de excluir sua conta." });
+                    await signOut(auth);
+                    router.push('/report/auth');
                 }
-            } else {
-                toast({ variant: 'destructive', title: 'Erro ao excluir', description: result.error });
                 setIsDeletingAccount(false);
             }
-        } catch (error: any) {
-            console.error("General deletion error:", error);
-            toast({ variant: 'destructive', title: "Erro crítico", description: "Ocorreu um erro inesperado ao tentar excluir sua conta." });
+        } else {
+            toast({ variant: 'destructive', title: 'Erro', description: result.error });
             setIsDeletingAccount(false);
         }
     };
@@ -423,51 +311,43 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         return (
             <div className="flex items-center justify-center p-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="ml-4 text-muted-foreground">Verificando autenticação...</p>
             </div>
         )
     }
 
-    const avatarInitial = (user.email || 'U').charAt(0).toUpperCase();
-
     return (
         <div className="space-y-8">
-             <Card>
-                <CardHeader>
-                    <CardTitle>Meus Dados</CardTitle>
-                    <Separator className="my-4" />
-                    <CardDescription className="mt-3">Visualize e edite as informações da sua conta.</CardDescription>
-                </CardHeader>
-                <CardContent>
+             <Card className="bg-white rounded-2xl shadow-md border border-gray-200 p-8 space-y-6 overflow-hidden">
+                <div className="flex flex-col items-center gap-4 mb-2">
+                    <Avatar className="h-20 w-20 shadow-sm border-2 border-gray-50">
+                        <AvatarImage src={userProfile?.photoURL || createAvatarSvg(user.email || 'U')} />
+                        <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
+                            {(user.email || 'U').charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                    </Avatar>
+                </div>
+                
+                <CardContent className="p-0">
                     {isProfileLoading ? (
                         <UserDataSkeleton />
-                    ) : !userProfile ? (
-                        <p className="text-sm text-muted-foreground">Não foi possível carregar os dados do seu perfil.</p>
                     ) : (
                         <Form {...form}>
                           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-                            <FormItem className="flex flex-col items-center gap-4">
-                              <Avatar className="h-24 w-24">
-                                <AvatarImage src={userProfile.photoURL || createAvatarSvg(userProfile.email)} />
-                                <AvatarFallback>{avatarInitial}</AvatarFallback>
-                              </Avatar>
-                            </FormItem>
-                            
                             <FormField
                               control={form.control}
                               name="name"
                               render={({ field }) => (
                                 <FormItem>
-                                  <div className="flex justify-between items-center">
-                                    <FormLabel>Nome Completo</FormLabel>
+                                  <div className="flex justify-between items-center mb-1">
+                                    <FormLabel className="text-sm font-medium text-gray-700">Nome Completo</FormLabel>
                                     {!isEditingName && (
-                                        <Button type="button" variant="link" className="p-0 h-auto text-sm" onClick={handleEditClick}>
+                                        <Button type="button" variant="link" className="p-0 h-auto text-sm text-primary font-medium hover:text-primary/80" onClick={handleEditClick}>
                                             Alterar
                                         </Button>
                                     )}
                                   </div>
                                   <FormControl>
-                                      <Input {...field} disabled={!isEditingName} className="disabled:opacity-100 disabled:cursor-not-allowed disabled:bg-muted" />
+                                      <Input {...field} disabled={!isEditingName} className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-50 text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-100 disabled:cursor-not-allowed" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -475,40 +355,37 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             />
 
                             {isEditingName && (
-                                <Alert variant="default" className={cn("bg-amber-50 border-amber-200", cooldown.onCooldown && "bg-red-50 border-red-200")}>
-                                    <AlertDescription className={cn("text-amber-800 text-xs", cooldown.onCooldown && "text-red-800")}>
+                                <Alert className="bg-amber-50 border-amber-200 py-3">
+                                    <AlertDescription className="text-amber-800 text-xs">
                                         {cooldown.onCooldown 
-                                            ? `Você deve esperar ${cooldown.remainingDays} ${cooldown.remainingDays === 1 ? 'dia' : 'dias'} para alterar o seu nome novamente.`
+                                            ? `Aguarde ${cooldown.remainingDays} ${cooldown.remainingDays === 1 ? 'dia' : 'dias'} para alterar novamente.`
                                             : "Você só pode alterar seu nome uma vez por semana."}
                                     </AlertDescription>
                                 </Alert>
                             )}
                             
-                            <FormItem>
-                                <FormLabel>
-                                    Data de Nascimento
-                                    {isEditingName && <span className="text-xs text-destructive/90 font-normal ml-2">(Não pode ser alterada)</span>}
-                                </FormLabel>
-                                <Input value={userProfile.dateOfBirth} disabled className="disabled:opacity-100 disabled:bg-muted" />
-                            </FormItem>
-                            
-                            <FormItem>
-                                <FormLabel>
-                                  Email
-                                  {isEditingName && <span className="text-xs text-destructive/90 font-normal ml-2">(Não pode ser alterado)</span>}
-                                </FormLabel>
-                                <Input value={userProfile.email} disabled className="disabled:opacity-100 disabled:bg-muted" />
-                            </FormItem>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <FormItem>
+                                    <FormLabel className="text-sm font-medium text-gray-700">Data de Nascimento</FormLabel>
+                                    <Input value={userProfile?.dateOfBirth} disabled className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-50 text-gray-700 disabled:opacity-100" />
+                                </FormItem>
+                                
+                                <FormItem>
+                                    <FormLabel className="text-sm font-medium text-gray-700">Email</FormLabel>
+                                    <Input value={userProfile?.email} disabled className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-50 text-gray-700 disabled:opacity-100" />
+                                </FormItem>
+                            </div>
 
                             {isEditingName && (
-                                <div className="flex justify-end gap-2 pt-4">
-                                    <Button type="button" variant="outline" onClick={handleCancel}>
-                                        <X className="mr-2 h-4 w-4" /> Cancelar
+                                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                                    <Button type="button" variant="outline" onClick={() => { setIsEditingName(false); form.reset(); }} className="h-10 px-6 rounded-lg font-bold">
+                                        Cancelar
                                     </Button>
                                     <Button 
                                         type="button" 
                                         onClick={handleSaveClick} 
                                         disabled={form.formState.isSubmitting || !form.formState.isDirty}
+                                        className="h-10 px-6 rounded-lg font-bold shadow-md hover:scale-[1.02] transition-all"
                                     >
                                         {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                                         Salvar
@@ -522,79 +399,67 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             </Card>
 
             <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-                <AlertDialogContent>
+                <AlertDialogContent className="rounded-2xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Aviso de Alteração de Nome</AlertDialogTitle>
-                        <AlertDialogDescription asChild>
-                            <div className="pt-2">Você só pode alterar seu nome uma vez por semana. Deseja continuar?</div>
+                        <AlertDialogTitle>Aviso de Alteração</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Alterações de nome só são permitidas uma vez a cada 7 dias. Deseja confirmar?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={!isConfirmEnabled || form.formState.isSubmitting}>
-                           {isConfirmEnabled ? 'Estou ciente' : `Estou ciente (${countdown})`}
+                    <AlertDialogFooter className="mt-4">
+                        <AlertDialogCancel className="rounded-xl">Voltar</AlertDialogCancel>
+                        <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={!isConfirmEnabled} className="bg-primary text-white rounded-xl font-bold">
+                           {isConfirmEnabled ? 'Confirmar' : `Aguarde (${countdown})`}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
 
             {!isEmployee && (
-                <Card id="meus-relatorios">
-                    <CardHeader>
-                        <CardTitle>Meus Relatórios</CardTitle>
-                        <Separator className="my-4" />
+                <Card className="bg-white rounded-2xl shadow-md border border-gray-200 p-6" id="meus-relatorios">
+                    <CardHeader className="p-0 mb-6">
+                        <CardTitle className="text-xl font-semibold text-gray-800">Meus Relatórios</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-0">
                         <MyReportsList reports={userReports} />
                     </CardContent>
                 </Card>
             )}
 
-            <Card className="border-destructive/20 bg-destructive/5">
-                <CardHeader>
-                    <CardTitle className="text-destructive flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5" />
-                        Zona de Perigo
-                    </CardTitle>
-                    <Separator className="my-4" />
-                    <CardDescription className="mt-3">
-                        Ações irreversíveis que afetam permanentemente sua conta no Infra Mais.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="space-y-1">
-                            <p className="font-semibold text-sm">Excluir minha conta</p>
-                            <p className="text-xs text-muted-foreground">Isso excluirá seu perfil e todos os problemas relatados por você.</p>
-                        </div>
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="destructive" size="sm" disabled={isDeletingAccount}>
-                                    {isDeletingAccount ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
-                                    Excluir Conta
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Excluir sua conta permanentemente?</AlertDialogTitle>
-                                    <AlertDialogDescription asChild>
-                                        <div className="space-y-3 pt-2">
-                                            <p>Esta ação é <strong>irreversível</strong>. Todos os seus dados pessoais e relatos enviados serão removidos do sistema.</p>
-                                            <p>Se você tentar entrar novamente com este e-mail, o sistema não reconhecerá mais seu cadastro.</p>
-                                        </div>
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                        Sim, excluir meus dados
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-6 space-y-4">
+                <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    <h3 className="text-red-600 font-semibold text-lg">Zona de Perigo</h3>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="space-y-1">
+                        <p className="font-bold text-sm text-red-700">Excluir minha conta</p>
+                        <p className="text-sm text-red-500">Ação irreversível. Todos os seus dados e relatos serão removidos.</p>
                     </div>
-                </CardContent>
-            </Card>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" className="bg-red-500 hover:bg-red-600 text-white rounded-lg px-6 h-11 shadow-sm transition-all hover:scale-[1.02]" disabled={isDeletingAccount}>
+                                {isDeletingAccount ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                                Excluir Conta
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="rounded-2xl">
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir conta permanentemente?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Esta ação não pode ser desfeita. Você perderá acesso a todos os seus relatos.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="mt-6">
+                                <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteAccount} className="bg-red-600 text-white rounded-xl font-bold">
+                                    Sim, excluir meus dados
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            </div>
         </div>
     )
 }

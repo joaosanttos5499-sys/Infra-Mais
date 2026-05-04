@@ -74,7 +74,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   }
 
   return (
-    <Button variant="default" className="rounded-xl px-6 font-bold shadow-md hover:scale-105 transition-all" onClick={onLoginClick}>
+    <Button variant="default" className="h-10 rounded-xl px-6 font-bold shadow-md hover:scale-105 transition-all" onClick={onLoginClick}>
       Entrar
     </Button>
   );
@@ -99,25 +99,24 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 h-16 flex items-center">
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+        <div className="max-w-7xl mx-auto px-6 w-full h-full flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 group transition-transform hover:scale-105">
               <Image
                 src="/img/logo1.png"
                 alt="Infra Mais Logo"
-                width={40}
-                height={40}
+                width={36}
+                height={36}
                 className="object-contain"
                 priority
               />
-              <span className="text-2xl font-bold tracking-tight text-gray-900">
+              <span className="text-xl font-bold tracking-tight text-gray-900">
                 Infra <span className="text-primary">Mais</span>
               </span>
             </Link>
             
-            <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
+            <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">
               {filteredNavLinks.map((link) => (
                   <Link
                     key={link.href}
@@ -129,13 +128,13 @@ export function Header() {
                   </Link>
               ))}
               
-              <Separator orientation="vertical" className="h-6 bg-gray-200" />
+              <div className="h-6 w-px bg-gray-200 mx-2" />
               
               <div className="flex items-center gap-4">
                 <NotificationsDropdown />
                 <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
                 {user && !isEmployee && (
-                  <Button asChild size="sm" className="rounded-xl font-bold shadow-md bg-primary hover:bg-primary/90 hover:scale-105 transition-all">
+                  <Button asChild size="sm" className="h-10 rounded-lg font-bold shadow-sm bg-primary hover:bg-primary/90 hover:scale-[1.02] transition-all">
                     <Link href="/report/new">
                       <Plus className="mr-2 h-4 w-4" />
                       Relatar
@@ -166,35 +165,20 @@ export function Header() {
                         className="flex items-center gap-4 p-4 rounded-xl hover:bg-primary/10 text-lg font-bold transition-all"
                         onClick={() => setIsSheetOpen(false)}
                       >
-                        <div className="p-2 rounded-lg bg-primary/5">
-                          <link.icon className="h-5 w-5 text-primary" />
-                        </div>
+                        <link.icon className="h-5 w-5 text-primary" />
                         {link.label}
                       </Link>
                     ))}
-                    {user && !isEmployee && (
-                      <Link
-                        href="/report/new"
-                        className="flex items-center gap-4 p-4 rounded-xl bg-primary text-white text-lg font-bold shadow-lg mt-4"
-                        onClick={() => setIsSheetOpen(false)}
-                      >
-                         <div className="p-2 rounded-lg bg-white/20">
-                          <Plus className="h-5 w-5" />
-                        </div>
-                        Enviar Relato
-                      </Link>
-                    )}
                   </nav>
                 </SheetContent>
               </Sheet>
             </div>
-          </div>
         </div>
         <DialogContent className="rounded-2xl sm:max-w-md p-0 overflow-hidden">
           <div className="p-8">
             <DialogHeader className="mb-6">
-              <DialogTitle className="text-3xl font-bold text-gray-900">Acessar Plataforma</DialogTitle>
-              <DialogDescription className="text-lg">
+              <DialogTitle className="text-2xl font-bold text-gray-900">Acessar Plataforma</DialogTitle>
+              <DialogDescription className="text-base text-gray-500">
                 Seja bem-vindo(a) de volta ao Infra Mais.
               </DialogDescription>
             </DialogHeader>
