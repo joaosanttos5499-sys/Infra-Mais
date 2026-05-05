@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, MapPin, CheckCircle2, Users, BarChart3, Clock, ChevronRight } from "lucide-react";
+import { ArrowRight, MapPin, CheckCircle2, BarChart3, Clock, ChevronRight } from "lucide-react";
 import { getReports } from "@/lib/data";
 import { type Report } from "@/lib/types";
 import { HomeMapClient } from "@/components/home-map-client";
@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { ReportsChart } from "@/components/reports-chart";
 import { ReportTime } from "@/components/report-time";
 import { HomeCtaClient } from "@/components/home-cta-client";
+import Image from "next/image";
 
 async function RecentReports() {
   const allReports = await getReports();
@@ -35,7 +36,6 @@ async function RecentReports() {
           return (
             <Link href={`/dashboard#report-${report.id}`} key={report.id} className="block group">
                 <Card className="overflow-hidden flex flex-col h-full border-gray-200 shadow-sm transition-all duration-500 hover:shadow-lg hover:-translate-y-1 rounded-xl bg-white relative animate-in fade-in slide-in-from-bottom-4">
-                  {/* Top Image Section */}
                   <div className="relative h-48 w-full overflow-hidden">
                       <Image
                         src={report.photoUrl}
@@ -44,28 +44,22 @@ async function RecentReports() {
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
-                      {/* Badge Over Image */}
                       <div className="absolute top-3 left-3 z-10">
                           <StatusBadge status={report.status} />
                       </div>
                   </div>
 
-                  {/* Content Section */}
                   <div className="p-5 flex flex-col flex-grow space-y-4">
                       <div className="space-y-1">
-                          {/* Title - Main Highlight */}
                           <h3 className="text-lg font-bold text-gray-900 line-clamp-2 leading-tight">
                               {problem?.label || report.problem}
                           </h3>
-                          
-                          {/* Category with Icon */}
                           <div className="flex items-center gap-2 text-sm text-gray-500">
                               {category?.icon && <category.icon className="h-4 w-4" style={{ color: category.color }} />}
                               <span>{category?.label || report.category}</span>
                           </div>
                       </div>
 
-                      {/* Location Blocks */}
                       <div className="space-y-2 py-2 border-y border-gray-50">
                           <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                               <MapPin className="h-4 w-4 text-primary" />
@@ -78,7 +72,6 @@ async function RecentReports() {
                           </div>
                       </div>
 
-                      {/* Footer Info & Action */}
                       <div className="mt-auto pt-2 flex items-center justify-between">
                           <div className="flex items-center gap-1.5 text-xs text-gray-400">
                               <Clock className="h-3.5 w-3.5" />
@@ -214,7 +207,6 @@ export default async function Home() {
             </div>
           </div>
           
-          {/* Decorative background elements */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-0 pointer-events-none overflow-hidden">
             <div className="absolute top-20 left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl opacity-50 md:opacity-100" />
             <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl opacity-50 md:opacity-100" />
@@ -228,7 +220,7 @@ export default async function Home() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6 md:mb-8">
                   <div className="space-y-1 text-center md:text-left">
                     <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-                        Veja os problemas na sua região
+                        Veja os relatos na sua região
                     </h2>
                     <p className="text-muted-foreground text-sm md:text-lg">Mapa de Problemas Reportados pela comunidade.</p>
                   </div>
@@ -250,7 +242,6 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Recent Reports Section */}
         <section className="py-16 md:py-24 bg-gray-50/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 md:mb-16">
@@ -275,4 +266,3 @@ export default async function Home() {
     </div>
   );
 }
-import Image from "next/image";

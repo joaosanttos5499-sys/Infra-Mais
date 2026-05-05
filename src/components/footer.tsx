@@ -1,25 +1,21 @@
 
 import Link from "next/link";
-import Image from "next/image";
+import { Construction } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-primary text-white py-6 mt-auto">
+    <footer className="bg-primary text-white py-8 mt-auto">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
-            <Image
-              src="/img/logo1.png"
-              alt="Infra Mais Logo"
-              width={32}
-              height={32}
-              className="object-contain brightness-0 invert"
-            />
-            <span className="text-lg font-bold">
-              Infra Mais
+            <div className="bg-white/10 p-2 rounded-xl border border-white/20">
+              <Construction className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-xl font-bold tracking-tight">
+              Infra <span className="opacity-80">Mais</span>
             </span>
           </div>
-          <div className="text-sm opacity-90 text-center sm:text-right">
+          <div className="text-sm opacity-80 text-center sm:text-right">
             <p>&copy; {new Date().getFullYear()} Infra Mais. Todos os direitos reservados.</p>
           </div>
         </div>
