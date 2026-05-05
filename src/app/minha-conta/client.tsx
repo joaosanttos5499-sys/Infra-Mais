@@ -430,12 +430,15 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             <div className="bg-red-50 border border-red-200 rounded-2xl p-6 space-y-4 mx-4 sm:mx-0">
                 <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-red-600" />
-                    <h3 className="text-red-600 font-semibold text-lg">Zona de Perigo</h3>
+                    <h3 className="text-red-600 font-semibold text-lg">Excluir minha conta</h3>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="space-y-1 text-center sm:text-left">
-                        <p className="font-bold text-sm text-red-700">Excluir minha conta</p>
-                        <p className="text-sm text-red-500">Ação irreversível. Todos os seus dados e relatos serão removidos.</p>
+                        <p className="text-sm text-red-500">
+                            {isEmployee 
+                                ? "Ação irreversível. Todos os seus dados serão removidos." 
+                                : "Ação irreversível. Todos os seus dados e relatos serão removidos."}
+                        </p>
                     </div>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
