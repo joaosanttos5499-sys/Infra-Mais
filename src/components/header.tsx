@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -17,8 +16,6 @@ import { createAvatarSvg } from "@/lib/avatar";
 import { useRouter } from "next/navigation";
 import { isEmailEmployee } from "@/lib/config";
 import { NotificationsDropdown } from "./notifications-dropdown";
-import { cn } from "@/lib/utils";
-import { Separator } from "./ui/separator";
 
 const navLinks = [
   { href: "/", label: "Início", icon: Home, public: true },
@@ -103,7 +100,8 @@ export function Header() {
     <header className="sticky top-0 z-[1001] w-full bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 h-16 flex items-center">
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
         <div className="max-w-7xl mx-auto px-6 w-full h-full flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 group transition-transform hover:scale-105">
+            {/* Desktop Logo */}
+            <Link href="/" className="hidden md:flex items-center gap-2 group transition-transform hover:scale-105">
               <Image
                 src="/img/logo1.png"
                 alt="Infra Mais Logo"
@@ -117,6 +115,7 @@ export function Header() {
               </span>
             </Link>
             
+            {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">
               {filteredNavLinks.map((link) => (
                   <Link
@@ -145,34 +144,54 @@ export function Header() {
               </div>
             </nav>
 
-            <div className="md:hidden flex items-center gap-3">
-              <NotificationsDropdown />
-              <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
-              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-xl">
-                    <Menu className="h-6 w-6" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="rounded-l-3xl">
-                    <SheetHeader className="text-left">
-                        <SheetTitle className="text-2xl font-bold">Menu</SheetTitle>
-                    </SheetHeader>
-                  <nav className="flex flex-col gap-2 mt-8">
-                    {filteredNavLinks.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className="flex items-center gap-4 p-4 rounded-xl hover:bg-primary/10 text-lg font-bold transition-all"
-                        onClick={() => setIsSheetOpen(false)}
-                      >
-                        <link.icon className="h-5 w-5 text-primary" />
-                        {link.label}
-                      </Link>
-                    ))}
-                  </nav>
-                </SheetContent>
-              </Sheet>
+            {/* Mobile Layout: Menu Button and Logo on the left */}
+            <div className="md:hidden flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10">
+                      <Menu className="h-6 w-6" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="rounded-r-3xl w-[280px]">
+                      <SheetHeader className="text-left">
+                          <SheetTitle className="text-2xl font-bold">Menu</SheetTitle>
+                      </SheetHeader>
+                    <nav className="flex flex-col gap-2 mt-8">
+                      {filteredNavLinks.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          className="flex items-center gap-4 p-4 rounded-xl hover:bg-primary/10 text-lg font-bold transition-all"
+                          onClick={() => setIsSheetOpen(false)}
+                        >
+                          <link.icon className="h-5 w-5 text-primary" />
+                          {link.label}
+                        </Link>
+                      ))}
+                    </nav>
+                  </SheetContent>
+                </Sheet>
+
+                <Link href="/" className="flex items-center gap-2 group">
+                  <Image
+                    src="/img/logo1.png"
+                    alt="Infra Mais Logo"
+                    width={32}
+                    height={32}
+                    className="object-contain"
+                    priority
+                  />
+                  <span className="text-lg font-bold tracking-tight text-gray-900">
+                    Infra <span className="text-primary">Mais</span>
+                  </span>
+                </Link>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <NotificationsDropdown />
+                <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
+              </div>
             </div>
         </div>
         <DialogContent className="rounded-2xl sm:max-w-md p-0 overflow-hidden">
