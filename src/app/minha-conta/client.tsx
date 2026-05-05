@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
@@ -17,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UpdateProfileSchema } from "@/lib/schemas";
-import { updateUserProfileAction, fetchUserProfileAction, saveUserProfileAction, deleteReportAction, deleteAccountAction } from "@/lib/actions";
+import { updateUserProfileAction, fetchUserProfileAction, deleteReportAction, deleteAccountAction } from "@/lib/actions";
 import { updateProfile, deleteUser as deleteAuthUser, signOut } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -199,10 +200,34 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             fetchUserProfileAction(user.uid)
                 .then(async (result) => {
                     if (result.success && result.data) {
-                        let firestoreProfile = result.data;
-                        setUserProfile(firestoreProfile);
-                        form.reset({ name: firestoreProfile.name });
+                        setUserProfile(result.data);
+                        form.reset({ name: result.data.name });
+                    } else {
+                        // Fallback: Se o perfil não for encontrado no banco local (dev), 
+                        // usamos os dados da conta Auth como base inicial.
+                        const fallbackProfile: UserProfile = {
+                            id: user.uid,
+                            name: user.displayName || 'Usuário',
+                            email: user.email || '',
+                            dateOfBirth: 'Não informada',
+                            role: isEmailEmployee(user.email) ? 'EMPLOYEE' : 'USER'
+                        };
+                        setUserProfile(fallbackProfile);
+                        form.reset({ name: fallbackProfile.name });
                     }
+                })
+                .catch(() => {
+                   if (user) {
+                        const fallbackProfile: UserProfile = {
+                            id: user.uid,
+                            name: user.displayName || 'Usuário',
+                            email: user.email || '',
+                            dateOfBirth: 'Não informada',
+                            role: isEmailEmployee(user.email) ? 'EMPLOYEE' : 'USER'
+                        };
+                        setUserProfile(fallbackProfile);
+                        form.reset({ name: fallbackProfile.name });
+                   }
                 })
                 .finally(() => {
                     setIsProfileLoading(false);
@@ -368,12 +393,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <FormItem>
                                     <FormLabel className="text-sm font-medium text-gray-700">Data de Nascimento</FormLabel>
-                                    <Input value={userProfile?.dateOfBirth} disabled className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-50 text-gray-700 disabled:opacity-100" />
+                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-50 text-gray-700 disabled:opacity-100" />
                                 </FormItem>
                                 
                                 <FormItem>
                                     <FormLabel className="text-sm font-medium text-gray-700">Email</FormLabel>
-                                    <Input value={userProfile?.email} disabled className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-50 text-gray-700 disabled:opacity-100" />
+                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-50 text-gray-700 disabled:opacity-100" />
                                 </FormItem>
                             </div>
 
