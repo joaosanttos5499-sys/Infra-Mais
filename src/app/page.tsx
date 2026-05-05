@@ -1,6 +1,6 @@
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, MapPin, CheckCircle2, Users, BarChart3, Clock, ChevronRight } from "lucide-react";
 import { getReports } from "@/lib/data";
 import { type Report } from "@/lib/types";
@@ -173,7 +173,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
                   </div>
                   <div className="space-y-1">
                     <p className="text-xl md:text-2xl font-bold text-amber-500">{totalReports - resolvedReports - inProgressReports}</p>
-                    <p className="text-[9px] md:text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Aberto</p>
+                    <p className="text-[9px] md:text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Pendente</p>
                   </div>
                    <div className="space-y-1">
                     <p className="text-xl md:text-2xl font-bold text-emerald-500">{resolvedReports}</p>
@@ -199,10 +199,6 @@ export default async function Home() {
         <section className="relative pt-12 pb-24 md:pt-32 md:pb-48 overflow-hidden bg-gradient-to-b from-primary/5 to-transparent">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center max-w-4xl mx-auto space-y-6 md:space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs sm:text-sm font-bold animate-fade-in">
-                <Users className="h-4 w-4" />
-                Plataforma de Cidadania Ativa
-              </div>
               <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-gray-900 tracking-tight leading-[1.15] sm:leading-[1.1]">
                 Relate um Problema na <br className="hidden sm:block"/><span className="text-primary italic">Sua Cidade</span>
               </h1>
@@ -212,7 +208,7 @@ export default async function Home() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 px-4">
                 <HomeCtaClient />
                 <Button asChild variant="ghost" size="lg" className="w-full sm:w-auto rounded-xl px-8 h-12 md:h-14 text-base md:text-lg font-semibold hover:bg-primary/5">
-                  <Link href="/dashboard">Ver Mapa <MapPin className="ml-2 h-5 w-5" /></Link>
+                  <Link href="/dashboard">Ver Relatos <MapPin className="ml-2 h-5 w-5" /></Link>
                 </Button>
               </div>
             </div>
@@ -239,7 +235,7 @@ export default async function Home() {
                   <div className="flex items-center justify-center gap-4">
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-amber-500" />
-                      <span className="text-xs font-medium">Aberto</span>
+                      <span className="text-xs font-medium">Pendente</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-emerald-500" />
@@ -279,3 +275,4 @@ export default async function Home() {
     </div>
   );
 }
+import Image from "next/image";

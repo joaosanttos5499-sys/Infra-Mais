@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import Image from "next/image";
 
@@ -12,7 +13,7 @@ export function Footer() {
               alt="Infra Mais Logo"
               width={32}
               height={32}
-              className="brightness-0 invert"
+              className="object-contain"
             />
             <span className="text-lg font-bold">
               Infra Mais

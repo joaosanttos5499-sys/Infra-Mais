@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -99,7 +100,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 h-16 flex items-center">
+    <header className="sticky top-0 z-[1001] w-full bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 h-16 flex items-center">
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
         <div className="max-w-7xl mx-auto px-6 w-full h-full flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 group transition-transform hover:scale-105">
