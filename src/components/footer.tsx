@@ -1,6 +1,6 @@
 
 import Link from "next/link";
-import { Construction } from "lucide-react";
+import Image from "next/image";
 
 export function Footer() {
   return (
@@ -8,8 +8,15 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
-            <div className="bg-white/10 p-2 rounded-xl border border-white/20">
-              <Construction className="h-6 w-6 text-white" />
+            <div className="bg-white p-1.5 rounded-lg shadow-sm">
+              <Image
+                src="/img/logo1.png"
+                alt="Infra Mais Logo"
+                width={32}
+                height={32}
+                className="object-contain"
+                priority
+              />
             </div>
             <span className="text-xl font-bold tracking-tight">
               Infra <span className="opacity-80">Mais</span>
