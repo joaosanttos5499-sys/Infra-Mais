@@ -53,10 +53,10 @@ function MyReportItem({ report }: { report: Report }) {
     };
 
     return (
-        <div className="flex gap-4 items-center border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 bg-white group relative animate-in fade-in slide-in-from-bottom-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-center border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 bg-white group relative animate-in fade-in slide-in-from-bottom-4">
             <Link href={`/dashboard#report-${report.id}`} className="absolute inset-0 z-0" />
             
-            <div className="relative w-24 h-24 rounded-lg overflow-hidden shrink-0 z-10 shadow-sm">
+            <div className="relative w-full sm:w-24 h-40 sm:h-24 rounded-lg overflow-hidden shrink-0 z-10 shadow-sm">
                 <Image
                     src={report.photoUrl}
                     alt={report.description}
@@ -65,7 +65,7 @@ function MyReportItem({ report }: { report: Report }) {
                 />
             </div>
 
-            <div className="flex flex-col flex-grow min-w-0 z-10">
+            <div className="flex flex-col flex-grow min-w-0 z-10 w-full">
                 <div className="flex justify-between items-start gap-2">
                     <h3 className="font-semibold text-gray-800 truncate">
                         {problem?.label || report.problem}
@@ -91,11 +91,11 @@ function MyReportItem({ report }: { report: Report }) {
                 </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center gap-2 z-10">
+            <div className="flex sm:flex-col items-center justify-center gap-4 sm:gap-2 z-10 w-full sm:w-auto border-t sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0">
                 {canDelete && (
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500 transition shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-8 sm:w-8 text-gray-400 hover:text-red-500 transition shrink-0" onClick={(e) => e.stopPropagation()}>
                                 {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                                 <span className="sr-only">Excluir</span>
                             </Button>
@@ -114,7 +114,8 @@ function MyReportItem({ report }: { report: Report }) {
                         </AlertDialogContent>
                     </AlertDialog>
                 )}
-                <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-primary transition-colors" />
+                <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4 text-gray-300 group-hover:text-primary transition-colors hidden sm:block" />
+                <Button variant="outline" size="sm" className="sm:hidden w-full font-bold text-primary border-primary/20">Ver detalhes</Button>
             </div>
         </div>
     );
@@ -123,7 +124,7 @@ function MyReportItem({ report }: { report: Report }) {
 function MyReportsList({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
         return (
-            <div className="text-center text-muted-foreground py-10 border-2 border-dashed rounded-2xl bg-gray-50/50">
+            <div className="text-center text-muted-foreground py-10 border-2 border-dashed rounded-2xl bg-gray-50/50 mx-4 sm:mx-0">
                 <p className="text-sm">Você ainda não relatou nenhum problema.</p>
                 <Button asChild variant="link" className="mt-2 text-primary font-bold">
                     <Link href="/report/new">Relatar um Problema</Link>
@@ -133,7 +134,7 @@ function MyReportsList({ reports }: { reports: Report[] }) {
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 px-4 sm:px-0">
             {reports.map((report) => (
                 <MyReportItem key={report.id} report={report} />
             ))}
@@ -317,7 +318,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     return (
         <div className="space-y-8">
-             <Card className="bg-white rounded-2xl shadow-md border border-gray-200 p-8 space-y-6 overflow-hidden">
+             <Card className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 sm:p-8 space-y-6 overflow-hidden mx-4 sm:mx-0">
                 <div className="flex flex-col items-center gap-4 mb-2">
                     <Avatar className="h-20 w-20 shadow-sm border-2 border-gray-50">
                         <AvatarImage src={userProfile?.photoURL || createAvatarSvg(user.email || 'U')} />
@@ -377,15 +378,15 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             </div>
 
                             {isEditingName && (
-                                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                                    <Button type="button" variant="outline" onClick={() => { setIsEditingName(false); form.reset(); }} className="h-10 px-6 rounded-lg font-bold">
+                                <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
+                                    <Button type="button" variant="outline" onClick={() => { setIsEditingName(false); form.reset(); }} className="h-10 px-6 rounded-lg font-bold w-full sm:w-auto">
                                         Cancelar
                                     </Button>
                                     <Button 
                                         type="button" 
                                         onClick={handleSaveClick} 
                                         disabled={form.formState.isSubmitting || !form.formState.isDirty}
-                                        className="h-10 px-6 rounded-lg font-bold shadow-md hover:scale-[1.02] transition-all"
+                                        className="h-10 px-6 rounded-lg font-bold shadow-md hover:scale-[1.02] transition-all w-full sm:w-auto"
                                     >
                                         {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                                         Salvar
@@ -399,16 +400,16 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             </Card>
 
             <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-                <AlertDialogContent className="rounded-2xl">
+                <AlertDialogContent className="rounded-2xl mx-4 sm:mx-0">
                     <AlertDialogHeader>
                         <AlertDialogTitle>Aviso de Alteração</AlertDialogTitle>
                         <AlertDialogDescription>
                             Alterações de nome só são permitidas uma vez a cada 7 dias. Deseja confirmar?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter className="mt-4">
-                        <AlertDialogCancel className="rounded-xl">Voltar</AlertDialogCancel>
-                        <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={!isConfirmEnabled} className="bg-primary text-white rounded-xl font-bold">
+                    <AlertDialogFooter className="mt-4 gap-2">
+                        <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Voltar</AlertDialogCancel>
+                        <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={!isConfirmEnabled} className="bg-primary text-white rounded-xl font-bold w-full sm:w-auto">
                            {isConfirmEnabled ? 'Confirmar' : `Aguarde (${countdown})`}
                         </AlertDialogAction>
                     </AlertDialogFooter>
@@ -416,7 +417,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             </AlertDialog>
 
             {!isEmployee && (
-                <Card className="bg-white rounded-2xl shadow-md border border-gray-200 p-6" id="meus-relatorios">
+                <Card className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mx-4 sm:mx-0" id="meus-relatorios">
                     <CardHeader className="p-0 mb-6">
                         <CardTitle className="text-xl font-semibold text-gray-800">Meus Relatórios</CardTitle>
                     </CardHeader>
@@ -426,33 +427,33 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 </Card>
             )}
 
-            <div className="bg-red-50 border border-red-200 rounded-2xl p-6 space-y-4">
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-6 space-y-4 mx-4 sm:mx-0">
                 <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-red-600" />
                     <h3 className="text-red-600 font-semibold text-lg">Zona de Perigo</h3>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="space-y-1">
+                    <div className="space-y-1 text-center sm:text-left">
                         <p className="font-bold text-sm text-red-700">Excluir minha conta</p>
                         <p className="text-sm text-red-500">Ação irreversível. Todos os seus dados e relatos serão removidos.</p>
                     </div>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="bg-red-500 hover:bg-red-600 text-white rounded-lg px-6 h-11 shadow-sm transition-all hover:scale-[1.02]" disabled={isDeletingAccount}>
+                            <Button variant="destructive" className="bg-red-500 hover:bg-red-600 text-white rounded-lg px-6 h-11 shadow-sm transition-all hover:scale-[1.02] w-full sm:w-auto" disabled={isDeletingAccount}>
                                 {isDeletingAccount ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
                                 Excluir Conta
                             </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-2xl">
+                        <AlertDialogContent className="rounded-2xl mx-4 sm:mx-0">
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Excluir conta permanentemente?</AlertDialogTitle>
                                 <AlertDialogDescription>
                                     Esta ação não pode ser desfeita. Você perderá acesso a todos os seus relatos.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
-                            <AlertDialogFooter className="mt-6">
-                                <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDeleteAccount} className="bg-red-600 text-white rounded-xl font-bold">
+                            <AlertDialogFooter className="mt-6 gap-2">
+                                <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteAccount} className="bg-red-600 text-white rounded-xl font-bold w-full sm:w-auto">
                                     Sim, excluir meus dados
                                 </AlertDialogAction>
                             </AlertDialogFooter>

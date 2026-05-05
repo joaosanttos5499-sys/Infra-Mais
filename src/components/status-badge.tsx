@@ -16,7 +16,7 @@ export const statusConfig: Record<
   },
   IN_PROGRESS: {
     label: "Em Andamento",
-    className: "bg-blue-600 text-white border-transparent hover:bg-blue-700",
+    className: "bg-primary text-white border-transparent hover:brightness-110",
   },
   RESOLVED: {
     label: "Resolvido",

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
@@ -96,7 +95,6 @@ export function NotificationsDropdown() {
                       notification.isRead ? "border-l-transparent" : "bg-primary/5 border-l-primary"
                   )}
                   onSelect={(e) => {
-                      // Impede o fechamento do menu ao clicar em "Ver relato" especificamente ou marcar como lida
                       if ((e.target as HTMLElement).closest('a')) return;
                       handleMarkAsRead(notification.id);
                   }}

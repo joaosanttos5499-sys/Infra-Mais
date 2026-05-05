@@ -1,4 +1,3 @@
-
 import {
   Accordion,
   AccordionContent,
@@ -71,10 +70,10 @@ export default function SupportPage() {
         <div className="max-w-3xl mx-auto">
           {/* Header Section */}
           <div className="mb-10 text-center md:text-left space-y-2">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900">
               Central de Suporte
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
               Tudo o que você precisa saber sobre como utilizar o Infra Mais.
             </p>
           </div>
@@ -131,7 +130,7 @@ export default function SupportPage() {
               </p>
             </div>
             <div className="pt-2">
-              <Button size="lg" className="rounded-xl font-bold shadow-md px-8">
+              <Button size="lg" className="rounded-xl font-bold shadow-md px-8 w-full sm:w-auto bg-primary hover:bg-primary/90">
                 Entrar em contato
               </Button>
             </div>
