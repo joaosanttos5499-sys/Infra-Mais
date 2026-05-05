@@ -201,7 +201,7 @@ function ReportCard({
                                             Solução
                                         </button>
                                     </DialogTrigger>
-                                    <DialogContent className="max-w-4xl p-2 rounded-2xl">
+                                    <DialogContent className="max-w-4xl p-2 rounded-2xl bg-white">
                                         <div className="relative aspect-video">
                                             <Image src={report.photoAfterUrl} alt="Trabalho concluído" fill className="object-contain" />
                                         </div>
@@ -219,7 +219,7 @@ function ReportCard({
                                             Remover
                                         </Button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent className="rounded-2xl">
+                                    <AlertDialogContent className="rounded-2xl bg-white">
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
                                             <AlertDialogDescription>
@@ -279,7 +279,7 @@ function ReportCard({
                                     <SelectTrigger id={`status-${report.id}`} className="h-12 rounded-xl bg-white border-gray-200 text-base font-semibold" disabled={isFinalStatus}>
                                         <SelectValue placeholder="Mudar status" />
                                     </SelectTrigger>
-                                    <SelectContent className="rounded-xl shadow-xl">
+                                    <SelectContent className="rounded-xl bg-white">
                                         {Object.entries(statusConfig).map(([key, { label }]) => {
                                             const isNext = key === nextAllowedStatus;
                                             const isCurrent = key === report.status;
@@ -330,12 +330,12 @@ function ReportCard({
                         <div className="flex justify-end">
                             <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
                                 <AlertDialogTrigger asChild>
-                                    <Button type="button" disabled={isPending || selectedStatus === report.status} className="h-12 w-full sm:w-auto rounded-xl px-8 font-bold shadow-md">
+                                    <Button type="button" disabled={isPending || selectedStatus === report.status} className="h-12 w-full sm:w-auto rounded-xl px-8 font-bold shadow-md bg-primary text-white">
                                         {isPending ? <Loader2 className="animate-spin h-5 w-5 mr-3" /> : <Upload className="h-5 w-5 mr-3" />}
                                         Salvar Alterações
                                     </Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent className="rounded-2xl">
+                                <AlertDialogContent className="rounded-2xl bg-white">
                                     <AlertDialogHeader>
                                         <AlertDialogTitle className="text-2xl font-bold">Confirmar Atualização</AlertDialogTitle>
                                         <AlertDialogDescription className="text-base">
@@ -490,7 +490,7 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
                 <SelectTrigger className="h-10 w-[160px] sm:w-[180px] bg-white border-gray-200 rounded-lg text-sm font-semibold">
                     <SelectValue placeholder="Escolher" />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl">
+                <SelectContent className="rounded-xl bg-white">
                   <SelectItem value="newest" className="font-medium">Mais Recentes</SelectItem>
                   <SelectItem value="oldest" className="font-medium">Mais Antigos</SelectItem>
                   <SelectItem value="upvotes" className="font-medium">Mais Apoiados</SelectItem>
