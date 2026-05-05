@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { saveUserProfileAction } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, MailCheck, Eye, EyeOff } from "lucide-react";
+import { Loader2, MailCheck, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { SignupSchema } from "@/lib/schemas";
@@ -40,6 +40,33 @@ export function SignupForm() {
   });
 
   const { control, handleSubmit } = form;
+
+  // Monitora a ativação da conta em tempo real após o envio do e-mail
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isVerificationSent && auth.currentUser) {
+      interval = setInterval(async () => {
+        try {
+          await auth.currentUser?.reload();
+          if (auth.currentUser?.emailVerified) {
+            clearInterval(interval);
+            toast({
+              title: "E-mail verificado!",
+              description: "Sua conta foi ativada com sucesso. Redirecionando...",
+            });
+            router.push('/');
+          }
+        } catch (error) {
+          console.error("Erro ao verificar status de ativação:", error);
+        }
+      }, 3000); // Verifica a cada 3 segundos
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isVerificationSent, auth, router, toast]);
 
   const handleSignup = async (data: SignupFormData) => {
     setIsSubmitting(true);
@@ -104,19 +131,32 @@ export function SignupForm() {
 
   if (isVerificationSent) {
     return (
-      <div className="text-center space-y-4 py-8">
+      <div className="text-center space-y-6 py-10 px-4 animate-in fade-in zoom-in duration-500">
         <div className="flex justify-center">
-          <div className="bg-green-100 p-3 rounded-full">
-            <MailCheck className="h-12 w-12 text-green-600" />
+          <div className="bg-green-100 p-4 rounded-full shadow-sm">
+            <MailCheck className="h-14 w-14 text-green-600 animate-bounce" />
           </div>
         </div>
-        <h2 className="text-2xl font-bold">Verifique seu e-mail</h2>
-        <p className="text-muted-foreground">
-          Enviamos um link de confirmação para o endereço informado. 
-          Por favor, verifique sua caixa de entrada (e a pasta de spam) para ativar sua conta.
-        </p>
-        <Button asChild className="mt-4">
-          <Link href="/report/auth">Ir para Login</Link>
+        <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-gray-900">Verifique seu e-mail</h2>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              Enviamos um link de confirmação para <strong>{auth.currentUser?.email}</strong>. 
+              Acesse seu e-mail para ativar sua conta.
+            </p>
+        </div>
+        
+        <div className="flex flex-col items-center gap-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-2 text-primary text-sm font-bold">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Aguardando ativação...
+            </div>
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest">
+                Você será redirecionado automaticamente após clicar no link
+            </p>
+        </div>
+
+        <Button asChild variant="ghost" className="mt-2 text-gray-500 hover:text-primary">
+          <Link href="/report/auth">Voltar para o Login</Link>
         </Button>
       </div>
     );
