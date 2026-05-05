@@ -1,5 +1,4 @@
-
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
@@ -18,6 +17,14 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Infra Mais",
   description: "Report infrastructure issues in your city.",
+  other: {
+    "color-scheme": "light"
+  }
+};
+
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -26,8 +33,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", poppins.variable)}>
+    <html lang="pt-BR" suppressHydrationWarning className="light">
+      <head>
+        <meta name="color-scheme" content="light" />
+      </head>
+      <body className={cn("min-h-screen bg-white font-body antialiased flex flex-col", poppins.variable)}>
         <FirebaseClientProvider>
           <SocialsHeader />
           <Header />

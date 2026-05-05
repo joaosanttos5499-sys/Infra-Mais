@@ -5,10 +5,10 @@ import { Loader2 } from "lucide-react";
 
 function PageSkeleton() {
     return (
-      <div className="flex items-center justify-center p-12">
+      <div className="flex items-center justify-center p-12 bg-white min-h-[60vh]">
         <span className="sr-only">Carregando...</span>
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="ml-4 text-muted-foreground">Carregando seus dados...</p>
+        <p className="ml-4 text-gray-500">Carregando seus dados...</p>
       </div>
     );
   }
@@ -17,7 +17,7 @@ export default async function MinhaContaPage() {
     const reports = await getReports();
 
     return (
-        <div className="flex flex-col min-h-screen bg-background">
+        <div className="flex flex-col min-h-screen bg-slate-50">
             <main className="flex-1 py-10 px-4">
                 <div className="max-w-3xl mx-auto">
                     <div className="mb-8 text-center md:text-left">
