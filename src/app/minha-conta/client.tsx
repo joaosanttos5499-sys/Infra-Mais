@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, X, Trash2, AlertTriangle, MapPin, Clock, ChevronRight } from "lucide-react";
+import { Loader2, Save, Trash2, AlertTriangle, MapPin, Clock, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -18,8 +17,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UpdateProfileSchema } from "@/lib/schemas";
-import { updateUserProfileAction, fetchUserProfileAction, deleteReportAction, deleteAccountAction } from "@/lib/actions";
-import { updateProfile, deleteUser as deleteAuthUser, signOut } from "firebase/auth";
+import { updateUserProfileAction, fetchUserProfileAction, deleteReportAction } from "@/lib/actions";
+import { updateProfile } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -28,8 +27,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createAvatarSvg } from "@/lib/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { isEmailEmployee } from "@/lib/config";
-import { cn } from "@/lib/utils";
-
 
 function MyReportItem({ report }: { report: Report }) {
     const { toast } = useToast();
@@ -168,7 +165,10 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isConfirmEnabled, setIsConfirmEnabled] = useState(false);
     const [countdown, setCountdown] = useState(5);
-    const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [deleteCountdown, setDeleteCountdown] = useState(5);
+    const [isDeleteConfirmEnabled, setIsDeleteConfirmEnabled] = useState(false);
 
 
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -203,8 +203,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                         setUserProfile(result.data);
                         form.reset({ name: result.data.name });
                     } else {
-                        // Fallback: Se o perfil não for encontrado no banco local (dev), 
-                        // usamos os dados da conta Auth como base inicial.
                         const fallbackProfile: UserProfile = {
                             id: user.uid,
                             name: user.displayName || 'Usuário',
@@ -261,6 +259,32 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         }
     }, [isConfirmOpen]);
 
+    useEffect(() => {
+        if (isDeleteDialogOpen) {
+            setIsDeleteConfirmEnabled(false);
+            setDeleteCountdown(5);
+            
+            const countdownInterval = setInterval(() => {
+                setDeleteCountdown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(countdownInterval);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+
+            const enableTimeout = setTimeout(() => {
+                setIsDeleteConfirmEnabled(true);
+            }, 5000);
+
+            return () => {
+                clearInterval(countdownInterval);
+                clearTimeout(enableTimeout);
+            };
+        }
+    }, [isDeleteDialogOpen]);
+
     const getCooldownInfo = () => {
         if (!userProfile?.nameLastUpdatedAt) return { onCooldown: false, remainingDays: 0 };
         const lastUpdate = new Date(userProfile.nameLastUpdatedAt);
@@ -309,29 +333,9 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         });
     };
 
-    const handleDeleteAccount = async () => {
-        if (!user || !auth.currentUser) return;
-        setIsDeletingAccount(true);
-        const result = await deleteAccountAction(user.uid);
-        if (result.success) {
-            try {
-                await deleteAuthUser(auth.currentUser);
-                toast({ title: "Conta excluída", description: "Todos os seus dados foram removidos permanentemente." });
-                router.push('/');
-            } catch (e: any) {
-                if (e.code === 'auth/requires-recent-login') {
-                    toast({ variant: 'destructive', title: "Ação Necessária", description: "Faça login novamente antes de excluir sua conta." });
-                    await signOut(auth);
-                    router.push('/report/auth');
-                }
-                setIsDeletingAccount(false);
-            }
-        } else {
-            toast({ variant: 'destructive', title: 'Erro', description: result.error });
-            setIsDeletingAccount(false);
-        }
+    const handleProceedToDelete = () => {
+        router.push('/exclusao-da-conta');
     };
-
 
     if (isUserLoading || !user) {
         return (
@@ -379,28 +383,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 </FormItem>
                               )}
                             />
-
-                            {isEditingName && (
-                                <Alert className="bg-amber-50 border-amber-200 py-3">
-                                    <AlertDescription className="text-amber-800 text-xs">
-                                        {cooldown.onCooldown 
-                                            ? `Aguarde ${cooldown.remainingDays} ${cooldown.remainingDays === 1 ? 'dia' : 'dias'} para alterar novamente.`
-                                            : "Você só pode alterar seu nome uma vez por semana."}
-                                    </AlertDescription>
-                                </Alert>
-                            )}
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <FormItem>
-                                    <FormLabel className="text-sm font-medium text-gray-700">Data de Nascimento</FormLabel>
-                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-50 text-gray-700 disabled:opacity-100" />
-                                </FormItem>
-                                
-                                <FormItem>
-                                    <FormLabel className="text-sm font-medium text-gray-700">Email</FormLabel>
-                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-50 text-gray-700 disabled:opacity-100" />
-                                </FormItem>
-                            </div>
 
                             {isEditingName && (
                                 <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
@@ -465,24 +447,24 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 : "Ação irreversível. Todos os seus dados e relatos serão removidos."}
                         </p>
                     </div>
-                    <AlertDialog>
+                    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="bg-red-500 hover:bg-red-600 text-white rounded-lg px-6 h-11 shadow-sm transition-all hover:scale-[1.02] w-full sm:w-auto" disabled={isDeletingAccount}>
-                                {isDeletingAccount ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                            <Button variant="destructive" className="bg-red-500 hover:bg-red-600 text-white rounded-lg px-6 h-11 shadow-sm transition-all hover:scale-[1.02] w-full sm:w-auto">
+                                <Trash2 className="h-4 w-4 mr-2" />
                                 Excluir Conta
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent className="rounded-2xl mx-4 sm:mx-0">
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Excluir conta permanentemente?</AlertDialogTitle>
+                                <AlertDialogTitle>Protocolo de Segurança</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    Esta ação não pode ser desfeita. Você perderá acesso a todos os seus relatos.
+                                    Para sua proteção, você será redirecionado para uma página de confirmação de identidade. Deseja prosseguir com a exclusão definitiva?
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-6 gap-2">
                                 <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDeleteAccount} className="bg-red-600 text-white rounded-xl font-bold w-full sm:w-auto">
-                                    Sim, excluir meus dados
+                                <AlertDialogAction onClick={handleProceedToDelete} disabled={!isDeleteConfirmEnabled} className="bg-red-600 text-white rounded-xl font-bold w-full sm:w-auto">
+                                    {isDeleteConfirmEnabled ? 'Sim, excluir meus dados' : `Aguarde (${deleteCountdown}s)`}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
