@@ -342,9 +342,11 @@ export async function fetchUserProfileAction(userId: string): Promise<{ success:
 }
 
 export async function deleteAccountAction(userId: string) {
+  if (!userId) return { success: false, error: "ID de usuário inválido." };
+  
   try {
-    const success = await dbDeleteUser(userId);
-    if (!success) return { success: false, error: "Usuário não encontrado." };
+    // dbDeleteUser agora sempre retorna true após limpar os dados associados
+    await dbDeleteUser(userId);
     
     revalidatePath("/");
     revalidatePath("/dashboard");

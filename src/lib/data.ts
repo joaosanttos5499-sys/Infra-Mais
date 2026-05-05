@@ -109,26 +109,30 @@ export async function getUserById(id: string): Promise<UserProfile | undefined> 
 }
 
 export async function deleteUser(id: string): Promise<boolean> {
+  // Remove o perfil se existir
   const userIndex = users.findIndex(u => u.id === id);
   if (userIndex !== -1) {
     users.splice(userIndex, 1);
-    // Remove todos os relatos deste usuário
-    let i = reports.length;
-    while (i--) {
-      if (reports[i].userId === id) {
-        reports.splice(i, 1);
-      }
-    }
-    // Remove todas as notificações deste usuário
-    let j = notifications.length;
-    while (j--) {
-        if (notifications[j].userId === id) {
-            notifications.splice(j, 1);
-        }
-    }
-    return true;
   }
-  return false;
+
+  // Remove todos os relatos deste usuário (sempre tenta limpar, mesmo que o perfil não exista)
+  let i = reports.length;
+  while (i--) {
+    if (reports[i].userId === id) {
+      reports.splice(i, 1);
+    }
+  }
+
+  // Remove todas as notificações deste usuário
+  let j = notifications.length;
+  while (j--) {
+    if (notifications[j].userId === id) {
+      notifications.splice(j, 1);
+    }
+  }
+
+  // Sempre retorna true para permitir que a exclusão continue no lado do cliente (Auth)
+  return true;
 }
 
 // Notifications Data Functions
