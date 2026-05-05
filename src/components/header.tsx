@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -100,7 +101,6 @@ export function Header() {
     <header className="sticky top-0 z-[1001] w-full bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 h-16 flex items-center">
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
         <div className="max-w-7xl mx-auto px-6 w-full h-full flex items-center justify-between">
-            {/* Desktop Logo */}
             <Link href="/" className="hidden md:flex items-center gap-2 group transition-transform hover:scale-105">
               <Image
                 src="/img/logo1.png"
@@ -115,7 +115,6 @@ export function Header() {
               </span>
             </Link>
             
-            {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">
               {filteredNavLinks.map((link) => (
                   <Link
@@ -144,7 +143,6 @@ export function Header() {
               </div>
             </nav>
 
-            {/* Mobile Layout: Menu Button and Logo on the left */}
             <div className="md:hidden flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -202,7 +200,10 @@ export function Header() {
                 Seja bem-vindo(a) de volta ao Infra Mais.
               </DialogDescription>
             </DialogHeader>
-            <AuthForm onAuthSuccess={handleLoginSuccess} />
+            <AuthForm 
+              onAuthSuccess={handleLoginSuccess} 
+              onSignupClick={() => setIsAuthModalOpen(false)}
+            />
           </div>
         </DialogContent>
       </Dialog>

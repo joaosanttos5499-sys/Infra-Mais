@@ -16,7 +16,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft, Check, Mail, Eye, EyeOff } from 'lucide-react';
 import { fetchUserProfileAction } from '@/lib/actions';
 
-export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
+export function AuthForm({ 
+  onAuthSuccess, 
+  onSignupClick 
+}: { 
+  onAuthSuccess?: () => void;
+  onSignupClick?: () => void;
+}) {
   const auth = useAuth();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
@@ -31,7 +37,6 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Check if email is verified (Optional: you can warn the user if not)
       if (!user.emailVerified) {
         toast({
           title: 'E-mail não verificado',
@@ -40,7 +45,6 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
         });
       }
 
-      // Sync profile from our DB to Firebase Auth on login
       try {
         const profileResult = await fetchUserProfileAction(user.uid);
         if (profileResult.success && profileResult.data) {
@@ -125,7 +129,6 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
     )
   }
 
-
   if (view === 'resetPassword') {
     return (
       <div className="space-y-6">
@@ -161,7 +164,6 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
       </div>
     );
   }
-
 
   return (
     <div className="space-y-6">
@@ -223,7 +225,11 @@ export function AuthForm({ onAuthSuccess }: { onAuthSuccess?: () => void }) {
       
       <p className="text-center text-sm text-muted-foreground">
         Não tem uma conta?{' '}
-        <Link href="/signup" className="underline font-medium hover:text-primary transition-colors">
+        <Link 
+          href="/signup" 
+          className="underline font-medium hover:text-primary transition-colors"
+          onClick={() => onSignupClick?.()}
+        >
           Crie uma agora
         </Link>
       </p>
