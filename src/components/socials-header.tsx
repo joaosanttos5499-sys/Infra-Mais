@@ -6,7 +6,7 @@ export function SocialsHeader() {
   return (
     <div className="bg-primary text-primary-foreground hidden sm:block">
       <div className="w-full max-w-full mx-auto px-2">
-        <div className="flex justify-end items-center h-5 gap-4">
+        <div className="flex justify-end items-center h-5 gap-6">
           <Link href="#" className="hover:opacity-80 transition-opacity" aria-label="Facebook">
             <Facebook className="h-3.5 w-3.5" />
             <span className="sr-only">Facebook</span>
