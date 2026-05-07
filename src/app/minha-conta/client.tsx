@@ -4,7 +4,7 @@ import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, Trash2, AlertTriangle, MapPin, Clock, ChevronRight } from "lucide-react";
+import { Loader2, Save, Trash2, AlertTriangle, MapPin, Clock, ChevronRight, Mail, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -23,7 +23,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createAvatarSvg } from "@/lib/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { isEmailEmployee } from "@/lib/config";
@@ -142,7 +141,11 @@ function MyReportsList({ reports }: { reports: Report[] }) {
 
 function UserDataSkeleton() {
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
+            <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-10 w-full" />
+            </div>
             <div className="space-y-2">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-10 w-full" />
@@ -383,6 +386,24 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 </FormItem>
                               )}
                             />
+
+                            <div className="space-y-4 pt-2">
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <FormLabel className="text-sm font-medium text-gray-700">E-mail</FormLabel>
+                                        <Mail className="h-3.5 w-3.5 text-gray-400" />
+                                    </div>
+                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-100 text-gray-500 cursor-not-allowed opacity-100" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <FormLabel className="text-sm font-medium text-gray-700">Data de Nascimento</FormLabel>
+                                        <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                                    </div>
+                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-100 text-gray-500 cursor-not-allowed opacity-100" />
+                                </div>
+                            </div>
 
                             {isEditingName && (
                                 <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
