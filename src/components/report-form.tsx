@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo, useCallback, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import Image from "next/image";
 import { Camera, Loader2, RefreshCw, ShieldAlert, MapPin, Info, ImagePlus, FileText } from "lucide-react";
@@ -28,53 +29,19 @@ import { Separator } from "./ui/separator";
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
+  loading: () => <div className="w-full h-[400px] bg-slate-100 animate-pulse flex items-center justify-center text-gray-400">Carregando mapa...</div>
 });
 
-function SubmitButton({ isRedirecting }: { isRedirecting: boolean }) {
-  const { formState: { isSubmitting } } = useFormContext();
-  const isLoading = isSubmitting || isRedirecting;
-
-  return (
-    <Button 
-      type="submit" 
-      className={cn(
-        "w-full sm:w-auto px-8 transition-all duration-300 shadow-md h-12",
-        isLoading 
-          ? "opacity-50 cursor-not-allowed" 
-          : "bg-primary text-white hover:bg-primary/90 hover:scale-[1.02]"
-      )} 
-      disabled={isLoading} 
-      aria-disabled={isLoading}
-    >
-      {isLoading ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Enviando...
-        </>
-      ) : (
-        "Enviar Relatório"
-      )}
-    </Button>
-  );
-}
+const PICUI_NEIGHBORHOODS = [
+  "Cenecista", "Centro", "JK", "Limeira", "Monte Santo", 
+  "Pedro Salustino de Lima", "Pedro Tomáz Dantas", "São José", "Zona Rural"
+].sort((a, b) => a.localeCompare(b));
 
 const ClientReportSchema = ReportSchema.extend({
     photo: z.instanceof(File, { message: 'A foto é obrigatória.'})
         .refine(file => file.size > 0, 'A foto é obrigatória.')
         .refine(file => file.size <= 5 * 1024 * 1024, 'O tamanho da foto não pode exceder 5MB.'),
 });
-
-const PICUI_NEIGHBORHOODS = [
-  "Cenecista",
-  "Centro",
-  "JK",
-  "Limeira",
-  "Monte Santo",
-  "Pedro Salustino de Lima",
-  "Pedro Tomáz Dantas",
-  "São José",
-  "Zona Rural"
-].sort((a, b) => a.localeCompare(b));
 
 export function ReportForm() {
   const { toast } = useToast();
@@ -99,391 +66,153 @@ export function ReportForm() {
     },
   });
 
-  const { formState, setError, setValue, watch, control } = form;
-
+  const { setValue, watch, control, handleSubmit, reset } = form;
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
   const selectedCategory = watch('category');
   const selectedCity = watch('city');
-  const problems = getCategory(selectedCategory)?.problems || [];
+  const selectedLat = watch('latitude');
+  const selectedLng = watch('longitude');
 
-  const isEmployee = isEmailEmployee(user?.email);
+  const problems = useMemo(() => getCategory(selectedCategory)?.problems || [], [selectedCategory]);
+  const locationObject = useMemo(() => (selectedLat !== 0 && selectedLng !== 0 ? { lat: selectedLat, lng: selectedLng } : null), [selectedLat, selectedLng]);
 
-  const onSubmit = async (values: z.infer<typeof ClientReportSchema>) => {
-    if (isEmployee) {
-      toast({ variant: 'destructive', title: 'Ação Bloqueada', description: 'Funcionários não podem enviar relatos.' });
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('photo', values.photo);
-    Object.keys(values).forEach(key => {
-      const formKey = key as keyof typeof values;
-      if (formKey !== 'photo') {
-        const value = values[formKey];
-        if (value !== undefined && value !== null) {
-          formData.append(formKey, String(value));
-        }
-      }
-    });
-
-    const result = await submitReport(undefined, formData);
-
-    if (result?.errors) {
-      Object.keys(result.errors).forEach((key) => {
-        const field = key as keyof FormState['errors'];
-        const message = result.errors?.[field]?.join(', ');
-        if (field === '_form') {
-          toast({ variant: 'destructive', title: 'Erro ao enviar relatório', description: message });
-        } else if (field && message) {
-          setError(field, { type: 'manual', message });
-        }
-      });
-    } else if (result?.success) {
-      setIsRedirecting(true);
-      toast({ 
-        title: "Relatório submetido com sucesso!", 
-        description: "Sua solicitação foi registrada. Você pode acompanhá-la em sua conta."
-      });
-      router.push('/minha-conta#meus-relatorios');
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      setValue('userId', user.uid);
-    }
-  }, [user, setValue]);
+  const handleMapClick = useCallback((lat: number, lng: number) => {
+    setValue('latitude', lat, { shouldValidate: true });
+    setValue('longitude', lng, { shouldValidate: true });
+  }, [setValue]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setValue('photo', file, { shouldValidate: true });
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-      };
+      reader.onloadend = () => setPhotoPreview(reader.result as string);
       reader.readAsDataURL(file);
-    } else {
-      setValue('photo', undefined, { shouldValidate: true });
-      setPhotoPreview(null);
     }
   };
 
-  const handleMapClick = (lat: number, lng: number) => {
-    setValue('latitude', lat, { shouldValidate: true });
-    setValue('longitude', lng, { shouldValidate: true });
-  };
-  
-  const resetForm = () => {
-      form.reset();
-      setPhotoPreview(null);
-  }
-  
-  const selectedLocation = watch(['latitude', 'longitude']);
-  const locationObject = selectedLocation[0] !== 0 && selectedLocation[1] !== 0 
-    ? { lat: selectedLocation[0], lng: selectedLocation[1]} 
-    : null;
+  const onSubmit = async (values: z.infer<typeof ClientReportSchema>) => {
+    const formData = new FormData();
+    formData.append('photo', values.photo);
+    Object.keys(values).forEach(key => {
+        if (key !== 'photo') formData.append(key, String((values as any)[key]));
+    });
 
-  if (!isUserLoading && isEmployee) {
+    const result = await submitReport(undefined, formData);
+    if (result?.success) {
+      setIsRedirecting(true);
+      toast({ title: "Sucesso!", description: "Relatório enviado." });
+      router.push('/minha-conta#meus-relatorios');
+    } else {
+      toast({ variant: 'destructive', title: 'Erro ao enviar', description: result?.errors?._form?.[0] });
+    }
+  };
+
+  if (isEmailEmployee(user?.email)) {
     return (
-        <Card className="w-full max-w-2xl border-primary/20 bg-primary/5 rounded-2xl">
-            <CardHeader className="text-center pt-10 px-6">
-                <ShieldAlert className="h-16 w-16 text-primary mx-auto mb-4" />
-                <CardTitle className="text-2xl sm:text-3xl font-bold">Acesso Restrito</CardTitle>
-                <CardDescription className="text-base sm:text-lg">
-                    Funcionários do Infra Mais não podem enviar relatos para garantir a imparcialidade do sistema.
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center pb-10 pt-4 px-6">
-                <Button asChild size="lg" className="w-full sm:w-auto rounded-xl font-bold h-12 px-8">
-                    <Link href="/funcionarios">Ir para Painel de Gestão</Link>
-                </Button>
-            </CardContent>
+        <Card className="w-full max-w-2xl border-primary/20 bg-primary/5 rounded-2xl p-10 text-center">
+            <ShieldAlert className="h-16 w-16 text-primary mx-auto mb-4" />
+            <CardTitle className="text-2xl font-bold">Acesso Restrito</CardTitle>
+            <p className="mt-4 text-gray-600">Funcionários não podem enviar relatos.</p>
+            <Button asChild className="mt-6"><Link href="/funcionarios">Painel de Gestão</Link></Button>
         </Card>
     );
   }
 
   return (
-    <Card className="w-full border-gray-200 shadow-xl rounded-2xl overflow-hidden bg-white transition-all">
+    <Card className="w-full border-gray-200 shadow-xl rounded-2xl overflow-hidden bg-white">
       <CardHeader className="bg-gray-50/50 border-b border-gray-100 p-6 md:p-8">
-        <div className="space-y-2">
-            <CardTitle className="text-2xl md:text-4xl font-bold text-gray-900 tracking-tight">Preencha o Relatório</CardTitle>
-            <CardDescription className="text-gray-500 text-sm md:text-base">
-              Forneça os detalhes do problema para que possamos encaminhar para a solução.
-            </CardDescription>
-        </div>
+        <CardTitle className="text-2xl md:text-4xl font-bold text-gray-900">Preencha o Relatório</CardTitle>
+        <CardDescription>Informe os detalhes do problema para resolução.</CardDescription>
       </CardHeader>
       
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
-            <input type="hidden" {...form.register('userId')} />
-            
-            {/* Seção 1: Mapa */}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <CardContent className="p-6 md:p-8 space-y-8">
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-2">
-                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                    <MapPin className="h-5 w-5" />
-                  </div>
-                  <Label className="text-lg font-bold text-gray-900">Onde está o problema?</Label>
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <Label className="text-lg font-bold">Onde está o problema?</Label>
               </div>
-              <p className="text-sm text-gray-500 mb-4">Clique no mapa para marcar o local exato do ocorrido.</p>
-              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative z-0 h-[300px] md:h-[400px] hover:shadow-md transition-shadow duration-300">
-                  <LeafletMap 
-                      interactive={true} 
-                      onLocationSelect={handleMapClick}
-                      selectedLocation={locationObject}
-                  />
+              <div className="rounded-2xl overflow-hidden border border-gray-200 h-[300px] md:h-[400px]">
+                  <LeafletMap interactive={true} onLocationSelect={handleMapClick} selectedLocation={locationObject} />
               </div>
             </div>
 
             <Separator className="bg-gray-100" />
 
-            {/* Seção 2: Categoria e Problema */}
-            <div className="space-y-6">
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                        <Info className="h-5 w-5" />
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900">Sobre o Problema</h3>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                    control={control}
-                    name="category"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-sm font-semibold text-gray-700">Categoria</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                <SelectTrigger className="h-11 rounded-xl border-gray-300 focus:ring-primary/20 text-base">
-                                    <SelectValue placeholder="Tipo de problema" />
-                                </SelectTrigger>
-                                </FormControl>
-                                <SelectContent className="rounded-xl">
-                                    <SelectGroup>
-                                    <SelectLabel>Categorias</SelectLabel>
-                                    {categories.map((category) => (
-                                        <SelectItem key={category.value} value={category.value} className="text-base py-3">
-                                        <div className="flex items-center gap-2">
-                                            <category.icon className="h-4 w-4 text-muted-foreground" />
-                                            <span>{category.label}</span>
-                                        </div>
-                                        </SelectItem>
-                                    ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    
-                    <FormField
-                    control={control}
-                    name="problem"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-sm font-semibold text-gray-700">Problema Específico</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
-                                <FormControl>
-                                <SelectTrigger className="h-11 rounded-xl border-gray-300 focus:ring-primary/20 text-base">
-                                    <SelectValue placeholder={selectedCategory ? "O que houve?" : "Escolha a categoria"} />
-                                </SelectTrigger>
-                                </FormControl>
-                                <SelectContent className="rounded-xl">
-                                    <SelectGroup>
-                                        <SelectLabel>Problemas</SelectLabel>
-                                        {problems.map((problem) => (
-                                            <SelectItem key={problem.value} value={problem.value} className="text-base py-3">
-                                            {problem.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                </div>
-            </div>
-
-            <Separator className="bg-gray-100" />
-
-            {/* Seção 3: Localização Detalhada */}
-            <div className="space-y-6">
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                        <MapPin className="h-5 w-5" />
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900">Localização Detalhada</h3>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                    control={control}
-                    name="city"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel className="text-sm font-semibold text-gray-700">Cidade</FormLabel>
-                        <Select onValueChange={(val) => {
-                            field.onChange(val);
-                            if (val === 'Picui') {
-                            setValue('bairro', '');
-                            }
-                        }} defaultValue={field.value}>
-                            <FormControl>
-                            <SelectTrigger className="h-11 rounded-xl border-gray-300 focus:ring-primary/20 text-base">
-                                <SelectValue placeholder="Selecione a cidade" />
-                            </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="rounded-xl">
-                            <SelectItem value="Picui" className="text-base py-3">Picuí</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-
-                    <FormField
-                    control={control}
-                    name="bairro"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel className="text-sm font-semibold text-gray-700">Bairro</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCity}>
-                            <FormControl>
-                            <SelectTrigger className="h-11 rounded-xl border-gray-300 focus:ring-primary/20 text-base">
-                                <SelectValue placeholder={selectedCity ? "Escolha o bairro" : "Escolha a cidade"} />
-                            </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="rounded-xl">
-                                {PICUI_NEIGHBORHOODS.map((bairro) => (
-                                <SelectItem key={bairro} value={bairro} className="text-base py-3">{bairro}</SelectItem>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField control={control} name="category" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Categoria</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Tipo" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                                {categories.map((c) => (
+                                    <SelectItem key={c.value} value={c.value} className="py-3">
+                                        <div className="flex items-center gap-2"><c.icon className="h-4 w-4" />{c.label}</div>
+                                    </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-
-                    <FormField
-                    control={control}
-                    name="address"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel className="text-sm font-semibold text-gray-700">Rua e Número</FormLabel>
-                        <FormControl>
-                            <Input placeholder="ex: Rua Principal, 123" className="h-11 rounded-xl border-gray-300 focus:ring-primary/20 text-base" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-
-                    <FormField
-                    control={control}
-                    name="reference"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel className="text-sm font-semibold text-gray-700">Ponto de Referência</FormLabel>
-                        <FormControl>
-                            <Input placeholder="ex: Próximo ao mercado" className="h-11 rounded-xl border-gray-300 focus:ring-primary/20 text-base" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                </div>
-            </div>
-
-            <Separator className="bg-gray-100" />
-
-            {/* Seção 4: Evidência Visual */}
-            <div className="space-y-6">
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                        <ImagePlus className="h-5 w-5" />
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900">Evidência Visual</h3>
-                </div>
-
-                <div className="space-y-4">
-                    <div className={cn(
-                        "aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300",
-                        photoPreview ? "border-primary/50 bg-gray-50" : "border-gray-200 bg-gray-50/50 hover:bg-gray-100/80 hover:border-gray-300"
-                    )}>
-                        {photoPreview ? (
-                            <Image src={photoPreview} alt="Preview" fill className="object-cover" />
-                        ) : (
-                            <div className="text-center p-4">
-                                <div className="bg-white p-3 md:p-4 rounded-full shadow-sm inline-block mb-3 border border-gray-100">
-                                    <Camera className="h-8 w-8 md:h-10 md:h-10 text-gray-400" />
-                                </div>
-                                <p className="text-sm font-bold text-gray-700">Toque aqui para enviar a foto</p>
-                                <p className="text-xs text-gray-400 mt-1">Obrigatório para comprovação.</p>
-                            </div>
-                        )}
-                        <Input 
-                            id="photo" 
-                            type="file" 
-                            accept="image/*" 
-                            className="absolute inset-0 opacity-0 cursor-pointer" 
-                            onChange={handlePhotoChange} 
-                        />
-                    </div>
-                    {formState.errors?.photo && (
-                        <p className="text-sm font-medium text-destructive text-center">{formState.errors.photo.message}</p>
-                    )}
-                </div>
-            </div>
-
-            <Separator className="bg-gray-100" />
-
-            {/* Seção 5: Descrição */}
-            <div className="space-y-6">
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                        <FileText className="h-5 w-5" />
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900">Descrição Adicional</h3>
-                </div>
-
-                <FormField
-                control={control}
-                name="description"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormControl>
-                        <Textarea
-                            placeholder="Descreva detalhes adicionais (opcional)..."
-                            className="min-h-[120px] rounded-2xl border-gray-300 focus:ring-primary/20 resize-none p-4 text-base"
-                            {...field}
-                        />
-                    </FormControl>
-                    <FormMessage />
                     </FormItem>
-                )}
-                />
+                )} />
+                <FormField control={control} name="problem" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Problema Específico</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
+                            <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                            <SelectContent>{problems.map((p) => <SelectItem key={p.value} value={p.value} className="py-3">{p.label}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </FormItem>
+                )} />
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField control={control} name="city" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Cidade" /></SelectTrigger></FormControl>
+                            <SelectContent><SelectItem value="Picui">Picuí</SelectItem></SelectContent>
+                        </Select>
+                    </FormItem>
+                )} />
+                <FormField control={control} name="bairro" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Bairro</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCity}>
+                            <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Bairro" /></SelectTrigger></FormControl>
+                            <SelectContent>{PICUI_NEIGHBORHOODS.map((b) => <SelectItem key={b} value={b} className="py-3">{b}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </FormItem>
+                )} />
+            </div>
+
+            <FormField control={control} name="address" render={({ field }) => (
+                <FormItem><FormLabel>Rua e Número</FormLabel><FormControl><Input placeholder="ex: Rua Principal, 123" className="h-11 rounded-xl" {...field} /></FormControl></FormItem>
+            )} />
+
+            <div className="space-y-4">
+                <Label className="font-bold flex items-center gap-2"><ImagePlus className="h-5 w-5 text-primary" /> Evidência Visual</Label>
+                <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-gray-50" : "bg-gray-50/50 hover:bg-gray-100")}>
+                    {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : <div className="text-center p-4"><Camera className="mx-auto h-10 w-10 text-gray-400" /><p className="text-sm font-bold mt-2">Toque para enviar a foto</p></div>}
+                    <Input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
+                </div>
+            </div>
+
+            <FormField control={control} name="description" render={({ field }) => (
+                <FormItem><FormLabel>Descrição Adicional</FormLabel><FormControl><Textarea placeholder="Detalhes (opcional)..." className="min-h-[100px] rounded-2xl" {...field} /></FormControl></FormItem>
+            )} />
           </CardContent>
 
-          <CardFooter className="bg-gray-50/50 border-t border-gray-100 p-6 md:p-8 flex flex-col sm:flex-row justify-between gap-4">
-              <Button 
-                variant="outline" 
-                type="button" 
-                onClick={resetForm} 
-                className="w-full sm:w-auto h-12 px-6 rounded-xl border-gray-300 text-gray-600 font-bold hover:bg-white" 
-                disabled={formState.isSubmitting || isRedirecting}
-              >
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Limpar
+          <CardFooter className="bg-gray-50/50 border-t border-gray-100 p-6 flex flex-col sm:flex-row justify-between gap-4">
+              <Button variant="outline" type="button" onClick={() => { reset(); setPhotoPreview(null); }} className="h-12 rounded-xl font-bold" disabled={isRedirecting}>Limpar</Button>
+              <Button type="submit" className="h-12 px-10 rounded-xl font-bold" disabled={form.formState.isSubmitting || isRedirecting}>
+                {(form.formState.isSubmitting || isRedirecting) ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
+                Enviar Relatório
               </Button>
-              <SubmitButton isRedirecting={isRedirecting} />
           </CardFooter>
         </form>
       </Form>
