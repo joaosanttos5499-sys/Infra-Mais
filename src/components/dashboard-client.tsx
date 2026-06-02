@@ -204,7 +204,7 @@ const ReportCard = memo(({
                                   variant={isUpvoted ? "default" : "outline"} 
                                   size="sm" 
                                   onClick={(e) => { e.stopPropagation(); onUpvote(report.id); }}
-                                  className={cn("rounded-full font-bold h-9 px-5 text-xs", isUpvoted ? "bg-primary" : "bg-gray-100 border-transparent")}
+                                  className={cn("rounded-full font-bold h-9 px-5 text-xs transition-all", isUpvoted ? "bg-primary hover:bg-primary/90" : "bg-gray-100 border-transparent hover:bg-gray-200")}
                                 >
                                     <ThumbsUp className={cn("h-3.5 w-3.5 mr-2", isUpvoted && "fill-current")} />
                                     Apoiar ({report.upvotes})
@@ -230,7 +230,7 @@ const ReportCard = memo(({
                                 <SelectTrigger className="h-12 rounded-xl bg-white" disabled={isFinalStatus}>
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent side="bottom" position="popper">
                                     {Object.entries(statusConfig).map(([key, { label }]) => (
                                         <SelectItem key={key} value={key} disabled={key !== nextAllowedStatus && key !== report.status}>
                                             {label} {key === nextAllowedStatus && "(Próximo)"}
@@ -295,6 +295,8 @@ ReportCard.displayName = "ReportCard";
 
 type OptimisticUpdate = { type: 'upvote', id: string, amount: 1 | -1 } | { type: 'status', reportId: string, newStatus: ReportStatus };
 
+const LOCAL_STORAGE_UPVOTES_KEY = 'infra_mais_upvoted_reports';
+
 export function DashboardClient({ reports, showUpvote = true }: { reports: Report[], showUpvote?: boolean }) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<ReportStatus>(showUpvote ? "PENDING" : "UNDER_REVIEW");
@@ -314,6 +316,23 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
     }
   );
 
+  // Carregar apoios persistidos do localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_UPVOTES_KEY);
+    if (saved) {
+      try {
+        setUpvotedReports(new Set(JSON.parse(saved)));
+      } catch (e) {
+        console.error("Erro ao carregar apoios persistidos", e);
+      }
+    }
+  }, []);
+
+  // Persistir apoios no localStorage sempre que mudar
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_UPVOTES_KEY, JSON.stringify(Array.from(upvotedReports)));
+  }, [upvotedReports]);
+
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {
@@ -330,29 +349,44 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
   }, [reports]);
 
   const handleUpvote = useCallback((reportId: string) => {
+    const isAlreadyUpvoted = upvotedReports.has(reportId);
+    
+    // Atualiza estado local de forma síncrona para feedback imediato
+    setUpvotedReports(prev => {
+        const next = new Set(prev);
+        if (isAlreadyUpvoted) next.delete(reportId);
+        else next.add(reportId);
+        return next;
+    });
+
+    // Inicia transição para atualização otimista do contador e chamada do servidor
     startTransition(async () => {
-      const isAlreadyUpvoted = upvotedReports.has(reportId);
-      setUpvotedReports(prev => {
-          const next = new Set(prev);
-          isAlreadyUpvoted ? next.delete(reportId) : next.add(reportId);
-          return next;
+      setOptimisticReports({ 
+        type: 'upvote', 
+        id: reportId, 
+        amount: isAlreadyUpvoted ? -1 : 1 
       });
-      setOptimisticReports({ type: 'upvote', id: reportId, amount: isAlreadyUpvoted ? -1 : 1 });
-      const result = isAlreadyUpvoted ? await downvoteReportAction(reportId) : await upvoteReportAction(reportId);
+
+      const result = isAlreadyUpvoted 
+        ? await downvoteReportAction(reportId) 
+        : await upvoteReportAction(reportId);
+
       if (!result?.success) {
         toast({ title: "Erro ao registrar apoio", variant: "destructive" });
+        // Reverte estado local em caso de falha no servidor
         setUpvotedReports(prev => {
             const next = new Set(prev);
-            isAlreadyUpvoted ? next.add(reportId) : next.delete(reportId);
+            if (isAlreadyUpvoted) next.add(reportId);
+            else next.delete(reportId);
             return next;
         });
       }
     });
-  }, [upvotedReports, toast]);
+  }, [upvotedReports, toast, setOptimisticReports]);
 
   const handleStatusUpdate = useCallback((reportId: string, newStatus: ReportStatus) => {
       startTransition(() => setOptimisticReports({ type: 'status', reportId, newStatus }));
-  }, []);
+  }, [setOptimisticReports]);
 
   const sortedReports = useMemo(() => {
     return [...optimisticReports].sort((a, b) => {
@@ -383,7 +417,7 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
                 <SelectTrigger className="h-10 w-[180px] bg-white border-gray-200">
                     <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side="bottom" position="popper">
                   <SelectItem value="newest">Mais Recentes</SelectItem>
                   <SelectItem value="oldest">Mais Antigos</SelectItem>
                   <SelectItem value="upvotes">Mais Apoiados</SelectItem>
@@ -397,7 +431,14 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
                 <div className="space-y-5">
                   {filteredReports.length > 0 ? (
                     filteredReports.map(r => (
-                      <ReportCard key={r.id} report={r} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} isUpvoted={upvotedReports.has(r.id)} showUpvote={showUpvote} />
+                      <ReportCard 
+                        key={r.id} 
+                        report={r} 
+                        onUpvote={handleUpvote} 
+                        onStatusUpdate={handleStatusUpdate} 
+                        isUpvoted={upvotedReports.has(r.id)} 
+                        showUpvote={showUpvote} 
+                      />
                     ))
                   ) : (
                     <div className="text-center py-20 bg-gray-50/50 rounded-2xl border-2 border-dashed">
