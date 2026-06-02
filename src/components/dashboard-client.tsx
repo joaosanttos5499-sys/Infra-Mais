@@ -58,8 +58,11 @@ const ReportCard = memo(({
   const [selectedStatus, setSelectedStatus] = useState<ReportStatus>(report.status);
 
   const [formState, formAction, isPending] = useActionState(async (prev: any, formData: FormData) => {
+    // DISPARO IMEDIATO DA ATUALIZAÇÃO OTIMISTA
     const status = formData.get("status") as ReportStatus;
-    if (onStatusUpdate) onStatusUpdate(report.id, status);
+    if (onStatusUpdate && status !== report.status) {
+        onStatusUpdate(report.id, status);
+    }
     return updateReportStatus(prev, { reportId: report.id, formData });
   }, undefined);
 
@@ -321,7 +324,6 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
     }
   );
 
-  // Carregar apoios persistidos do localStorage
   useEffect(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_UPVOTES_KEY);
     if (saved) {
@@ -333,7 +335,6 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
     }
   }, []);
 
-  // Persistir apoios no localStorage sempre que mudar
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_UPVOTES_KEY, JSON.stringify(Array.from(upvotedReports)));
   }, [upvotedReports]);
@@ -356,7 +357,6 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
   const handleUpvote = useCallback((reportId: string) => {
     const isAlreadyUpvoted = upvotedReports.has(reportId);
     
-    // Atualiza estado local de forma síncrona para feedback imediato
     setUpvotedReports(prev => {
         const next = new Set(prev);
         if (isAlreadyUpvoted) next.delete(reportId);
@@ -364,7 +364,6 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
         return next;
     });
 
-    // Inicia transição para atualização otimista do contador e chamada do servidor
     startTransition(async () => {
       setOptimisticReports({ 
         type: 'upvote', 
@@ -378,7 +377,6 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
 
       if (!result?.success) {
         toast({ title: "Erro ao registrar apoio", variant: "destructive" });
-        // Reverte estado local em caso de falha no servidor
         setUpvotedReports(prev => {
             const next = new Set(prev);
             if (isAlreadyUpvoted) next.add(reportId);
@@ -390,7 +388,10 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
   }, [upvotedReports, toast, setOptimisticReports]);
 
   const handleStatusUpdate = useCallback((reportId: string, newStatus: ReportStatus) => {
-      startTransition(() => setOptimisticReports({ type: 'status', reportId, newStatus }));
+      // ATUALIZAÇÃO OTIMISTA DO STATUS NA LISTA
+      startTransition(() => {
+          setOptimisticReports({ type: 'status', reportId, newStatus });
+      });
   }, [setOptimisticReports]);
 
   const sortedReports = useMemo(() => {
