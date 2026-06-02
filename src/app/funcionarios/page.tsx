@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { DashboardClient } from "@/components/dashboard-client";
 import { getAllReportsAction } from "@/lib/actions";
 import { Loader2, ShieldAlert } from "lucide-react";
@@ -42,16 +43,19 @@ export default function FuncionariosPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [isLoadingReports, setIsLoadingReports] = useState(true);
 
-  useEffect(() => {
-    if (!isUserLoading && user && isEmailEmployee(user.email)) {
-      getAllReportsAction().then(data => {
-        setReports(data);
-        setIsLoadingReports(false);
-      });
+  const fetchReports = useCallback(async () => {
+    if (user && isEmailEmployee(user.email)) {
+      const data = await getAllReportsAction();
+      setReports(data);
+      setIsLoadingReports(false);
     } else if (!isUserLoading && (!user || !isEmailEmployee(user.email))) {
-        setIsLoadingReports(false);
+      setIsLoadingReports(false);
     }
   }, [user, isUserLoading]);
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
 
   if (isUserLoading) return <LoadingScreen />;
 
@@ -79,7 +83,11 @@ export default function FuncionariosPage() {
                   <p className="ml-4 text-gray-500">Carregando relatórios...</p>
               </div>
           ) : (
-            <DashboardClient reports={reports} showUpvote={false} />
+            <DashboardClient 
+                reports={reports} 
+                showUpvote={false} 
+                onSuccess={fetchReports}
+            />
           )}
         </div>
       </main>

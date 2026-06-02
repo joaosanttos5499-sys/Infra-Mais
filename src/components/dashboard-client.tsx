@@ -34,12 +34,14 @@ const ReportCard = memo(({
     report,
     onUpvote,
     onStatusUpdate,
+    onSuccess,
     isUpvoted,
     showUpvote,
 }: { 
     report: Report,
     onUpvote: (id: string) => void,
     onStatusUpdate?: (id: string, newStatus: ReportStatus) => void,
+    onSuccess?: () => void,
     isUpvoted: boolean,
     showUpvote: boolean
 }) => {
@@ -80,8 +82,10 @@ const ReportCard = memo(({
         toast({ title: "Sucesso", description: formState.message });
         setPhotoAfterPreview(null);
         setIsStatusConfirmOpen(false);
+        if (onSuccess) onSuccess();
+        router.refresh();
     }
-  }, [formState, toast]);
+  }, [formState, toast, router, onSuccess]);
 
   useEffect(() => {
     if (isStatusConfirmOpen) {
@@ -99,6 +103,7 @@ const ReportCard = memo(({
         if (result.success) {
             toast({ title: "Relatório excluído" });
             router.refresh();
+            if (onSuccess) onSuccess();
         } else {
             toast({ variant: "destructive", title: "Erro ao excluir", description: result.message });
         }
@@ -297,7 +302,7 @@ type OptimisticUpdate = { type: 'upvote', id: string, amount: 1 | -1 } | { type:
 
 const LOCAL_STORAGE_UPVOTES_KEY = 'infra_mais_upvoted_reports';
 
-export function DashboardClient({ reports, showUpvote = true }: { reports: Report[], showUpvote?: boolean }) {
+export function DashboardClient({ reports, showUpvote = true, onSuccess }: { reports: Report[], showUpvote?: boolean, onSuccess?: () => void }) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<ReportStatus>(showUpvote ? "PENDING" : "UNDER_REVIEW");
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
@@ -436,6 +441,7 @@ export function DashboardClient({ reports, showUpvote = true }: { reports: Repor
                         report={r} 
                         onUpvote={handleUpvote} 
                         onStatusUpdate={handleStatusUpdate} 
+                        onSuccess={onSuccess}
                         isUpvoted={upvotedReports.has(r.id)} 
                         showUpvote={showUpvote} 
                       />
