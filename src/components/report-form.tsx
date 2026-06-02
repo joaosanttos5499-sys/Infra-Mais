@@ -148,7 +148,7 @@ export function ReportForm() {
                         <FormLabel>Categoria</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Tipo" /></SelectTrigger></FormControl>
-                            <SelectContent>
+                            <SelectContent side="bottom" position="popper" sideOffset={4} className="z-[2001]">
                                 {categories.map((c) => (
                                     <SelectItem key={c.value} value={c.value} className="py-3">
                                         <div className="flex items-center gap-2"><c.icon className="h-4 w-4" />{c.label}</div>
@@ -163,7 +163,7 @@ export function ReportForm() {
                         <FormLabel>Problema Específico</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
                             <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
-                            <SelectContent>{problems.map((p) => <SelectItem key={p.value} value={p.value} className="py-3">{p.label}</SelectItem>)}</SelectContent>
+                            <SelectContent side="bottom" position="popper" sideOffset={4} className="z-[2001]">{problems.map((p) => <SelectItem key={p.value} value={p.value} className="py-3">{p.label}</SelectItem>)}</SelectContent>
                         </Select>
                     </FormItem>
                 )} />
@@ -175,7 +175,7 @@ export function ReportForm() {
                         <FormLabel>Cidade</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Cidade" /></SelectTrigger></FormControl>
-                            <SelectContent><SelectItem value="Picui">Picuí</SelectItem></SelectContent>
+                            <SelectContent side="bottom" position="popper" sideOffset={4} className="z-[2001]"><SelectItem value="Picui">Picuí</SelectItem></SelectContent>
                         </Select>
                     </FormItem>
                 )} />
@@ -184,7 +184,7 @@ export function ReportForm() {
                         <FormLabel>Bairro</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCity}>
                             <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Bairro" /></SelectTrigger></FormControl>
-                            <SelectContent>{PICUI_NEIGHBORHOODS.map((b) => <SelectItem key={b} value={b} className="py-3">{b}</SelectItem>)}</SelectContent>
+                            <SelectContent side="bottom" position="popper" sideOffset={4} className="z-[2001]">{PICUI_NEIGHBORHOODS.map((b) => <SelectItem key={b} value={b} className="py-3">{b}</SelectItem>)}</SelectContent>
                         </Select>
                     </FormItem>
                 )} />
@@ -198,7 +198,7 @@ export function ReportForm() {
                 <Label className="font-bold flex items-center gap-2"><ImagePlus className="h-5 w-5 text-primary" /> Evidência Visual</Label>
                 <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-gray-50" : "bg-gray-50/50 hover:bg-gray-100")}>
                     {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : <div className="text-center p-4"><Camera className="mx-auto h-10 w-10 text-gray-400" /><p className="text-sm font-bold mt-2">Toque para enviar a foto</p></div>}
-                    <Input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
+                    <input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
                 </div>
             </div>
 

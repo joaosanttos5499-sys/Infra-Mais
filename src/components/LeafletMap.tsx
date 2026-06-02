@@ -149,8 +149,8 @@ const LeafletMap = ({
   return (
     <div
       ref={mapRef}
-      className={cn('w-full h-full min-h-[300px]', interactive ? 'cursor-crosshair' : '')}
-      style={{ touchAction: 'none' }}
+      className={cn('w-full h-full min-h-[300px] relative z-0', interactive ? 'cursor-crosshair' : '')}
+      style={{ touchAction: 'manipulation' }}
     />
   );
 };
