@@ -191,7 +191,7 @@ export function ReportForm() {
             </div>
 
             <FormField control={control} name="address" render={({ field }) => (
-                <FormItem><FormLabel>Rua e Número</FormLabel><FormControl><Input placeholder="ex: Rua Principal, 123" className="h-11 rounded-xl" {...field} /></FormControl></FormItem>
+                <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input placeholder="ex: Rua Principal" className="h-11 rounded-xl" {...field} /></FormControl></FormItem>
             )} />
 
             <div className="space-y-4">
