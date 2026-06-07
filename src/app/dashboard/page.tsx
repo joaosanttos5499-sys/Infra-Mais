@@ -1,3 +1,4 @@
+
 import { Suspense } from "react";
 import { DashboardClient } from "@/components/dashboard-client";
 import { getReports } from "@/lib/data";
@@ -17,7 +18,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
-      <main className="flex-1 p-4 md:p-8">
+      <main className="flex-1 p-6 md:p-10">
         <div className="max-w-6xl mx-auto">
           <div className="mb-10 text-center md:text-left">
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">

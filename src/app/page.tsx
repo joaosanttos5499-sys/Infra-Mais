@@ -90,7 +90,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
 
   return (
     <section className="py-16 md:py-24 bg-white border-t border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 leading-tight text-center md:text-left">
@@ -136,7 +136,7 @@ export default async function Home() {
     <div className="flex flex-col w-full">
       <main>
         <section className="relative pt-12 pb-24 md:pt-32 md:pb-48 bg-gradient-to-b from-primary/5 to-transparent">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 relative z-10 text-center">
             <h1 className="text-4xl md:text-7xl font-bold text-gray-900 tracking-tight leading-tight">
               Relate um Problema na <br className="hidden sm:block"/><span className="text-primary italic">Sua Cidade</span>
             </h1>
@@ -153,7 +153,7 @@ export default async function Home() {
         </section>
         
         <section className="py-12 md:py-24 -mt-12 md:-mt-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
             <div className="bg-white p-4 md:p-8 rounded-2xl md:rounded-3xl shadow-2xl border border-gray-100">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                   <div>
@@ -173,7 +173,7 @@ export default async function Home() {
         </section>
 
         <section className="py-16 md:py-24 bg-gray-50/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
             <div className="flex items-end justify-between mb-12">
                 <h2 className="text-3xl font-bold">Relatos Recentes</h2>
                 <Button asChild variant="link" className="font-bold text-primary p-0 group">

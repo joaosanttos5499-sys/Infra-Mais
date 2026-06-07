@@ -100,7 +100,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-[2000] w-full bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 h-16 flex items-center">
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-        <div className="w-full max-w-full mx-auto px-2 h-full flex items-center justify-between">
+        <div className="w-full max-w-full mx-auto px-6 h-full flex items-center justify-between">
             <Link href="/" className="hidden md:flex items-center gap-2 group transition-transform hover:scale-105">
               <Image
                 src="/img/logo1.png"
