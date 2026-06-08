@@ -4,7 +4,7 @@ import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, Trash2, AlertTriangle, MapPin, Clock, ChevronRight, Mail, Calendar } from "lucide-react";
+import { Loader2, Save, Trash2, AlertTriangle, MapPin, Clock, ChevronRight, Mail, Calendar, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -131,10 +131,21 @@ function MyReportsList({ reports }: { reports: Report[] }) {
     }
 
     return (
-        <div className="space-y-4 px-4 sm:px-0">
-            {reports.map((report) => (
-                <MyReportItem key={report.id} report={report} />
-            ))}
+        <div className="space-y-6 px-4 sm:px-0">
+            <div className="space-y-4">
+                {reports.map((report) => (
+                    <MyReportItem key={report.id} report={report} />
+                ))}
+            </div>
+            
+            <div className="pt-4 flex justify-center sm:justify-start">
+                <Button asChild variant="outline" className="w-full sm:w-auto border-primary/20 text-primary font-bold hover:bg-primary/5 rounded-xl h-11 px-8 shadow-sm transition-all hover:scale-[1.02]">
+                    <Link href="/report/new" className="flex items-center gap-2">
+                        <Plus className="h-5 w-5" />
+                        Relatar um Problema
+                    </Link>
+                </Button>
+            </div>
         </div>
     )
 }
