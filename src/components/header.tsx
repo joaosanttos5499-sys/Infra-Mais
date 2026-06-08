@@ -84,13 +84,6 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
                 <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Meus Relatos</span>
               </Link>
             </DropdownMenuItem>
-
-            <DropdownMenuItem asChild className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
-              <button className="flex items-center w-full">
-                <Bell className="mr-3 h-5 w-5 text-gray-400 group-focus:text-primary transition-colors" />
-                <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Notificações</span>
-              </button>
-            </DropdownMenuItem>
           </div>
 
           <DropdownMenuSeparator className="mx-2 bg-gray-100" />
