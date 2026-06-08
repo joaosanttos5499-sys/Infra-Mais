@@ -130,7 +130,6 @@ export async function submitReport(
 
     addReport(newReport);
     
-    // Revalida as rotas para garantir que os novos dados apareçam nos componentes de servidor
     revalidatePath("/");
     revalidatePath("/dashboard");
     revalidatePath("/minha-conta");
@@ -168,7 +167,6 @@ export async function updateReportStatus(
       photoAfterUrl = await fileToDataUri(photoAfterFile);
     }
 
-    // Validação de foto obrigatória para status RESOLVED
     if (status === 'RESOLVED' && !photoAfterUrl) {
         return { success: false, message: "A foto da solução é obrigatória para finalizar este relato e comprovar o trabalho realizado." };
     }
@@ -230,9 +228,8 @@ export async function deleteReportAction(reportId: string) {
       return { success: false, message: "Relatório não encontrado." };
     }
 
-    if (report.status !== 'UNDER_REVIEW') {
-      return { success: false, message: "Este relatório já foi validado e não pode mais ser excluído." };
-    }
+    // Nota: Funcionários podem deletar qualquer relato. 
+    // Em um sistema real, checaríamos a role do usuário autenticado no servidor aqui.
 
     const success = await dbDeleteReport(reportId);
     if (!success) {
@@ -250,16 +247,24 @@ export async function deleteReportAction(reportId: string) {
   }
 }
 
+export async function reportAbuseAction(reportId: string) {
+    try {
+        // Lógica de auditoria simplificada para o protótipo
+        console.log(`Relato ${reportId} sinalizado para auditoria.`);
+        return { success: true };
+    } catch (error) {
+        return { success: false, message: "Erro ao processar denúncia." };
+    }
+}
+
 export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'photoURL' | 'role'> & { photoURL?: string }): Promise<{ success: boolean; error?: string; photoURL?: string; }> {
   try {
     const role = isEmailEmployee(userProfile.email) ? "EMPLOYEE" : "USER";
-    
-    // Forçamos a geração do avatar a partir do e-mail para garantir a letra correta (E para evidenciadetudo@gmail.com)
     const avatarSvg = createAvatarSvg(userProfile.email);
     
     const finalUserProfile: UserProfile = {
       ...userProfile,
-      photoURL: avatarSvg, // Sempre sobrescreve com o SVG baseado no e-mail para garantir a lógica permanente
+      photoURL: avatarSvg,
       role,
     };
     
@@ -311,7 +316,6 @@ export async function updateUserProfileAction(userId: string, data: { name: stri
     const updatedProfile: UserProfile = {
       ...existingProfile,
       name,
-      // Mantém o avatar original (que já é garantido ser baseado no e-mail)
       nameLastUpdatedAt: name !== existingProfile.name ? new Date().toISOString() : existingProfile.nameLastUpdatedAt,
     };
 
@@ -345,9 +349,7 @@ export async function deleteAccountAction(userId: string) {
   if (!userId) return { success: false, error: "ID de usuário inválido." };
   
   try {
-    // dbDeleteUser agora sempre retorna true após limpar os dados associados
     await dbDeleteUser(userId);
-    
     revalidatePath("/");
     revalidatePath("/dashboard");
     revalidatePath("/minha-conta");

@@ -3,8 +3,8 @@
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
 import Image from "next/image";
-import { updateReportStatus, upvoteReportAction, downvoteReportAction, deleteReportAction } from "@/lib/actions";
-import { type Report, type ReportStatus } from "@/lib/types";
+import { updateReportStatus, upvoteReportAction, downvoteReportAction, deleteReportAction, reportAbuseAction } from "@/lib/actions";
+import { type Report, { type ReportStatus } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2 } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, AlertTriangle, ShieldAlert } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
@@ -22,6 +22,7 @@ import { useUser } from "@/firebase";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { ReportTime } from "./report-time";
+import { Separator } from "./ui/separator";
 
 const STATUS_PROGRESSION: Record<ReportStatus, ReportStatus | null> = {
   UNDER_REVIEW: "PENDING",
@@ -49,6 +50,7 @@ const ReportCard = memo(({
   const { toast } = useToast();
   const router = useRouter();
   const [isDeleting, startDeleteTransition] = useTransition();
+  const [isReporting, startReportTransition] = useTransition();
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
   
@@ -58,7 +60,6 @@ const ReportCard = memo(({
   const [selectedStatus, setSelectedStatus] = useState<ReportStatus>(report.status);
 
   const [formState, formAction, isPending] = useActionState(async (prev: any, formData: FormData) => {
-    // DISPARO IMEDIATO DA ATUALIZAÇÃO OTIMISTA
     const status = formData.get("status") as ReportStatus;
     if (onStatusUpdate && status !== report.status) {
         onStatusUpdate(report.id, status);
@@ -104,11 +105,22 @@ const ReportCard = memo(({
     startDeleteTransition(async () => {
         const result = await deleteReportAction(report.id);
         if (result.success) {
-            toast({ title: "Relatório excluído" });
+            toast({ title: "Relatório removido", description: "O registro indevido foi excluído do sistema." });
             router.refresh();
             if (onSuccess) onSuccess();
         } else {
             toast({ variant: "destructive", title: "Erro ao excluir", description: result.message });
+        }
+    });
+  };
+
+  const handleReportAbuse = async () => {
+    startReportTransition(async () => {
+        const result = await reportAbuseAction(report.id);
+        if (result.success) {
+            toast({ title: "Denúncia Enviada", description: "O conteúdo foi sinalizado para auditoria interna." });
+        } else {
+            toast({ variant: "destructive", title: "Erro ao denunciar", description: result.message });
         }
     });
   };
@@ -233,12 +245,12 @@ const ReportCard = memo(({
                 <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="space-y-6">
-                            <Label className="text-sm font-bold text-gray-700 uppercase">Novo Status</Label>
+                            <Label className="text-sm font-bold text-gray-700 uppercase">Atualizar Situação</Label>
                             <Select name="status" defaultValue={report.status} onValueChange={(val) => setSelectedStatus(val as ReportStatus)}>
-                                <SelectTrigger className="h-12 rounded-xl bg-white" disabled={isFinalStatus}>
+                                <SelectTrigger className="h-12 rounded-xl bg-white shadow-sm" disabled={isFinalStatus}>
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent side="bottom" position="popper">
+                                <SelectContent side="bottom" position="popper" className="z-[2001]">
                                     {Object.entries(statusConfig).map(([key, { label }]) => (
                                         <SelectItem key={key} value={key} disabled={key !== nextAllowedStatus && key !== report.status}>
                                             {label} {key === nextAllowedStatus && "(Próximo)"}
@@ -246,11 +258,34 @@ const ReportCard = memo(({
                                     ))}
                                 </SelectContent>
                             </Select>
+                            
+                            {!isFinalStatus && (
+                                <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
+                                    <AlertDialogTrigger asChild>
+                                        <Button type="button" disabled={isPending || selectedStatus === report.status} className="h-12 w-full rounded-xl px-8 font-bold shadow-md">
+                                            {isPending ? <Loader2 className="animate-spin h-5 w-5 mr-3" /> : <Upload className="h-5 w-5 mr-3" />}
+                                            Salvar Alterações
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="rounded-2xl">
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Confirmar Atualização</AlertDialogTitle>
+                                            <AlertDialogDescription>O cidadão autor do relato será notificado sobre a mudança.</AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => formRef.current?.requestSubmit()} disabled={!isStatusConfirmEnabled || isPending} className="bg-primary text-white">
+                                                {isStatusConfirmEnabled ? "Confirmar" : `Aguarde (${statusCountdown}s)`}
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
                         </div>
 
                         <div className={cn("space-y-4", !isPhotoEnabled && "opacity-40 pointer-events-none")}>
-                            <Label className="text-sm font-bold text-gray-700 uppercase">Foto do Reparo</Label>
-                            <div className="aspect-video rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center relative overflow-hidden bg-white">
+                            <Label className="text-sm font-bold text-gray-700 uppercase">Foto do Reparo Realizado</Label>
+                            <div className="aspect-video rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center relative overflow-hidden bg-white group-hover:border-primary/50 transition-colors">
                                 {(photoAfterPreview || report.photoAfterUrl) ? (
                                     <Image src={photoAfterPreview || report.photoAfterUrl!} alt="Preview" fill className="object-cover" />
                                 ) : (
@@ -264,30 +299,50 @@ const ReportCard = memo(({
                         </div>
                     </div>
 
-                    {!isFinalStatus && (
-                        <div className="flex justify-end">
-                            <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
+                    <Separator className="bg-gray-200" />
+
+                    <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <ShieldAlert className="h-5 w-5 text-amber-600" />
+                            <h4 className="text-sm font-bold text-gray-900 uppercase">Ações de Moderação</h4>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button type="button" disabled={isPending || selectedStatus === report.status} className="h-12 w-full sm:w-auto rounded-xl px-8 font-bold">
-                                        {isPending ? <Loader2 className="animate-spin h-5 w-5 mr-3" /> : <Upload className="h-5 w-5 mr-3" />}
-                                        Salvar Alterações
+                                    <Button type="button" variant="outline" className="flex-1 h-11 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 font-bold rounded-lg transition-colors">
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Excluir Relatório Indevido
                                     </Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent>
+                                <AlertDialogContent className="rounded-2xl">
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>Confirmar Atualização</AlertDialogTitle>
-                                        <AlertDialogDescription>O cidadão será notificado.</AlertDialogDescription>
+                                        <AlertDialogTitle>Excluir permanentemente?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Esta ação removerá o relato do mapa e de todos os painéis. Utilize apenas para trotes, spam ou conteúdos ofensivos.
+                                        </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => formRef.current?.requestSubmit()} disabled={!isStatusConfirmEnabled || isPending} className="bg-primary text-white">
-                                            {isStatusConfirmEnabled ? "Confirmar" : `Aguarde (${statusCountdown}s)`}
-                                        </AlertDialogAction>
+                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white">Sim, excluir relato</AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
+
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={handleReportAbuse}
+                                disabled={isReporting}
+                                className="flex-1 h-11 border-amber-200 text-amber-700 hover:bg-amber-50 font-bold rounded-lg transition-colors"
+                            >
+                                {isReporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <AlertTriangle className="h-4 w-4 mr-2" />}
+                                Denunciar
+                            </Button>
                         </div>
-                    )}
+                        <p className="text-[10px] text-gray-400 uppercase tracking-tight text-center sm:text-left">
+                            As ações acima são registradas no log de auditoria do sistema.
+                        </p>
+                    </div>
                 </div>
               </form>
             </AccordionContent>
@@ -388,7 +443,6 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
   }, [upvotedReports, toast, setOptimisticReports]);
 
   const handleStatusUpdate = useCallback((reportId: string, newStatus: ReportStatus) => {
-      // ATUALIZAÇÃO OTIMISTA DO STATUS NA LISTA
       startTransition(() => {
           setOptimisticReports({ type: 'status', reportId, newStatus });
       });
