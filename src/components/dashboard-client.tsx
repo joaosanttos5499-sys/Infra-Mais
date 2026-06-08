@@ -4,7 +4,7 @@
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { updateReportStatus, upvoteReportAction, downvoteReportAction, deleteReportAction, reportAbuseAction } from "@/lib/actions";
-import { type Report, { type ReportStatus } from "@/lib/types";
+import { type Report, type ReportStatus } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
