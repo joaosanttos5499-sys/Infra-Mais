@@ -146,7 +146,7 @@ export default async function Home() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-10">
               <HomeCtaClient />
               <Button asChild variant="ghost" size="lg" className="rounded-xl px-10 h-14 font-semibold">
-                <Link href="/dashboard">Ver Mapa <MapPin className="ml-2 h-5 w-5" /></Link>
+                <Link href="/dashboard">Ver relatos <MapPin className="ml-2 h-5 w-5" /></Link>
               </Button>
             </div>
           </div>
