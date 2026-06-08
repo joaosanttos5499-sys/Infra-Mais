@@ -138,8 +138,8 @@ function MyReportsList({ reports }: { reports: Report[] }) {
                 ))}
             </div>
             
-            <div className="pt-4 flex justify-center sm:justify-start">
-                <Button asChild variant="outline" className="w-full sm:w-auto border-primary/20 text-primary font-bold hover:bg-primary/5 rounded-xl h-11 px-8 shadow-sm transition-all hover:scale-[1.02]">
+            <div className="pt-4 flex justify-center">
+                <Button asChild className="w-full sm:w-auto bg-primary hover:bg-primary text-white rounded-xl h-11 px-8 shadow-sm transition-none hover:scale-100 active:scale-100">
                     <Link href="/report/new" className="flex items-center gap-2">
                         <Plus className="h-5 w-5" />
                         Relatar um Problema
