@@ -135,7 +135,7 @@ export function ReportForm() {
                   <MapPin className="h-5 w-5 text-primary" />
                   <Label className="text-lg font-bold">Onde está o problema?</Label>
               </div>
-              <div className="rounded-2xl overflow-hidden border border-gray-200 h-[300px] md:h-[400px]">
+              <div className="rounded-2xl overflow-hidden border border-gray-200 h-[300px] md:h-[400px] relative z-0">
                   <LeafletMap interactive={true} onLocationSelect={handleMapClick} selectedLocation={locationObject} />
               </div>
             </div>

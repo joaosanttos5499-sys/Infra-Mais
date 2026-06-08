@@ -38,8 +38,8 @@ const LeafletMap = ({
     if ((container as any)._leaflet_id) return;
 
     mapInstance.current = L.map(container, {
-      scrollWheelZoom: !interactive,
-      tap: !interactive, // Helps with mobile interaction
+      scrollWheelZoom: true,
+      tap: true, 
     }).setView(defaultCenter, 14);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -150,7 +150,7 @@ const LeafletMap = ({
     <div
       ref={mapRef}
       className={cn('w-full h-full min-h-[300px] relative z-0', interactive ? 'cursor-crosshair' : '')}
-      style={{ touchAction: 'manipulation' }}
+      style={{ touchAction: 'pan-y', isolation: 'isolate' }}
     />
   );
 };
