@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus } from "lucide-react";
+import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Bell, Briefcase } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
@@ -17,6 +17,7 @@ import { createAvatarSvg } from "@/lib/avatar";
 import { useRouter } from "next/navigation";
 import { isEmailEmployee } from "@/lib/config";
 import { NotificationsDropdown } from "./notifications-dropdown";
+import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/", label: "Início", icon: Home, public: true },
@@ -39,34 +40,70 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
     return (
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-gray-100 hover:bg-primary/10 transition-colors p-0">
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-gray-100 hover:bg-primary/10 transition-all p-0 focus-visible:ring-0">
             <Avatar className="h-10 w-10">
               <AvatarImage src={avatarSrc} alt={user.displayName || user.email || 'User'} />
               <AvatarFallback className="bg-primary/10 text-primary font-bold">{userInitial}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56 rounded-xl shadow-xl" align="end" forceMount>
-          <DropdownMenuLabel className="font-normal p-4">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-bold leading-none">Minha Conta</p>
-              <p className="text-xs leading-none text-muted-foreground mt-1">
+        <DropdownMenuContent 
+          className="w-[320px] sm:w-[340px] rounded-[16px] border-gray-200 bg-white p-2 animate-in fade-in slide-in-from-top-2 duration-200" 
+          align="end" 
+          forceMount
+          style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.10)' }}
+        >
+          <div className="flex flex-col items-center p-6 pb-4">
+            <Avatar className="h-14 w-14 mb-3 shadow-md border-2 border-white ring-1 ring-gray-100">
+              <AvatarImage src={avatarSrc} alt={user.displayName || user.email || 'User'} />
+              <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">{userInitial}</AvatarFallback>
+            </Avatar>
+            <div className="text-center">
+              <p className="text-base font-bold text-gray-900 leading-tight">
+                {user.displayName || 'Usuário'}
+              </p>
+              <p className="text-xs text-gray-500 font-medium mt-1 truncate max-w-[200px]">
                 {user.email}
               </p>
             </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem asChild className="p-3 cursor-pointer">
-            <Link href="/minha-conta" className="flex items-center">
-              <User className="mr-3 h-4 w-4 text-primary" />
-              <span className="font-medium">Ver Perfil</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => signOut(auth)} className="p-3 cursor-pointer text-destructive focus:text-destructive">
-            <LogOut className="mr-3 h-4 w-4" />
-            <span className="font-medium">Sair</span>
-          </DropdownMenuItem>
+          </div>
+          
+          <DropdownMenuSeparator className="mx-2 bg-gray-100" />
+          
+          <div className="py-1 px-1">
+            <DropdownMenuItem asChild className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
+              <Link href="/minha-conta" className="flex items-center w-full">
+                <User className="mr-3 h-5 w-5 text-gray-400 group-focus:text-primary transition-colors" />
+                <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Meu Perfil</span>
+              </Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem asChild className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
+              <Link href="/minha-conta#meus-relatorios" className="flex items-center w-full">
+                <Briefcase className="mr-3 h-5 w-5 text-gray-400 group-focus:text-primary transition-colors" />
+                <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Meus Relatos</span>
+              </Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem asChild className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
+              <button className="flex items-center w-full">
+                <Bell className="mr-3 h-5 w-5 text-gray-400 group-focus:text-primary transition-colors" />
+                <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Notificações</span>
+              </button>
+            </DropdownMenuItem>
+          </div>
+
+          <DropdownMenuSeparator className="mx-2 bg-gray-100" />
+          
+          <div className="px-1 py-1">
+            <DropdownMenuItem 
+              onClick={() => signOut(auth)} 
+              className="h-12 rounded-lg cursor-pointer px-3 focus:bg-red-50 focus:text-red-600 transition-colors group"
+            >
+              <LogOut className="mr-3 h-5 w-5 text-gray-400 group-focus:text-red-500 transition-colors" />
+              <span className="font-semibold text-sm text-gray-700 group-focus:text-red-600">Sair</span>
+            </DropdownMenuItem>
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
     );
