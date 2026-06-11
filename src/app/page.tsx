@@ -141,7 +141,7 @@ export default async function Home() {
               Relate um Problema na <br className="hidden sm:block"/><span className="text-primary italic">Sua Cidade</span>
             </h1>
             <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Informe problemas de infraestrutura de forma rápida e precisa. Marque no mapa e anexe uma foto.
+              Informe problemas de infraestrutura de forma rápida e precisa.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-10">
               <HomeCtaClient />
