@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, MapPin, CheckCircle2, BarChart3, Clock, ChevronRight, Plus, ShieldCheck } from "lucide-react";
@@ -11,6 +10,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { ReportsChart } from "@/components/reports-chart";
 import { ReportTime } from "@/components/report-time";
 import { HomeCtaClient } from "@/components/home-cta-client";
+import { RecentReportCard } from "@/components/recent-report-card";
 import Image from "next/image";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,62 +31,9 @@ async function RecentReports() {
   return (
     <div className="space-y-12">
       <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {recentReports.map((report) => {
-          const category = getCategory(report.category);
-          const problem = category?.problems.find(p => p.value === report.problem);
-          const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
-          
-          return (
-            <Link href={`/dashboard#report-${report.id}`} key={report.id} className="block group">
-                <Card className="overflow-hidden flex flex-col h-full border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg rounded-xl bg-white">
-                  <div className="relative h-48 w-full">
-                      <Image
-                        src={report.photoUrl}
-                        alt="Foto do problema"
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        loading="lazy"
-                      />
-                      <div className="absolute top-3 left-3 z-10">
-                          <StatusBadge status={report.status} />
-                      </div>
-                  </div>
-
-                  <div className="p-5 flex flex-col flex-grow space-y-4">
-                      <div className="space-y-1">
-                          <h3 className="text-lg font-bold text-gray-900 line-clamp-2">
-                              {problem?.label || report.problem}
-                          </h3>
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                              {category?.icon && <category.icon className="h-4 w-4" style={{ color: category.color }} />}
-                              <span>{category?.label || report.category}</span>
-                          </div>
-                      </div>
-
-                      <div className="mt-auto pt-2 flex items-center justify-between border-t border-gray-50 pt-4">
-                          <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                              <Clock className="h-3.5 w-3.5" />
-                              <ReportTime date={new Date(report.createdAt)} />
-                          </div>
-                          <div className="flex items-center gap-3">
-                              <Link 
-                                href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`} 
-                                className="text-xs font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                  <MapPin className="h-3 w-3" /> Mapa
-                              </Link>
-                              <div className="flex items-center gap-1 text-sm font-bold text-primary">
-                                  Detalhes <ChevronRight className="h-4 w-4" />
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-                </Card>
-            </Link>
-          );
-        })}
+        {recentReports.map((report) => (
+          <RecentReportCard key={report.id} report={report} />
+        ))}
       </div>
     </div>
   );
