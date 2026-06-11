@@ -23,6 +23,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useRouter } from "next/navigation";
 import { ReportTime } from "./report-time";
 import { Separator } from "./ui/separator";
+import Link from "next/link";
 
 const STATUS_PROGRESSION: Record<ReportStatus, ReportStatus | null> = {
   UNDER_REVIEW: "PENDING",
@@ -199,6 +200,12 @@ const ReportCard = memo(({
                         </div>
 
                         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold">
+                                <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
+                                    <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
+                                </Link>
+                            </Button>
+
                             {canDelete && (
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>

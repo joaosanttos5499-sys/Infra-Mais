@@ -83,12 +83,18 @@ function MyReportItem({ report }: { report: Report }) {
                 </div>
 
                 <div className="flex items-center gap-1.5 text-xs text-gray-400 mt-2">
-                    <Clock className="h-3 w-3" />
+                    <Clock className="h-3.5 w-3.5" />
                     <ReportTime date={new Date(report.createdAt)} />
                 </div>
             </div>
 
             <div className="flex sm:flex-col items-center justify-center gap-4 sm:gap-2 z-10 w-full sm:w-auto border-t sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0">
+                <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold">
+                    <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
+                        <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
+                    </Link>
+                </Button>
+
                 {canDelete && (
                     <AlertDialog>
                         <AlertDialogTrigger asChild>

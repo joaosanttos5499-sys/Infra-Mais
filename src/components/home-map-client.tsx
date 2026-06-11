@@ -1,3 +1,4 @@
+
 "use client";
 
 import { type Report } from "@/lib/types";
@@ -7,6 +8,11 @@ const LeafletMap = dynamic(() => import("@/components/LeafletMap"), {
   ssr: false,
 });
 
-export function HomeMapClient({ reports }: { reports: Report[] }) {
-  return <LeafletMap reports={reports} />;
+interface HomeMapClientProps {
+  reports: Report[];
+  selectedLocation?: { lat: number; lng: number } | null;
+}
+
+export function HomeMapClient({ reports, selectedLocation }: HomeMapClientProps) {
+  return <LeafletMap reports={reports} selectedLocation={selectedLocation} />;
 }

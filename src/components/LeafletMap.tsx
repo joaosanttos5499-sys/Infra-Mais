@@ -127,7 +127,7 @@ const LeafletMap = ({
   // Handle Selected Location
   useEffect(() => {
     const map = mapInstance.current;
-    if (!map || !interactive) return;
+    if (!map) return;
 
     if (markerInstance.current) {
       markerInstance.current.removeFrom(map);
@@ -144,7 +144,7 @@ const LeafletMap = ({
       markerInstance.current = L.marker([selectedLocation.lat, selectedLocation.lng], { icon }).addTo(map);
       map.setView([selectedLocation.lat, selectedLocation.lng], 16);
     }
-  }, [selectedLocation, interactive]);
+  }, [selectedLocation]);
 
   return (
     <div

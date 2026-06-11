@@ -17,7 +17,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 async function RecentReports() {
   const allReports = await getReports();
-  const recentReports = allReports.filter(r => r.status !== 'UNDER_REVIEW').slice(0, 3);
+  // Mostramos todos os relatórios recentes na Home para maior transparência
+  const recentReports = allReports.slice(0, 3);
 
   if (recentReports.length === 0) {
     return (
@@ -68,8 +69,17 @@ async function RecentReports() {
                               <Clock className="h-3.5 w-3.5" />
                               <ReportTime date={new Date(report.createdAt)} />
                           </div>
-                          <div className="flex items-center gap-1 text-sm font-bold text-primary">
-                              Detalhes <ChevronRight className="h-4 w-4" />
+                          <div className="flex items-center gap-3">
+                              <Link 
+                                href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`} 
+                                className="text-xs font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                  <MapPin className="h-3 w-3" /> Mapa
+                              </Link>
+                              <div className="flex items-center gap-1 text-sm font-bold text-primary">
+                                  Detalhes <ChevronRight className="h-4 w-4" />
+                              </div>
                           </div>
                       </div>
                   </div>
@@ -83,10 +93,10 @@ async function RecentReports() {
 }
 
 function AboutSection({ reports }: { reports: Report[] }) {
-  const publicReports = reports.filter(r => r.status !== 'UNDER_REVIEW');
-  const totalReports = publicReports.length;
-  const resolvedReports = publicReports.filter(r => r.status === 'RESOLVED').length;
-  const inProgressReports = publicReports.filter(r => r.status === 'IN_PROGRESS').length;
+  // Visão geral considera todos os relatos registrados
+  const totalReports = reports.length;
+  const resolvedReports = reports.filter(r => r.status === 'RESOLVED').length;
+  const inProgressReports = reports.filter(r => r.status === 'IN_PROGRESS').length;
 
   return (
     <section className="py-16 md:py-24 bg-white border-t border-gray-100">
@@ -128,9 +138,13 @@ function AboutSection({ reports }: { reports: Report[] }) {
   );
 }
 
-export default async function Home() {
+export default async function Home(props: { searchParams: Promise<{ lat?: string, lng?: string }> }) {
   const allReports: Report[] = await getReports();
-  const publicReports = allReports.filter(r => r.status !== 'UNDER_REVIEW');
+  const searchParams = await props.searchParams;
+  
+  const lat = searchParams.lat ? parseFloat(searchParams.lat) : null;
+  const lng = searchParams.lng ? parseFloat(searchParams.lng) : null;
+  const selectedLocation = (lat && lng) ? { lat, lng } : null;
 
   return (
     <div className="flex flex-col w-full">
@@ -152,7 +166,7 @@ export default async function Home() {
           </div>
         </section>
         
-        <section className="py-12 md:py-24 -mt-12 md:-mt-24">
+        <section id="map-section" className="py-12 md:py-24 -mt-12 md:-mt-24 scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
             <div className="bg-white p-4 md:p-8 rounded-2xl md:rounded-3xl shadow-2xl border border-gray-100">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
@@ -161,12 +175,13 @@ export default async function Home() {
                     <p className="text-muted-foreground">Ocorrências registradas em tempo real.</p>
                   </div>
                   <div className="flex items-center gap-4 text-xs font-bold uppercase">
+                    <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-slate-500" /> Em Análise</div>
                     <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Pendente</div>
                     <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Resolvido</div>
                   </div>
                 </div>
                 <div className="rounded-xl overflow-hidden shadow-inner border border-gray-100 h-[350px] md:h-[550px]">
-                  <HomeMapClient reports={publicReports} />
+                  <HomeMapClient reports={allReports} selectedLocation={selectedLocation} />
                 </div>
             </div>
           </div>
