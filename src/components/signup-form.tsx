@@ -9,15 +9,18 @@ import { useRouter } from "next/navigation";
 import { saveUserProfileAction } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, MailCheck, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { Loader2, MailCheck, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { SignupSchema } from "@/lib/schemas";
 import { useAuth } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
 import { z } from "zod";
+import { createAvatarSvg } from "@/lib/avatar";
 
 type SignupFormData = z.infer<typeof SignupSchema>;
+
+const LOCAL_STORAGE_ACCOUNTS_KEY = 'infra_mais_saved_accounts';
 
 export function SignupForm() {
   const router = useRouter();
@@ -41,7 +44,27 @@ export function SignupForm() {
 
   const { control, handleSubmit } = form;
 
-  // Monitora a ativação da conta em tempo real após o envio do e-mail
+  const saveAccountLocally = (user: any, profileName: string, profilePhoto: string) => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
+    let accounts = [];
+    if (saved) {
+      try {
+        accounts = JSON.parse(saved);
+      } catch (e) {}
+    }
+
+    const newAccount = {
+      uid: user.uid,
+      email: user.email,
+      displayName: profileName,
+      photoURL: profilePhoto
+    };
+
+    accounts = accounts.filter((a: any) => a.email !== user.email);
+    accounts.unshift(newAccount);
+    localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts.slice(0, 5)));
+  };
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
@@ -60,7 +83,7 @@ export function SignupForm() {
         } catch (error) {
           console.error("Erro ao verificar status de ativação:", error);
         }
-      }, 3000); // Verifica a cada 3 segundos
+      }, 3000);
     }
 
     return () => {
@@ -88,12 +111,15 @@ export function SignupForm() {
         });
 
         if(result.success) {
+            const profilePhoto = result.photoURL || createAvatarSvg(data.email);
             if (auth.currentUser) {
               await updateProfile(auth.currentUser, {
                 displayName: data.name,
-                photoURL: result.photoURL,
+                photoURL: profilePhoto,
               });
             }
+
+            saveAccountLocally(user, data.name, profilePhoto);
 
             toast({
                 title: "Conta criada com sucesso!",

@@ -5,9 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Bell, Briefcase } from "lucide-react";
-import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Bell, Briefcase, Users, Trash2, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { isEmailEmployee } from "@/lib/config";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "./ui/scroll-area";
 
 const navLinks = [
   { href: "/", label: "Início", icon: Home, public: true },
@@ -25,9 +26,45 @@ const navLinks = [
   { href: "/support", label: "Suporte", icon: LifeBuoy, public: true },
 ];
 
+const LOCAL_STORAGE_ACCOUNTS_KEY = 'infra_mais_saved_accounts';
+
+interface SavedAccount {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL: string;
+}
+
 function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const router = useRouter();
+  const [isSwitchAccountOpen, setIsSwitchAccountOpen] = useState(false);
+  const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
+    if (saved) {
+      try {
+        setSavedAccounts(JSON.parse(saved));
+      } catch (e) {
+        console.error("Erro ao carregar contas salvas", e);
+      }
+    }
+  }, [isSwitchAccountOpen]);
+
+  const handleSwitchAccount = (account: SavedAccount) => {
+    signOut(auth).then(() => {
+      setIsSwitchAccountOpen(false);
+      router.push(`/report/auth?email=${encodeURIComponent(account.email)}`);
+    });
+  };
+
+  const removeAccount = (uid: string) => {
+    const updated = savedAccounts.filter(a => a.uid !== uid);
+    setSavedAccounts(updated);
+    localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(updated));
+  };
 
   if (isUserLoading) {
     return <Button variant="ghost" size="icon" disabled className="animate-pulse"><User className="h-5 w-5" /></Button>;
@@ -38,67 +75,156 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
     const userInitial = (user.email || user.displayName || 'U').charAt(0).toUpperCase();
 
     return (
-      <DropdownMenu modal={false}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-gray-100 hover:bg-primary/10 transition-all p-0 focus-visible:ring-0">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={avatarSrc} alt={user.displayName || user.email || 'User'} />
-              <AvatarFallback className="bg-primary/10 text-primary font-bold">{userInitial}</AvatarFallback>
-            </Avatar>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent 
-          className="w-[320px] sm:w-[340px] rounded-[16px] border-gray-200 bg-white p-2 animate-in fade-in slide-in-from-top-2 duration-200" 
-          align="end" 
-          forceMount
-          style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.10)' }}
-        >
-          <div className="flex flex-col items-center p-6 pb-4">
-            <Avatar className="h-14 w-14 mb-3 shadow-md border-2 border-white ring-1 ring-gray-100">
-              <AvatarImage src={avatarSrc} alt={user.displayName || user.email || 'User'} />
-              <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">{userInitial}</AvatarFallback>
-            </Avatar>
-            <div className="text-center">
-              <p className="text-base font-bold text-gray-900 leading-tight">
-                {user.displayName || 'Usuário'}
-              </p>
-              <p className="text-xs text-gray-500 font-medium mt-1 truncate max-w-[200px]">
-                {user.email}
-              </p>
+      <>
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-gray-100 hover:bg-primary/10 transition-all p-0 focus-visible:ring-0">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={avatarSrc} alt={user.displayName || user.email || 'User'} />
+                <AvatarFallback className="bg-primary/10 text-primary font-bold">{userInitial}</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent 
+            className="w-[320px] sm:w-[340px] rounded-[16px] border-gray-200 bg-white p-2 animate-in fade-in slide-in-from-top-2 duration-200" 
+            align="end" 
+            forceMount
+            style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.10)' }}
+          >
+            <div className="flex flex-col items-center p-6 pb-4">
+              <Avatar className="h-14 w-14 mb-3 shadow-md border-2 border-white ring-1 ring-gray-100">
+                <AvatarImage src={avatarSrc} alt={user.displayName || user.email || 'User'} />
+                <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">{userInitial}</AvatarFallback>
+              </Avatar>
+              <div className="text-center">
+                <p className="text-base font-bold text-gray-900 leading-tight">
+                  {user.displayName || 'Usuário'}
+                </p>
+                <p className="text-xs text-gray-500 font-medium mt-1 truncate max-w-[200px]">
+                  {user.email}
+                </p>
+              </div>
             </div>
-          </div>
-          
-          <DropdownMenuSeparator className="mx-2 bg-gray-100" />
-          
-          <div className="py-1 px-1">
-            <DropdownMenuItem asChild className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
-              <Link href="/minha-conta" className="flex items-center w-full">
-                <User className="mr-3 h-5 w-5 text-gray-400 group-focus:text-primary transition-colors" />
-                <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Meu Perfil</span>
-              </Link>
-            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator className="mx-2 bg-gray-100" />
+            
+            <div className="py-1 px-1">
+              <DropdownMenuItem asChild className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
+                <Link href="/minha-conta" className="flex items-center w-full">
+                  <User className="mr-3 h-5 w-5 text-gray-400 group-focus:text-primary transition-colors" />
+                  <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Meu Perfil</span>
+                </Link>
+              </DropdownMenuItem>
 
-            <DropdownMenuItem asChild className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
-              <Link href="/minha-conta#meus-relatorios" className="flex items-center w-full">
-                <Briefcase className="mr-3 h-5 w-5 text-gray-400 group-focus:text-primary transition-colors" />
-                <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Meus Relatos</span>
-              </Link>
-            </DropdownMenuItem>
-          </div>
+              <DropdownMenuItem asChild className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
+                <Link href="/minha-conta#meus-relatorios" className="flex items-center w-full">
+                  <Briefcase className="mr-3 h-5 w-5 text-gray-400 group-focus:text-primary transition-colors" />
+                  <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Meus Relatos</span>
+                </Link>
+              </DropdownMenuItem>
 
-          <DropdownMenuSeparator className="mx-2 bg-gray-100" />
-          
-          <div className="px-1 py-1">
-            <DropdownMenuItem 
-              onClick={() => signOut(auth)} 
-              className="h-12 rounded-lg cursor-pointer px-3 focus:bg-red-50 focus:text-red-600 transition-colors group"
-            >
-              <LogOut className="mr-3 h-5 w-5 text-gray-400 group-focus:text-red-500 transition-colors" />
-              <span className="font-semibold text-sm text-gray-700 group-focus:text-red-600">Sair</span>
-            </DropdownMenuItem>
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
+              <DropdownMenuItem 
+                onSelect={(e) => { e.preventDefault(); setIsSwitchAccountOpen(true); }}
+                className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group"
+              >
+                <Users className="mr-3 h-5 w-5 text-gray-400 group-focus:text-primary transition-colors" />
+                <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Trocar de Conta</span>
+              </DropdownMenuItem>
+            </div>
+
+            <DropdownMenuSeparator className="mx-2 bg-gray-100" />
+            
+            <div className="px-1 py-1">
+              <DropdownMenuItem 
+                onClick={() => signOut(auth)} 
+                className="h-12 rounded-lg cursor-pointer px-3 focus:bg-red-50 focus:text-red-600 transition-colors group"
+              >
+                <LogOut className="mr-3 h-5 w-5 text-gray-400 group-focus:text-red-500 transition-colors" />
+                <span className="font-semibold text-sm text-gray-700 group-focus:text-red-600">Sair</span>
+              </DropdownMenuItem>
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Dialog open={isSwitchAccountOpen} onOpenChange={setIsSwitchAccountOpen}>
+          <DialogContent className="rounded-2xl sm:max-w-md p-0 overflow-hidden">
+            <div className="p-8">
+              <DialogHeader className="mb-6">
+                <DialogTitle className="text-2xl font-bold text-gray-900">Trocar de Conta</DialogTitle>
+                <DialogDescription className="text-base text-gray-500">
+                  Selecione uma conta salva para entrar rapidamente.
+                </DialogDescription>
+              </DialogHeader>
+
+              <ScrollArea className="max-h-[300px] -mx-2 px-2">
+                <div className="space-y-2">
+                  {savedAccounts.length > 0 ? (
+                    savedAccounts.map((account) => (
+                      <div 
+                        key={account.uid} 
+                        className={cn(
+                          "flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:bg-primary/5 transition-all group",
+                          user?.uid === account.uid && "bg-primary/5 border-primary/20 pointer-events-none"
+                        )}
+                      >
+                        <button 
+                          onClick={() => handleSwitchAccount(account)}
+                          className="flex items-center gap-3 flex-grow text-left"
+                        >
+                          <Avatar className="h-10 w-10 border border-white shadow-sm">
+                            <AvatarImage src={account.photoURL} alt={account.displayName} />
+                            <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                              {account.displayName.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-gray-900 truncate">{account.displayName}</p>
+                            <p className="text-xs text-gray-500 truncate">{account.email}</p>
+                          </div>
+                        </button>
+                        
+                        <div className="flex items-center gap-2">
+                          {user?.uid === account.uid ? (
+                            <span className="text-[10px] font-bold text-primary uppercase bg-primary/10 px-2 py-1 rounded-full">Atual</span>
+                          ) : (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"
+                              onClick={(e) => { e.stopPropagation(); removeAccount(account.uid); }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-gray-500">Nenhuma outra conta salva.</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+
+              <div className="mt-6 pt-6 border-t border-gray-100">
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 rounded-xl font-bold border-primary/20 text-primary hover:bg-primary/5"
+                  onClick={() => {
+                    signOut(auth).then(() => {
+                      setIsSwitchAccountOpen(false);
+                      router.push('/report/auth');
+                    });
+                  }}
+                >
+                  Usar outra conta <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 

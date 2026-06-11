@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/firebase';
 import {
@@ -13,8 +13,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Check, Mail, Eye, EyeOff } from 'lucide-react';
+import { Loader2, ArrowLeft, Mail, Eye, EyeOff } from 'lucide-react';
 import { fetchUserProfileAction } from '@/lib/actions';
+import { useSearchParams } from 'next/navigation';
+import { createAvatarSvg } from '@/lib/avatar';
+
+const LOCAL_STORAGE_ACCOUNTS_KEY = 'infra_mais_saved_accounts';
 
 export function AuthForm({ 
   onAuthSuccess, 
@@ -24,12 +28,42 @@ export function AuthForm({
   onSignupClick?: () => void;
 }) {
   const auth = useAuth();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [view, setView] = useState<'signIn' | 'resetPassword' | 'resetSuccess'>('signIn');
+
+  useEffect(() => {
+    const emailParam = searchParams.get('email');
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+  }, [searchParams]);
+
+  const saveAccountLocally = (user: any, profileName: string, profilePhoto: string) => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
+    let accounts = [];
+    if (saved) {
+      try {
+        accounts = JSON.parse(saved);
+      } catch (e) {}
+    }
+
+    const newAccount = {
+      uid: user.uid,
+      email: user.email,
+      displayName: profileName,
+      photoURL: profilePhoto
+    };
+
+    // Remove duplicates and add the newest one
+    accounts = accounts.filter((a: any) => a.email !== user.email);
+    accounts.unshift(newAccount);
+    localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts.slice(0, 5)));
+  };
 
   const handleSignIn = async () => {
     setIsSubmitting(true);
@@ -45,10 +79,15 @@ export function AuthForm({
         });
       }
 
+      let profileName = user.displayName || 'Usuário';
+      let profilePhoto = user.photoURL || createAvatarSvg(user.email || 'U');
+
       try {
         const profileResult = await fetchUserProfileAction(user.uid);
         if (profileResult.success && profileResult.data) {
           const ourProfile = profileResult.data;
+          profileName = ourProfile.name;
+          profilePhoto = ourProfile.photoURL || profilePhoto;
           if (user.displayName !== ourProfile.name || user.photoURL !== ourProfile.photoURL) {
             await updateProfile(user, {
               displayName: ourProfile.name,
@@ -60,6 +99,8 @@ export function AuthForm({
         console.error("Failed to sync profile on login:", syncError);
       }
       
+      saveAccountLocally(user, profileName, profilePhoto);
+
       toast({
         title: 'Bem-vindo(a) de volta!',
       });
