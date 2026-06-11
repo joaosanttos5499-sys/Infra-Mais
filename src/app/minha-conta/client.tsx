@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
@@ -50,15 +51,14 @@ function MyReportItem({ report }: { report: Report }) {
     };
 
     return (
-        <div className="flex flex-col sm:flex-row gap-4 items-center border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 bg-white group relative animate-in fade-in slide-in-from-bottom-4">
-            <Link href={`/dashboard#report-${report.id}`} className="absolute inset-0 z-0" />
+        <div className="flex flex-col sm:flex-row gap-4 items-center border border-gray-200 rounded-xl p-4 bg-white group relative animate-in fade-in slide-in-from-bottom-4">
             
             <div className="relative w-full sm:w-24 h-40 sm:h-24 rounded-lg overflow-hidden shrink-0 z-10 shadow-sm">
                 <Image
                     src={report.photoUrl}
-                    alt={report.description}
+                    alt={report.description || "Foto do problema"}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="object-cover"
                 />
             </div>
 
@@ -111,8 +111,6 @@ function MyReportItem({ report }: { report: Report }) {
                         </AlertDialogContent>
                     </AlertDialog>
                 )}
-                <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4 text-gray-300 group-hover:text-primary transition-colors hidden sm:block" />
-                <Button variant="outline" size="sm" className="sm:hidden w-full font-bold text-primary border-primary/20">Ver detalhes</Button>
             </div>
         </div>
     );
