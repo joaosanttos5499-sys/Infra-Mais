@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, MapPin, CheckCircle2, BarChart3, Clock, ChevronRight, Plus, ShieldCheck } from "lucide-react";
@@ -17,13 +18,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 async function RecentReports() {
   const allReports = await getReports();
-  // Mostramos todos os relatórios recentes na Home para maior transparência
-  const recentReports = allReports.slice(0, 3);
+  // Exibimos apenas relatórios públicos (ignorando os 'Em Análise') na Home
+  const publicReports = allReports.filter(report => report.status !== 'UNDER_REVIEW');
+  const recentReports = publicReports.slice(0, 3);
 
   if (recentReports.length === 0) {
     return (
       <div className="bg-white p-12 rounded-2xl border border-dashed text-center text-muted-foreground shadow-sm">
-        Nenhum problema relatado recentemente.
+        Nenhum problema relatado publicamente recentemente.
       </div>
     );
   }
@@ -40,10 +42,11 @@ async function RecentReports() {
 }
 
 function AboutSection({ reports }: { reports: Report[] }) {
-  // Visão geral considera todos os relatos registrados
-  const totalReports = reports.length;
-  const resolvedReports = reports.filter(r => r.status === 'RESOLVED').length;
-  const inProgressReports = reports.filter(r => r.status === 'IN_PROGRESS').length;
+  // Visão geral considera apenas relatos públicos
+  const publicReports = reports.filter(r => r.status !== 'UNDER_REVIEW');
+  const totalReports = publicReports.length;
+  const resolvedReports = publicReports.filter(r => r.status === 'RESOLVED').length;
+  const inProgressReports = publicReports.filter(r => r.status === 'IN_PROGRESS').length;
 
   return (
     <section className="py-16 md:py-24 bg-white border-t border-gray-100">
@@ -87,8 +90,10 @@ function AboutSection({ reports }: { reports: Report[] }) {
 
 export default async function Home(props: { searchParams: Promise<{ lat?: string, lng?: string }> }) {
   const allReports: Report[] = await getReports();
-  const searchParams = await props.searchParams;
+  // Filtramos os relatórios para o mapa não mostrar os "Em Análise"
+  const publicReports = allReports.filter(report => report.status !== 'UNDER_REVIEW');
   
+  const searchParams = await props.searchParams;
   const lat = searchParams.lat ? parseFloat(searchParams.lat) : null;
   const lng = searchParams.lng ? parseFloat(searchParams.lng) : null;
   const selectedLocation = (lat && lng) ? { lat, lng } : null;
@@ -119,16 +124,16 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                   <div>
                     <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Mapa da Comunidade</h2>
-                    <p className="text-muted-foreground">Ocorrências registradas em tempo real.</p>
+                    <p className="text-muted-foreground">Ocorrências registradas e aprovadas.</p>
                   </div>
                   <div className="flex items-center gap-4 text-xs font-bold uppercase">
-                    <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-slate-500" /> Em Análise</div>
                     <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Pendente</div>
+                    <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-primary" /> Em Andamento</div>
                     <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Resolvido</div>
                   </div>
                 </div>
                 <div className="rounded-xl overflow-hidden shadow-inner border border-gray-100 h-[350px] md:h-[550px]">
-                  <HomeMapClient reports={allReports} selectedLocation={selectedLocation} />
+                  <HomeMapClient reports={publicReports} selectedLocation={selectedLocation} />
                 </div>
             </div>
           </div>
