@@ -6,8 +6,7 @@ import {
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, MessageCircle, HelpCircle } from "lucide-react";
+import { Search, HelpCircle } from "lucide-react";
 
 export default function SupportPage() {
   const faqs = [
@@ -111,25 +110,6 @@ export default function SupportPage() {
               </Accordion>
             </CardContent>
           </Card>
-          
-          <div className="mt-10 p-8 bg-primary/5 rounded-2xl border border-primary/10 text-center space-y-4">
-            <div className="flex justify-center">
-              <div className="bg-primary/10 p-3 rounded-full">
-                <MessageCircle className="h-8 w-8 text-primary" />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-xl font-bold text-gray-900">Ainda tem dúvidas?</h3>
-              <p className="text-gray-500 text-sm md:text-base max-w-md mx-auto">
-                Se você encontrou um problema técnico ou deseja propor uma parceria em sua cidade, nossa equipe está pronta para ajudar.
-              </p>
-            </div>
-            <div className="pt-2">
-              <Button size="lg" className="rounded-xl font-bold shadow-md px-8 w-full sm:w-auto bg-primary text-white hover:bg-primary/90">
-                Entrar em contato
-              </Button>
-            </div>
-          </div>
         </div>
       </main>
     </div>
