@@ -24,8 +24,8 @@ const LeafletMap = ({
 }: LeafletMapProps) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstance = useRef<L.Map | null>(null);
-  const markerInstance = useRef<L.Marker | null>(null);
-  const reportMarkers = useRef<L.Marker[]>([]);
+  const selectionMarkerInstance = useRef<L.Marker | null>(null);
+  const reportMarkers = useRef<Map<string, L.Marker>>(new Map());
 
   const defaultCenter: [number, number] = [-6.515, -36.35];
 
@@ -33,7 +33,6 @@ const LeafletMap = ({
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
 
-    // Check if map container is already initialized by checking for leaflet id
     const container = mapRef.current;
     if ((container as any)._leaflet_id) return;
 
@@ -74,11 +73,13 @@ const LeafletMap = ({
   // Handle Markers
   useEffect(() => {
     const map = mapInstance.current;
-    if (!map || interactive) return;
+    if (!map) return;
 
     // Clear old markers
     reportMarkers.current.forEach(marker => marker.removeFrom(map));
-    reportMarkers.current = [];
+    reportMarkers.current.clear();
+
+    if (interactive) return;
 
     reports.forEach(report => {
       const category = getCategory(report.category);
@@ -99,18 +100,18 @@ const LeafletMap = ({
       });
 
       const popupContent = `
-        <div class="min-w-[200px] p-1 font-sans">
+        <div class="min-w-[220px] p-2 font-sans bg-white">
           <div class="mb-2">
-            <span class="bg-primary text-white px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">
+            <span class="bg-gray-900 text-white px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">
               ${category?.label || 'Problema'}
             </span>
           </div>
-          <h3 class="m-0 text-sm font-bold text-gray-900 leading-tight">${problemLabel}</h3>
-          <p class="mt-1 mb-3 text-xs text-gray-500 leading-snug">
-            <strong>${displayCity} - ${report.bairro}</strong><br/>
+          <h3 class="m-0 text-sm font-bold text-gray-900 leading-tight mb-1">${problemLabel}</h3>
+          <p class="mt-0 mb-4 text-[11px] text-gray-600 leading-snug font-medium">
+            <strong class="text-gray-800">${displayCity} - ${report.bairro}</strong><br/>
             ${report.location}
           </p>
-          <a href="/dashboard#report-${report.id}" class="block text-center bg-primary text-white py-2 rounded-md text-xs font-bold hover:brightness-110 transition-all">
+          <a href="/dashboard#report-${report.id}" class="block text-center bg-[#1d4ed8] text-white py-2.5 rounded-lg text-xs font-black shadow-lg hover:bg-[#1e40af] transition-colors uppercase tracking-wide">
             Ver Detalhes
           </a>
         </div>
@@ -118,22 +119,27 @@ const LeafletMap = ({
       
       const marker = L.marker([report.latitude, report.longitude], { icon: customIcon })
         .addTo(map)
-        .bindPopup(popupContent);
+        .bindPopup(popupContent, {
+          className: 'custom-popup',
+          offset: [0, -10]
+        });
       
-      reportMarkers.current.push(marker);
+      // Store marker by a composite key of lat/lng for lookup
+      const key = `${report.latitude.toFixed(6)},${report.longitude.toFixed(6)}`;
+      reportMarkers.current.set(key, marker);
     });
   }, [reports, interactive]);
 
-  // Handle Selected Location
+  // Handle Selected Location (Redirection or Picking)
   useEffect(() => {
     const map = mapInstance.current;
-    if (!map) return;
+    if (!map || !selectedLocation) return;
 
-    if (markerInstance.current) {
-      markerInstance.current.removeFrom(map);
-    }
-
-    if (selectedLocation) {
+    if (interactive) {
+      // Logic for picking a new location in the form
+      if (selectionMarkerInstance.current) {
+        selectionMarkerInstance.current.removeFrom(map);
+      }
       const icon = L.icon({
         iconUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png",
         iconRetinaUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon-2x.png",
@@ -141,10 +147,27 @@ const LeafletMap = ({
         iconSize: [25, 41],
         iconAnchor: [12, 41],
       });
-      markerInstance.current = L.marker([selectedLocation.lat, selectedLocation.lng], { icon }).addTo(map);
+      selectionMarkerInstance.current = L.marker([selectedLocation.lat, selectedLocation.lng], { icon }).addTo(map);
       map.setView([selectedLocation.lat, selectedLocation.lng], 16);
+    } else {
+      // Logic for viewing an existing report
+      map.setView([selectedLocation.lat, selectedLocation.lng], 17, {
+        animate: true,
+        duration: 1
+      });
+
+      // Find the marker that exactly matches these coordinates and open its popup
+      const key = `${selectedLocation.lat.toFixed(6)},${selectedLocation.lng.toFixed(6)}`;
+      const marker = reportMarkers.current.get(key);
+      
+      if (marker) {
+        // Short delay to ensure map transition finishes before opening popup
+        setTimeout(() => {
+          marker.openPopup();
+        }, 300);
+      }
     }
-  }, [selectedLocation]);
+  }, [selectedLocation, interactive]);
 
   return (
     <div
