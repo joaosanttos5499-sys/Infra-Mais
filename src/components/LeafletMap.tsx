@@ -16,6 +16,14 @@ interface LeafletMapProps {
   selectedLocation?: { lat: number; lng: number } | null;
 }
 
+// Cores baseadas no status para os marcadores do mapa
+const statusColorMap: Record<string, string> = {
+  PENDING: '#f59e0b',    // Amarelo (Amber-500)
+  IN_PROGRESS: '#3b82f6', // Azul (Primary-500)
+  RESOLVED: '#10b981',    // Verde (Emerald-500)
+  UNDER_REVIEW: '#94a3b8' // Cinza (Slate-400) - Fallback
+};
+
 const LeafletMap = ({
   reports = [],
   interactive = false,
@@ -86,14 +94,16 @@ const LeafletMap = ({
       const IconComponent = category?.icon;
       const problemLabel = category?.problems.find(p => p.value === report.problem)?.label || report.problem;
       const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
-      const categoryColor = category?.color || '#3b82f6';
+      
+      // Cor baseada no status, não na categoria
+      const markerColor = statusColorMap[report.status] || statusColorMap.UNDER_REVIEW;
 
       const iconHtml = IconComponent 
         ? renderToString(<IconComponent className="h-5 w-5" style={{ color: '#ffffff' }} />)
         : '';
 
       const customIcon = L.divIcon({
-        html: `<div style="background-color: ${categoryColor};" class="w-8 h-8 rounded-full shadow-md flex items-center justify-center border-2 border-white">${iconHtml}</div>`,
+        html: `<div style="background-color: ${markerColor};" class="w-8 h-8 rounded-full shadow-md flex items-center justify-center border-2 border-white">${iconHtml}</div>`,
         className: 'custom-leaflet-icon',
         iconSize: [32, 32],
         iconAnchor: [16, 16],
@@ -103,7 +113,7 @@ const LeafletMap = ({
       const popupContent = `
         <div class="min-w-[220px] p-2 font-sans bg-white">
           <div class="mb-2">
-            <span style="background-color: ${categoryColor}; color: #ffffff !important;" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">
+            <span style="background-color: ${markerColor}; color: #ffffff !important;" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">
               ${category?.label || 'Problema'}
             </span>
           </div>
