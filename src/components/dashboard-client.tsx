@@ -3,7 +3,7 @@
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
 import Image from "next/image";
-import { updateReportStatus, upvoteReportAction, downvoteReportAction, deleteReportAction, reportAbuseAction } from "@/lib/actions";
+import { updateReportStatus, upvoteReportAction, downvoteReportAction, deleteReportAction } from "@/lib/actions";
 import { type Report, type ReportStatus } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, AlertTriangle, ShieldAlert } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { statusConfig, StatusBadge } from "./status-badge";
@@ -51,7 +51,6 @@ const ReportCard = memo(({
   const { toast } = useToast();
   const router = useRouter();
   const [isDeleting, startDeleteTransition] = useTransition();
-  const [isReporting, startReportTransition] = useTransition();
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
   
@@ -111,17 +110,6 @@ const ReportCard = memo(({
             if (onSuccess) onSuccess();
         } else {
             toast({ variant: "destructive", title: "Erro ao excluir", description: result.message });
-        }
-    });
-  };
-
-  const handleReportAbuse = async () => {
-    startReportTransition(async () => {
-        const result = await reportAbuseAction(report.id);
-        if (result.success) {
-            toast({ title: "Denúncia Enviada", description: "O conteúdo foi sinalizado para auditoria interna." });
-        } else {
-            toast({ variant: "destructive", title: "Erro ao denunciar", description: result.message });
         }
     });
   };
@@ -334,17 +322,6 @@ const ReportCard = memo(({
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
-
-                            <Button 
-                                type="button" 
-                                variant="outline" 
-                                onClick={handleReportAbuse}
-                                disabled={isReporting}
-                                className="flex-1 h-11 border-amber-200 text-amber-700 hover:bg-amber-50 font-bold rounded-lg transition-colors"
-                            >
-                                {isReporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <AlertTriangle className="h-4 w-4 mr-2" />}
-                                Denunciar
-                            </Button>
                         </div>
                         <p className="text-[10px] text-gray-400 uppercase tracking-tight text-center sm:text-left">
                             As ações acima são registradas no log de auditoria do sistema.
