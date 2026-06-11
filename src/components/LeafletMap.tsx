@@ -112,7 +112,7 @@ const LeafletMap = ({
             <strong class="text-gray-800">${displayCity} - ${report.bairro}</strong><br/>
             ${report.location}
           </p>
-          <a href="/dashboard#report-${report.id}" style="background-color: ${categoryColor};" class="block text-center text-white py-2.5 rounded-lg text-xs font-black shadow-lg hover:brightness-110 transition-all uppercase tracking-wide">
+          <a href="/dashboard#report-${report.id}" style="background-color: #3b82f6;" class="block text-center text-white py-2.5 rounded-lg text-xs font-black shadow-lg hover:brightness-110 transition-all uppercase tracking-wide">
             Ver Detalhes
           </a>
         </div>
