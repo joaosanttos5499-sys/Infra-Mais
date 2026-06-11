@@ -86,13 +86,14 @@ const LeafletMap = ({
       const IconComponent = category?.icon;
       const problemLabel = category?.problems.find(p => p.value === report.problem)?.label || report.problem;
       const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
+      const categoryColor = category?.color || '#3b82f6';
 
       const iconHtml = IconComponent 
         ? renderToString(<IconComponent className="h-5 w-5 text-white" />)
         : '';
 
       const customIcon = L.divIcon({
-        html: `<div style="background-color: ${category?.color || '#3b82f6'};" class="w-8 h-8 rounded-full shadow-md flex items-center justify-center border-2 border-white">${iconHtml}</div>`,
+        html: `<div style="background-color: ${categoryColor};" class="w-8 h-8 rounded-full shadow-md flex items-center justify-center border-2 border-white">${iconHtml}</div>`,
         className: 'custom-leaflet-icon',
         iconSize: [32, 32],
         iconAnchor: [16, 16],
@@ -102,7 +103,7 @@ const LeafletMap = ({
       const popupContent = `
         <div class="min-w-[220px] p-2 font-sans bg-white">
           <div class="mb-2">
-            <span class="bg-gray-900 text-white px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">
+            <span style="background-color: ${categoryColor};" class="text-white px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">
               ${category?.label || 'Problema'}
             </span>
           </div>
@@ -111,7 +112,7 @@ const LeafletMap = ({
             <strong class="text-gray-800">${displayCity} - ${report.bairro}</strong><br/>
             ${report.location}
           </p>
-          <a href="/dashboard#report-${report.id}" class="block text-center bg-[#1d4ed8] text-white py-2.5 rounded-lg text-xs font-black shadow-lg hover:bg-[#1e40af] transition-colors uppercase tracking-wide">
+          <a href="/dashboard#report-${report.id}" style="background-color: ${categoryColor};" class="block text-center text-white py-2.5 rounded-lg text-xs font-black shadow-lg hover:brightness-110 transition-all uppercase tracking-wide">
             Ver Detalhes
           </a>
         </div>
