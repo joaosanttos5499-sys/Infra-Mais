@@ -89,7 +89,7 @@ const LeafletMap = ({
       const categoryColor = category?.color || '#3b82f6';
 
       const iconHtml = IconComponent 
-        ? renderToString(<IconComponent className="h-5 w-5 text-white" />)
+        ? renderToString(<IconComponent className="h-5 w-5" style={{ color: '#ffffff' }} />)
         : '';
 
       const customIcon = L.divIcon({
@@ -103,7 +103,7 @@ const LeafletMap = ({
       const popupContent = `
         <div class="min-w-[220px] p-2 font-sans bg-white">
           <div class="mb-2">
-            <span style="background-color: ${categoryColor};" class="text-white px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">
+            <span style="background-color: ${categoryColor}; color: #ffffff !important;" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">
               ${category?.label || 'Problema'}
             </span>
           </div>
@@ -112,7 +112,7 @@ const LeafletMap = ({
             <strong class="text-gray-800">${displayCity} - ${report.bairro}</strong><br/>
             ${report.location}
           </p>
-          <a href="/dashboard#report-${report.id}" style="background-color: #3b82f6;" class="block text-center text-white py-2.5 rounded-lg text-xs font-black shadow-lg hover:brightness-110 transition-all uppercase tracking-wide">
+          <a href="/dashboard#report-${report.id}" style="background-color: #3b82f6; color: #ffffff !important; text-decoration: none !important;" class="block text-center py-2.5 rounded-lg text-xs font-black shadow-lg hover:brightness-110 transition-all uppercase tracking-wide">
             Ver Detalhes
           </a>
         </div>
@@ -125,7 +125,6 @@ const LeafletMap = ({
           offset: [0, -10]
         });
       
-      // Store marker by a composite key of lat/lng for lookup
       const key = `${report.latitude.toFixed(6)},${report.longitude.toFixed(6)}`;
       reportMarkers.current.set(key, marker);
     });
@@ -137,7 +136,6 @@ const LeafletMap = ({
     if (!map || !selectedLocation) return;
 
     if (interactive) {
-      // Logic for picking a new location in the form
       if (selectionMarkerInstance.current) {
         selectionMarkerInstance.current.removeFrom(map);
       }
@@ -151,18 +149,15 @@ const LeafletMap = ({
       selectionMarkerInstance.current = L.marker([selectedLocation.lat, selectedLocation.lng], { icon }).addTo(map);
       map.setView([selectedLocation.lat, selectedLocation.lng], 16);
     } else {
-      // Logic for viewing an existing report
       map.setView([selectedLocation.lat, selectedLocation.lng], 17, {
         animate: true,
         duration: 1
       });
 
-      // Find the marker that exactly matches these coordinates and open its popup
       const key = `${selectedLocation.lat.toFixed(6)},${selectedLocation.lng.toFixed(6)}`;
       const marker = reportMarkers.current.get(key);
       
       if (marker) {
-        // Short delay to ensure map transition finishes before opening popup
         setTimeout(() => {
           marker.openPopup();
         }, 300);
