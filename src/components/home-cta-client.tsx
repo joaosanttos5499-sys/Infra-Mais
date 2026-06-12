@@ -22,7 +22,7 @@ export function HomeCtaClient() {
       return (
           <Button asChild size="lg" className="w-full sm:w-auto rounded-xl px-10 h-12 md:h-14 text-base md:text-lg font-bold shadow-xl hover:scale-105 transition-all duration-300 bg-primary text-white">
             <Link href="/funcionarios" className="flex items-center gap-2 justify-center">
-              Ir para Gestão <ShieldCheck className="h-6 w-6" />
+              Gestão dos Relatos <ShieldCheck className="h-6 w-6" />
             </Link>
           </Button>
       );
