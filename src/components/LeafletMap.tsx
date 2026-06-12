@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef, memo } from "react";
@@ -8,6 +7,7 @@ import { type Report } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
 import { renderToString } from 'react-dom/server';
 import { cn } from "@/lib/utils";
+import { useTheme } from "./theme-provider";
 
 interface LeafletMapProps {
   reports?: Report[];
@@ -16,12 +16,11 @@ interface LeafletMapProps {
   selectedLocation?: { lat: number; lng: number } | null;
 }
 
-// Cores baseadas no status para os marcadores do mapa
 const statusColorMap: Record<string, string> = {
   PENDING: '#f59e0b',    // Amarelo (Amber-500)
   IN_PROGRESS: '#3b82f6', // Azul (Primary-500)
   RESOLVED: '#10b981',    // Verde (Emerald-500)
-  UNDER_REVIEW: '#94a3b8' // Cinza (Slate-400) - Fallback
+  UNDER_REVIEW: '#94a3b8' // Cinza (Slate-400)
 };
 
 const LeafletMap = ({
@@ -34,6 +33,7 @@ const LeafletMap = ({
   const mapInstance = useRef<L.Map | null>(null);
   const selectionMarkerInstance = useRef<L.Marker | null>(null);
   const reportMarkers = useRef<Map<string, L.Marker>>(new Map());
+  const { theme } = useTheme();
 
   const defaultCenter: [number, number] = [-6.515, -36.35];
 
@@ -61,6 +61,13 @@ const LeafletMap = ({
       }
     };
   }, []);
+
+  // Handle Theme Change
+  useEffect(() => {
+    if (mapRef.current) {
+      // Logic handled via CSS class on html element and .leaflet-tile filter in globals.css
+    }
+  }, [theme]);
 
   // Handle Interactivity
   useEffect(() => {
@@ -95,7 +102,6 @@ const LeafletMap = ({
       const problemLabel = category?.problems.find(p => p.value === report.problem)?.label || report.problem;
       const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
       
-      // Cor baseada no status, não na categoria
       const markerColor = statusColorMap[report.status] || statusColorMap.UNDER_REVIEW;
 
       const iconHtml = IconComponent 
@@ -111,15 +117,15 @@ const LeafletMap = ({
       });
 
       const popupContent = `
-        <div class="min-w-[220px] p-2 font-sans bg-white">
+        <div class="min-w-[220px] p-2 font-sans">
           <div class="mb-2">
             <span style="background-color: ${markerColor}; color: #ffffff !important;" class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">
               ${category?.label || 'Problema'}
             </span>
           </div>
-          <h3 class="m-0 text-sm font-bold text-gray-900 leading-tight mb-1">${problemLabel}</h3>
-          <p class="mt-0 mb-4 text-[11px] text-gray-600 leading-snug font-medium">
-            <strong class="text-gray-800">${displayCity} - ${report.bairro}</strong><br/>
+          <h3 class="m-0 text-sm font-bold leading-tight mb-1 text-card-foreground">${problemLabel}</h3>
+          <p class="mt-0 mb-4 text-[11px] leading-snug font-medium text-muted-foreground">
+            <strong class="text-foreground">${displayCity} - ${report.bairro}</strong><br/>
             ${report.location}
           </p>
           <a href="/dashboard#report-${report.id}" style="background-color: #3b82f6; color: #ffffff !important; text-decoration: none !important;" class="block text-center py-2.5 rounded-lg text-xs font-black shadow-lg hover:brightness-110 transition-all uppercase tracking-wide">
@@ -140,7 +146,7 @@ const LeafletMap = ({
     });
   }, [reports, interactive]);
 
-  // Handle Selected Location (Redirection or Picking)
+  // Handle Selected Location
   useEffect(() => {
     const map = mapInstance.current;
     if (!map || !selectedLocation) return;

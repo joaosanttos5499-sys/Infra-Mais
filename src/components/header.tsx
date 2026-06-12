@@ -1,17 +1,16 @@
-
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Bell, Briefcase, Users, Trash2, ArrowRight } from "lucide-react";
+import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Bell, Briefcase, Users, Trash2, ArrowRight, Palette, Sun, Moon, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { createAvatarSvg } from "@/lib/avatar";
 import { useRouter } from "next/navigation";
@@ -19,6 +18,7 @@ import { isEmailEmployee } from "@/lib/config";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "./ui/scroll-area";
+import { useTheme } from "./theme-provider";
 
 const navLinks = [
   { href: "/", label: "Início", icon: Home, public: true },
@@ -37,6 +37,7 @@ interface SavedAccount {
 
 function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   const { user, isUserLoading } = useUser();
+  const { theme, setTheme } = useTheme();
   const auth = useAuth();
   const router = useRouter();
   const [isSwitchAccountOpen, setIsSwitchAccountOpen] = useState(false);
@@ -78,7 +79,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
       <>
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-gray-100 hover:bg-primary/10 transition-all p-0 focus-visible:ring-0">
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-border hover:bg-primary/10 transition-all p-0 focus-visible:ring-0">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={avatarSrc} alt={user.displayName || user.email || 'User'} />
                 <AvatarFallback className="bg-primary/10 text-primary font-bold">{userInitial}</AvatarFallback>
@@ -86,72 +87,91 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent 
-            className="w-[320px] sm:w-[340px] rounded-[16px] border-gray-200 bg-white p-2 animate-in fade-in slide-in-from-top-2 duration-200" 
+            className="w-[320px] sm:w-[340px] rounded-[16px] border-border bg-card p-2 animate-in fade-in slide-in-from-top-2 duration-200" 
             align="end" 
             forceMount
-            style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.10)' }}
+            style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.15)' }}
           >
             <div className="flex flex-col items-center p-6 pb-4">
-              <Avatar className="h-14 w-14 mb-3 shadow-md border-2 border-white ring-1 ring-gray-100">
+              <Avatar className="h-14 w-14 mb-3 shadow-md border-2 border-background ring-1 ring-border">
                 <AvatarImage src={avatarSrc} alt={user.displayName || user.email || 'User'} />
                 <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">{userInitial}</AvatarFallback>
               </Avatar>
               <div className="text-center">
-                <p className="text-base font-bold text-gray-900 leading-tight">
+                <p className="text-base font-bold text-foreground leading-tight">
                   {user.displayName || 'Usuário'}
                 </p>
-                <p className="text-xs text-gray-500 font-medium mt-1 truncate max-w-[200px]">
+                <p className="text-xs text-muted-foreground font-medium mt-1 truncate max-w-[200px]">
                   {user.email}
                 </p>
               </div>
             </div>
             
-            <DropdownMenuSeparator className="mx-2 bg-gray-100" />
+            <DropdownMenuSeparator className="mx-2 bg-border" />
             
             <div className="py-1 px-1">
               <DropdownMenuItem asChild className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
                 <Link href="/minha-conta" className="flex items-center w-full">
-                  <User className="mr-3 h-5 w-5 text-gray-400 group-focus:text-primary transition-colors" />
-                  <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Meu Perfil</span>
+                  <User className="mr-3 h-5 w-5 text-muted-foreground group-focus:text-primary transition-colors" />
+                  <span className="font-semibold text-sm text-foreground group-focus:text-primary">Meu Perfil</span>
                 </Link>
               </DropdownMenuItem>
 
               <DropdownMenuItem asChild className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
                 <Link href="/minha-conta#meus-relatorios" className="flex items-center w-full">
-                  <Briefcase className="mr-3 h-5 w-5 text-gray-400 group-focus:text-primary transition-colors" />
-                  <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Meus Relatos</span>
+                  <Briefcase className="mr-3 h-5 w-5 text-muted-foreground group-focus:text-primary transition-colors" />
+                  <span className="font-semibold text-sm text-foreground group-focus:text-primary">Meus Relatos</span>
                 </Link>
               </DropdownMenuItem>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
+                  <Palette className="mr-3 h-5 w-5 text-muted-foreground group-focus:text-primary transition-colors" />
+                  <span className="font-semibold text-sm text-foreground group-focus:text-primary">Tema</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent className="bg-card border-border p-1 rounded-xl shadow-xl">
+                    <DropdownMenuItem onClick={() => setTheme('light')} className={cn("h-10 rounded-lg cursor-pointer px-3 gap-3", theme === 'light' && "bg-primary/10 text-primary")}>
+                      <Sun className="h-4 w-4" />
+                      <span className="font-semibold text-sm">Tema Claro</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme('dark')} className={cn("h-10 rounded-lg cursor-pointer px-3 gap-3", theme === 'dark' && "bg-primary/10 text-primary")}>
+                      <Moon className="h-4 w-4" />
+                      <span className="font-semibold text-sm">Tema Escuro</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
 
               <DropdownMenuItem 
                 onSelect={(e) => { e.preventDefault(); setIsSwitchAccountOpen(true); }}
                 className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group"
               >
-                <Users className="mr-3 h-5 w-5 text-gray-400 group-focus:text-primary transition-colors" />
-                <span className="font-semibold text-sm text-gray-700 group-focus:text-primary">Trocar de Conta</span>
+                <Users className="mr-3 h-5 w-5 text-muted-foreground group-focus:text-primary transition-colors" />
+                <span className="font-semibold text-sm text-foreground group-focus:text-primary">Trocar de Conta</span>
               </DropdownMenuItem>
             </div>
 
-            <DropdownMenuSeparator className="mx-2 bg-gray-100" />
+            <DropdownMenuSeparator className="mx-2 bg-border" />
             
             <div className="px-1 py-1">
               <DropdownMenuItem 
                 onClick={() => signOut(auth)} 
-                className="h-12 rounded-lg cursor-pointer px-3 focus:bg-red-50 focus:text-red-600 transition-colors group"
+                className="h-12 rounded-lg cursor-pointer px-3 focus:bg-destructive/10 focus:text-destructive transition-colors group"
               >
-                <LogOut className="mr-3 h-5 w-5 text-gray-400 group-focus:text-red-500 transition-colors" />
-                <span className="font-semibold text-sm text-gray-700 group-focus:text-red-600">Sair</span>
+                <LogOut className="mr-3 h-5 w-5 text-muted-foreground group-focus:text-destructive transition-colors" />
+                <span className="font-semibold text-sm text-foreground group-focus:text-destructive">Sair</span>
               </DropdownMenuItem>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
 
         <Dialog open={isSwitchAccountOpen} onOpenChange={setIsSwitchAccountOpen}>
-          <DialogContent className="rounded-2xl sm:max-w-md p-0 overflow-hidden">
+          <DialogContent className="rounded-2xl sm:max-w-md p-0 overflow-hidden bg-card border-border">
             <div className="p-8">
               <DialogHeader className="mb-6">
-                <DialogTitle className="text-2xl font-bold text-gray-900">Trocar de Conta</DialogTitle>
-                <DialogDescription className="text-base text-gray-500">
+                <DialogTitle className="text-2xl font-bold text-foreground">Trocar de Conta</DialogTitle>
+                <DialogDescription className="text-base text-muted-foreground">
                   Selecione uma conta salva para entrar rapidamente.
                 </DialogDescription>
               </DialogHeader>
@@ -163,7 +183,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
                       <div 
                         key={account.uid} 
                         className={cn(
-                          "flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:bg-primary/5 transition-all group",
+                          "flex items-center justify-between p-3 rounded-xl border border-border hover:bg-primary/5 transition-all group",
                           user?.uid === account.uid && "bg-primary/5 border-primary/20 pointer-events-none"
                         )}
                       >
@@ -171,15 +191,15 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
                           onClick={() => handleSwitchAccount(account)}
                           className="flex items-center gap-3 flex-grow text-left"
                         >
-                          <Avatar className="h-10 w-10 border border-white shadow-sm">
+                          <Avatar className="h-10 w-10 border border-background shadow-sm">
                             <AvatarImage src={account.photoURL} alt={account.displayName} />
                             <AvatarFallback className="bg-primary/10 text-primary font-bold">
                               {account.displayName.charAt(0).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0">
-                            <p className="text-sm font-bold text-gray-900 truncate">{account.displayName}</p>
-                            <p className="text-xs text-gray-500 truncate">{account.email}</p>
+                            <p className="text-sm font-bold text-foreground truncate">{account.displayName}</p>
+                            <p className="text-xs text-muted-foreground truncate">{account.email}</p>
                           </div>
                         </button>
                         
@@ -190,7 +210,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-8 w-8 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
                               onClick={(e) => { e.stopPropagation(); removeAccount(account.uid); }}
                             >
                               <Trash2 className="h-4 w-4" />
@@ -201,13 +221,13 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
                     ))
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-sm text-gray-500">Nenhuma outra conta salva.</p>
+                      <p className="text-sm text-muted-foreground">Nenhuma outra conta salva.</p>
                     </div>
                   )}
                 </div>
               </ScrollArea>
 
-              <div className="mt-6 pt-6 border-t border-gray-100">
+              <div className="mt-6 pt-6 border-t border-border">
                 <Button 
                   variant="outline" 
                   className="w-full h-12 rounded-xl font-bold border-primary/20 text-primary hover:bg-primary/5"
@@ -264,8 +284,8 @@ export function Header() {
 
   return (
     <header className={cn(
-      "w-full bg-white flex items-center h-16 transition-all duration-300 border-b border-gray-100",
-      scrolled ? "shadow-md" : "shadow-sm"
+      "w-full bg-background flex items-center h-16 transition-all duration-300 border-b border-border",
+      scrolled ? "shadow-md" : "shadow-none"
     )}>
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
         <div className="w-full max-w-full mx-auto px-6 h-full flex items-center justify-between">
@@ -278,7 +298,7 @@ export function Header() {
                 className="object-contain"
                 priority
               />
-              <span className="text-xl font-bold tracking-tight text-gray-900">
+              <span className="text-xl font-bold tracking-tight text-foreground">
                 Infra <span className="text-primary">Mais</span>
               </span>
             </Link>
@@ -288,14 +308,14 @@ export function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="text-gray-600 hover:text-primary transition-colors relative group"
+                    className="text-muted-foreground hover:text-primary transition-colors relative group"
                   >
                     {link.label}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
                   </Link>
               ))}
               
-              <div className="h-6 w-px bg-gray-200 mx-2" />
+              <div className="h-6 w-px bg-border mx-2" />
               
               <div className="flex items-center gap-4">
                 <NotificationsDropdown />
@@ -319,7 +339,7 @@ export function Header() {
                       <Menu className="h-6 w-6" />
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="left" className="rounded-r-3xl w-[280px]">
+                  <SheetContent side="left" className="rounded-r-3xl w-[280px] bg-card border-border">
                       <SheetHeader className="text-left">
                           <SheetTitle className="text-2xl font-bold">Menu</SheetTitle>
                       </SheetHeader>
@@ -328,7 +348,7 @@ export function Header() {
                         <Link
                           key={link.href}
                           href={link.href}
-                          className="flex items-center gap-4 p-4 rounded-xl hover:bg-primary/10 text-lg font-bold transition-all"
+                          className="flex items-center gap-4 p-4 rounded-xl hover:bg-primary/10 text-lg font-bold transition-all text-foreground"
                           onClick={() => setIsSheetOpen(false)}
                         >
                           <link.icon className="h-5 w-5 text-primary" />
@@ -348,7 +368,7 @@ export function Header() {
                     className="object-contain"
                     priority
                   />
-                  <span className="text-lg font-bold tracking-tight text-gray-900">
+                  <span className="text-lg font-bold tracking-tight text-foreground">
                     Infra <span className="text-primary">Mais</span>
                   </span>
                 </Link>
@@ -360,11 +380,11 @@ export function Header() {
               </div>
             </div>
         </div>
-        <DialogContent className="rounded-2xl sm:max-w-md p-0 overflow-hidden">
+        <DialogContent className="rounded-2xl sm:max-w-md p-0 overflow-hidden bg-card border-border">
           <div className="p-8">
             <DialogHeader className="mb-6">
-              <DialogTitle className="text-2xl font-bold text-gray-900">Acessar Plataforma</DialogTitle>
-              <DialogDescription className="text-base text-gray-500">
+              <DialogTitle className="text-2xl font-bold text-foreground">Acessar Plataforma</DialogTitle>
+              <DialogDescription className="text-base text-muted-foreground">
                 Seja bem-vindo(a) de volta ao Infra Mais.
               </DialogDescription>
             </DialogHeader>

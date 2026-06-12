@@ -32,31 +32,69 @@
     --chart-5: 27 87% 67%;
     --radius: 0.75rem;
   }
+
+  .dark {
+    color-scheme: dark;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 222 47% 9%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 214 32% 91%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 215 25% 27%;
+    --input: 215 25% 27%;
+    --ring: 221.2 83.2% 53.3%;
+    --chart-1: 221.2 83.2% 53.3%;
+    --chart-2: 142.1 76.2% 36.3%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border transition-colors duration-300;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
   html, body {
-    @apply bg-white text-gray-900 selection:bg-primary/20;
-    background-color: #ffffff !important;
-    color: #111827 !important;
+    @apply bg-background text-foreground selection:bg-primary/20;
     overflow-x: hidden;
     width: 100%;
     position: relative;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight text-gray-900;
+    @apply font-bold tracking-tight text-foreground;
   }
   input, textarea, select {
-    @apply bg-white text-gray-900 border-gray-300;
+    @apply bg-background text-foreground border-border;
     appearance: none;
   }
 }
 
 .custom-leaflet-icon {
   @apply transition-transform duration-200 hover:scale-110;
+}
+
+.dark .leaflet-tile {
+  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+
+.custom-popup .leaflet-popup-content-wrapper {
+  @apply bg-card text-card-foreground rounded-xl shadow-xl p-0 overflow-hidden;
+}
+
+.custom-popup .leaflet-popup-tip {
+  @apply bg-card;
 }
