@@ -124,7 +124,6 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                   <div>
                     <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Mapa da Comunidade</h2>
-                    <p className="text-muted-foreground">Ocorrências registradas e aprovadas.</p>
                   </div>
                   <div className="flex items-center gap-4 text-xs font-bold uppercase">
                     <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Pendente</div>
