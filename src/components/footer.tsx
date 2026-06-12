@@ -12,7 +12,7 @@ export function Footer() {
               alt="Infra Mais Logo"
               width={36}
               height={36}
-              className="object-contain brightness-0 invert"
+              className="object-contain"
               priority
             />
             <span className="text-xl font-bold tracking-tight">
