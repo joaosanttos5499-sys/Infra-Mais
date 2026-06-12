@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef, memo } from "react";
@@ -128,7 +129,7 @@ const LeafletMap = ({
             <strong class="text-foreground">${displayCity} - ${report.bairro}</strong><br/>
             ${report.location}
           </p>
-          <a href="/dashboard#report-${report.id}" style="background-color: #3b82f6; color: #ffffff !important; text-decoration: none !important;" class="block text-center py-2.5 rounded-lg text-xs font-black shadow-lg hover:brightness-110 transition-all uppercase tracking-wide">
+          <a href="/dashboard#report-${report.id}" style="background-color: #3b82f6; color: #ffffff !important; text-decoration: none !important; display: block; text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; font-size: 12px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); text-transform: uppercase; letter-spacing: 0.5px;">
             Ver Detalhes
           </a>
         </div>
