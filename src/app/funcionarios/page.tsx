@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -12,19 +11,19 @@ import { Separator } from "@/components/ui/separator";
 
 function LoadingScreen() {
   return (
-    <div className="flex items-center justify-center p-12 min-h-[60vh] bg-white">
+    <div className="flex items-center justify-center p-12 min-h-[60vh] bg-background">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <p className="ml-4 text-gray-500">Verificando credenciais...</p>
+      <p className="ml-4 text-muted-foreground">Verificando credenciais...</p>
     </div>
   );
 }
 
 function AccessDenied() {
     return (
-        <div className="flex flex-col items-center justify-center p-12 text-center min-h-[60vh] bg-white">
+        <div className="flex flex-col items-center justify-center p-12 text-center min-h-[60vh] bg-background">
             <ShieldAlert className="h-16 w-16 text-destructive mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900">Acesso Negado</h1>
-            <p className="text-gray-500 mt-3 max-w-md">
+            <h1 className="text-2xl font-bold text-foreground">Acesso Negado</h1>
+            <p className="text-muted-foreground mt-3 max-w-md">
                 Esta área é restrita a funcionários credenciados do Infra Mais.
                 Se você acredita que deveria ter acesso, entre em contato com o administrador.
             </p>
@@ -64,15 +63,15 @@ export default function FuncionariosPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1 p-6 md:p-10">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 text-center md:text-left">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
               Painel do Funcionário
             </h1>
-            <Separator className="my-4 bg-gray-200" />
-            <p className="text-gray-500 mt-3">
+            <Separator className="my-4 bg-border" />
+            <p className="text-muted-foreground mt-3">
               Visualize, gerencie e atualize os problemas de infraestrutura relatados pelos cidadãos.
             </p>
           </div>
@@ -80,7 +79,7 @@ export default function FuncionariosPage() {
           {isLoadingReports ? (
               <div className="flex items-center justify-center p-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <p className="ml-4 text-gray-500">Carregando relatórios...</p>
+                  <p className="ml-4 text-muted-foreground">Carregando relatórios...</p>
               </div>
           ) : (
             <DashboardClient 

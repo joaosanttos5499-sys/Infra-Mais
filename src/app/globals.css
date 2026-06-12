@@ -64,7 +64,7 @@
 
 @layer base {
   * {
-    @apply border-border transition-colors duration-300;
+    @apply border-border transition-colors duration-200;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
@@ -77,10 +77,6 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold tracking-tight text-foreground;
   }
-  input, textarea, select {
-    @apply bg-background text-foreground border-border;
-    appearance: none;
-  }
 }
 
 .custom-leaflet-icon {
@@ -92,9 +88,17 @@
 }
 
 .custom-popup .leaflet-popup-content-wrapper {
-  @apply bg-card text-card-foreground rounded-xl shadow-xl p-0 overflow-hidden;
+  @apply bg-card text-card-foreground rounded-xl shadow-xl p-0 overflow-hidden border border-border;
 }
 
 .custom-popup .leaflet-popup-tip {
-  @apply bg-card;
+  @apply bg-card border border-border;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

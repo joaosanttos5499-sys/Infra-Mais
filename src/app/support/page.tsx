@@ -63,30 +63,30 @@ export default function SupportPage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1 p-4 md:p-12">
         <div className="max-w-3xl mx-auto">
           <div className="mb-10 text-center md:text-left space-y-2">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
               Central de Suporte
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-500">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
               Tudo o que você precisa saber sobre como utilizar o Infra Mais.
             </p>
           </div>
 
           <div className="relative mb-8">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input 
               type="text" 
               placeholder="Buscar dúvida..." 
-              className="w-full pl-12 pr-4 py-6 rounded-xl border-gray-200 shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-base bg-white text-gray-900"
+              className="w-full pl-12 pr-4 py-6 rounded-xl border-border shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-base bg-card text-foreground"
             />
           </div>
 
-          <Card className="rounded-2xl border-gray-200 shadow-sm overflow-hidden bg-white">
-            <CardHeader className="bg-gray-50/50 border-b border-gray-100 p-6">
-              <CardTitle className="text-xl md:text-2xl font-bold flex items-center gap-2 text-gray-900">
+          <Card className="rounded-2xl border-border shadow-sm overflow-hidden bg-card">
+            <CardHeader className="bg-muted/30 border-b border-border p-6">
+              <CardTitle className="text-xl md:text-2xl font-bold flex items-center gap-2 text-foreground">
                 <HelpCircle className="h-6 w-6 text-primary" />
                 Perguntas Frequentes (FAQ)
               </CardTitle>
@@ -97,12 +97,12 @@ export default function SupportPage() {
                   <AccordionItem 
                     value={`item-${index}`} 
                     key={index} 
-                    className="border-b-0 px-2 rounded-xl transition-all hover:bg-gray-50/80 data-[state=open]:bg-primary/5 data-[state=open]:border data-[state=open]:border-primary/10 mb-1"
+                    className="border-b-0 px-2 rounded-xl transition-all hover:bg-muted/50 data-[state=open]:bg-primary/5 data-[state=open]:border data-[state=open]:border-primary/10 mb-1"
                   >
-                    <AccordionTrigger className="text-left font-bold text-base md:text-lg py-5 px-4 hover:no-underline hover:text-primary transition-colors text-gray-800">
+                    <AccordionTrigger className="text-left font-bold text-base md:text-lg py-5 px-4 hover:no-underline hover:text-primary transition-colors text-foreground">
                       {faq.question}
                     </AccordionTrigger>
-                    <AccordionContent className="text-gray-600 whitespace-pre-wrap text-sm md:text-base leading-relaxed px-4 pb-6">
+                    <AccordionContent className="text-muted-foreground whitespace-pre-wrap text-sm md:text-base leading-relaxed px-4 pb-6">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>

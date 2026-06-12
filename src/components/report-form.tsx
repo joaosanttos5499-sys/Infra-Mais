@@ -1,17 +1,15 @@
-
 "use client";
 
 import { useEffect, useState, memo, useCallback, useMemo } from "react";
-import { useFormContext } from "react-hook-form";
 import Image from "next/image";
-import { Camera, Loader2, RefreshCw, ShieldAlert, MapPin, Info, ImagePlus, FileText } from "lucide-react";
-import { submitReport, type FormState } from "@/lib/actions";
+import { Camera, Loader2, MapPin, ImagePlus } from "lucide-react";
+import { submitReport } from "@/lib/actions";
 import { categories, getCategory } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import dynamic from 'next/dynamic';
@@ -29,7 +27,7 @@ import { Separator } from "./ui/separator";
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
-  loading: () => <div className="w-full h-[400px] bg-slate-100 animate-pulse flex items-center justify-center text-gray-400">Carregando mapa...</div>
+  loading: () => <div className="w-full h-[400px] bg-muted animate-pulse flex items-center justify-center text-muted-foreground">Carregando mapa...</div>
 });
 
 const PICUI_NEIGHBORHOODS = [
@@ -112,19 +110,19 @@ export function ReportForm() {
   if (isEmailEmployee(user?.email)) {
     return (
         <Card className="w-full max-w-2xl border-primary/20 bg-primary/5 rounded-2xl p-10 text-center">
-            <ShieldAlert className="h-16 w-16 text-primary mx-auto mb-4" />
+            <Loader2 className="h-16 w-16 text-primary mx-auto mb-4" />
             <CardTitle className="text-2xl font-bold">Acesso Restrito</CardTitle>
-            <p className="mt-4 text-gray-600">Funcionários não podem enviar relatos.</p>
+            <p className="mt-4 text-muted-foreground">Funcionários não podem enviar relatos.</p>
             <Button asChild className="mt-6"><Link href="/funcionarios">Painel de Gestão</Link></Button>
         </Card>
     );
   }
 
   return (
-    <Card className="w-full border-gray-200 shadow-xl rounded-2xl overflow-hidden bg-white">
-      <CardHeader className="bg-gray-50/50 border-b border-gray-100 p-6 md:p-8">
-        <CardTitle className="text-2xl md:text-4xl font-bold text-gray-900">Preencha o Relatório</CardTitle>
-        <CardDescription>Informe os detalhes do problema para resolução.</CardDescription>
+    <Card className="w-full border-border shadow-2xl rounded-2xl overflow-hidden bg-card">
+      <CardHeader className="bg-muted/30 border-b border-border p-6 md:p-8">
+        <CardTitle className="text-2xl md:text-3xl font-bold text-foreground">Relatar Problema</CardTitle>
+        <CardDescription className="text-muted-foreground">Informe os detalhes para que possamos agir.</CardDescription>
       </CardHeader>
       
       <Form {...form}>
@@ -133,24 +131,25 @@ export function ReportForm() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-2">
                   <MapPin className="h-5 w-5 text-primary" />
-                  <Label className="text-lg font-bold">Onde está o problema?</Label>
+                  <Label className="text-lg font-bold text-foreground">Localização</Label>
               </div>
-              <div className="rounded-2xl overflow-hidden border border-gray-200 h-[300px] md:h-[400px] relative z-0">
+              <div className="rounded-2xl overflow-hidden border border-border h-[300px] md:h-[400px] relative z-0 bg-muted">
                   <LeafletMap interactive={true} onLocationSelect={handleMapClick} selectedLocation={locationObject} />
               </div>
+              <p className="text-xs text-muted-foreground italic">Toque no mapa para marcar o local exato do problema.</p>
             </div>
 
-            <Separator className="bg-gray-100" />
+            <Separator className="bg-border" />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={control} name="category" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Categoria</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Tipo" /></SelectTrigger></FormControl>
-                            <SelectContent side="bottom" position="popper" sideOffset={4} className="z-[2001]">
+                            <FormControl><SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger></FormControl>
+                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
                                 {categories.map((c) => (
-                                    <SelectItem key={c.value} value={c.value} className="py-3">
+                                    <SelectItem key={c.value} value={c.value} className="py-3 rounded-lg">
                                         <div className="flex items-center gap-2"><c.icon className="h-4 w-4" />{c.label}</div>
                                     </SelectItem>
                                 ))}
@@ -162,8 +161,10 @@ export function ReportForm() {
                     <FormItem>
                         <FormLabel>Problema Específico</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
-                            <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
-                            <SelectContent side="bottom" position="popper" sideOffset={4} className="z-[2001]">{problems.map((p) => <SelectItem key={p.value} value={p.value} className="py-3">{p.label}</SelectItem>)}</SelectContent>
+                            <FormControl><SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border"><SelectValue placeholder="O que houve?" /></SelectTrigger></FormControl>
+                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
+                                {problems.map((p) => <SelectItem key={p.value} value={p.value} className="py-3 rounded-lg">{p.label}</SelectItem>)}
+                            </SelectContent>
                         </Select>
                     </FormItem>
                 )} />
@@ -174,8 +175,10 @@ export function ReportForm() {
                     <FormItem>
                         <FormLabel>Cidade</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Cidade" /></SelectTrigger></FormControl>
-                            <SelectContent side="bottom" position="popper" sideOffset={4} className="z-[2001]"><SelectItem value="Picui">Picuí</SelectItem></SelectContent>
+                            <FormControl><SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border"><SelectValue placeholder="Cidade" /></SelectTrigger></FormControl>
+                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
+                                <SelectItem value="Picui" className="rounded-lg">Picuí</SelectItem>
+                            </SelectContent>
                         </Select>
                     </FormItem>
                 )} />
@@ -183,33 +186,36 @@ export function ReportForm() {
                     <FormItem>
                         <FormLabel>Bairro</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCity}>
-                            <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Bairro" /></SelectTrigger></FormControl>
-                            <SelectContent side="bottom" position="popper" sideOffset={4} className="z-[2001]">{PICUI_NEIGHBORHOODS.map((b) => <SelectItem key={b} value={b} className="py-3">{b}</SelectItem>)}</SelectContent>
+                            <FormControl><SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border"><SelectValue placeholder="Selecione o bairro" /></SelectTrigger></FormControl>
+                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
+                                {PICUI_NEIGHBORHOODS.map((b) => <SelectItem key={b} value={b} className="py-3 rounded-lg">{b}</SelectItem>)}
+                            </SelectContent>
                         </Select>
                     </FormItem>
                 )} />
             </div>
 
             <FormField control={control} name="address" render={({ field }) => (
-                <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input placeholder="ex: Rua Principal" className="h-11 rounded-xl" {...field} /></FormControl></FormItem>
+                <FormItem><FormLabel>Endereço ou Ponto de Referência</FormLabel><FormControl><Input placeholder="ex: Rua Principal, próximo ao mercadinho" className="h-12 rounded-xl bg-muted/20 border-border" {...field} /></FormControl></FormItem>
             )} />
 
             <div className="space-y-4">
-                <Label className="font-bold flex items-center gap-2"><ImagePlus className="h-5 w-5 text-primary" /> Evidência Visual</Label>
-                <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-gray-50" : "bg-gray-50/50 hover:bg-gray-100")}>
-                    {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : <div className="text-center p-4"><Camera className="mx-auto h-10 w-10 text-gray-400" /><p className="text-sm font-bold mt-2">Toque para enviar a foto</p></div>}
+                <Label className="font-bold flex items-center gap-2 text-foreground"><ImagePlus className="h-5 w-5 text-primary" /> Evidência Visual</Label>
+                <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-muted border-primary/50" : "bg-muted/50 border-border hover:bg-muted")}>
+                    {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : <div className="text-center p-4"><Camera className="mx-auto h-12 w-12 text-muted-foreground" /><p className="text-sm font-bold mt-2 text-muted-foreground">Clique para tirar ou anexar uma foto</p></div>}
                     <input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
                 </div>
+                <FormMessage />
             </div>
 
             <FormField control={control} name="description" render={({ field }) => (
-                <FormItem><FormLabel>Descrição Adicional</FormLabel><FormControl><Textarea placeholder="Detalhes (opcional)..." className="min-h-[100px] rounded-2xl" {...field} /></FormControl></FormItem>
+                <FormItem><FormLabel>Descrição Detalhada</FormLabel><FormControl><Textarea placeholder="Descreva o problema em mais detalhes se necessário..." className="min-h-[120px] rounded-2xl bg-muted/20 border-border" {...field} /></FormControl></FormItem>
             )} />
           </CardContent>
 
-          <CardFooter className="bg-gray-50/50 border-t border-gray-100 p-6 flex flex-col sm:flex-row justify-between gap-4">
-              <Button variant="outline" type="button" onClick={() => { reset(); setPhotoPreview(null); }} className="h-12 rounded-xl font-bold" disabled={isRedirecting}>Limpar</Button>
-              <Button type="submit" className="h-12 px-10 rounded-xl font-bold" disabled={form.formState.isSubmitting || isRedirecting}>
+          <CardFooter className="bg-muted/30 border-t border-border p-6 md:p-8 flex flex-col sm:flex-row justify-between gap-4">
+              <Button variant="outline" type="button" onClick={() => { reset(); setPhotoPreview(null); }} className="h-12 rounded-xl font-bold w-full sm:w-auto" disabled={isRedirecting}>Limpar Formulário</Button>
+              <Button type="submit" className="h-12 px-12 rounded-xl font-bold w-full sm:w-auto shadow-lg" disabled={form.formState.isSubmitting || isRedirecting}>
                 {(form.formState.isSubmitting || isRedirecting) ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
                 Enviar Relatório
               </Button>

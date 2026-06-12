@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
@@ -123,14 +122,14 @@ const ReportCard = memo(({
 
   return (
     <Card 
-      className="overflow-hidden bg-white border border-gray-200 shadow-sm transition-transform duration-300 hover:shadow-md rounded-xl animate-in fade-in" 
+      className="overflow-hidden bg-card border-border shadow-sm transition-all duration-300 hover:shadow-lg rounded-xl animate-in fade-in" 
       id={`report-${report.id}`}
     >
       <CardContent className="p-0">
         <Accordion type="single" collapsible disabled={showUpvote}>
           <AccordionItem value={report.id} className="border-b-0">
             <div className="flex flex-col md:flex-row h-full">
-                <div className="relative w-full md:w-56 h-48 md:h-auto overflow-hidden bg-gray-100 shrink-0">
+                <div className="relative w-full md:w-56 h-48 md:h-auto overflow-hidden bg-muted shrink-0">
                     <Image
                         src={report.photoUrl}
                         alt="Foto do problema"
@@ -147,26 +146,26 @@ const ReportCard = memo(({
                 <div className="p-4 md:p-6 flex flex-col flex-grow min-w-0">
                     <div className="flex justify-between items-start gap-4 mb-2">
                         <div className="space-y-1 min-w-0">
-                            <h3 className="font-bold text-lg text-gray-900 leading-tight truncate">
+                            <h3 className="font-bold text-lg text-foreground leading-tight truncate">
                                 {problem?.label || report.problem}
                             </h3>
-                            <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
                                 {category?.icon && <category.icon className="h-4 w-4" style={{ color: category?.color }} />}
                                 <span>{category?.label || report.category}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="space-y-1 py-3 border-t border-gray-50 mt-2">
-                        <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                    <div className="space-y-1 py-3 border-t border-border mt-2">
+                        <div className="flex items-center gap-2 text-sm font-bold text-foreground/80">
                             <MapPin className="h-4 w-4 text-primary" />
                             <span>{displayCity} - {report.bairro}</span>
                         </div>
                     </div>
 
-                    <div className="mt-auto pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border-t border-gray-50 gap-4">
+                    <div className="mt-auto pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border-t border-border gap-4">
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium uppercase">
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium uppercase">
                                 <Clock className="h-3.5 w-3.5" />
                                 <ReportTime date={new Date(report.createdAt)} />
                             </div>
@@ -174,12 +173,12 @@ const ReportCard = memo(({
                             {report.status === 'RESOLVED' && report.photoAfterUrl && (
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <button className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:underline">
+                                        <button className="flex items-center gap-1.5 text-xs font-bold text-emerald-500 hover:underline">
                                             <CheckCircle2 className="h-3.5 w-3.5" /> Solução
                                         </button>
                                     </DialogTrigger>
-                                    <DialogContent className="max-w-4xl p-2 rounded-2xl">
-                                        <div className="relative aspect-video">
+                                    <DialogContent className="max-w-4xl p-2 rounded-2xl bg-card border-border">
+                                        <div className="relative aspect-video rounded-xl overflow-hidden bg-muted">
                                             <Image src={report.photoAfterUrl} alt="Trabalho concluído" fill className="object-contain" />
                                         </div>
                                     </DialogContent>
@@ -188,7 +187,7 @@ const ReportCard = memo(({
                         </div>
 
                         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                            <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold">
+                            <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold hover:bg-primary/10">
                                 <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
                                     <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
                                 </Link>
@@ -197,18 +196,18 @@ const ReportCard = memo(({
                             {canDelete && (
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="text-destructive h-9 px-3">
+                                        <Button variant="ghost" size="sm" className="text-destructive h-9 px-3 hover:bg-destructive/10">
                                             <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Remover
                                         </Button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent className="rounded-2xl">
+                                    <AlertDialogContent className="rounded-2xl bg-card border-border">
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
                                             <AlertDialogDescription>Esta ação é irreversível.</AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white">Confirmar</AlertDialogAction>
+                                            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl">Confirmar</AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
@@ -219,7 +218,7 @@ const ReportCard = memo(({
                                   variant={isUpvoted ? "default" : "outline"} 
                                   size="sm" 
                                   onClick={(e) => { e.stopPropagation(); onUpvote(report.id); }}
-                                  className={cn("rounded-full font-bold h-9 px-5 text-xs transition-all", isUpvoted ? "bg-primary hover:bg-primary/90" : "bg-gray-100 border-transparent hover:bg-gray-200")}
+                                  className={cn("rounded-full font-bold h-9 px-5 text-xs transition-all shadow-sm", isUpvoted ? "bg-primary hover:bg-primary/90" : "bg-muted/50 border-border hover:bg-muted")}
                                 >
                                     <ThumbsUp className={cn("h-3.5 w-3.5 mr-2", isUpvoted && "fill-current")} />
                                     Apoiar ({report.upvotes})
@@ -235,19 +234,19 @@ const ReportCard = memo(({
             </div>
             
             {!showUpvote && (
-            <AccordionContent className="bg-gray-50/50 border-t border-gray-100">
+            <AccordionContent className="bg-muted/20 border-t border-border">
               <form action={formAction} ref={formRef}>
                 <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="space-y-6">
-                            <Label className="text-sm font-bold text-gray-700 uppercase">Atualizar Situação</Label>
+                            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Atualizar Situação</Label>
                             <Select name="status" defaultValue={report.status} onValueChange={(val) => setSelectedStatus(val as ReportStatus)}>
-                                <SelectTrigger className="h-12 rounded-xl bg-white shadow-sm" disabled={isFinalStatus}>
+                                <SelectTrigger className="h-12 rounded-xl bg-card border-border shadow-sm" disabled={isFinalStatus}>
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent side="bottom" position="popper" className="z-[2001]">
+                                <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
                                     {Object.entries(statusConfig).map(([key, { label }]) => (
-                                        <SelectItem key={key} value={key} disabled={key !== nextAllowedStatus && key !== report.status}>
+                                        <SelectItem key={key} value={key} disabled={key !== nextAllowedStatus && key !== report.status} className="rounded-lg">
                                             {label} {key === nextAllowedStatus && "(Próximo)"}
                                         </SelectItem>
                                     ))}
@@ -262,14 +261,14 @@ const ReportCard = memo(({
                                             Salvar Alterações
                                         </Button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent className="rounded-2xl">
+                                    <AlertDialogContent className="rounded-2xl bg-card border-border">
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Confirmar Atualização</AlertDialogTitle>
                                             <AlertDialogDescription>O cidadão autor do relato será notificado sobre a mudança.</AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => formRef.current?.requestSubmit()} disabled={!isStatusConfirmEnabled || isPending} className="bg-primary text-white">
+                                            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => formRef.current?.requestSubmit()} disabled={!isStatusConfirmEnabled || isPending} className="bg-primary text-primary-foreground rounded-xl">
                                                 {isStatusConfirmEnabled ? "Confirmar" : `Aguarde (${statusCountdown}s)`}
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
@@ -279,14 +278,14 @@ const ReportCard = memo(({
                         </div>
 
                         <div className={cn("space-y-4", !isPhotoEnabled && "opacity-40 pointer-events-none")}>
-                            <Label className="text-sm font-bold text-gray-700 uppercase">Foto do Reparo Realizado</Label>
-                            <div className="aspect-video rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center relative overflow-hidden bg-white group-hover:border-primary/50 transition-colors">
+                            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Foto do Reparo Realizado</Label>
+                            <div className="aspect-video rounded-xl border-2 border-dashed border-border flex items-center justify-center relative overflow-hidden bg-card hover:border-primary/50 transition-colors">
                                 {(photoAfterPreview || report.photoAfterUrl) ? (
                                     <Image src={photoAfterPreview || report.photoAfterUrl!} alt="Preview" fill className="object-cover" />
                                 ) : (
                                     <div className="text-center p-4">
-                                        <Camera className="mx-auto h-8 w-8 text-gray-400" />
-                                        <p className="mt-2 text-xs font-bold text-gray-500">Anexar evidência</p>
+                                        <Camera className="mx-auto h-8 w-8 text-muted-foreground" />
+                                        <p className="mt-2 text-xs font-bold text-muted-foreground">Anexar evidência</p>
                                     </div>
                                 )}
                                 <Input id={`photoAfter-${report.id}`} name="photoAfter" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} disabled={!isPhotoEnabled || isFinalStatus} />
@@ -294,22 +293,22 @@ const ReportCard = memo(({
                         </div>
                     </div>
 
-                    <Separator className="bg-gray-200" />
+                    <Separator className="bg-border" />
 
-                    <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-4">
+                    <div className="bg-destructive/5 p-5 rounded-xl border border-destructive/20 space-y-4">
                         <div className="flex items-center gap-2 mb-2">
-                            <ShieldAlert className="h-5 w-5 text-amber-600" />
-                            <h4 className="text-sm font-bold text-gray-900 uppercase">Ações de Moderação</h4>
+                            <ShieldAlert className="h-5 w-5 text-destructive" />
+                            <h4 className="text-sm font-bold text-destructive uppercase tracking-wider">Ações de Moderação</h4>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3">
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button type="button" variant="outline" className="flex-1 h-11 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 font-bold rounded-lg transition-colors">
+                                    <Button type="button" variant="outline" className="flex-1 h-11 border-destructive/20 text-destructive hover:bg-destructive/10 font-bold rounded-xl transition-colors">
                                         <Trash2 className="h-4 w-4 mr-2" />
                                         Excluir Relatório Indevido
                                     </Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent className="rounded-2xl">
+                                <AlertDialogContent className="rounded-2xl bg-card border-border">
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>Excluir permanentemente?</AlertDialogTitle>
                                         <AlertDialogDescription>
@@ -317,13 +316,13 @@ const ReportCard = memo(({
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white">Sim, excluir relato</AlertDialogAction>
+                                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl">Sim, excluir relato</AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
                         </div>
-                        <p className="text-[10px] text-gray-400 uppercase tracking-tight text-center sm:text-left">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-tight text-center sm:text-left">
                             As ações acima são registradas no log de auditoria do sistema.
                         </p>
                     </div>
@@ -446,25 +445,25 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
     <div className="space-y-8">
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ReportStatus)} className="w-full">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-8">
-            <TabsList className="bg-gray-100 p-1 rounded-full w-full lg:w-auto overflow-x-auto no-scrollbar">
-                {!showUpvote && <TabsTrigger value="UNDER_REVIEW" className="rounded-full px-5 py-2.5 text-sm font-bold">Em Análise</TabsTrigger>}
-                <TabsTrigger value="PENDING" className="rounded-full px-5 py-2.5 text-sm font-bold">Pendente</TabsTrigger>
-                <TabsTrigger value="IN_PROGRESS" className="rounded-full px-5 py-2.5 text-sm font-bold">Em Andamento</TabsTrigger>
-                <TabsTrigger value="RESOLVED" className="rounded-full px-5 py-2.5 text-sm font-bold">Resolvido</TabsTrigger>
+            <TabsList className="bg-muted p-1 rounded-2xl w-full lg:w-auto overflow-x-auto no-scrollbar shadow-inner">
+                {!showUpvote && <TabsTrigger value="UNDER_REVIEW" className="rounded-xl px-5 py-2.5 text-sm font-bold data-[state=active]:bg-background">Em Análise</TabsTrigger>}
+                <TabsTrigger value="PENDING" className="rounded-xl px-5 py-2.5 text-sm font-bold data-[state=active]:bg-background">Pendente</TabsTrigger>
+                <TabsTrigger value="IN_PROGRESS" className="rounded-xl px-5 py-2.5 text-sm font-bold data-[state=active]:bg-background">Em Andamento</TabsTrigger>
+                <TabsTrigger value="RESOLVED" className="rounded-xl px-5 py-2.5 text-sm font-bold data-[state=active]:bg-background">Resolvido</TabsTrigger>
             </TabsList>
             
             <div className="flex items-center gap-4 w-full lg:w-auto justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase">
+              <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
                 <Filter className="h-4 w-4" /> Ordenar
               </div>
               <Select onValueChange={(v) => setSortBy(v as any)} defaultValue={sortBy}>
-                <SelectTrigger className="h-10 w-[180px] bg-white border-gray-200">
+                <SelectTrigger className="h-10 w-[180px] bg-card border-border rounded-xl shadow-sm">
                     <SelectValue />
                 </SelectTrigger>
-                <SelectContent side="bottom" position="popper">
-                  <SelectItem value="newest">Mais Recentes</SelectItem>
-                  <SelectItem value="oldest">Mais Antigos</SelectItem>
-                  <SelectItem value="upvotes">Mais Apoiados</SelectItem>
+                <SelectContent side="bottom" position="popper" className="bg-card border-border rounded-xl shadow-xl z-[1001]">
+                  <SelectItem value="newest" className="rounded-lg">Mais Recentes</SelectItem>
+                  <SelectItem value="oldest" className="rounded-lg">Mais Antigos</SelectItem>
+                  <SelectItem value="upvotes" className="rounded-lg">Mais Apoiados</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -486,7 +485,7 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
                       />
                     ))
                   ) : (
-                    <div className="text-center py-20 bg-gray-50/50 rounded-2xl border-2 border-dashed">
+                    <div className="text-center py-20 bg-muted/20 rounded-2xl border-2 border-dashed border-border shadow-inner">
                       <p className="text-muted-foreground font-medium">Nenhum relato nesta categoria.</p>
                     </div>
                   )}

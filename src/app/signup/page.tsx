@@ -3,12 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export default function SignupPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1 p-4 md:p-8 flex items-center justify-center">
-        <Card className="w-full max-w-md bg-white border-gray-200">
+        <Card className="w-full max-w-md bg-card border-border shadow-xl">
             <CardHeader>
-                <CardTitle className="text-gray-900">Criar Conta</CardTitle>
-                <CardDescription className="text-gray-500">Preencha os campos abaixo para criar sua conta.</CardDescription>
+                <CardTitle className="text-foreground">Criar Conta</CardTitle>
+                <CardDescription className="text-muted-foreground">Preencha os campos abaixo para criar sua conta no Infra Mais.</CardDescription>
             </CardHeader>
             <CardContent>
                 <SignupForm />

@@ -1,17 +1,16 @@
-
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Bell, Briefcase, Users, Trash2, ArrowRight, Palette, Sun, Moon, ChevronRight } from "lucide-react";
+import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Briefcase, Users, Trash2, ArrowRight, Palette, Sun, Moon } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { createAvatarSvg } from "@/lib/avatar";
 import { useRouter } from "next/navigation";
@@ -88,21 +87,20 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent 
-            className="w-[320px] sm:w-[340px] rounded-[16px] border-border bg-card p-2 animate-in fade-in slide-in-from-top-2 duration-200" 
+            className="w-[300px] rounded-2xl border-border bg-card p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200" 
             align="end" 
             forceMount
-            style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.15)' }}
           >
             <div className="flex flex-col items-center p-6 pb-4">
-              <Avatar className="h-14 w-14 mb-3 shadow-md border-2 border-background ring-1 ring-border">
+              <Avatar className="h-16 w-16 mb-3 shadow-md border-2 border-background">
                 <AvatarImage src={avatarSrc} alt={user.displayName || user.email || 'User'} />
-                <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">{userInitial}</AvatarFallback>
+                <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">{userInitial}</AvatarFallback>
               </Avatar>
               <div className="text-center">
-                <p className="text-base font-bold text-foreground leading-tight">
+                <p className="text-base font-bold text-foreground leading-tight truncate max-w-[240px]">
                   {user.displayName || 'Usuário'}
                 </p>
-                <p className="text-xs text-muted-foreground font-medium mt-1 truncate max-w-[200px]">
+                <p className="text-xs text-muted-foreground mt-1 truncate max-w-[240px]">
                   {user.email}
                 </p>
               </div>
@@ -110,35 +108,35 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
             
             <DropdownMenuSeparator className="mx-2 bg-border" />
             
-            <div className="py-1 px-1">
-              <DropdownMenuItem asChild className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
+            <div className="py-1">
+              <DropdownMenuItem asChild className="h-11 rounded-xl cursor-pointer px-3 group">
                 <Link href="/minha-conta" className="flex items-center w-full">
-                  <User className="mr-3 h-5 w-5 text-muted-foreground group-focus:text-primary transition-colors" />
-                  <span className="font-semibold text-sm text-foreground group-focus:text-primary">Meu Perfil</span>
+                  <User className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                  <span className="font-semibold text-sm">Meu Perfil</span>
                 </Link>
               </DropdownMenuItem>
 
-              <DropdownMenuItem asChild className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
+              <DropdownMenuItem asChild className="h-11 rounded-xl cursor-pointer px-3 group">
                 <Link href="/minha-conta#meus-relatorios" className="flex items-center w-full">
-                  <Briefcase className="mr-3 h-5 w-5 text-muted-foreground group-focus:text-primary transition-colors" />
-                  <span className="font-semibold text-sm text-foreground group-focus:text-primary">Meus Relatos</span>
+                  <Briefcase className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                  <span className="font-semibold text-sm">Meus Relatos</span>
                 </Link>
               </DropdownMenuItem>
 
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group">
-                  <Palette className="mr-3 h-5 w-5 text-muted-foreground group-focus:text-primary transition-colors" />
-                  <span className="font-semibold text-sm text-foreground group-focus:text-primary">Tema</span>
+                <DropdownMenuSubTrigger className="h-11 rounded-xl cursor-pointer px-3 group">
+                  <Palette className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                  <span className="font-semibold text-sm">Tema</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="bg-card border-border p-1 rounded-xl shadow-xl">
+                  <DropdownMenuSubContent className="bg-card border-border p-1 rounded-xl shadow-xl min-w-[140px]">
                     <DropdownMenuItem onClick={() => setTheme('light')} className={cn("h-10 rounded-lg cursor-pointer px-3 gap-3", theme === 'light' && "bg-primary/10 text-primary")}>
                       <Sun className="h-4 w-4" />
-                      <span className="font-semibold text-sm">Tema Claro</span>
+                      <span className="font-semibold text-sm">Claro</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setTheme('dark')} className={cn("h-10 rounded-lg cursor-pointer px-3 gap-3", theme === 'dark' && "bg-primary/10 text-primary")}>
                       <Moon className="h-4 w-4" />
-                      <span className="font-semibold text-sm">Tema Escuro</span>
+                      <span className="font-semibold text-sm">Escuro</span>
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
@@ -146,102 +144,94 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
 
               <DropdownMenuItem 
                 onSelect={(e) => { e.preventDefault(); setIsSwitchAccountOpen(true); }}
-                className="h-12 rounded-lg cursor-pointer px-3 focus:bg-primary/5 focus:text-primary transition-colors group"
+                className="h-11 rounded-xl cursor-pointer px-3 group"
               >
-                <Users className="mr-3 h-5 w-5 text-muted-foreground group-focus:text-primary transition-colors" />
-                <span className="font-semibold text-sm text-foreground group-focus:text-primary">Trocar de Conta</span>
+                <Users className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                <span className="font-semibold text-sm">Trocar de Conta</span>
               </DropdownMenuItem>
             </div>
 
             <DropdownMenuSeparator className="mx-2 bg-border" />
             
-            <div className="px-1 py-1">
+            <div className="py-1">
               <DropdownMenuItem 
                 onClick={() => signOut(auth)} 
-                className="h-12 rounded-lg cursor-pointer px-3 focus:bg-destructive/10 focus:text-destructive transition-colors group"
+                className="h-11 rounded-xl cursor-pointer px-3 group text-destructive hover:bg-destructive/10"
               >
-                <LogOut className="mr-3 h-5 w-5 text-muted-foreground group-focus:text-destructive transition-colors" />
-                <span className="font-semibold text-sm text-foreground group-focus:text-destructive">Sair</span>
+                <LogOut className="mr-3 h-5 w-5 text-destructive" />
+                <span className="font-semibold text-sm">Sair</span>
               </DropdownMenuItem>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
 
         <Dialog open={isSwitchAccountOpen} onOpenChange={setIsSwitchAccountOpen}>
-          <DialogContent className="rounded-2xl sm:max-w-md p-0 overflow-hidden bg-card border-border">
-            <div className="p-8">
-              <DialogHeader className="mb-6">
-                <DialogTitle className="text-2xl font-bold text-foreground">Trocar de Conta</DialogTitle>
-                <DialogDescription className="text-base text-muted-foreground">
-                  Selecione uma conta salva para entrar rapidamente.
-                </DialogDescription>
-              </DialogHeader>
+          <DialogContent className="rounded-2xl sm:max-w-md p-6 bg-card border-border">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-xl font-bold">Trocar de Conta</DialogTitle>
+              <DialogDescription>
+                Selecione uma conta salva para entrar.
+              </DialogDescription>
+            </DialogHeader>
 
-              <ScrollArea className="max-h-[300px] -mx-2 px-2">
-                <div className="space-y-2">
-                  {savedAccounts.length > 0 ? (
-                    savedAccounts.map((account) => (
-                      <div 
-                        key={account.uid} 
-                        className={cn(
-                          "flex items-center justify-between p-3 rounded-xl border border-border hover:bg-primary/5 transition-all group",
-                          user?.uid === account.uid && "bg-primary/5 border-primary/20 pointer-events-none"
-                        )}
+            <ScrollArea className="max-h-[300px] pr-2">
+              <div className="space-y-2">
+                {savedAccounts.length > 0 ? (
+                  savedAccounts.map((account) => (
+                    <div 
+                      key={account.uid} 
+                      className={cn(
+                        "flex items-center justify-between p-3 rounded-xl border border-border hover:bg-primary/5 transition-all group",
+                        user?.uid === account.uid && "bg-primary/5 border-primary/20 pointer-events-none"
+                      )}
+                    >
+                      <button 
+                        onClick={() => handleSwitchAccount(account)}
+                        className="flex items-center gap-3 flex-grow text-left"
                       >
-                        <button 
-                          onClick={() => handleSwitchAccount(account)}
-                          className="flex items-center gap-3 flex-grow text-left"
-                        >
-                          <Avatar className="h-10 w-10 border border-background shadow-sm">
-                            <AvatarImage src={account.photoURL} alt={account.displayName} />
-                            <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                              {account.displayName.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0">
-                            <p className="text-sm font-bold text-foreground truncate">{account.displayName}</p>
-                            <p className="text-xs text-muted-foreground truncate">{account.email}</p>
-                          </div>
-                        </button>
-                        
-                        <div className="flex items-center gap-2">
-                          {user?.uid === account.uid ? (
-                            <span className="text-[10px] font-bold text-primary uppercase bg-primary/10 px-2 py-1 rounded-full">Atual</span>
-                          ) : (
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
-                              onClick={(e) => { e.stopPropagation(); removeAccount(account.uid); }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={account.photoURL} alt={account.displayName} />
+                          <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                            {account.displayName.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold truncate">{account.displayName}</p>
+                          <p className="text-xs text-muted-foreground truncate">{account.email}</p>
                         </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-sm text-muted-foreground">Nenhuma outra conta salva.</p>
+                      </button>
+                      
+                      {user?.uid !== account.uid && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={(e) => { e.stopPropagation(); removeAccount(account.uid); }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
-                  )}
-                </div>
-              </ScrollArea>
-
-              <div className="mt-6 pt-6 border-t border-border">
-                <Button 
-                  variant="outline" 
-                  className="w-full h-12 rounded-xl font-bold border-primary/20 text-primary hover:bg-primary/5"
-                  onClick={() => {
-                    signOut(auth).then(() => {
-                      setIsSwitchAccountOpen(false);
-                      router.push('/report/auth');
-                    });
-                  }}
-                >
-                  Usar outra conta <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                  ))
+                ) : (
+                  <p className="text-center py-8 text-sm text-muted-foreground">Nenhuma conta salva.</p>
+                )}
               </div>
+            </ScrollArea>
+
+            <div className="mt-6 pt-4 border-t border-border">
+              <Button 
+                variant="outline" 
+                className="w-full h-11 rounded-xl font-bold"
+                onClick={() => {
+                  signOut(auth).then(() => {
+                    setIsSwitchAccountOpen(false);
+                    router.push('/report/auth');
+                  });
+                }}
+              >
+                Usar outra conta <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -250,7 +240,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   }
 
   return (
-    <Button variant="default" className="h-10 rounded-xl px-6 font-bold shadow-md hover:scale-105 transition-all" onClick={onLoginClick}>
+    <Button variant="default" className="h-10 rounded-xl px-6 font-bold shadow-md" onClick={onLoginClick}>
       Entrar
     </Button>
   );
@@ -285,115 +275,105 @@ export function Header() {
 
   return (
     <header className={cn(
-      "w-full bg-background flex items-center h-16 transition-all duration-300 border-b border-border",
-      scrolled ? "shadow-md" : "shadow-none"
+      "fixed top-0 left-0 w-full z-[1000] bg-background border-b border-border transition-all duration-300",
+      scrolled ? "h-16 shadow-md" : "h-20"
     )}>
-      <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-        <div className="w-full max-w-full mx-auto px-6 h-full flex items-center justify-between">
-            <Link href="/" className="hidden md:flex items-center gap-2 group transition-transform hover:scale-105">
-              <Image
-                src="/img/logo1.png"
-                alt="Infra Mais Logo"
-                width={36}
-                height={36}
-                className="object-contain"
-                priority
-              />
-              <span className="text-xl font-bold tracking-tight text-foreground">
-                Infra <span className="text-primary">Mais</span>
-              </span>
-            </Link>
-            
-            <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">
-              {filteredNavLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="text-muted-foreground hover:text-primary transition-colors relative group"
-                  >
-                    {link.label}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
-                  </Link>
-              ))}
-              
-              <div className="h-6 w-px bg-border mx-2" />
-              
-              <div className="flex items-center gap-4">
-                <NotificationsDropdown />
-                <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
-                {user && !isEmployee && (
-                  <Button asChild size="sm" className="h-10 rounded-lg font-bold shadow-sm bg-primary hover:bg-primary/90 hover:scale-[1.02] transition-all">
-                    <Link href="/report/new">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Relatar
-                    </Link>
-                  </Button>
-                )}
-              </div>
-            </nav>
-
-            <div className="md:hidden flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
-                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10">
-                      <Menu className="h-6 w-6" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="rounded-r-3xl w-[280px] bg-card border-border">
-                      <SheetHeader className="text-left">
-                          <SheetTitle className="text-2xl font-bold">Menu</SheetTitle>
-                      </SheetHeader>
-                    <nav className="flex flex-col gap-2 mt-8">
-                      {filteredNavLinks.map((link) => (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          className="flex items-center gap-4 p-4 rounded-xl hover:bg-primary/10 text-lg font-bold transition-all text-foreground"
-                          onClick={() => setIsSheetOpen(false)}
-                        >
-                          <link.icon className="h-5 w-5 text-primary" />
-                          {link.label}
-                        </Link>
-                      ))}
-                    </nav>
-                  </SheetContent>
-                </Sheet>
-
-                <Link href="/" className="flex items-center gap-2 group">
-                  <Image
-                    src="/img/logo1.png"
-                    alt="Infra Mais Logo"
-                    width={32}
-                    height={32}
-                    className="object-contain"
-                    priority
-                  />
-                  <span className="text-lg font-bold tracking-tight text-foreground">
-                    Infra <span className="text-primary">Mais</span>
-                  </span>
-                </Link>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <NotificationsDropdown />
-                <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
-              </div>
-            </div>
-        </div>
-        <DialogContent className="rounded-2xl sm:max-w-md p-0 overflow-hidden bg-card border-border">
-          <div className="p-8">
-            <DialogHeader className="mb-6">
-              <DialogTitle className="text-2xl font-bold text-foreground">Acessar Plataforma</DialogTitle>
-              <DialogDescription className="text-base text-muted-foreground">
-                Seja bem-vindo(a) de volta ao Infra Mais.
-              </DialogDescription>
-            </DialogHeader>
-            <AuthForm 
-              onAuthSuccess={handleLoginSuccess} 
-              onSignupClick={() => setIsAuthModalOpen(false)}
+      <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 group">
+            <Image
+              src="/img/logo1.png"
+              alt="Infra Mais Logo"
+              width={36}
+              height={36}
+              className="object-contain"
+              priority
             />
+            <span className="text-xl font-bold tracking-tight">
+              Infra <span className="text-primary">Mais</span>
+            </span>
+          </Link>
+          
+          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
+            {filteredNavLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-muted-foreground hover:text-primary transition-colors relative group"
+                >
+                  {link.label}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+                </Link>
+            ))}
+            
+            <div className="h-6 w-px bg-border mx-2" />
+            
+            <div className="flex items-center gap-4">
+              <NotificationsDropdown />
+              <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
+              {user && !isEmployee && (
+                <Button asChild size="sm" className="h-10 rounded-lg font-bold shadow-sm">
+                  <Link href="/report/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Relatar
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </nav>
+
+          <div className="md:hidden flex items-center gap-2">
+            <NotificationsDropdown />
+            <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-xl">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-card border-border">
+                <SheetHeader className="text-left mb-8">
+                    <SheetTitle className="text-2xl font-bold">Navegação</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-2">
+                  {filteredNavLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="flex items-center gap-4 p-4 rounded-xl hover:bg-primary/10 text-lg font-bold transition-all"
+                      onClick={() => setIsSheetOpen(false)}
+                    >
+                      <link.icon className="h-5 w-5 text-primary" />
+                      {link.label}
+                    </Link>
+                  ))}
+                  {user && !isEmployee && (
+                    <Link
+                      href="/report/new"
+                      className="flex items-center gap-4 p-4 rounded-xl bg-primary text-white text-lg font-bold mt-4"
+                      onClick={() => setIsSheetOpen(false)}
+                    >
+                      <Plus className="h-5 w-5" />
+                      Novo Relato
+                    </Link>
+                  )}
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
+      </div>
+
+      <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
+        <DialogContent className="rounded-2xl sm:max-w-md p-8 bg-card border-border">
+          <DialogHeader className="mb-6">
+            <DialogTitle className="text-2xl font-bold">Acessar Plataforma</DialogTitle>
+            <DialogDescription>
+              Seja bem-vindo(a) de volta ao Infra Mais.
+            </DialogDescription>
+          </DialogHeader>
+          <AuthForm 
+            onAuthSuccess={handleLoginSuccess} 
+            onSignupClick={() => setIsAuthModalOpen(false)}
+          />
         </DialogContent>
       </Dialog>
     </header>

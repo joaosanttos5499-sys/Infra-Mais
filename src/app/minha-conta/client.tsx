@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, Trash2, AlertTriangle, MapPin, Clock, ChevronRight, Mail, Calendar, Plus } from "lucide-react";
+import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -51,9 +50,9 @@ function MyReportItem({ report }: { report: Report }) {
     };
 
     return (
-        <div className="flex flex-col sm:flex-row gap-4 items-center border border-gray-200 rounded-xl p-4 bg-white group relative animate-in fade-in slide-in-from-bottom-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-center border border-border rounded-xl p-4 bg-card group relative animate-in fade-in slide-in-from-bottom-4">
             
-            <div className="relative w-full sm:w-24 h-40 sm:h-24 rounded-lg overflow-hidden shrink-0 z-10 shadow-sm">
+            <div className="relative w-full sm:w-24 h-40 sm:h-24 rounded-lg overflow-hidden shrink-0 z-10 shadow-sm bg-muted">
                 <Image
                     src={report.photoUrl}
                     alt={report.description || "Foto do problema"}
@@ -64,7 +63,7 @@ function MyReportItem({ report }: { report: Report }) {
 
             <div className="flex flex-col flex-grow min-w-0 z-10 w-full">
                 <div className="flex justify-between items-start gap-2">
-                    <h3 className="font-semibold text-gray-800 truncate">
+                    <h3 className="font-semibold text-foreground truncate">
                         {problem?.label || report.problem}
                     </h3>
                     <div className="shrink-0">
@@ -72,23 +71,23 @@ function MyReportItem({ report }: { report: Report }) {
                     </div>
                 </div>
 
-                <div className="text-sm text-gray-500 flex items-center gap-1.5 mt-1">
+                <div className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">
                     {category?.icon && <category.icon className="h-3 w-3" style={{ color: category.color }} />}
                     <span className="truncate">{category?.label || report.category}</span>
                 </div>
 
-                <div className="text-sm text-gray-600 flex items-center gap-1.5 mt-1">
+                <div className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">
                     <MapPin className="h-3 w-3 text-primary" />
                     <span className="truncate">{displayCity} - {report.bairro}</span>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs text-gray-400 mt-2">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2">
                     <Clock className="h-3.5 w-3.5" />
                     <ReportTime date={new Date(report.createdAt)} />
                 </div>
             </div>
 
-            <div className="flex sm:flex-col items-center justify-center gap-4 sm:gap-2 z-10 w-full sm:w-auto border-t sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0">
+            <div className="flex sm:flex-col items-center justify-center gap-4 sm:gap-2 z-10 w-full sm:w-auto border-t border-border sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0">
                 <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold">
                     <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
                         <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
@@ -98,7 +97,7 @@ function MyReportItem({ report }: { report: Report }) {
                 {canDelete && (
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-8 sm:w-8 text-gray-400 hover:text-red-500 transition shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-8 sm:w-8 text-muted-foreground hover:text-destructive transition shrink-0" onClick={(e) => e.stopPropagation()}>
                                 {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                                 <span className="sr-only">Excluir</span>
                             </Button>
@@ -110,7 +109,7 @@ function MyReportItem({ report }: { report: Report }) {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white">
+                                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
                                     Excluir
                                 </AlertDialogAction>
                             </AlertDialogFooter>
@@ -125,7 +124,7 @@ function MyReportItem({ report }: { report: Report }) {
 function MyReportsList({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
         return (
-            <div className="text-center text-muted-foreground py-10 border-2 border-dashed rounded-2xl bg-gray-50/50 mx-4 sm:mx-0">
+            <div className="text-center text-muted-foreground py-10 border-2 border-dashed border-border rounded-2xl bg-muted/20 mx-4 sm:mx-0">
                 <p className="text-sm">Você ainda não relatou nenhum problema.</p>
                 <Button asChild variant="link" className="mt-2 text-primary font-bold">
                     <Link href="/report/new">Relatar um Problema</Link>
@@ -143,7 +142,7 @@ function MyReportsList({ reports }: { reports: Report[] }) {
             </div>
             
             <div className="pt-4 flex justify-center">
-                <Button asChild className="w-full sm:w-auto bg-primary hover:bg-primary text-white rounded-xl h-11 px-8 shadow-sm transition-none hover:scale-100 active:scale-100">
+                <Button asChild className="w-full sm:w-auto rounded-xl h-11 px-8 shadow-sm">
                     <Link href="/report/new" className="flex items-center gap-2">
                         <Plus className="h-5 w-5" />
                         Relatar um Problema
@@ -365,11 +364,11 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     return (
         <div className="space-y-8">
-             <Card className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 sm:p-8 space-y-6 overflow-hidden mx-4 sm:mx-0">
+             <Card className="bg-card rounded-2xl shadow-md border border-border p-6 sm:p-8 space-y-6 overflow-hidden mx-4 sm:mx-0">
                 <div className="flex flex-col items-center gap-4 mb-2">
-                    <Avatar className="h-20 w-20 shadow-sm border-2 border-gray-50">
+                    <Avatar className="h-24 w-24 shadow-md border-4 border-background">
                         <AvatarImage src={userProfile?.photoURL || createAvatarSvg(user.email || 'U')} />
-                        <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
+                        <AvatarFallback className="text-3xl font-bold bg-primary/10 text-primary">
                             {(user.email || 'U').charAt(0).toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
@@ -387,52 +386,52 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               render={({ field }) => (
                                 <FormItem>
                                   <div className="flex justify-between items-center mb-1">
-                                    <FormLabel className="text-sm font-medium text-gray-700">Nome Completo</FormLabel>
+                                    <FormLabel className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Nome Completo</FormLabel>
                                     {!isEditingName && (
-                                        <Button type="button" variant="link" className="p-0 h-auto text-sm text-primary font-medium hover:text-primary/80" onClick={handleEditClick}>
+                                        <Button type="button" variant="link" className="p-0 h-auto text-sm text-primary font-bold hover:text-primary/80" onClick={handleEditClick}>
                                             Alterar
                                         </Button>
                                     )}
                                   </div>
                                   <FormControl>
-                                      <Input {...field} disabled={!isEditingName} className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-50 text-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-100 disabled:cursor-not-allowed" />
+                                      <Input {...field} disabled={!isEditingName} className="h-12 rounded-xl bg-muted/30 focus:bg-background border-border" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
                               )}
                             />
 
-                            <div className="space-y-4 pt-2">
+                            <div className="space-y-6 pt-2">
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        <FormLabel className="text-sm font-medium text-gray-700">E-mail</FormLabel>
-                                        <Mail className="h-3.5 w-3.5 text-gray-400" />
+                                        <FormLabel className="text-sm font-medium text-muted-foreground uppercase tracking-wider">E-mail</FormLabel>
+                                        <Mail className="h-3.5 w-3.5 text-muted-foreground" />
                                     </div>
-                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-100 text-gray-500 cursor-not-allowed opacity-100" />
+                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-xl bg-muted/50 text-muted-foreground cursor-not-allowed opacity-100 border-border" />
                                 </div>
 
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        <FormLabel className="text-sm font-medium text-gray-700">Data de Nascimento</FormLabel>
-                                        <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                                        <FormLabel className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Data de Nascimento</FormLabel>
+                                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
                                     </div>
-                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-11 rounded-lg border border-gray-300 px-4 bg-gray-100 text-gray-500 cursor-not-allowed opacity-100" />
+                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-xl bg-muted/50 text-muted-foreground cursor-not-allowed opacity-100 border-border" />
                                 </div>
                             </div>
 
                             {isEditingName && (
-                                <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
-                                    <Button type="button" variant="outline" onClick={() => { setIsEditingName(false); form.reset(); }} className="h-10 px-6 rounded-lg font-bold w-full sm:w-auto">
+                                <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-border">
+                                    <Button type="button" variant="outline" onClick={() => { setIsEditingName(false); form.reset(); }} className="h-11 px-6 rounded-xl font-bold w-full sm:w-auto">
                                         Cancelar
                                     </Button>
                                     <Button 
                                         type="button" 
                                         onClick={handleSaveClick} 
                                         disabled={form.formState.isSubmitting || !form.formState.isDirty}
-                                        className="h-10 px-6 rounded-lg font-bold shadow-md hover:scale-[1.02] transition-all w-full sm:w-auto"
+                                        className="h-11 px-6 rounded-xl font-bold shadow-md w-full sm:w-auto"
                                     >
                                         {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                        Salvar
+                                        Salvar Alterações
                                     </Button>
                                 </div>
                             )}
@@ -443,7 +442,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             </Card>
 
             <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-                <AlertDialogContent className="rounded-2xl mx-4 sm:mx-0">
+                <AlertDialogContent className="rounded-2xl mx-4 sm:mx-0 bg-card border-border">
                     <AlertDialogHeader>
                         <AlertDialogTitle>Aviso de Alteração</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -452,7 +451,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                     </AlertDialogHeader>
                     <AlertDialogFooter className="mt-4 gap-2">
                         <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Voltar</AlertDialogCancel>
-                        <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={!isConfirmEnabled} className="bg-primary text-white rounded-xl font-bold w-full sm:w-auto">
+                        <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={!isConfirmEnabled} className="bg-primary text-primary-foreground rounded-xl font-bold w-full sm:w-auto">
                            {isConfirmEnabled ? 'Confirmar' : `Aguarde (${countdown})`}
                         </AlertDialogAction>
                     </AlertDialogFooter>
@@ -460,9 +459,9 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             </AlertDialog>
 
             {!isEmployee && (
-                <Card className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mx-4 sm:mx-0" id="meus-relatorios">
+                <Card className="bg-card rounded-2xl shadow-md border border-border p-6 mx-4 sm:mx-0" id="meus-relatorios">
                     <CardHeader className="p-0 mb-6">
-                        <CardTitle className="text-xl font-semibold text-gray-800">Meus Relatórios</CardTitle>
+                        <CardTitle className="text-xl font-bold text-foreground">Meus Relatórios</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                         <MyReportsList reports={userReports} />
@@ -470,27 +469,27 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 </Card>
             )}
 
-            <div className="bg-red-50 border border-red-200 rounded-2xl p-6 space-y-4 mx-4 sm:mx-0">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-6 space-y-4 mx-4 sm:mx-0">
                 <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-red-600" />
-                    <h3 className="text-red-600 font-semibold text-lg">Excluir minha conta</h3>
+                    <Trash2 className="h-5 w-5 text-destructive" />
+                    <h3 className="text-destructive font-bold text-lg">Zona de Perigo</h3>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="space-y-1 text-center sm:text-left">
-                        <p className="text-sm text-red-500">
+                        <p className="text-sm text-destructive/80 font-medium">
                             {isEmployee 
-                                ? "Ação irreversível. Todos os seus dados serão removidos." 
-                                : "Ação irreversível. Todos os seus dados e relatos serão removidos."}
+                                ? "Ação irreversível. Todos os seus dados de funcionário serão removidos." 
+                                : "Ação irreversível. Todos os seus dados e relatos serão removidos permanentemente."}
                         </p>
                     </div>
                     <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="bg-red-500 hover:bg-red-600 text-white rounded-lg px-6 h-11 shadow-sm transition-all hover:scale-[1.02] w-full sm:w-auto">
+                            <Button variant="destructive" className="rounded-xl px-6 h-11 shadow-sm w-full sm:w-auto font-bold">
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Excluir Conta
                             </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-2xl mx-4 sm:mx-0">
+                        <AlertDialogContent className="rounded-2xl mx-4 sm:mx-0 bg-card border-border">
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Protocolo de Segurança</AlertDialogTitle>
                                 <AlertDialogDescription>
@@ -499,7 +498,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-6 gap-2">
                                 <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleProceedToDelete} disabled={!isDeleteConfirmEnabled} className="bg-red-600 text-white rounded-xl font-bold w-full sm:w-auto">
+                                <AlertDialogAction onClick={handleProceedToDelete} disabled={!isDeleteConfirmEnabled} className="bg-destructive text-destructive-foreground rounded-xl font-bold w-full sm:w-auto">
                                     {isDeleteConfirmEnabled ? 'Sim, excluir meus dados' : `Aguarde (${deleteCountdown}s)`}
                                 </AlertDialogAction>
                             </AlertDialogFooter>

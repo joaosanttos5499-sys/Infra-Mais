@@ -5,7 +5,7 @@ import { Bell, Info, Check, ArrowRight } from "lucide-react";
 import { useUser } from "@/firebase";
 import { getNotificationsAction, markAsReadAction, markAllAsReadAction } from "@/lib/actions";
 import { type Notification } from "@/lib/types";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import { ReportTime } from "./report-time";
@@ -50,18 +50,18 @@ export function NotificationsDropdown() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-xl hover:bg-primary/10 transition-colors group">
-          <Bell className="h-5 w-5 text-gray-600 transition-colors group-hover:text-primary" />
+          <Bell className="h-5 w-5 text-muted-foreground transition-colors group-hover:text-primary" />
           {unreadCount > 0 && (
-            <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white ring-2 ring-white animate-in zoom-in">
+            <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground ring-2 ring-background animate-in zoom-in">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
           <span className="sr-only">Notificações</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-80 sm:w-96 rounded-2xl shadow-2xl border-gray-100 p-0 overflow-hidden" align="end">
-        <div className="p-4 bg-white border-b border-gray-50 flex items-center justify-between">
-          <h3 className="font-bold text-lg text-gray-900 tracking-tight">Notificações</h3>
+      <DropdownMenuContent className="w-80 sm:w-96 rounded-2xl shadow-2xl border-border bg-card p-0 overflow-hidden" align="end">
+        <div className="p-4 bg-muted/30 border-b border-border flex items-center justify-between">
+          <h3 className="font-bold text-lg text-foreground tracking-tight">Notificações</h3>
           {unreadCount > 0 && (
             <Button 
                 variant="ghost" 
@@ -75,13 +75,13 @@ export function NotificationsDropdown() {
         </div>
 
         <ScrollArea className="h-[400px]">
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-border">
             {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-                <div className="bg-gray-50 p-4 rounded-full mb-4">
-                  <Bell className="h-8 w-8 text-gray-300" />
+              <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+                <div className="bg-muted p-4 rounded-full mb-4">
+                  <Bell className="h-8 w-8 text-muted-foreground/30" />
                 </div>
-                <p className="text-sm font-bold text-gray-900">Nenhuma novidade</p>
+                <p className="text-sm font-bold text-foreground">Nada por aqui</p>
                 <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
                   Avisaremos você assim que houver atualizações nos seus relatos.
                 </p>
@@ -91,7 +91,7 @@ export function NotificationsDropdown() {
                 <DropdownMenuItem 
                   key={notification.id} 
                   className={cn(
-                      "flex flex-col items-start gap-1 p-4 cursor-pointer focus:bg-gray-50/80 transition-all border-l-4",
+                      "flex flex-col items-start gap-1 p-4 cursor-pointer focus:bg-muted/50 transition-all border-l-4",
                       notification.isRead ? "border-l-transparent" : "bg-primary/5 border-l-primary"
                   )}
                   onSelect={(e) => {
@@ -103,24 +103,19 @@ export function NotificationsDropdown() {
                     <div className="flex gap-3">
                         <div className={cn(
                             "mt-1.5 h-2 w-2 rounded-full shrink-0",
-                            notification.isRead ? "bg-gray-200" : "bg-primary"
+                            notification.isRead ? "bg-muted" : "bg-primary"
                         )} />
                         <p className={cn(
                             "text-sm leading-relaxed", 
-                            !notification.isRead ? "font-bold text-gray-900" : "text-gray-600"
+                            !notification.isRead ? "font-bold text-foreground" : "text-muted-foreground"
                         )}>
                             {notification.message}
                         </p>
                     </div>
-                    {!notification.isRead && (
-                        <div className="h-6 w-6 shrink-0 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-primary">
-                            <Check className="h-3.5 w-3.5" />
-                        </div>
-                    )}
                   </div>
                   
-                  <div className="flex items-center justify-between w-full mt-2 pl-5">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  <div className="flex items-center justify-between w-full mt-3 pl-5">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                           <ReportTime date={new Date(notification.createdAt)} />
                       </span>
                       <Link 
@@ -142,10 +137,10 @@ export function NotificationsDropdown() {
         </ScrollArea>
         
         {notifications.length > 0 && (
-           <div className="p-3 border-t border-gray-50 bg-gray-50/30 text-center">
+           <div className="p-3 border-t border-border bg-muted/10 text-center">
               <Link 
                 href="/minha-conta#meus-relatorios" 
-                className="text-xs font-bold text-gray-500 hover:text-primary transition-colors"
+                className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors"
               >
                 Gerenciar todos os relatos
               </Link>
