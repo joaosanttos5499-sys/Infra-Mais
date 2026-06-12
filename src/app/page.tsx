@@ -66,7 +66,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
                 <div><h4 className="font-bold">Eficiência</h4><p className="text-sm text-muted-foreground">Relatos diretos.</p></div>
               </div>
               <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 flex items-start gap-4">
-                <BarChart3 className="h-6 w-6 text-primary shrink-0" />
+                <BarChart3 className="h-6 w-6 text-primary scholar-shrink-0" />
                 <div><h4 className="font-bold">Transparência</h4><p className="text-sm text-muted-foreground">Acompanhamento real.</p></div>
               </div>
             </div>
@@ -112,7 +112,7 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-10">
               <HomeCtaClient />
               <Button asChild variant="ghost" size="lg" className="rounded-xl px-10 h-14 font-semibold">
-                <Link href="/dashboard">Ver relatos <MapPin className="ml-2 h-5 w-5" /></Link>
+                <Link href="/dashboard">Ver Relatos <MapPin className="ml-2 h-5 w-5" /></Link>
               </Button>
             </div>
           </div>
