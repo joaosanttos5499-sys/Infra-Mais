@@ -238,8 +238,17 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
 export function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user } = useUser();
   const router = useRouter();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const isEmployee = isEmailEmployee(user?.email);
   const filteredNavLinks = [...navLinks];
@@ -254,7 +263,10 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-[2000] w-full bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 h-16 flex items-center">
+    <header className={cn(
+      "w-full bg-white flex items-center h-16 transition-all duration-300 border-b border-gray-100",
+      scrolled ? "shadow-md" : "shadow-sm"
+    )}>
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
         <div className="w-full max-w-full mx-auto px-6 h-full flex items-center justify-between">
             <Link href="/" className="hidden md:flex items-center gap-2 group transition-transform hover:scale-105">

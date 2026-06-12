@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
@@ -39,9 +40,11 @@ export default function RootLayout({
       </head>
       <body className={cn("min-h-screen bg-white font-body antialiased flex flex-col", poppins.variable)}>
         <FirebaseClientProvider>
-          <SocialsHeader />
-          <Header />
-          <div className="flex-grow">
+          <div className="fixed top-0 left-0 w-full z-[2000]">
+            <SocialsHeader />
+            <Header />
+          </div>
+          <div className="flex-grow pt-16 sm:pt-[84px]">
             {children}
           </div>
           <Toaster />
