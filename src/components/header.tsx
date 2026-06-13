@@ -344,7 +344,7 @@ export function Header() {
             </span>
           </Link>
           
-          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
+          <nav className="hidden md:flex items-center gap-5 text-sm font-semibold">
             {filteredNavLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -356,7 +356,7 @@ export function Header() {
                 </Link>
             ))}
             
-            <div className="h-6 w-px bg-border mx-2" />
+            <div className="h-6 w-px bg-border mx-1" />
             
             <div className="flex items-center gap-4">
               <NotificationsDropdown scrolled={scrolled} />
