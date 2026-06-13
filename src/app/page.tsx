@@ -48,16 +48,18 @@ function AboutSection({ reports }: { reports: Report[] }) {
   return (
     <section className="py-16 md:py-24 bg-background border-t border-border">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8">
-            <h2 className="text-3xl md:text-5xl font-bold text-foreground leading-tight text-center md:text-left">
-              Zeladoria Urbana <br className="hidden md:block"/><span className="text-primary">Inteligente e Transparente</span>
-            </h2>
-            <div className="space-y-6 text-base md:text-lg text-muted-foreground leading-relaxed text-center md:text-left">
-              <p>O Infra Mais conecta a população às demandas de infraestrutura da região. Através de relatórios geolocalizados, acompanhamento em tempo real e participação da comunidade, a plataforma torna o processo de identificação e monitoramento de problemas mais simples, transparente e acessível para todos.</p>
-              <p className="font-semibold text-foreground">Sua participação faz a diferença na melhoria da cidade.</p>
+        <div className="grid lg:grid-cols-2 gap-12 items-stretch">
+          <div className="space-y-8 flex flex-col justify-between">
+            <div className="space-y-8">
+              <h2 className="text-3xl md:text-5xl font-bold text-foreground leading-tight text-center md:text-left">
+                Zeladoria Urbana <br className="hidden md:block"/><span className="text-primary">Inteligente e Transparente</span>
+              </h2>
+              <div className="space-y-6 text-base md:text-lg text-muted-foreground leading-relaxed text-center md:text-left">
+                <p>O Infra Mais conecta a população às demandas de infraestrutura da região. Através de relatórios geolocalizados, acompanhamento em tempo real e participação da comunidade, a plataforma torna o processo de identificação e monitoramento de problemas mais simples, transparente e acessível para todos.</p>
+                <p className="font-semibold text-foreground">Sua participação faz a diferença na melhoria da cidade.</p>
+              </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-auto">
               <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 flex items-start gap-4">
                 <CheckCircle2 className="h-6 w-6 text-primary shrink-0" />
                 <div><h4 className="font-bold text-foreground">Eficiência</h4><p className="text-sm text-muted-foreground">Relatos diretos.</p></div>
@@ -69,13 +71,13 @@ function AboutSection({ reports }: { reports: Report[] }) {
             </div>
           </div>
 
-          <Card className="rounded-2xl border-border shadow-xl p-4 md:p-6 bg-card">
+          <Card className="rounded-2xl border-border shadow-xl p-4 md:p-6 bg-card flex flex-col justify-center">
             <CardHeader className="text-center pb-2">
                 <CardTitle className="text-xl md:text-2xl font-bold flex items-center justify-center gap-2 text-foreground">
                   <BarChart3 className="h-6 w-6 text-primary" /> Visão Geral
                 </CardTitle>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 flex-grow flex items-center justify-center">
                 <ReportsChart total={totalReports} resolved={resolvedReports} inProgress={inProgressReports} />
             </CardContent>
           </Card>
