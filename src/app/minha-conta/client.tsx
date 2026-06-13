@@ -469,7 +469,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 </Card>
             )}
 
-            <div className="bg-destructive/10 border border-destructive/30 rounded-2xl p-6 space-y-4 mx-4 sm:mx-0">
+            <div className="bg-destructive/10 border border-destructive/30 rounded-2xl p-6 space-y-4 mx-4 sm:mx-0 !mt-20">
                 <div className="flex items-center gap-2">
                     <ShieldAlert className="h-5 w-5 text-destructive" />
                     <h3 className="text-destructive font-bold text-lg uppercase tracking-tight">Zona de Perigo</h3>
