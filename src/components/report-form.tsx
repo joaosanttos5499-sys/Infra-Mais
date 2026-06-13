@@ -123,12 +123,14 @@ export function ReportForm() {
   const smartScrollToElement = useCallback((id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      // Pequeno delay para permitir que o Radix abra o portal e calcule o layout
       setTimeout(() => {
-        // scrollIntoView com block: "nearest" só rola se o elemento não estiver visível
-        // Isso atende ao pedido de "só acontecer se parte estiver oculto"
-        element.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 100);
+        const rect = element.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        // Se o campo estiver na parte inferior (mais de 70% da tela) ou escondido pelo header
+        if (rect.bottom > windowHeight * 0.7 || rect.top < 100) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 150);
     }
   }, []);
 
@@ -167,7 +169,7 @@ export function ReportForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={control} name="category" render={({ field }) => (
-                    <FormItem className="scroll-mt-28" id="field-category">
+                    <FormItem className="scroll-mt-32" id="field-category">
                         <FormLabel>Categoria</FormLabel>
                         <Select 
                           onValueChange={field.onChange} 
@@ -181,7 +183,12 @@ export function ReportForm() {
                                     <SelectValue placeholder="Selecione o tipo" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" position="popper" className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                            <SelectContent 
+                                side="bottom" 
+                                position="popper" 
+                                avoidCollisions={false}
+                                className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300"
+                            >
                                 {categories.map((c) => (
                                     <SelectItem 
                                         key={c.value} 
@@ -199,7 +206,7 @@ export function ReportForm() {
                     </FormItem>
                 )} />
                 <FormField control={control} name="problem" render={({ field }) => (
-                    <FormItem className="scroll-mt-28" id="field-problem">
+                    <FormItem className="scroll-mt-32" id="field-problem">
                         <FormLabel>Problema Específico</FormLabel>
                         <Select 
                           onValueChange={field.onChange} 
@@ -214,7 +221,12 @@ export function ReportForm() {
                                     <SelectValue placeholder="O que houve?" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" position="popper" className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                            <SelectContent 
+                                side="bottom" 
+                                position="popper" 
+                                avoidCollisions={false}
+                                className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300"
+                            >
                                 {problems.map((p) => (
                                     <SelectItem 
                                         key={p.value} 
@@ -232,7 +244,7 @@ export function ReportForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={control} name="city" render={({ field }) => (
-                    <FormItem className="scroll-mt-28" id="field-city">
+                    <FormItem className="scroll-mt-32" id="field-city">
                         <FormLabel>Cidade</FormLabel>
                         <Select 
                           onValueChange={field.onChange} 
@@ -246,7 +258,12 @@ export function ReportForm() {
                                     <SelectValue placeholder="Selecione a cidade" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" position="popper" className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                            <SelectContent 
+                                side="bottom" 
+                                position="popper" 
+                                avoidCollisions={false}
+                                className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300"
+                            >
                                 <SelectItem value="Picui" className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10 font-medium">
                                     Picuí
                                 </SelectItem>
@@ -255,7 +272,7 @@ export function ReportForm() {
                     </FormItem>
                 )} />
                 <FormField control={control} name="bairro" render={({ field }) => (
-                    <FormItem className="scroll-mt-28" id="field-bairro">
+                    <FormItem className="scroll-mt-32" id="field-bairro">
                         <FormLabel>Bairro</FormLabel>
                         <Select 
                           onValueChange={field.onChange} 
@@ -270,7 +287,12 @@ export function ReportForm() {
                                     <SelectValue placeholder="Selecione o bairro" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" position="popper" className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                            <SelectContent 
+                                side="bottom" 
+                                position="popper" 
+                                avoidCollisions={false}
+                                className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300"
+                            >
                                 {PICUI_NEIGHBORHOODS.map((b) => (
                                     <SelectItem 
                                         key={b} 

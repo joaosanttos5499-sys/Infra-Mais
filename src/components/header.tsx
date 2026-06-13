@@ -288,8 +288,8 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
 export function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user } = useUser();
   const router = useRouter();
 
@@ -348,7 +348,7 @@ export function Header() {
                 ))}
             </div>
             
-            <div className="h-6 w-px bg-border mx-2" />
+            <div className="h-6 w-px bg-border" />
             
             <div className="flex items-center gap-5">
               <NotificationsDropdown scrolled={scrolled} />
