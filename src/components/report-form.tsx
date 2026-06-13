@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, memo, useCallback, useMemo } from "react";
@@ -194,9 +195,24 @@ export function ReportForm() {
                 )} />
             </div>
 
-            <FormField control={control} name="address" render={({ field }) => (
-                <FormItem><FormLabel>Endereço ou Ponto de Referência</FormLabel><FormControl><Input placeholder="ex: Rua Principal, próximo ao mercadinho" className="h-12 rounded-xl bg-muted/20 border-border" {...field} /></FormControl></FormItem>
-            )} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField control={control} name="address" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Endereço</FormLabel>
+                        <FormControl>
+                            <Input placeholder="ex: Rua Principal, 123" className="h-12 rounded-xl bg-muted/20 border-border" {...field} />
+                        </FormControl>
+                    </FormItem>
+                )} />
+                <FormField control={control} name="reference" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Ponto de Referência (Opcional)</FormLabel>
+                        <FormControl>
+                            <Input placeholder="ex: Próximo ao mercadinho" className="h-12 rounded-xl bg-muted/20 border-border" {...field} />
+                        </FormControl>
+                    </FormItem>
+                )} />
+            </div>
 
             <div className="space-y-4">
                 <Label className="font-bold flex items-center gap-2 text-foreground"><ImagePlus className="h-5 w-5 text-primary" /> Evidência Visual</Label>
