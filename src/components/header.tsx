@@ -5,12 +5,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Briefcase, Users, Trash2, ArrowRight, Palette, Sun, Moon, CheckCircle2 } from "lucide-react";
+import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Briefcase, Users, Trash2, ArrowRight, Palette, Sun, Moon, CheckCircle2, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
 import { useUser, useAuth } from "@/firebase";
-import { signOut } from "firebase/auth";
+import { signOut, signInWithEmailAndPassword } from "firebase/auth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuPortal, DropdownMenuSubContent } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { createAvatarSvg } from "@/lib/avatar";
@@ -20,6 +20,7 @@ import { NotificationsDropdown } from "./notifications-dropdown";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "./ui/scroll-area";
 import { useTheme } from "./theme-provider";
+import { useToast } from "@/hooks/use-toast";
 
 const navLinks = [
   { href: "/", label: "Início", icon: Home, public: true },
@@ -34,15 +35,18 @@ interface SavedAccount {
   email: string;
   displayName: string;
   photoURL: string;
+  password?: string; // Armazenado para troca instantânea no protótipo
 }
 
 function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scrolled: boolean }) {
   const { user, isUserLoading } = useUser();
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
   const auth = useAuth();
   const router = useRouter();
   const [isSwitchAccountOpen, setIsSwitchAccountOpen] = useState(false);
   const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
+  const [isSwitching, setIsSwitching] = useState(false);
 
   const dynamicOffset = scrolled ? 22 : 30;
 
@@ -57,41 +61,30 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
     }
   }, [isSwitchAccountOpen]);
 
-  useEffect(() => {
-    if (user && !isUserLoading) {
-      const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
-      let accounts: SavedAccount[] = [];
-      if (saved) {
-        try { accounts = JSON.parse(saved); } catch (e) {}
-      }
-      
-      const exists = accounts.find(a => a.uid === user.uid);
-      const needsUpdate = exists && (exists.displayName !== user.displayName || exists.photoURL !== user.photoURL);
-
-      if (!exists || needsUpdate) {
-        const newAccount = {
-          uid: user.uid,
-          email: user.email || '',
-          displayName: user.displayName || 'Usuário',
-          photoURL: user.photoURL || createAvatarSvg(user.email || 'U')
-        };
-        let updated;
-        if (exists) {
-          updated = accounts.map(a => a.uid === user.uid ? newAccount : a);
-        } else {
-          updated = [newAccount, ...accounts].slice(0, 5);
-        }
-        localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(updated));
-        setSavedAccounts(updated);
-      }
+  const handleSwitchAccount = async (account: SavedAccount) => {
+    if (!account.password) {
+        toast({ title: "Senha não encontrada", description: "Por favor, faça login manualmente nesta conta uma vez.", variant: "destructive" });
+        signOut(auth).then(() => {
+            setIsSwitchAccountOpen(false);
+            router.push(`/report/auth?email=${encodeURIComponent(account.email)}`);
+        });
+        return;
     }
-  }, [user, isUserLoading]);
 
-  const handleSwitchAccount = (account: SavedAccount) => {
-    signOut(auth).then(() => {
-      setIsSwitchAccountOpen(false);
-      router.push(`/report/auth?email=${encodeURIComponent(account.email)}`);
-    });
+    setIsSwitching(true);
+    try {
+        await signOut(auth);
+        await signInWithEmailAndPassword(auth, account.email, account.password);
+        setIsSwitchAccountOpen(false);
+        toast({ title: "Conta alternada", description: `Bem-vindo(a) de volta, ${account.displayName}!` });
+        router.refresh();
+    } catch (error) {
+        console.error("Erro ao trocar conta:", error);
+        toast({ title: "Erro na troca", description: "Não foi possível realizar o login automático.", variant: "destructive" });
+        router.push(`/report/auth?email=${encodeURIComponent(account.email)}`);
+    } finally {
+        setIsSwitching(false);
+    }
   };
 
   const removeAccount = (uid: string) => {
@@ -207,7 +200,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
             <DialogHeader className="mb-4">
               <DialogTitle className="text-xl font-bold">Trocar de Conta</DialogTitle>
               <DialogDescription>
-                Selecione uma conta salva para entrar.
+                Selecione uma conta salva para entrar instantaneamente.
               </DialogDescription>
             </DialogHeader>
 
@@ -232,7 +225,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
                             "flex items-center gap-3 flex-grow text-left",
                             isActive ? "cursor-default" : "cursor-pointer"
                           )}
-                          disabled={isActive}
+                          disabled={isActive || isSwitching}
                         >
                           <Avatar className="h-11 w-11 shadow-sm">
                             <AvatarImage src={account.photoURL} alt={account.displayName} />
@@ -250,7 +243,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
                           </div>
                         </button>
                         
-                        {!isActive && (
+                        {!isActive && !isSwitching && (
                           <Button 
                             variant="ghost" 
                             size="icon" 
@@ -259,6 +252,10 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
+                        )}
+
+                        {isSwitching && !isActive && (
+                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
                         )}
                       </div>
                     );
@@ -273,6 +270,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
               <Button 
                 variant="outline" 
                 className="w-full h-11 rounded-xl font-bold hover:bg-primary/5 hover:text-primary transition-all"
+                disabled={isSwitching}
                 onClick={() => {
                   signOut(auth).then(() => {
                     setIsSwitchAccountOpen(false);

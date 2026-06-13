@@ -44,7 +44,7 @@ export function SignupForm() {
 
   const { control, handleSubmit } = form;
 
-  const saveAccountLocally = (user: any, profileName: string, profilePhoto: string) => {
+  const saveAccountLocally = (user: any, profileName: string, profilePhoto: string, pass: string) => {
     const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
     let accounts = [];
     if (saved) {
@@ -57,7 +57,8 @@ export function SignupForm() {
       uid: user.uid,
       email: user.email,
       displayName: profileName,
-      photoURL: profilePhoto
+      photoURL: profilePhoto,
+      password: pass // Salvamos para permitir troca instantânea no protótipo
     };
 
     accounts = accounts.filter((a: any) => a.email !== user.email);
@@ -119,7 +120,7 @@ export function SignupForm() {
               });
             }
 
-            saveAccountLocally(user, data.name, profilePhoto);
+            saveAccountLocally(user, data.name, profilePhoto, data.password);
 
             toast({
                 title: "Conta criada com sucesso!",

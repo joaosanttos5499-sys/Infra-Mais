@@ -43,7 +43,7 @@ export function AuthForm({
     }
   }, [searchParams]);
 
-  const saveAccountLocally = (user: any, profileName: string, profilePhoto: string) => {
+  const saveAccountLocally = (user: any, profileName: string, profilePhoto: string, pass: string) => {
     const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
     let accounts = [];
     if (saved) {
@@ -56,7 +56,8 @@ export function AuthForm({
       uid: user.uid,
       email: user.email,
       displayName: profileName,
-      photoURL: profilePhoto
+      photoURL: profilePhoto,
+      password: pass // Salvamos para permitir troca instantânea no protótipo
     };
 
     // Remove duplicates and add the newest one
@@ -99,7 +100,7 @@ export function AuthForm({
         console.error("Failed to sync profile on login:", syncError);
       }
       
-      saveAccountLocally(user, profileName, profilePhoto);
+      saveAccountLocally(user, profileName, profilePhoto, password);
 
       toast({
         title: 'Bem-vindo(a) de volta!',
