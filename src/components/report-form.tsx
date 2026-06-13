@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
+import { useEffect, useState, memo, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { Camera, Loader2, MapPin, ImagePlus } from "lucide-react";
 import { submitReport } from "@/lib/actions";
@@ -44,7 +44,7 @@ const ClientReportSchema = ReportSchema.extend({
 
 export function ReportForm() {
   const { toast } = useToast();
-  const { user, isUserLoading } = useUser();
+  const { user } = useUser();
   const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [deviceLabels, setDeviceLabels] = useState({
@@ -120,28 +120,14 @@ export function ReportForm() {
     }
   };
 
-  const smartScrollToElement = useCallback((id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      setTimeout(() => {
-        const rect = element.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        // Se o campo estiver na parte inferior (mais de 70% da tela) ou escondido pelo header
-        if (rect.bottom > windowHeight * 0.7 || rect.top < 100) {
-          element.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }, 150);
-    }
-  }, []);
-
   if (isEmailEmployee(user?.email)) {
     return (
-        <Card className="w-full max-w-2xl border-primary/20 bg-primary/5 rounded-2xl p-10 text-center">
-            <Loader2 className="h-16 w-16 text-primary mx-auto mb-4" />
-            <CardTitle className="text-2xl font-bold">Acesso Restrito</CardTitle>
+        <div className="flex flex-col items-center justify-center p-12 text-center bg-card rounded-2xl border border-border shadow-xl">
+            <Loader2 className="h-16 w-16 text-primary mb-4" />
+            <h2 className="text-2xl font-bold">Acesso Restrito</h2>
             <p className="mt-4 text-muted-foreground">Funcionários não podem enviar relatos.</p>
             <Button asChild className="mt-6"><Link href="/funcionarios">Painel de Gestão</Link></Button>
-        </Card>
+        </div>
     );
   }
 
@@ -169,32 +155,17 @@ export function ReportForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={control} name="category" render={({ field }) => (
-                    <FormItem className="scroll-mt-32" id="field-category">
+                    <FormItem>
                         <FormLabel>Categoria</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                          onOpenChange={(open) => open && smartScrollToElement('field-category')}
-                        >
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                                <SelectTrigger 
-                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5"
-                                >
+                                <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5">
                                     <SelectValue placeholder="Selecione o tipo" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent 
-                                side="bottom" 
-                                position="popper" 
-                                avoidCollisions={false}
-                                className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300"
-                            >
+                            <SelectContent side="bottom" avoidCollisions={false} className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
                                 {categories.map((c) => (
-                                    <SelectItem 
-                                        key={c.value} 
-                                        value={c.value} 
-                                        className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10"
-                                    >
+                                    <SelectItem key={c.value} value={c.value} className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10">
                                         <div className="flex items-center gap-2 font-medium">
                                             <c.icon className="h-4 w-4" style={{ color: c.color }} />
                                             {c.label}
@@ -206,33 +177,17 @@ export function ReportForm() {
                     </FormItem>
                 )} />
                 <FormField control={control} name="problem" render={({ field }) => (
-                    <FormItem className="scroll-mt-32" id="field-problem">
+                    <FormItem>
                         <FormLabel>Problema Específico</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value} 
-                          disabled={!selectedCategory}
-                          onOpenChange={(open) => open && smartScrollToElement('field-problem')}
-                        >
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
                             <FormControl>
-                                <SelectTrigger 
-                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5"
-                                >
+                                <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5">
                                     <SelectValue placeholder="O que houve?" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent 
-                                side="bottom" 
-                                position="popper" 
-                                avoidCollisions={false}
-                                className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300"
-                            >
+                            <SelectContent side="bottom" avoidCollisions={false} className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
                                 {problems.map((p) => (
-                                    <SelectItem 
-                                        key={p.value} 
-                                        value={p.value} 
-                                        className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10"
-                                    >
+                                    <SelectItem key={p.value} value={p.value} className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10">
                                         <span className="font-medium">{p.label}</span>
                                     </SelectItem>
                                 ))}
@@ -244,26 +199,15 @@ export function ReportForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={control} name="city" render={({ field }) => (
-                    <FormItem className="scroll-mt-32" id="field-city">
+                    <FormItem>
                         <FormLabel>Cidade</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                          onOpenChange={(open) => open && smartScrollToElement('field-city')}
-                        >
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                                <SelectTrigger 
-                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5"
-                                >
+                                <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5">
                                     <SelectValue placeholder="Selecione a cidade" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent 
-                                side="bottom" 
-                                position="popper" 
-                                avoidCollisions={false}
-                                className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300"
-                            >
+                            <SelectContent side="bottom" avoidCollisions={false} className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
                                 <SelectItem value="Picui" className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10 font-medium">
                                     Picuí
                                 </SelectItem>
@@ -272,33 +216,17 @@ export function ReportForm() {
                     </FormItem>
                 )} />
                 <FormField control={control} name="bairro" render={({ field }) => (
-                    <FormItem className="scroll-mt-32" id="field-bairro">
+                    <FormItem>
                         <FormLabel>Bairro</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          value={field.value} 
-                          disabled={!selectedCity}
-                          onOpenChange={(open) => open && smartScrollToElement('field-bairro')}
-                        >
+                        <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCity}>
                             <FormControl>
-                                <SelectTrigger 
-                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5"
-                                >
+                                <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5">
                                     <SelectValue placeholder="Selecione o bairro" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent 
-                                side="bottom" 
-                                position="popper" 
-                                avoidCollisions={false}
-                                className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300"
-                            >
+                            <SelectContent side="bottom" avoidCollisions={false} className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
                                 {PICUI_NEIGHBORHOODS.map((b) => (
-                                    <SelectItem 
-                                        key={b} 
-                                        value={b} 
-                                        className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10 font-medium"
-                                    >
+                                    <SelectItem key={b} value={b} className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10 font-medium">
                                         {b}
                                     </SelectItem>
                                 ))}
