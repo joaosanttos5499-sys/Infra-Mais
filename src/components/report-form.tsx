@@ -157,7 +157,7 @@ export function ReportForm() {
                 <FormField control={control} name="category" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Categoria</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} modal={false}>
                             <FormControl>
                                 <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5">
                                     <SelectValue placeholder="Selecione o tipo" />
@@ -179,7 +179,7 @@ export function ReportForm() {
                 <FormField control={control} name="problem" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Problema Específico</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory} modal={false}>
                             <FormControl>
                                 <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5">
                                     <SelectValue placeholder="O que houve?" />
@@ -201,7 +201,7 @@ export function ReportForm() {
                 <FormField control={control} name="city" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Cidade</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} modal={false}>
                             <FormControl>
                                 <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5">
                                     <SelectValue placeholder="Selecione a cidade" />
@@ -218,7 +218,7 @@ export function ReportForm() {
                 <FormField control={control} name="bairro" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Bairro</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCity}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCity} modal={false}>
                             <FormControl>
                                 <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5">
                                     <SelectValue placeholder="Selecione o bairro" />
