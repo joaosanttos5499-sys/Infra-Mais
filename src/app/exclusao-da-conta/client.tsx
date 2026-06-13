@@ -66,15 +66,15 @@ export function ExclusaoContaClient() {
   }
 
   return (
-    <Card className="rounded-2xl shadow-xl border-gray-200 bg-white overflow-hidden">
-      <CardHeader className="bg-red-50 p-8 border-b border-red-100">
+    <Card className="rounded-2xl shadow-xl border-destructive/20 bg-card overflow-hidden">
+      <CardHeader className="bg-destructive/5 p-8 border-b border-destructive/10">
         <div className="flex justify-center mb-4">
-            <div className="p-3 bg-red-100 rounded-full">
-                <ShieldAlert className="h-10 w-10 text-red-600" />
+            <div className="p-3 bg-destructive/10 rounded-full">
+                <ShieldAlert className="h-10 w-10 text-destructive" />
             </div>
         </div>
-        <CardTitle className="text-2xl font-bold text-center text-red-900">Exclusão da Conta</CardTitle>
-        <CardDescription className="text-center text-red-700">
+        <CardTitle className="text-2xl font-bold text-center text-destructive">Exclusão da Conta</CardTitle>
+        <CardDescription className="text-center text-destructive/80 font-medium">
             Esta é uma ação de segurança para confirmar sua identidade e ciência sobre a exclusão definitiva.
         </CardDescription>
       </CardHeader>
@@ -94,7 +94,7 @@ export function ExclusaoContaClient() {
                         required
                         className="h-11 rounded-xl pl-10"
                     />
-                    <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 </div>
             </div>
 
@@ -110,22 +110,22 @@ export function ExclusaoContaClient() {
                         required
                         className="h-11 rounded-xl pl-10"
                     />
-                    <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 </div>
             </div>
           </div>
 
-          <Separator className="bg-gray-100" />
+          <Separator className="bg-border" />
 
-          <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+          <div className="flex items-start space-x-3 p-4 bg-muted/20 rounded-xl border border-border">
             <Checkbox 
                 id="confirm-aware" 
                 checked={confirmed} 
                 onCheckedChange={(val) => setConfirmed(val as boolean)}
                 className="mt-1"
             />
-            <Label htmlFor="confirm-aware" className="text-sm leading-relaxed text-gray-600 cursor-pointer">
-                Estou ciente de que a exclusão da conta é <strong>irreversível</strong> e que perderei acesso a todos os meus relatos e dados pessoais no Infra Mais.
+            <Label htmlFor="confirm-aware" className="text-sm leading-relaxed text-muted-foreground cursor-pointer font-medium">
+                Estou ciente de que a exclusão da conta é <strong className="text-destructive">irreversível</strong> e que perderei acesso a todos os meus relatos e dados pessoais no Infra Mais.
             </Label>
           </div>
 
@@ -143,7 +143,7 @@ export function ExclusaoContaClient() {
                 type="button" 
                 variant="ghost" 
                 onClick={() => router.back()}
-                className="h-10 text-gray-500 font-medium"
+                className="h-10 text-muted-foreground font-medium"
                 disabled={isDeleting}
             >
                 <ArrowLeft className="mr-2 h-4 w-4" />

@@ -4,7 +4,7 @@ import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, Plus } from "lucide-react";
+import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, Plus, ShieldAlert } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -469,14 +469,14 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 </Card>
             )}
 
-            <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-6 space-y-4 mx-4 sm:mx-0">
+            <div className="bg-destructive/10 border border-destructive/30 rounded-2xl p-6 space-y-4 mx-4 sm:mx-0">
                 <div className="flex items-center gap-2">
-                    <Trash2 className="h-5 w-5 text-destructive" />
-                    <h3 className="text-destructive font-bold text-lg">Zona de Perigo</h3>
+                    <ShieldAlert className="h-5 w-5 text-destructive" />
+                    <h3 className="text-destructive font-bold text-lg uppercase tracking-tight">Zona de Perigo</h3>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="space-y-1 text-center sm:text-left">
-                        <p className="text-sm text-destructive/80 font-medium">
+                        <p className="text-sm text-destructive dark:text-destructive font-bold">
                             {isEmployee 
                                 ? "Ação irreversível. Todos os seus dados de funcionário serão removidos." 
                                 : "Ação irreversível. Todos os seus dados e relatos serão removidos permanentemente."}
