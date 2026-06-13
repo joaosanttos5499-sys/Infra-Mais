@@ -91,7 +91,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
           <DropdownMenuContent 
             className="w-[300px] rounded-2xl border-border bg-card p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200" 
             align="end" 
-            sideOffset={14}
+            sideOffset={17}
             forceMount
           >
             <div className="flex flex-col items-center p-6 pb-4">
