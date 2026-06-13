@@ -270,7 +270,16 @@ export function ReportForm() {
             </div>
 
             <FormField control={control} name="description" render={({ field }) => (
-                <FormItem><FormLabel>Descrição Detalhada</FormLabel><FormControl><Textarea placeholder="Descreva o problema em mais detalhes se necessário..." className="min-h-[120px] rounded-2xl bg-muted/20 border-border" {...field} /></FormControl></FormItem>
+                <FormItem>
+                    <FormLabel>Descrição do Problema (Opcional)</FormLabel>
+                    <FormControl>
+                        <Textarea 
+                            placeholder="Descrição Detalhada" 
+                            className="min-h-[120px] rounded-2xl bg-muted/20 border-border placeholder:text-muted-foreground" 
+                            {...field} 
+                        />
+                    </FormControl>
+                </FormItem>
             )} />
           </CardContent>
 
