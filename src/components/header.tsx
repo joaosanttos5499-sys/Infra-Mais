@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -74,6 +75,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   if (user) {
     const avatarSrc = user.photoURL || createAvatarSvg(user.email || user.displayName || 'U');
     const userInitial = (user.email || user.displayName || 'U').charAt(0).toUpperCase();
+    const isEmployee = isEmailEmployee(user.email);
 
     return (
       <>
@@ -116,12 +118,14 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
                 </Link>
               </DropdownMenuItem>
 
-              <DropdownMenuItem asChild className="h-11 rounded-xl cursor-pointer px-3 group">
-                <Link href="/minha-conta#meus-relatorios" className="flex items-center w-full">
-                  <Briefcase className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                  <span className="font-semibold text-sm">Meus Relatos</span>
-                </Link>
-              </DropdownMenuItem>
+              {!isEmployee && (
+                <DropdownMenuItem asChild className="h-11 rounded-xl cursor-pointer px-3 group">
+                  <Link href="/minha-conta#meus-relatorios" className="flex items-center w-full">
+                    <Briefcase className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                    <span className="font-semibold text-sm">Meus Relatos</span>
+                  </Link>
+                </DropdownMenuItem>
+              )}
 
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="h-11 rounded-xl cursor-pointer px-3 group">
