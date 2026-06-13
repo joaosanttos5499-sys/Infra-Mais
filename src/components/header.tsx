@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { AuthForm } from "./auth-form";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuPortal, DropdownMenuSubContent } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { createAvatarSvg } from "@/lib/avatar";
 import { useRouter } from "next/navigation";
@@ -91,6 +91,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
           <DropdownMenuContent 
             className="w-[300px] rounded-2xl border-border bg-card p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200" 
             align="end" 
+            sideOffset={14}
             forceMount
           >
             <div className="flex flex-col items-center p-6 pb-4">

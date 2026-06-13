@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
@@ -59,7 +60,11 @@ export function NotificationsDropdown() {
           <span className="sr-only">Notificações</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-80 sm:w-96 rounded-2xl shadow-2xl border-border bg-card p-0 overflow-hidden" align="end">
+      <DropdownMenuContent 
+        className="w-80 sm:w-96 rounded-2xl shadow-2xl border-border bg-card p-0 overflow-hidden" 
+        align="end" 
+        sideOffset={14}
+      >
         <div className="p-4 bg-muted/30 border-b border-border flex items-center justify-between">
           <h3 className="font-bold text-lg text-foreground tracking-tight">Notificações</h3>
           {unreadCount > 0 && (
