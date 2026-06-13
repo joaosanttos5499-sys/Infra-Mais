@@ -24,8 +24,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
@@ -39,8 +41,8 @@ export default function RootLayout({
         <ThemeProvider>
           <FirebaseClientProvider>
             <div className={cn(
-                "fixed top-0 left-0 w-full z-[2000] border-b border-border bg-background transition-shadow duration-300",
-                scrolled ? "shadow-md" : ""
+                "fixed top-0 left-0 w-full z-[2000] border-b border-border bg-background transition-all duration-300",
+                mounted && scrolled ? "shadow-md" : ""
             )}>
               <Header />
             </div>

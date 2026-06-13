@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -36,7 +37,7 @@ interface SavedAccount {
   photoURL: string;
 }
 
-function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scrolled: boolean }) {
+function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   const { user, isUserLoading } = useUser();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
@@ -45,8 +46,6 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
   const [isSwitchAccountOpen, setIsSwitchAccountOpen] = useState(false);
   const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
   const [isSwitching, setIsSwitching] = useState(false);
-
-  const dynamicOffset = 17;
 
   useEffect(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
@@ -59,7 +58,6 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
     }
   }, [isSwitchAccountOpen]);
 
-  // Sincroniza a conta logada com o localStorage
   useEffect(() => {
     if (user) {
       const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
@@ -91,7 +89,6 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
     try {
         await signOut(auth);
         setIsSwitchAccountOpen(false);
-        // Redireciona para login com o e-mail pré-preenchido via query param
         router.push(`/report/auth?email=${encodeURIComponent(account.email)}`);
         toast({ title: "Quase lá!", description: `Informe a senha para acessar a conta ${account.displayName}.` });
     } catch (error) {
@@ -131,7 +128,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
           <DropdownMenuContent 
             className="w-[300px] rounded-2xl border-border bg-card p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200" 
             align="end" 
-            sideOffset={dynamicOffset}
+            sideOffset={10}
             forceMount
           >
             <div className="flex flex-col items-center p-6 pb-4">
@@ -254,7 +251,6 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
                                 {isActive && <CheckCircle2 className="h-3.5 w-3.5 text-primary" />}
                             </div>
                             <p className="text-xs text-muted-foreground truncate">{account.email}</p>
-                            {isActive && <p className="text-[10px] font-bold text-primary uppercase mt-0.5">Sessão Ativa</p>}
                           </div>
                         </button>
                         
@@ -268,10 +264,6 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         )}
-
-                        {isSwitching && !isActive && (
-                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        )}
                       </div>
                     );
                   })
@@ -280,22 +272,6 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
                 )}
               </div>
             </ScrollArea>
-
-            <div className="mt-6 pt-4 border-t border-border">
-              <Button 
-                variant="outline" 
-                className="w-full h-11 rounded-xl font-bold hover:bg-primary/5 hover:text-primary transition-all"
-                disabled={isSwitching}
-                onClick={() => {
-                  signOut(auth).then(() => {
-                    setIsSwitchAccountOpen(false);
-                    router.push('/report/auth');
-                  });
-                }}
-              >
-                Usar outra conta <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
           </DialogContent>
         </Dialog>
       </>
@@ -313,10 +289,12 @@ export function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { user } = useUser();
   const router = useRouter();
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
@@ -339,7 +317,7 @@ export function Header() {
   return (
     <header className={cn(
       "w-full bg-background transition-all duration-300",
-      scrolled ? "h-16" : "h-20"
+      mounted && scrolled ? "h-16" : "h-20"
     )}>
       <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
@@ -374,7 +352,7 @@ export function Header() {
             
             <div className="flex items-center gap-5">
               <NotificationsDropdown scrolled={scrolled} />
-              <UserButton onLoginClick={() => setIsAuthModalOpen(true)} scrolled={scrolled} />
+              <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
               {user && !isEmployee && (
                 <Button asChild size="sm" className="h-10 rounded-lg font-bold shadow-sm">
                   <Link href="/report/new">
@@ -388,7 +366,7 @@ export function Header() {
 
           <div className="md:hidden flex items-center gap-2">
             <NotificationsDropdown scrolled={scrolled} />
-            <UserButton onLoginClick={() => setIsAuthModalOpen(true)} scrolled={scrolled} />
+            <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-xl">
