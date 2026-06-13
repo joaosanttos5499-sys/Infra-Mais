@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
@@ -349,6 +350,8 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'upvotes'>('newest');
   
+  const tabsRef = useRef<HTMLDivElement>(null);
+
   const [optimisticReports, setOptimisticReports] = useOptimistic(
     reports,
     (state, update: OptimisticUpdate) => {
@@ -376,6 +379,19 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_UPVOTES_KEY, JSON.stringify(Array.from(upvotedReports)));
   }, [upvotedReports]);
+
+  // Efeito para rolagem automática ao mudar a lista/aba
+  useEffect(() => {
+    if (tabsRef.current) {
+        const rect = tabsRef.current.getBoundingClientRect();
+        // Se o topo da lista estiver fora da visão (acima do topo da janela considerando o header fixo)
+        if (rect.top < 80) {
+            const yOffset = -100; // Distância do topo para compensar o header
+            const y = tabsRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+    }
+  }, [activeTab, sortBy]);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -442,7 +458,7 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
   const filteredReports = sortedReports.filter(r => r.status === activeTab);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" ref={tabsRef}>
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ReportStatus)} className="w-full">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-8">
             <TabsList className="bg-muted p-1 rounded-2xl w-full lg:w-auto overflow-x-auto no-scrollbar shadow-inner">

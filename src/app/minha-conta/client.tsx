@@ -1,8 +1,9 @@
+
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, Plus, ShieldAlert } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -192,6 +193,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const [isProfileLoading, setIsProfileLoading] = useState(true);
 
     const [userReports, setUserReports] = useState<Report[]>([]);
+    
+    const reportsRef = useRef<HTMLDivElement>(null);
 
     const isEmployee = isEmailEmployee(user?.email);
 
@@ -459,7 +462,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             </AlertDialog>
 
             {!isEmployee && (
-                <Card className="bg-card rounded-2xl shadow-md border border-border p-6 mx-4 sm:mx-0" id="meus-relatorios">
+                <Card className="bg-card rounded-2xl shadow-md border border-border p-6 mx-4 sm:mx-0" id="meus-relatorios" ref={reportsRef}>
                     <CardHeader className="p-0 mb-6">
                         <CardTitle className="text-xl font-bold text-foreground">Meus Relatórios</CardTitle>
                     </CardHeader>
