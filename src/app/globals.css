@@ -1,3 +1,4 @@
+
 @import "leaflet/dist/leaflet.css";
 @tailwind base;
 @tailwind components;
@@ -73,6 +74,14 @@
     overflow-x: hidden;
     width: 100%;
     position: relative;
+  }
+  /* Fix: Ensure body scroll and pointer events are never blocked by external libraries */
+  body[style*="overflow: hidden"] {
+    overflow: auto !important;
+    padding-right: 0 !important;
+  }
+  body[style*="pointer-events: none"] {
+    pointer-events: auto !important;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold tracking-tight text-foreground;
