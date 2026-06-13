@@ -215,7 +215,7 @@ export function ReportForm() {
             </div>
 
             <div className="space-y-4">
-                <Label className="font-bold flex items-center gap-2 text-foreground"><ImagePlus className="h-5 w-5 text-primary" /> Evidência Visual</Label>
+                <Label className="font-bold flex items-center gap-2 text-foreground"><ImagePlus className="h-5 w-5 text-primary" /> Foto do Problema</Label>
                 <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-muted border-primary/50" : "bg-muted/50 border-border hover:bg-muted")}>
                     {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : <div className="text-center p-4"><Camera className="mx-auto h-12 w-12 text-muted-foreground" /><p className="text-sm font-bold mt-2 text-muted-foreground">Clique para tirar ou anexar uma foto</p></div>}
                     <input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
