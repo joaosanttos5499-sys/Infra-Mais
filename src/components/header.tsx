@@ -325,8 +325,8 @@ export function Header() {
 
   return (
     <header className={cn(
-      "fixed top-0 left-0 w-full z-[1000] bg-background border-b border-border transition-all duration-300",
-      scrolled ? "h-16 shadow-md" : "h-20"
+      "w-full bg-background transition-all duration-300",
+      scrolled ? "h-16" : "h-20"
     )}>
       <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
@@ -344,16 +344,18 @@ export function Header() {
           </Link>
           
           <nav className="hidden md:flex items-center gap-5 text-sm font-semibold">
-            {filteredNavLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-muted-foreground hover:text-primary transition-colors relative group"
-                >
-                  {link.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
-                </Link>
-            ))}
+            <div className="flex items-center gap-5">
+                {filteredNavLinks.map((link) => (
+                    <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-muted-foreground hover:text-primary transition-colors relative group"
+                    >
+                    {link.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+                    </Link>
+                ))}
+            </div>
             
             <div className="h-6 w-px bg-border" />
             
