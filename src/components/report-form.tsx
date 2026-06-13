@@ -47,6 +47,10 @@ export function ReportForm() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [deviceLabels, setDeviceLabels] = useState({
+    photo: "Clique para anexar uma foto",
+    map: "Clique no mapa para marcar o local exato do problema."
+  });
   
   const form = useForm<z.infer<typeof ClientReportSchema>>({
     resolver: zodResolver(ClientReportSchema),
@@ -75,6 +79,14 @@ export function ReportForm() {
 
   const problems = useMemo(() => getCategory(selectedCategory)?.problems || [], [selectedCategory]);
   const locationObject = useMemo(() => (selectedLat !== 0 && selectedLng !== 0 ? { lat: selectedLat, lng: selectedLng } : null), [selectedLat, selectedLng]);
+
+  useEffect(() => {
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    setDeviceLabels({
+      photo: isTouch ? "Toque para anexar uma foto" : "Clique para anexar uma foto",
+      map: isTouch ? "Toque no mapa para marcar o local exato do problema." : "Clique no mapa para marcar o local exato do problema."
+    });
+  }, []);
 
   const handleMapClick = useCallback((lat: number, lng: number) => {
     setValue('latitude', lat, { shouldValidate: true });
@@ -119,6 +131,15 @@ export function ReportForm() {
     );
   }
 
+  const scrollToField = (e: any) => {
+    const field = e.target.closest('.scroll-mt-field');
+    if (field) {
+        setTimeout(() => {
+            field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    }
+  };
+
   return (
     <Card className="w-full border-border shadow-2xl rounded-2xl overflow-hidden bg-card">
       <CardHeader className="bg-muted/30 border-b border-border p-6 md:p-8">
@@ -136,17 +157,21 @@ export function ReportForm() {
               <div className="rounded-2xl overflow-hidden border border-border h-[300px] md:h-[400px] relative z-0 bg-muted">
                   <LeafletMap interactive={true} onLocationSelect={handleMapClick} selectedLocation={locationObject} />
               </div>
-              <p className="text-xs text-muted-foreground italic">Toque no mapa para marcar o local exato do problema.</p>
+              <p className="text-xs text-muted-foreground italic">{deviceLabels.map}</p>
             </div>
 
             <Separator className="bg-border" />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={control} name="category" render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="scroll-mt-field">
                         <FormLabel>Categoria</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger></FormControl>
+                            <FormControl>
+                                <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border" onClick={scrollToField}>
+                                    <SelectValue placeholder="Selecione o tipo" />
+                                </SelectTrigger>
+                            </FormControl>
                             <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
                                 {categories.map((c) => (
                                     <SelectItem key={c.value} value={c.value} className="py-3 rounded-lg">
@@ -158,10 +183,14 @@ export function ReportForm() {
                     </FormItem>
                 )} />
                 <FormField control={control} name="problem" render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="scroll-mt-field">
                         <FormLabel>Problema Específico</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
-                            <FormControl><SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border"><SelectValue placeholder="O que houve?" /></SelectTrigger></FormControl>
+                            <FormControl>
+                                <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border" onClick={scrollToField}>
+                                    <SelectValue placeholder="O que houve?" />
+                                </SelectTrigger>
+                            </FormControl>
                             <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
                                 {problems.map((p) => <SelectItem key={p.value} value={p.value} className="py-3 rounded-lg">{p.label}</SelectItem>)}
                             </SelectContent>
@@ -172,10 +201,14 @@ export function ReportForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={control} name="city" render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="scroll-mt-field">
                         <FormLabel>Cidade</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border"><SelectValue placeholder="Selecione a cidade" /></SelectTrigger></FormControl>
+                            <FormControl>
+                                <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border" onClick={scrollToField}>
+                                    <SelectValue placeholder="Selecione a cidade" />
+                                </SelectTrigger>
+                            </FormControl>
                             <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
                                 <SelectItem value="Picui" className="rounded-lg">Picuí</SelectItem>
                             </SelectContent>
@@ -183,10 +216,14 @@ export function ReportForm() {
                     </FormItem>
                 )} />
                 <FormField control={control} name="bairro" render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="scroll-mt-field">
                         <FormLabel>Bairro</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCity}>
-                            <FormControl><SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border"><SelectValue placeholder="Selecione o bairro" /></SelectTrigger></FormControl>
+                            <FormControl>
+                                <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border" onClick={scrollToField}>
+                                    <SelectValue placeholder="Selecione o bairro" />
+                                </SelectTrigger>
+                            </FormControl>
                             <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
                                 {PICUI_NEIGHBORHOODS.map((b) => <SelectItem key={b} value={b} className="py-3 rounded-lg">{b}</SelectItem>)}
                             </SelectContent>
@@ -217,14 +254,19 @@ export function ReportForm() {
             <div className="space-y-4">
                 <Label className="font-bold flex items-center gap-2 text-foreground"><ImagePlus className="h-5 w-5 text-primary" /> Foto do Problema</Label>
                 <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-muted border-primary/50" : "bg-muted/50 border-border hover:bg-muted")}>
-                    {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : <div className="text-center p-4"><Camera className="mx-auto h-12 w-12 text-muted-foreground" /><p className="text-sm font-bold mt-2 text-muted-foreground">Clique para tirar ou anexar uma foto</p></div>}
+                    {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : (
+                      <div className="text-center p-4">
+                        <Camera className="mx-auto h-12 w-12 text-muted-foreground" />
+                        <p className="text-sm font-bold mt-2 text-muted-foreground">{deviceLabels.photo}</p>
+                      </div>
+                    )}
                     <input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
                 </div>
                 <FormMessage />
             </div>
 
             <FormField control={control} name="description" render={({ field }) => (
-                <FormItem><FormLabel>Descrição Detalhada</FormLabel><FormControl><Textarea placeholder="Descreva o problem em mais detalhes se necessário..." className="min-h-[120px] rounded-2xl bg-muted/20 border-border" {...field} /></FormControl></FormItem>
+                <FormItem><FormLabel>Descrição Detalhada</FormLabel><FormControl><Textarea placeholder="Descreva o problema em mais detalhes se necessário..." className="min-h-[120px] rounded-2xl bg-muted/20 border-border" {...field} /></FormControl></FormItem>
             )} />
           </CardContent>
 
