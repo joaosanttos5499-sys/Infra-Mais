@@ -446,10 +446,32 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ReportStatus)} className="w-full">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-8">
             <TabsList className="bg-muted p-1 rounded-2xl w-full lg:w-auto overflow-x-auto no-scrollbar shadow-inner">
-                {!showUpvote && <TabsTrigger value="UNDER_REVIEW" className="rounded-xl px-5 py-2.5 text-sm font-bold data-[state=active]:bg-background">Em Análise</TabsTrigger>}
-                <TabsTrigger value="PENDING" className="rounded-xl px-5 py-2.5 text-sm font-bold data-[state=active]:bg-background">Pendente</TabsTrigger>
-                <TabsTrigger value="IN_PROGRESS" className="rounded-xl px-5 py-2.5 text-sm font-bold data-[state=active]:bg-background">Em Andamento</TabsTrigger>
-                <TabsTrigger value="RESOLVED" className="rounded-xl px-5 py-2.5 text-sm font-bold data-[state=active]:bg-background">Resolvido</TabsTrigger>
+                {!showUpvote && (
+                  <TabsTrigger 
+                    value="UNDER_REVIEW" 
+                    className="rounded-xl px-5 py-2.5 text-sm font-bold data-[state=active]:bg-slate-500 data-[state=active]:text-white"
+                  >
+                    Em Análise
+                  </TabsTrigger>
+                )}
+                <TabsTrigger 
+                  value="PENDING" 
+                  className="rounded-xl px-5 py-2.5 text-sm font-bold data-[state=active]:bg-amber-500 data-[state=active]:text-white"
+                >
+                  Pendente
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="IN_PROGRESS" 
+                  className="rounded-xl px-5 py-2.5 text-sm font-bold data-[state=active]:bg-primary data-[state=active]:text-white"
+                >
+                  Em Andamento
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="RESOLVED" 
+                  className="rounded-xl px-5 py-2.5 text-sm font-bold data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
+                >
+                  Resolvido
+                </TabsTrigger>
             </TabsList>
             
             <div className="flex items-center gap-4 w-full lg:w-auto justify-between">
