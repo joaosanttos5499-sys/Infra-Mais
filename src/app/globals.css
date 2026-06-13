@@ -83,10 +83,6 @@
   @apply transition-transform duration-200 hover:scale-110;
 }
 
-.dark .leaflet-tile {
-  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
-}
-
 .custom-popup .leaflet-popup-content-wrapper {
   @apply bg-card text-card-foreground rounded-xl shadow-xl p-0 overflow-hidden border border-border;
 }
