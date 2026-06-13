@@ -57,7 +57,6 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
     }
   }, [isSwitchAccountOpen]);
 
-  // Sincroniza a conta logada atual com o localStorage
   useEffect(() => {
     if (user && !isUserLoading) {
       const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
@@ -356,9 +355,9 @@ export function Header() {
                 </Link>
             ))}
             
-            <div className="h-6 w-px bg-border mx-1" />
+            <div className="h-6 w-px bg-border" />
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-5">
               <NotificationsDropdown scrolled={scrolled} />
               <UserButton onLoginClick={() => setIsAuthModalOpen(true)} scrolled={scrolled} />
               {user && !isEmployee && (
