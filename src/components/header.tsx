@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -10,7 +9,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
 import { useUser, useAuth } from "@/firebase";
-import { signOut, signInWithEmailAndPassword } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuPortal, DropdownMenuSubContent } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { createAvatarSvg } from "@/lib/avatar";
@@ -35,7 +34,6 @@ interface SavedAccount {
   email: string;
   displayName: string;
   photoURL: string;
-  password?: string; // Armazenado para troca instantânea no protótipo
 }
 
 function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scrolled: boolean }) {
@@ -48,7 +46,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
   const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
   const [isSwitching, setIsSwitching] = useState(false);
 
-  const dynamicOffset = scrolled ? 22 : 30;
+  const dynamicOffset = 17;
 
   useEffect(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
@@ -61,27 +59,44 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
     }
   }, [isSwitchAccountOpen]);
 
-  const handleSwitchAccount = async (account: SavedAccount) => {
-    if (!account.password) {
-        toast({ title: "Senha não encontrada", description: "Por favor, faça login manualmente nesta conta uma vez.", variant: "destructive" });
-        signOut(auth).then(() => {
-            setIsSwitchAccountOpen(false);
-            router.push(`/report/auth?email=${encodeURIComponent(account.email)}`);
-        });
-        return;
-    }
+  // Sincroniza a conta logada com o localStorage
+  useEffect(() => {
+    if (user) {
+      const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
+      let accounts: SavedAccount[] = [];
+      if (saved) {
+        try {
+          accounts = JSON.parse(saved);
+        } catch (e) {}
+      }
 
+      const currentProfile: SavedAccount = {
+        uid: user.uid,
+        email: user.email || '',
+        displayName: user.displayName || 'Usuário',
+        photoURL: user.photoURL || createAvatarSvg(user.email || 'U')
+      };
+
+      const exists = accounts.find(a => a.uid === user.uid);
+      if (!exists) {
+        accounts.unshift(currentProfile);
+        localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts.slice(0, 5)));
+        setSavedAccounts(accounts);
+      }
+    }
+  }, [user]);
+
+  const handleSwitchAccount = async (account: SavedAccount) => {
     setIsSwitching(true);
     try {
         await signOut(auth);
-        await signInWithEmailAndPassword(auth, account.email, account.password);
         setIsSwitchAccountOpen(false);
-        toast({ title: "Conta alternada", description: `Bem-vindo(a) de volta, ${account.displayName}!` });
-        router.refresh();
+        // Redireciona para login com o e-mail pré-preenchido via query param
+        router.push(`/report/auth?email=${encodeURIComponent(account.email)}`);
+        toast({ title: "Quase lá!", description: `Informe a senha para acessar a conta ${account.displayName}.` });
     } catch (error) {
         console.error("Erro ao trocar conta:", error);
-        toast({ title: "Erro na troca", description: "Não foi possível realizar o login automático.", variant: "destructive" });
-        router.push(`/report/auth?email=${encodeURIComponent(account.email)}`);
+        toast({ title: "Erro na troca", description: "Não foi possível preparar a troca de conta.", variant: "destructive" });
     } finally {
         setIsSwitching(false);
     }
@@ -200,7 +215,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
             <DialogHeader className="mb-4">
               <DialogTitle className="text-xl font-bold">Trocar de Conta</DialogTitle>
               <DialogDescription>
-                Selecione uma conta salva para entrar instantaneamente.
+                Selecione uma conta para entrar. Por segurança, você deverá informar a senha.
               </DialogDescription>
             </DialogHeader>
 
@@ -355,7 +370,7 @@ export function Header() {
                 ))}
             </div>
             
-            <div className="h-6 w-px bg-border" />
+            <div className="h-6 w-px bg-border mx-2" />
             
             <div className="flex items-center gap-5">
               <NotificationsDropdown scrolled={scrolled} />
