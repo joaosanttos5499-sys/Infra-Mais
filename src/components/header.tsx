@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Briefcase, Users, Trash2, ArrowRight, Palette, Sun, Moon } from "lucide-react";
+import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Briefcase, Users, Trash2, ArrowRight, Palette, Sun, Moon, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
@@ -44,7 +44,6 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
   const [isSwitchAccountOpen, setIsSwitchAccountOpen] = useState(false);
   const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
 
-  // Offset dinâmico: 30px quando header é grande, 22px quando é pequeno (mantém ~10px da borda)
   const dynamicOffset = scrolled ? 22 : 30;
 
   useEffect(() => {
@@ -57,6 +56,37 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
       }
     }
   }, [isSwitchAccountOpen]);
+
+  // Sincroniza a conta logada atual com o localStorage
+  useEffect(() => {
+    if (user && !isUserLoading) {
+      const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
+      let accounts: SavedAccount[] = [];
+      if (saved) {
+        try { accounts = JSON.parse(saved); } catch (e) {}
+      }
+      
+      const exists = accounts.find(a => a.uid === user.uid);
+      const needsUpdate = exists && (exists.displayName !== user.displayName || exists.photoURL !== user.photoURL);
+
+      if (!exists || needsUpdate) {
+        const newAccount = {
+          uid: user.uid,
+          email: user.email || '',
+          displayName: user.displayName || 'Usuário',
+          photoURL: user.photoURL || createAvatarSvg(user.email || 'U')
+        };
+        let updated;
+        if (exists) {
+          updated = accounts.map(a => a.uid === user.uid ? newAccount : a);
+        } else {
+          updated = [newAccount, ...accounts].slice(0, 5);
+        }
+        localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(updated));
+        setSavedAccounts(updated);
+      }
+    }
+  }, [user, isUserLoading]);
 
   const handleSwitchAccount = (account: SavedAccount) => {
     signOut(auth).then(() => {
@@ -182,45 +212,58 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
               </DialogDescription>
             </DialogHeader>
 
-            <ScrollArea className="max-h-[300px] pr-2">
-              <div className="space-y-2">
+            <ScrollArea className="max-h-[350px] pr-2">
+              <div className="space-y-3">
                 {savedAccounts.length > 0 ? (
-                  savedAccounts.map((account) => (
-                    <div 
-                      key={account.uid} 
-                      className={cn(
-                        "flex items-center justify-between p-3 rounded-xl border border-border hover:bg-primary/5 transition-all group",
-                        user?.uid === account.uid && "bg-primary/5 border-primary/20 pointer-events-none"
-                      )}
-                    >
-                      <button 
-                        onClick={() => handleSwitchAccount(account)}
-                        className="flex items-center gap-3 flex-grow text-left"
+                  savedAccounts.map((account) => {
+                    const isActive = user?.uid === account.uid;
+                    return (
+                      <div 
+                        key={account.uid} 
+                        className={cn(
+                          "flex items-center justify-between p-3 rounded-xl border transition-all group",
+                          isActive 
+                            ? "bg-primary/5 border-primary/30 ring-1 ring-primary/20" 
+                            : "border-border hover:bg-muted/50 hover:border-primary/20"
+                        )}
                       >
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={account.photoURL} alt={account.displayName} />
-                          <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                            {account.displayName.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold truncate">{account.displayName}</p>
-                          <p className="text-xs text-muted-foreground truncate">{account.email}</p>
-                        </div>
-                      </button>
-                      
-                      {user?.uid !== account.uid && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          onClick={(e) => { e.stopPropagation(); removeAccount(account.uid); }}
+                        <button 
+                          onClick={() => !isActive && handleSwitchAccount(account)}
+                          className={cn(
+                            "flex items-center gap-3 flex-grow text-left",
+                            isActive ? "cursor-default" : "cursor-pointer"
+                          )}
+                          disabled={isActive}
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ))
+                          <Avatar className="h-11 w-11 shadow-sm">
+                            <AvatarImage src={account.photoURL} alt={account.displayName} />
+                            <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                              {account.displayName.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm font-bold truncate">{account.displayName}</p>
+                                {isActive && <CheckCircle2 className="h-3.5 w-3.5 text-primary" />}
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">{account.email}</p>
+                            {isActive && <p className="text-[10px] font-bold text-primary uppercase mt-0.5">Sessão Ativa</p>}
+                          </div>
+                        </button>
+                        
+                        {!isActive && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+                            onClick={(e) => { e.stopPropagation(); removeAccount(account.uid); }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })
                 ) : (
                   <p className="text-center py-8 text-sm text-muted-foreground">Nenhuma conta salva.</p>
                 )}
@@ -230,7 +273,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
             <div className="mt-6 pt-4 border-t border-border">
               <Button 
                 variant="outline" 
-                className="w-full h-11 rounded-xl font-bold"
+                className="w-full h-11 rounded-xl font-bold hover:bg-primary/5 hover:text-primary transition-all"
                 onClick={() => {
                   signOut(auth).then(() => {
                     setIsSwitchAccountOpen(false);
