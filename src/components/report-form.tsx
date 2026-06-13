@@ -174,7 +174,7 @@ export function ReportForm() {
                     <FormItem>
                         <FormLabel>Cidade</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border"><SelectValue placeholder="Cidade" /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border"><SelectValue placeholder="Selecione a cidade" /></SelectTrigger></FormControl>
                             <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
                                 <SelectItem value="Picui" className="rounded-lg">Picuí</SelectItem>
                             </SelectContent>
