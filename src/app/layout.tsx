@@ -9,7 +9,6 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { SocialsHeader } from "@/components/socials-header";
 import { FirebaseClientProvider } from "@/firebase";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -18,10 +17,6 @@ const poppins = Poppins({
   weight: ["400", "700"],
   variable: "--font-poppins",
 });
-
-// Since Metadata can't be in a 'use client' file, we'll keep the styles here
-// and the metadata would typically be in a separate layout file or page.
-// For simplicity in this prototype, I'll keep the structure.
 
 export default function RootLayout({
   children,
@@ -47,10 +42,9 @@ export default function RootLayout({
                 "fixed top-0 left-0 w-full z-[2000] border-b border-border bg-background transition-shadow duration-300",
                 scrolled ? "shadow-md" : ""
             )}>
-              <SocialsHeader />
               <Header />
             </div>
-            <div className="flex-grow pt-16 sm:pt-[100px]">
+            <div className="flex-grow pt-20">
               {children}
             </div>
             <Toaster />
