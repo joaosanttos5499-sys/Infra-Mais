@@ -120,11 +120,14 @@ export function ReportForm() {
     }
   };
 
-  const scrollToElement = useCallback((id: string) => {
+  const smartScrollToElement = useCallback((id: string) => {
     const element = document.getElementById(id);
     if (element) {
+      // Pequeno delay para permitir que o Radix abra o portal e calcule o layout
       setTimeout(() => {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // scrollIntoView com block: "nearest" só rola se o elemento não estiver visível
+        // Isso atende ao pedido de "só acontecer se parte estiver oculto"
+        element.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }, 100);
     }
   }, []);
@@ -169,7 +172,7 @@ export function ReportForm() {
                         <Select 
                           onValueChange={field.onChange} 
                           defaultValue={field.value}
-                          onOpenChange={(open) => open && scrollToElement('field-category')}
+                          onOpenChange={(open) => open && smartScrollToElement('field-category')}
                         >
                             <FormControl>
                                 <SelectTrigger 
@@ -202,7 +205,7 @@ export function ReportForm() {
                           onValueChange={field.onChange} 
                           defaultValue={field.value} 
                           disabled={!selectedCategory}
-                          onOpenChange={(open) => open && scrollToElement('field-problem')}
+                          onOpenChange={(open) => open && smartScrollToElement('field-problem')}
                         >
                             <FormControl>
                                 <SelectTrigger 
@@ -234,7 +237,7 @@ export function ReportForm() {
                         <Select 
                           onValueChange={field.onChange} 
                           defaultValue={field.value}
-                          onOpenChange={(open) => open && scrollToElement('field-city')}
+                          onOpenChange={(open) => open && smartScrollToElement('field-city')}
                         >
                             <FormControl>
                                 <SelectTrigger 
@@ -258,7 +261,7 @@ export function ReportForm() {
                           onValueChange={field.onChange} 
                           value={field.value} 
                           disabled={!selectedCity}
-                          onOpenChange={(open) => open && scrollToElement('field-bairro')}
+                          onOpenChange={(open) => open && smartScrollToElement('field-bairro')}
                         >
                             <FormControl>
                                 <SelectTrigger 
