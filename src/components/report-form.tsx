@@ -120,12 +120,12 @@ export function ReportForm() {
     }
   };
 
-  const handleScrollToField = useCallback((e: any) => {
-    const field = e.target.closest('.scroll-mt-field');
+  const handleScrollToField = useCallback((e: React.MouseEvent | React.FocusEvent) => {
+    const field = e.currentTarget.closest('.scroll-mt-field');
     if (field) {
         setTimeout(() => {
-            field.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 150);
+            field.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
     }
   }, []);
 
@@ -164,23 +164,23 @@ export function ReportForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={control} name="category" render={({ field }) => (
-                    <FormItem className="scroll-mt-field">
+                    <FormItem className="scroll-mt-field scroll-mt-24">
                         <FormLabel>Categoria</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                                 <SelectTrigger 
-                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all"
+                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5"
                                     onClick={handleScrollToField}
                                 >
                                     <SelectValue placeholder="Selecione o tipo" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+                            <SelectContent side="bottom" position="popper" className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
                                 {categories.map((c) => (
                                     <SelectItem 
                                         key={c.value} 
                                         value={c.value} 
-                                        className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/5 focus:bg-primary/10"
+                                        className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10"
                                     >
                                         <div className="flex items-center gap-2 font-medium">
                                             <c.icon className="h-4 w-4" style={{ color: c.color }} />
@@ -193,23 +193,23 @@ export function ReportForm() {
                     </FormItem>
                 )} />
                 <FormField control={control} name="problem" render={({ field }) => (
-                    <FormItem className="scroll-mt-field">
+                    <FormItem className="scroll-mt-field scroll-mt-24">
                         <FormLabel>Problema Específico</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
                             <FormControl>
                                 <SelectTrigger 
-                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all"
+                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5"
                                     onClick={handleScrollToField}
                                 >
                                     <SelectValue placeholder="O que houve?" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+                            <SelectContent side="bottom" position="popper" className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
                                 {problems.map((p) => (
                                     <SelectItem 
                                         key={p.value} 
                                         value={p.value} 
-                                        className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/5 focus:bg-primary/10"
+                                        className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10"
                                     >
                                         <span className="font-medium">{p.label}</span>
                                     </SelectItem>
@@ -222,19 +222,19 @@ export function ReportForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={control} name="city" render={({ field }) => (
-                    <FormItem className="scroll-mt-field">
+                    <FormItem className="scroll-mt-field scroll-mt-24">
                         <FormLabel>Cidade</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                                 <SelectTrigger 
-                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all"
+                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5"
                                     onClick={handleScrollToField}
                                 >
                                     <SelectValue placeholder="Selecione a cidade" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
-                                <SelectItem value="Picui" className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/5 focus:bg-primary/10 font-medium">
+                            <SelectContent side="bottom" position="popper" className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+                                <SelectItem value="Picui" className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10 font-medium">
                                     Picuí
                                 </SelectItem>
                             </SelectContent>
@@ -242,23 +242,23 @@ export function ReportForm() {
                     </FormItem>
                 )} />
                 <FormField control={control} name="bairro" render={({ field }) => (
-                    <FormItem className="scroll-mt-field">
+                    <FormItem className="scroll-mt-field scroll-mt-24">
                         <FormLabel>Bairro</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCity}>
                             <FormControl>
                                 <SelectTrigger 
-                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all"
+                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5"
                                     onClick={handleScrollToField}
                                 >
                                     <SelectValue placeholder="Selecione o bairro" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+                            <SelectContent side="bottom" position="popper" className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
                                 {PICUI_NEIGHBORHOODS.map((b) => (
                                     <SelectItem 
                                         key={b} 
                                         value={b} 
-                                        className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/5 focus:bg-primary/10 font-medium"
+                                        className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10 font-medium"
                                     >
                                         {b}
                                     </SelectItem>
