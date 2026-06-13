@@ -7,7 +7,7 @@ import { Camera, Loader2, MapPin, ImagePlus } from "lucide-react";
 import { submitReport } from "@/lib/actions";
 import { categories, getCategory } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -120,6 +120,15 @@ export function ReportForm() {
     }
   };
 
+  const handleScrollToField = useCallback((e: any) => {
+    const field = e.target.closest('.scroll-mt-field');
+    if (field) {
+        setTimeout(() => {
+            field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 150);
+    }
+  }, []);
+
   if (isEmailEmployee(user?.email)) {
     return (
         <Card className="w-full max-w-2xl border-primary/20 bg-primary/5 rounded-2xl p-10 text-center">
@@ -131,19 +140,10 @@ export function ReportForm() {
     );
   }
 
-  const scrollToField = (e: any) => {
-    const field = e.target.closest('.scroll-mt-field');
-    if (field) {
-        setTimeout(() => {
-            field.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-    }
-  };
-
   return (
     <Card className="w-full border-border shadow-2xl rounded-2xl overflow-hidden bg-card">
       <CardHeader className="bg-muted/30 border-b border-border p-6 md:p-8">
-        <CardTitle className="text-2xl md:text-3xl font-bold text-foreground">Relatar Problema</CardTitle>
+        <CardTitle className="text-2xl md:text-3xl font-bold text-foreground text-center md:text-left">Relatar Problema</CardTitle>
       </CardHeader>
       
       <Form {...form}>
@@ -168,14 +168,24 @@ export function ReportForm() {
                         <FormLabel>Categoria</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                                <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border" onClick={scrollToField}>
+                                <SelectTrigger 
+                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all"
+                                    onClick={handleScrollToField}
+                                >
                                     <SelectValue placeholder="Selecione o tipo" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
+                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
                                 {categories.map((c) => (
-                                    <SelectItem key={c.value} value={c.value} className="py-3 rounded-lg">
-                                        <div className="flex items-center gap-2"><c.icon className="h-4 w-4" />{c.label}</div>
+                                    <SelectItem 
+                                        key={c.value} 
+                                        value={c.value} 
+                                        className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/5 focus:bg-primary/10"
+                                    >
+                                        <div className="flex items-center gap-2 font-medium">
+                                            <c.icon className="h-4 w-4" style={{ color: c.color }} />
+                                            {c.label}
+                                        </div>
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -187,12 +197,23 @@ export function ReportForm() {
                         <FormLabel>Problema Específico</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
                             <FormControl>
-                                <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border" onClick={scrollToField}>
+                                <SelectTrigger 
+                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all"
+                                    onClick={handleScrollToField}
+                                >
                                     <SelectValue placeholder="O que houve?" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
-                                {problems.map((p) => <SelectItem key={p.value} value={p.value} className="py-3 rounded-lg">{p.label}</SelectItem>)}
+                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+                                {problems.map((p) => (
+                                    <SelectItem 
+                                        key={p.value} 
+                                        value={p.value} 
+                                        className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/5 focus:bg-primary/10"
+                                    >
+                                        <span className="font-medium">{p.label}</span>
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </FormItem>
@@ -205,12 +226,17 @@ export function ReportForm() {
                         <FormLabel>Cidade</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                                <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border" onClick={scrollToField}>
+                                <SelectTrigger 
+                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all"
+                                    onClick={handleScrollToField}
+                                >
                                     <SelectValue placeholder="Selecione a cidade" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
-                                <SelectItem value="Picui" className="rounded-lg">Picuí</SelectItem>
+                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+                                <SelectItem value="Picui" className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/5 focus:bg-primary/10 font-medium">
+                                    Picuí
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </FormItem>
@@ -220,12 +246,23 @@ export function ReportForm() {
                         <FormLabel>Bairro</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCity}>
                             <FormControl>
-                                <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border" onClick={scrollToField}>
+                                <SelectTrigger 
+                                    className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all"
+                                    onClick={handleScrollToField}
+                                >
                                     <SelectValue placeholder="Selecione o bairro" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border">
-                                {PICUI_NEIGHBORHOODS.map((b) => <SelectItem key={b} value={b} className="py-3 rounded-lg">{b}</SelectItem>)}
+                            <SelectContent side="bottom" position="popper" className="z-[1001] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+                                {PICUI_NEIGHBORHOODS.map((b) => (
+                                    <SelectItem 
+                                        key={b} 
+                                        value={b} 
+                                        className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/5 focus:bg-primary/10 font-medium"
+                                    >
+                                        {b}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </FormItem>
@@ -253,7 +290,7 @@ export function ReportForm() {
 
             <div className="space-y-4">
                 <Label className="font-bold flex items-center gap-2 text-foreground"><ImagePlus className="h-5 w-5 text-primary" /> Foto do Problema</Label>
-                <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-muted border-primary/50" : "bg-muted/50 border-border hover:bg-muted")}>
+                <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-muted border-primary/50" : "bg-muted/50 border-border hover:bg-muted hover:border-primary/30")}>
                     {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : (
                       <div className="text-center p-4">
                         <Camera className="mx-auto h-12 w-12 text-muted-foreground" />
