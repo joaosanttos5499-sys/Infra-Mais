@@ -472,7 +472,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             <div className="bg-destructive/10 border border-destructive/30 rounded-2xl p-6 space-y-4 mx-4 sm:mx-0 !mt-20">
                 <div className="flex items-center gap-2">
                     <ShieldAlert className="h-5 w-5 text-destructive" />
-                    <h3 className="text-destructive font-bold text-lg uppercase tracking-tight">Zona de Perigo</h3>
+                    <h3 className="text-destructive font-bold text-lg uppercase tracking-tight">Exclusão da Conta</h3>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="space-y-1 text-center sm:text-left">
