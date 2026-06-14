@@ -15,8 +15,8 @@ export function Footer() {
               className="object-contain"
               priority
             />
-            <span className="text-xl font-bold tracking-tight">
-              Infra <span className="opacity-80">Mais</span>
+            <span className="text-xl font-bold tracking-tight text-white">
+              Infra Mais
             </span>
           </div>
           <div className="text-sm opacity-80 text-center sm:text-right">
