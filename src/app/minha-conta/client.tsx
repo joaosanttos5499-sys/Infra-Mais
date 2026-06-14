@@ -53,6 +53,11 @@ function MyReportItem({ report }: { report: Report }) {
     return (
         <div className="flex flex-col sm:flex-row gap-4 items-center border border-border rounded-xl p-4 bg-card group relative animate-in fade-in slide-in-from-bottom-4">
             
+            {/* Status no canto superior direito */}
+            <div className="absolute top-4 right-4 z-20">
+                <StatusBadge status={report.status} />
+            </div>
+
             <div className="relative w-full sm:w-24 h-40 sm:h-24 rounded-lg overflow-hidden shrink-0 z-10 shadow-sm bg-muted">
                 <Image
                     src={report.photoUrl}
@@ -62,15 +67,10 @@ function MyReportItem({ report }: { report: Report }) {
                 />
             </div>
 
-            <div className="flex flex-col flex-grow min-w-0 z-10 w-full">
-                <div className="flex justify-between items-start gap-2">
-                    <h3 className="font-semibold text-foreground truncate">
-                        {problem?.label || report.problem}
-                    </h3>
-                    <div className="shrink-0">
-                        <StatusBadge status={report.status} />
-                    </div>
-                </div>
+            <div className="flex flex-col flex-grow min-w-0 z-10 w-full pr-24 sm:pr-28">
+                <h3 className="font-semibold text-foreground truncate">
+                    {problem?.label || report.problem}
+                </h3>
 
                 <div className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">
                     {category?.icon && <category.icon className="h-3 w-3" style={{ color: category.color }} />}
@@ -88,7 +88,8 @@ function MyReportItem({ report }: { report: Report }) {
                 </div>
             </div>
 
-            <div className="flex sm:flex-col items-center justify-center gap-4 sm:gap-2 z-10 w-full sm:w-auto border-t border-border sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0">
+            {/* Ações lado a lado */}
+            <div className="flex items-center justify-end gap-2 z-10 w-full sm:w-auto border-t border-border sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0">
                 <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold">
                     <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
                         <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
@@ -98,7 +99,7 @@ function MyReportItem({ report }: { report: Report }) {
                 {canDelete && (
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-8 sm:w-8 text-muted-foreground hover:text-destructive transition shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive transition shrink-0" onClick={(e) => e.stopPropagation()}>
                                 {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                                 <span className="sr-only">Excluir</span>
                             </Button>
