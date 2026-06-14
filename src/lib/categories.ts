@@ -42,7 +42,7 @@ export const categories: Category[] = [
     value: "iluminacao", 
     label: "Iluminação", 
     icon: Lightbulb, 
-    color: "#60a5fa",
+    color: "#3c83f6",
     problems: [
         { value: "poste_apagado", label: "Poste apagado" },
         { value: "oscilacao_luz", label: "Oscilação de luz" },
@@ -54,7 +54,7 @@ export const categories: Category[] = [
     value: "agua_esgoto", 
     label: "Água e Esgoto", 
     icon: Droplets, 
-    color: "#3b82f6",
+    color: "#3c83f6",
     problems: [
         { value: "vazamento_agua", label: "Vazamento de água" },
         { value: "esgoto_ceu_aberto", label: "Esgoto a céu aberto" },
