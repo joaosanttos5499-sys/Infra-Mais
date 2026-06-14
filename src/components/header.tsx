@@ -329,7 +329,7 @@ export function Header() {
               className="object-contain"
               priority
             />
-            <span className="text-xl font-bold tracking-tight">
+            <span className="text-xl font-bold tracking-tight text-foreground">
               Infra <span className="text-primary">Mais</span>
             </span>
           </Link>
