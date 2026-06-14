@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
@@ -120,6 +119,7 @@ const ReportCard = memo(({
   const nextAllowedStatus = STATUS_PROGRESSION[report.status];
   const isFinalStatus = !nextAllowedStatus;
   const isPhotoEnabled = selectedStatus === 'RESOLVED';
+  const isPublic = report.status !== 'UNDER_REVIEW';
 
   return (
     <Card 
@@ -188,11 +188,13 @@ const ReportCard = memo(({
                         </div>
 
                         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                            <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold hover:bg-primary/10">
-                                <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
-                                    <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
-                                </Link>
-                            </Button>
+                            {isPublic && (
+                                <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold hover:bg-primary/10">
+                                    <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
+                                        <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
+                                    </Link>
+                                </Button>
+                            )}
 
                             {canDelete && (
                                 <AlertDialog>
