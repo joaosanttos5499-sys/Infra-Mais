@@ -393,7 +393,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               render={({ field }) => (
                                 <FormItem>
                                   <div className="flex justify-between items-center mb-1">
-                                    <FormLabel className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Nome Completo</FormLabel>
+                                    <FormLabel className="text-sm font-bold text-foreground uppercase tracking-wider">Nome Completo</FormLabel>
                                     {!isEditingName && (
                                         <Button type="button" variant="link" className="p-0 h-auto text-sm text-primary font-bold hover:text-primary/80" onClick={handleEditClick}>
                                             Alterar
@@ -411,7 +411,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             <div className="space-y-6 pt-2">
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        <FormLabel className="text-sm font-medium text-muted-foreground uppercase tracking-wider">E-mail</FormLabel>
+                                        <FormLabel className="text-sm font-bold text-foreground uppercase tracking-wider">E-mail</FormLabel>
                                         <Mail className="h-3.5 w-3.5 text-muted-foreground" />
                                     </div>
                                     <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-xl bg-muted/50 text-muted-foreground cursor-not-allowed opacity-100 border-border" />
@@ -419,7 +419,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        <FormLabel className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Data de Nascimento</FormLabel>
+                                        <FormLabel className="text-sm font-bold text-foreground uppercase tracking-wider">Data de Nascimento</FormLabel>
                                         <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
                                     </div>
                                     <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-xl bg-muted/50 text-muted-foreground cursor-not-allowed opacity-100 border-border" />
