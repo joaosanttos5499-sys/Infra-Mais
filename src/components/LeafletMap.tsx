@@ -19,7 +19,7 @@ interface LeafletMapProps {
 
 const statusColorMap: Record<string, string> = {
   PENDING: '#f59e0b',    // Amarelo (Amber-500)
-  IN_PROGRESS: '#3b82f6', // Azul (Primary-500)
+  IN_PROGRESS: '#3c83f6', // Azul customizado (#3c83f6)
   RESOLVED: '#10b981',    // Verde (Emerald-500)
   UNDER_REVIEW: '#94a3b8' // Cinza (Slate-400)
 };
@@ -38,7 +38,6 @@ const LeafletMap = ({
 
   const defaultCenter: [number, number] = [-6.515, -36.35];
 
-  // Initialize Map
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
 
@@ -63,14 +62,12 @@ const LeafletMap = ({
     };
   }, []);
 
-  // Handle Theme Change
   useEffect(() => {
     if (mapRef.current) {
       // Logic handled via CSS class on html element and .leaflet-tile filter in globals.css
     }
   }, [theme]);
 
-  // Handle Interactivity
   useEffect(() => {
     const map = mapInstance.current;
     if (!map) return;
@@ -86,12 +83,10 @@ const LeafletMap = ({
     }
   }, [interactive, onLocationSelect]);
 
-  // Handle Markers
   useEffect(() => {
     const map = mapInstance.current;
     if (!map) return;
 
-    // Clear old markers
     reportMarkers.current.forEach(marker => marker.removeFrom(map));
     reportMarkers.current.clear();
 
@@ -129,7 +124,7 @@ const LeafletMap = ({
             <strong class="text-foreground">${displayCity} - ${report.bairro}</strong><br/>
             ${report.location}
           </p>
-          <a href="/dashboard#report-${report.id}" style="background-color: #3b82f6; color: #ffffff !important; text-decoration: none !important; display: block; text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; font-size: 12px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); text-transform: uppercase; letter-spacing: 0.5px;">
+          <a href="/dashboard#report-${report.id}" style="background-color: #3c83f6; color: #ffffff !important; text-decoration: none !important; display: block; text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; font-size: 12px; box-shadow: 0 4px 12px rgba(60, 131, 246, 0.3); text-transform: uppercase; letter-spacing: 0.5px;">
             Ver Detalhes
           </a>
         </div>
@@ -147,7 +142,6 @@ const LeafletMap = ({
     });
   }, [reports, interactive]);
 
-  // Handle Selected Location
   useEffect(() => {
     const map = mapInstance.current;
     if (!map || !selectedLocation) return;
