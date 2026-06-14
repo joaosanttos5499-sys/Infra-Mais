@@ -27,6 +27,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createAvatarSvg } from "@/lib/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { isEmailEmployee } from "@/lib/config";
+import { cn } from "@/lib/utils";
 
 function MyReportItem({ report }: { report: Report }) {
     const { toast } = useToast();
@@ -51,14 +52,14 @@ function MyReportItem({ report }: { report: Report }) {
     };
 
     return (
-        <div className="flex flex-col sm:flex-row gap-4 items-center border border-border rounded-xl p-4 bg-card group relative animate-in fade-in slide-in-from-bottom-4">
+        <div className="flex flex-col sm:flex-row gap-4 border border-border rounded-xl p-4 bg-card group relative animate-in fade-in slide-in-from-bottom-4 min-h-[160px]">
             
             {/* Status no canto superior direito */}
             <div className="absolute top-4 right-4 z-20">
                 <StatusBadge status={report.status} />
             </div>
 
-            <div className="relative w-full sm:w-24 h-40 sm:h-24 rounded-lg overflow-hidden shrink-0 z-10 shadow-sm bg-muted">
+            <div className="relative w-full sm:w-32 h-40 sm:h-auto rounded-lg overflow-hidden shrink-0 z-10 shadow-sm bg-muted">
                 <Image
                     src={report.photoUrl}
                     alt={report.description || "Foto do problema"}
@@ -67,57 +68,59 @@ function MyReportItem({ report }: { report: Report }) {
                 />
             </div>
 
-            <div className="flex flex-col flex-grow min-w-0 z-10 w-full pr-24 sm:pr-28">
-                <h3 className="font-semibold text-foreground truncate">
-                    {problem?.label || report.problem}
-                </h3>
+            <div className="flex flex-col flex-grow min-w-0 z-10 w-full justify-between">
+                <div className="space-y-1 pr-24 sm:pr-28">
+                    <h3 className="font-bold text-lg text-foreground truncate">
+                        {problem?.label || report.problem}
+                    </h3>
 
-                <div className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">
-                    {category?.icon && <category.icon className="h-3 w-3" style={{ color: category.color }} />}
-                    <span className="truncate">{category?.label || report.category}</span>
+                    <div className="text-sm text-muted-foreground flex items-center gap-1.5">
+                        {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
+                        <span className="truncate">{category?.label || report.category}</span>
+                    </div>
+
+                    <div className="text-sm text-muted-foreground flex items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5 text-primary" />
+                        <span className="truncate">{displayCity} - {report.bairro}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
+                        <Clock className="h-3.5 w-3.5" />
+                        <ReportTime date={new Date(report.createdAt)} />
+                    </div>
                 </div>
 
-                <div className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">
-                    <MapPin className="h-3 w-3 text-primary" />
-                    <span className="truncate">{displayCity} - {report.bairro}</span>
+                {/* Ações no canto inferior direito */}
+                <div className="flex items-center justify-end gap-2 w-full mt-4 sm:mt-0">
+                    <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold hover:bg-primary/5 transition-colors">
+                        <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
+                            <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
+                        </Link>
+                    </Button>
+
+                    {canDelete && (
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition shrink-0" onClick={(e) => e.stopPropagation()}>
+                                    {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                    <span className="sr-only">Excluir</span>
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
+                                    <AlertDialogDescription>Esta ação não pode ser desfeita. O relatório será removido permanentemente.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl font-bold">
+                                        Excluir
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )}
                 </div>
-
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2">
-                    <Clock className="h-3.5 w-3.5" />
-                    <ReportTime date={new Date(report.createdAt)} />
-                </div>
-            </div>
-
-            {/* Ações lado a lado */}
-            <div className="flex items-center justify-end gap-2 z-10 w-full sm:w-auto border-t border-border sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0">
-                <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold">
-                    <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
-                        <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
-                    </Link>
-                </Button>
-
-                {canDelete && (
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive transition shrink-0" onClick={(e) => e.stopPropagation()}>
-                                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                                <span className="sr-only">Excluir</span>
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
-                                <AlertDialogDescription>Esta ação não pode ser desfeita. O relatório será removido permanentemente.</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-                                    Excluir
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                )}
             </div>
         </div>
     );
@@ -126,7 +129,7 @@ function MyReportItem({ report }: { report: Report }) {
 function MyReportsList({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
         return (
-            <div className="text-center text-muted-foreground py-10 border-2 border-dashed border-border rounded-2xl bg-muted/20 mx-4 sm:mx-0">
+            <div className="text-center text-muted-foreground py-12 border-2 border-dashed border-border rounded-2xl bg-muted/20 mx-4 sm:mx-0">
                 <p className="text-sm">Você ainda não relatou nenhum problema.</p>
                 <Button asChild variant="link" className="mt-2 text-primary font-bold">
                     <Link href="/report/new">Relatar um Problema</Link>
@@ -143,8 +146,8 @@ function MyReportsList({ reports }: { reports: Report[] }) {
                 ))}
             </div>
             
-            <div className="pt-4 flex justify-center">
-                <Button asChild className="w-full sm:w-auto rounded-xl h-11 px-8 shadow-sm">
+            <div className="pt-6 flex justify-center">
+                <Button asChild className="w-full sm:w-auto rounded-xl h-12 px-10 shadow-lg hover:scale-105 transition-all">
                     <Link href="/report/new" className="flex items-center gap-2">
                         <Plus className="h-5 w-5" />
                         Relatar um Problema
