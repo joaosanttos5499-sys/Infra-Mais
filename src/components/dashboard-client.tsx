@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
@@ -348,7 +347,7 @@ const ReportCard = memo(({
                                                 <p className="mt-2 text-xs font-bold text-muted-foreground">Anexar evidência</p>
                                             </div>
                                         )}
-                                        <Input name="photoAfter" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
+                                        <input name="photoAfter" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
                                     </div>
                                 </div>
                             )}
@@ -490,7 +489,9 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
     });
   }, [optimisticReports, sortBy]);
 
-  const filteredReports = sortedReports.filter(r => r.status === activeTab);
+  const filteredReports = useMemo(() => {
+      return sortedReports.filter(r => r.status === activeTab);
+  }, [sortedReports, activeTab]);
 
   return (
     <div className="space-y-8" ref={tabsRef}>
@@ -509,7 +510,7 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
               <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest"><Filter className="h-4 w-4" /> Ordenar</div>
               <Select onValueChange={(v) => setSortBy(v as any)} defaultValue={sortBy}>
                 <SelectTrigger className="h-10 w-[180px] bg-card border-border rounded-xl shadow-sm"><SelectValue /></SelectTrigger>
-                <SelectContent side="bottom" position="popper" className="bg-card border-border rounded-xl shadow-xl z-[1001]">
+                <SelectContent side="bottom" position="popper" className="bg-card border-border rounded-xl shadow-xl z-[2100]">
                   <SelectItem value="newest">Mais Recentes</SelectItem>
                   <SelectItem value="oldest">Mais Antigos</SelectItem>
                   <SelectItem value="upvotes">Mais Apoiados</SelectItem>

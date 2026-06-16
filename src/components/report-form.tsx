@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
@@ -132,6 +131,7 @@ export function ReportForm() {
     setPhotoPreview(null);
     toast({ title: "Formulário limpo", description: "Todas as informações foram apagadas." });
     
+    // Ajuste de scroll solicitado
     if (formCardRef.current) {
         const yOffset = -100;
         const y = formCardRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
@@ -150,10 +150,10 @@ export function ReportForm() {
         const result = await submitReport(undefined, formData);
         if (result?.success) {
           setIsRedirecting(true);
-          toast({ title: "Sucesso!", description: "Relatório enviado." });
+          toast({ title: "Sucesso!", description: "Relatório enviado com sucesso." });
           router.push('/minha-conta#meus-relatorios');
         } else {
-          toast({ variant: 'destructive', title: 'Erro ao enviar', description: result?.errors?._form?.[0] || "Verifique os campos." });
+          toast({ variant: 'destructive', title: 'Erro ao enviar', description: result?.errors?._form?.[0] || "Verifique os campos do formulário." });
         }
     } catch (error) {
         toast({ variant: 'destructive', title: 'Erro', description: "Ocorreu um erro ao processar sua solicitação." });
@@ -321,7 +321,7 @@ export function ReportForm() {
                     <FormLabel>Descrição do Problema (Opcional)</FormLabel>
                     <FormControl>
                         <Textarea 
-                            placeholder="Descrição Detalhada" 
+                            placeholder="Descreva o que está acontecendo..." 
                             className="min-h-[120px] rounded-2xl bg-muted/20 border-border placeholder:text-muted-foreground" 
                             {...field} 
                         />
