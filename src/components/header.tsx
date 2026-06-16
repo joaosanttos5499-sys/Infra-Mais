@@ -1,11 +1,10 @@
-
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Briefcase, Users, Trash2, ArrowRight, Palette, Sun, Moon, CheckCircle2, Loader2 } from "lucide-react";
+import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Briefcase, Users, Trash2, ArrowRight, Palette, Sun, Moon, CheckCircle2, UserPlus, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
@@ -99,6 +98,19 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
     }
   };
 
+  const handleAddNewAccount = async () => {
+    setIsSwitching(true);
+    try {
+      await signOut(auth);
+      setIsSwitchAccountOpen(false);
+      router.push('/report/auth');
+    } catch (error) {
+      console.error("Erro ao sair para adicionar conta:", error);
+    } finally {
+      setIsSwitching(false);
+    }
+  };
+
   const removeAccount = (uid: string) => {
     const updated = savedAccounts.filter(a => a.uid !== uid);
     setSavedAccounts(updated);
@@ -171,7 +183,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
                   <span className="font-semibold text-sm">Tema</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="bg-card border-border p-1 rounded-xl shadow-xl min-w-[140px]">
+                  <DropdownMenuSubContent className="bg-card border-border p-1 rounded-xl shadow-xl min-w-[140px]" sideOffset={10}>
                     <DropdownMenuItem onClick={() => setTheme('light')} className={cn("h-10 rounded-lg cursor-pointer px-3 gap-3", theme === 'light' && "bg-primary/10 text-primary")}>
                       <Sun className="h-4 w-4" />
                       <span className="font-semibold text-sm">Claro</span>
@@ -210,13 +222,13 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
         <Dialog open={isSwitchAccountOpen} onOpenChange={setIsSwitchAccountOpen}>
           <DialogContent className="rounded-2xl sm:max-w-md p-6 bg-card border-border">
             <DialogHeader className="mb-4">
-              <DialogTitle className="text-xl font-bold">Trocar de Conta</DialogTitle>
+              <DialogTitle className="text-xl font-bold">Gerenciar Contas</DialogTitle>
               <DialogDescription>
-                Selecione uma conta para entrar. Por segurança, você deverá informar a senha.
+                Selecione uma conta salva ou adicione uma nova.
               </DialogDescription>
             </DialogHeader>
 
-            <ScrollArea className="max-h-[350px] pr-2">
+            <ScrollArea className="max-h-[300px] pr-2 mb-4">
               <div className="space-y-3">
                 {savedAccounts.length > 0 ? (
                   savedAccounts.map((account) => {
@@ -272,6 +284,16 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
                 )}
               </div>
             </ScrollArea>
+
+            <Button 
+              variant="outline" 
+              className="w-full h-12 rounded-xl font-bold border-dashed border-2 hover:bg-primary/5 hover:border-primary/50 text-primary group"
+              onClick={handleAddNewAccount}
+              disabled={isSwitching}
+            >
+              <UserPlus className="mr-2 h-5 w-5 transition-transform group-hover:scale-110" />
+              Entrar com outra conta
+            </Button>
           </DialogContent>
         </Dialog>
       </>

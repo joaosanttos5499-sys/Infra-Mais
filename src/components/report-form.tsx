@@ -1,9 +1,8 @@
-
 "use client";
 
-import { useEffect, useState, memo, useCallback, useMemo } from "react";
+import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
-import { Camera, Loader2, MapPin, ImagePlus } from "lucide-react";
+import { Camera, Loader2, MapPin, ImagePlus, RotateCcw } from "lucide-react";
 import { submitReport } from "@/lib/actions";
 import { categories, getCategory } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
@@ -25,6 +24,17 @@ import { isEmailEmployee } from "@/lib/config";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Separator } from "./ui/separator";
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle, 
+  AlertDialogTrigger 
+} from "@/components/ui/alert-dialog";
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
@@ -46,6 +56,7 @@ export function ReportForm() {
   const { toast } = useToast();
   const { user } = useUser();
   const router = useRouter();
+  const formRef = useRef<HTMLDivElement>(null);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [deviceLabels, setDeviceLabels] = useState({
     photo: "Clique para anexar uma foto",
@@ -103,6 +114,30 @@ export function ReportForm() {
     }
   };
 
+  const handleClearForm = () => {
+    reset({
+      userId: user?.uid ?? '',
+      category: '',
+      problem: '',
+      city: '',
+      bairro: '',
+      address: '',
+      reference: '',
+      description: '',
+      latitude: 0,
+      longitude: 0,
+    });
+    setPhotoPreview(null);
+    toast({ title: "Formulário limpo", description: "Todas as informações foram apagadas." });
+    
+    // Scroll suave para o início do formulário
+    if (formRef.current) {
+      const yOffset = -100; 
+      const y = formRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
+
   const onSubmit = async (values: z.infer<typeof ClientReportSchema>) => {
     const formData = new FormData();
     formData.append('photo', values.photo);
@@ -132,7 +167,7 @@ export function ReportForm() {
   }
 
   return (
-    <Card className="w-full border-border shadow-2xl rounded-2xl overflow-hidden bg-card">
+    <Card className="w-full border-border shadow-2xl rounded-2xl overflow-hidden bg-card" ref={formRef}>
       <CardHeader className="bg-muted/30 border-b border-border p-6 md:p-8">
         <CardTitle className="text-2xl md:text-3xl font-bold text-foreground text-center md:text-left">Relatar Problema</CardTitle>
       </CardHeader>
@@ -157,16 +192,16 @@ export function ReportForm() {
                 <FormField control={control} name="category" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Categoria</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} modal={false}>
+                        <Select onValueChange={field.onChange} value={field.value} modal={false}>
                             <FormControl>
                                 <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5">
                                     <SelectValue placeholder="Selecione o tipo" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" avoidCollisions={false} className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                            <SelectContent side="bottom" avoidCollisions={true} className="z-[2200]">
                                 {categories.map((c) => (
-                                    <SelectItem key={c.value} value={c.value} className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10">
-                                        <div className="flex items-center gap-2 font-medium">
+                                    <SelectItem key={c.value} value={c.value}>
+                                        <div className="flex items-center gap-2">
                                             <c.icon className="h-4 w-4" style={{ color: c.color }} />
                                             {c.label}
                                         </div>
@@ -174,25 +209,27 @@ export function ReportForm() {
                                 ))}
                             </SelectContent>
                         </Select>
+                        <FormMessage />
                     </FormItem>
                 )} />
                 <FormField control={control} name="problem" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Problema Específico</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory} modal={false}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategory} modal={false}>
                             <FormControl>
                                 <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5">
                                     <SelectValue placeholder="O que houve?" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" avoidCollisions={false} className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                            <SelectContent side="bottom" avoidCollisions={true} className="z-[2200]">
                                 {problems.map((p) => (
-                                    <SelectItem key={p.value} value={p.value} className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10">
-                                        <span className="font-medium">{p.label}</span>
+                                    <SelectItem key={p.value} value={p.value}>
+                                        {p.label}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
+                        <FormMessage />
                     </FormItem>
                 )} />
             </div>
@@ -201,18 +238,19 @@ export function ReportForm() {
                 <FormField control={control} name="city" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Cidade</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} modal={false}>
+                        <Select onValueChange={field.onChange} value={field.value} modal={false}>
                             <FormControl>
                                 <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border focus:ring-2 focus:ring-primary/20 transition-all hover:bg-primary/5">
                                     <SelectValue placeholder="Selecione a cidade" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" avoidCollisions={false} className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
-                                <SelectItem value="Picui" className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10 font-medium">
+                            <SelectContent side="bottom" avoidCollisions={true} className="z-[2200]">
+                                <SelectItem value="Picui">
                                     Picuí
                                 </SelectItem>
                             </SelectContent>
                         </Select>
+                        <FormMessage />
                     </FormItem>
                 )} />
                 <FormField control={control} name="bairro" render={({ field }) => (
@@ -224,14 +262,15 @@ export function ReportForm() {
                                     <SelectValue placeholder="Selecione o bairro" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent side="bottom" avoidCollisions={false} className="z-[2100] bg-card border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                            <SelectContent side="bottom" avoidCollisions={true} className="z-[2200]">
                                 {PICUI_NEIGHBORHOODS.map((b) => (
-                                    <SelectItem key={b} value={b} className="py-3 px-4 rounded-lg cursor-pointer transition-colors hover:bg-primary/10 focus:bg-primary/10 font-medium">
+                                    <SelectItem key={b} value={b}>
                                         {b}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
+                        <FormMessage />
                     </FormItem>
                 )} />
             </div>
@@ -243,6 +282,7 @@ export function ReportForm() {
                         <FormControl>
                             <Input placeholder="ex: Rua Principal, 123" className="h-12 rounded-xl bg-muted/20 border-border" {...field} />
                         </FormControl>
+                        <FormMessage />
                     </FormItem>
                 )} />
                 <FormField control={control} name="reference" render={({ field }) => (
@@ -251,12 +291,18 @@ export function ReportForm() {
                         <FormControl>
                             <Input placeholder="ex: Próximo ao mercadinho" className="h-12 rounded-xl bg-muted/20 border-border" {...field} />
                         </FormControl>
+                        <FormMessage />
                     </FormItem>
                 )} />
             </div>
 
             <div className="space-y-4">
-                <Label className="font-bold flex items-center gap-2 text-foreground"><ImagePlus className="h-5 w-5 text-primary" /> Foto do Problema</Label>
+                <div className="flex flex-col gap-1">
+                  <Label className="font-bold flex items-center gap-2 text-foreground">
+                    <ImagePlus className="h-5 w-5 text-primary" /> Foto do Problema
+                  </Label>
+                  <span className="text-[10px] text-muted-foreground ml-7 font-medium uppercase tracking-wider">(Até 5 Mb)</span>
+                </div>
                 <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-muted border-primary/50" : "bg-muted/50 border-border hover:bg-muted hover:border-primary/30")}>
                     {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : (
                       <div className="text-center p-4">
@@ -279,12 +325,32 @@ export function ReportForm() {
                             {...field} 
                         />
                     </FormControl>
+                    <FormMessage />
                 </FormItem>
             )} />
           </CardContent>
 
           <CardFooter className="bg-muted/30 border-t border-border p-6 md:p-8 flex flex-col sm:flex-row justify-between gap-4">
-              <Button variant="outline" type="button" onClick={() => { reset(); setPhotoPreview(null); }} className="h-12 rounded-xl font-bold w-full sm:w-auto" disabled={isRedirecting}>Limpar Formulário</Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" type="button" className="h-12 rounded-xl font-bold w-full sm:w-auto text-muted-foreground hover:text-foreground" disabled={isRedirecting}>
+                    <RotateCcw className="mr-2 h-4 w-4" /> Limpar Formulário
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-2xl bg-card border-border">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Apagar informações?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Isso irá remover todos os dados preenchidos e o marcador no mapa. Esta ação não pode ser desfeita.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleClearForm} className="bg-primary text-white rounded-xl font-bold">Sim, apagar tudo</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
               <Button type="submit" className="h-12 px-12 rounded-xl font-bold w-full sm:w-auto shadow-lg" disabled={form.formState.isSubmitting || isRedirecting}>
                 {(form.formState.isSubmitting || isRedirecting) ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
                 Enviar Relatório

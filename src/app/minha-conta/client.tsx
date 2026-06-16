@@ -220,6 +220,20 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         }
     }, [user, isUserLoading, allReports, router, isEmployee]);
     
+    // Lógica para rolagem suave ao carregar a página com hash #meus-relatorios
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.location.hash === '#meus-relatorios' && reportsRef.current && !isProfileLoading) {
+            setTimeout(() => {
+                const element = reportsRef.current;
+                if (element) {
+                    const yOffset = -100; // Offset para encobrir a zona de exclusão e focar nos relatos
+                    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+            }, 300);
+        }
+    }, [isProfileLoading]);
+
     useEffect(() => {
         if (user?.uid) {
             setIsProfileLoading(true);
@@ -468,7 +482,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             </AlertDialog>
 
             {!isEmployee && (
-                <Card className="bg-card rounded-2xl shadow-md border border-border p-6 mx-4 sm:mx-0" id="meus-relatorios" ref={reportsRef}>
+                <Card className="bg-card rounded-2xl shadow-md border border-border p-6 mx-4 sm:mx-0 scroll-mt-24" id="meus-relatorios" ref={reportsRef}>
                     <CardHeader className="p-0 mb-6">
                         <CardTitle className="text-xl font-bold text-foreground">Meus Relatórios</CardTitle>
                     </CardHeader>

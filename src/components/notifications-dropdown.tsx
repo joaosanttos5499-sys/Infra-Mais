@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
@@ -17,9 +16,6 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
   const { user } = useUser();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isPending, startTransition] = useTransition();
-
-  // Offset dinâmico: 30px quando header é grande, 22px quando é pequeno (mantém ~10px da borda)
-  const dynamicOffset = scrolled ? 22 : 30;
 
   useEffect(() => {
     if (user) {
@@ -66,7 +62,7 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
       <DropdownMenuContent 
         className="w-80 sm:w-96 rounded-2xl shadow-2xl border-border bg-card p-0 overflow-hidden" 
         align="end" 
-        sideOffset={dynamicOffset}
+        sideOffset={10}
       >
         <div className="p-4 bg-muted/30 border-b border-border flex items-center justify-between">
           <h3 className="font-bold text-lg text-foreground tracking-tight">Notificações</h3>
