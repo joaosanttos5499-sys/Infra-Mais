@@ -4,6 +4,7 @@ export type ReportStatus = "UNDER_REVIEW" | "PENDING" | "IN_PROGRESS" | "RESOLVE
 export interface Report {
   id: string;
   userId: string;
+  relatorEmail: string;
   category: string;
   problem: string;
   city: string;

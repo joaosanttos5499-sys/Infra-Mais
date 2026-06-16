@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
@@ -56,7 +57,7 @@ export function ReportForm() {
   const { toast } = useToast();
   const { user } = useUser();
   const router = useRouter();
-  const formRef = useRef<HTMLDivElement>(null);
+  const formCardRef = useRef<HTMLDivElement>(null);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [deviceLabels, setDeviceLabels] = useState({
     photo: "Clique para anexar uma foto",
@@ -130,11 +131,10 @@ export function ReportForm() {
     setPhotoPreview(null);
     toast({ title: "Formulário limpo", description: "Todas as informações foram apagadas." });
     
-    // Ajuste de posição para o início do formulário com offset para o header fixo
-    if (formRef.current) {
-        setTimeout(() => {
-            formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
+    if (formCardRef.current) {
+        const yOffset = -100;
+        const y = formCardRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
@@ -167,7 +167,7 @@ export function ReportForm() {
   }
 
   return (
-    <Card className="w-full border-border shadow-2xl rounded-2xl overflow-hidden bg-card scroll-mt-32" ref={formRef}>
+    <Card className="w-full border-border shadow-2xl rounded-2xl overflow-hidden bg-card scroll-mt-32" ref={formCardRef}>
       <CardHeader className="bg-muted/30 border-b border-border p-6 md:p-8">
         <CardTitle className="text-2xl md:text-3xl font-bold text-foreground text-center md:text-left">Relatar Problema</CardTitle>
       </CardHeader>
