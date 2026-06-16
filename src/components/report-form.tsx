@@ -131,7 +131,7 @@ export function ReportForm() {
     setPhotoPreview(null);
     toast({ title: "Formulário limpo", description: "Todas as informações foram apagadas." });
     
-    // Ajuste de scroll solicitado
+    // Ajuste de scroll
     if (formCardRef.current) {
         const yOffset = -100;
         const y = formCardRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
@@ -172,7 +172,7 @@ export function ReportForm() {
   }
 
   return (
-    <Card className="w-full border-border shadow-2xl rounded-2xl overflow-hidden bg-card scroll-mt-32" ref={formCardRef}>
+    <Card className="w-full border-border shadow-2xl rounded-2xl overflow-hidden bg-card scroll-mt-32 max-w-[2000px] mx-auto" ref={formCardRef}>
       <CardHeader className="bg-muted/30 border-b border-border p-6 md:p-8">
         <CardTitle className="text-2xl md:text-3xl font-bold text-foreground text-center md:text-left">Relatar Problema</CardTitle>
       </CardHeader>
