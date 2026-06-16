@@ -1,7 +1,4 @@
 
-"use client";
-
-import { useEffect, useState } from "react";
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
@@ -18,32 +15,29 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
+export const metadata: Metadata = {
+  title: "Infra Mais - Zeladoria Urbana",
+  description: "Relate e acompanhe problemas de infraestrutura na sua cidade.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [scrolled, setScrolled] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", poppins.variable)}>
+      <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", poppins.variable)} suppressHydrationWarning>
         <ThemeProvider>
           <FirebaseClientProvider>
-            <div className={cn(
-                "fixed top-0 left-0 w-full z-[2000] border-b border-border bg-background transition-all duration-300",
-                mounted && scrolled ? "shadow-md" : ""
-            )}>
+            <div className="fixed top-0 left-0 w-full z-[2000] border-b border-border bg-background">
               <Header />
             </div>
             <div className="flex-grow pt-20">

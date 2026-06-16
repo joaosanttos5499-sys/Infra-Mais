@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -220,7 +221,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
         </DropdownMenu>
 
         <Dialog open={isSwitchAccountOpen} onOpenChange={setIsSwitchAccountOpen}>
-          <DialogContent className="rounded-2xl sm:max-w-md p-6 bg-card border-border">
+          <DialogContent className="rounded-2xl sm:max-w-md p-6 bg-card border-border" sideOffset={10}>
             <DialogHeader className="mb-4">
               <DialogTitle className="text-xl font-bold">Gerenciar Contas</DialogTitle>
               <DialogDescription>
@@ -320,7 +321,8 @@ export function Header() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -395,7 +397,7 @@ export function Header() {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="bg-card border-border">
+              <SheetContent side="right" className="bg-card border-border" sideOffset={0}>
                 <SheetHeader className="text-left mb-8">
                     <SheetTitle className="text-2xl font-bold">Navegação</SheetTitle>
                 </SheetHeader>
@@ -428,7 +430,7 @@ export function Header() {
       </div>
 
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-        <DialogContent className="rounded-2xl sm:max-w-md p-8 bg-card border-border">
+        <DialogContent className="rounded-2xl sm:max-w-md p-8 bg-card border-border" sideOffset={10}>
           <DialogHeader className="mb-6">
             <DialogTitle className="text-2xl font-bold">Acessar Plataforma</DialogTitle>
             <DialogDescription>
