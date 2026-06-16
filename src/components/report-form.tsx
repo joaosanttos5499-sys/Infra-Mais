@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
@@ -38,7 +39,7 @@ import {
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
-  loading: () => <div className="w-full h-[400px] bg-muted animate-pulse flex items-center justify-center text-muted-foreground">Carregando mapa...</div>
+  loading: () => <div className="w-full h-[400px] bg-muted animate-pulse flex items-center justify-center text-muted-foreground rounded-2xl">Carregando mapa...</div>
 });
 
 const PICUI_NEIGHBORHOODS = [
@@ -114,7 +115,7 @@ export function ReportForm() {
     }
   };
 
-  const handleClearForm = () => {
+  const handleClearForm = useCallback(() => {
     reset({
       userId: user?.uid ?? '',
       category: '',
@@ -135,7 +136,7 @@ export function ReportForm() {
         const y = formCardRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({ top: y, behavior: 'smooth' });
     }
-  };
+  }, [reset, user?.uid, toast]);
 
   const onSubmit = async (values: z.infer<typeof ClientReportSchema>) => {
     const formData = new FormData();
@@ -144,13 +145,17 @@ export function ReportForm() {
         if (key !== 'photo') formData.append(key, String((values as any)[key]));
     });
 
-    const result = await submitReport(undefined, formData);
-    if (result?.success) {
-      setIsRedirecting(true);
-      toast({ title: "Sucesso!", description: "Relatório enviado." });
-      router.push('/minha-conta#meus-relatorios');
-    } else {
-      toast({ variant: 'destructive', title: 'Erro ao enviar', description: result?.errors?._form?.[0] });
+    try {
+        const result = await submitReport(undefined, formData);
+        if (result?.success) {
+          setIsRedirecting(true);
+          toast({ title: "Sucesso!", description: "Relatório enviado." });
+          router.push('/minha-conta#meus-relatorios');
+        } else {
+          toast({ variant: 'destructive', title: 'Erro ao enviar', description: result?.errors?._form?.[0] || "Verifique os campos." });
+        }
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'Erro', description: "Ocorreu um erro ao processar sua solicitação." });
     }
   };
 
@@ -244,9 +249,7 @@ export function ReportForm() {
                                 </SelectTrigger>
                             </FormControl>
                             <SelectContent side="bottom" avoidCollisions={true} className="z-[2200]">
-                                <SelectItem value="Picui">
-                                    Picuí
-                                </SelectItem>
+                                <SelectItem value="Picui">Picuí</SelectItem>
                             </SelectContent>
                         </Select>
                         <FormMessage />
@@ -263,9 +266,7 @@ export function ReportForm() {
                             </FormControl>
                             <SelectContent side="bottom" avoidCollisions={true} className="z-[2200]">
                                 {PICUI_NEIGHBORHOODS.map((b) => (
-                                    <SelectItem key={b} value={b}>
-                                        {b}
-                                    </SelectItem>
+                                    <SelectItem key={b} value={b}>{b}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -309,7 +310,7 @@ export function ReportForm() {
                         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1">(Até 5 Mb)</p>
                       </div>
                     )}
-                    <input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
+                    <input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} aria-label="Upload de foto" />
                 </div>
                 <FormMessage />
             </div>

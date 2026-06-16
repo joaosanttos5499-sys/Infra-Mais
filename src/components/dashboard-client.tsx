@@ -71,7 +71,6 @@ const ReportCard = memo(({
   const [isStatusConfirmEnabled, setIsStatusConfirmEnabled] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<ReportStatus>(report.status);
 
-  // Edit fields for employees
   const [editCategory, setEditCategory] = useState(report.category);
   const [editProblem, setEditProblem] = useState(report.problem);
   const [editBairro, setEditBairro] = useState(report.bairro);
@@ -141,7 +140,6 @@ const ReportCard = memo(({
   const canDelete = isOwner && report.status === 'UNDER_REVIEW';
   const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
   const nextAllowedStatus = STATUS_PROGRESSION[report.status];
-  const isFinalStatus = !nextAllowedStatus;
   const isPhotoEnabled = selectedStatus === 'RESOLVED';
   const isPublic = report.status !== 'UNDER_REVIEW';
 
@@ -161,7 +159,6 @@ const ReportCard = memo(({
                         fill
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, 224px"
-                        priority={false}
                     />
                     <div className="absolute top-3 left-3 z-10">
                         <StatusBadge status={report.status} />
@@ -454,32 +451,6 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_UPVOTES_KEY, JSON.stringify(Array.from(upvotedReports)));
   }, [upvotedReports]);
-
-  useEffect(() => {
-    if (tabsRef.current) {
-        const rect = tabsRef.current.getBoundingClientRect();
-        if (rect.top < 80) {
-            const yOffset = -100;
-            const y = tabsRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-            window.scrollTo({ top: y, behavior: 'smooth' });
-        }
-    }
-  }, [activeTab, sortBy]);
-
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash) {
-      const reportId = hash.replace("#report-", "");
-      const report = reports.find(r => r.id === reportId);
-      if (report) {
-        setActiveTab(report.status);
-        setTimeout(() => {
-          const element = document.getElementById(hash.substring(1));
-          element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 150);
-      }
-    }
-  }, [reports]);
 
   const handleUpvote = useCallback((reportId: string) => {
     const isAlreadyUpvoted = upvotedReports.has(reportId);

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useRef, memo } from "react";
+import { useEffect, useRef, memo, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { type Report } from "@/lib/types";
@@ -9,6 +9,7 @@ import { getCategory } from "@/lib/categories";
 import { renderToString } from 'react-dom/server';
 import { cn } from "@/lib/utils";
 import { useTheme } from "./theme-provider";
+import { Loader2 } from "lucide-react";
 
 interface LeafletMapProps {
   reports?: Report[];
@@ -35,6 +36,7 @@ const LeafletMap = ({
   const selectionMarkerInstance = useRef<L.Marker | null>(null);
   const reportMarkers = useRef<Map<string, L.Marker>>(new Map());
   const { theme } = useTheme();
+  const [isReady, setIsReady] = useState(false);
 
   const defaultCenter: [number, number] = [-6.515, -36.35];
 
@@ -44,33 +46,35 @@ const LeafletMap = ({
     const container = mapRef.current;
     if ((container as any)._leaflet_id) return;
 
-    mapInstance.current = L.map(container, {
-      scrollWheelZoom: true,
-      tap: true, 
-    }).setView(defaultCenter, 14);
+    try {
+        mapInstance.current = L.map(container, {
+          scrollWheelZoom: true,
+          tap: true, 
+          zoomControl: true,
+        }).setView(defaultCenter, 14);
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "© OpenStreetMap",
-    }).addTo(mapInstance.current);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "© OpenStreetMap",
+        }).addTo(mapInstance.current);
+
+        setIsReady(true);
+    } catch (error) {
+        console.error("Leaflet initialization error:", error);
+    }
 
     return () => {
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
+        setIsReady(false);
       }
     };
   }, []);
 
   useEffect(() => {
-    if (mapRef.current) {
-      // Logic handled via CSS class on html element and .leaflet-tile filter in globals.css
-    }
-  }, [theme]);
-
-  useEffect(() => {
     const map = mapInstance.current;
-    if (!map) return;
+    if (!map || !isReady) return;
 
     if (interactive && onLocationSelect) {
       const handleClick = (e: L.LeafletMouseEvent) => {
@@ -81,11 +85,11 @@ const LeafletMap = ({
         map.off("click", handleClick);
       };
     }
-  }, [interactive, onLocationSelect]);
+  }, [interactive, onLocationSelect, isReady]);
 
   useEffect(() => {
     const map = mapInstance.current;
-    if (!map) return;
+    if (!map || !isReady) return;
 
     reportMarkers.current.forEach(marker => marker.removeFrom(map));
     reportMarkers.current.clear();
@@ -140,11 +144,11 @@ const LeafletMap = ({
       const key = `${report.latitude.toFixed(6)},${report.longitude.toFixed(6)}`;
       reportMarkers.current.set(key, marker);
     });
-  }, [reports, interactive]);
+  }, [reports, interactive, isReady]);
 
   useEffect(() => {
     const map = mapInstance.current;
-    if (!map || !selectedLocation) return;
+    if (!map || !selectedLocation || !isReady) return;
 
     if (interactive) {
       if (selectionMarkerInstance.current) {
@@ -174,14 +178,21 @@ const LeafletMap = ({
         }, 300);
       }
     }
-  }, [selectedLocation, interactive]);
+  }, [selectedLocation, interactive, isReady]);
 
   return (
-    <div
-      ref={mapRef}
-      className={cn('w-full h-full min-h-[300px] relative z-0', interactive ? 'cursor-crosshair' : '')}
-      style={{ touchAction: 'pan-y', isolation: 'isolate' }}
-    />
+    <div className="w-full h-full min-h-[300px] relative">
+      {!isReady && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/50 z-10 rounded-xl">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+      )}
+      <div
+        ref={mapRef}
+        className={cn('w-full h-full relative z-0', interactive ? 'cursor-crosshair' : '')}
+        style={{ touchAction: 'pan-y', isolation: 'isolate' }}
+      />
+    </div>
   );
 };
 

@@ -1,10 +1,11 @@
+
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Briefcase, Users, Trash2, ArrowRight, Palette, Sun, Moon, CheckCircle2, UserPlus, Loader2 } from "lucide-react";
+import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Briefcase, Users, Trash2, Palette, Sun, Moon, CheckCircle2, UserPlus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
@@ -118,7 +119,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   };
 
   if (isUserLoading) {
-    return <Button variant="ghost" size="icon" disabled className="animate-pulse"><User className="h-5 w-5" /></Button>;
+    return <Button variant="ghost" size="icon" disabled className="animate-pulse" aria-label="Carregando usuário"><User className="h-5 w-5" /></Button>;
   }
 
   if (user) {
@@ -130,7 +131,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
       <>
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-border hover:bg-primary/10 transition-all p-0 focus-visible:ring-0">
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-border hover:bg-primary/10 transition-all p-0 focus-visible:ring-0" aria-label="Menu do usuário">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={avatarSrc} alt={user.displayName || user.email || 'User'} />
                 <AvatarFallback className="bg-primary/10 text-primary font-bold">{userInitial}</AvatarFallback>
@@ -221,7 +222,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
 
         <Dialog open={isSwitchAccountOpen} onOpenChange={setIsSwitchAccountOpen}>
           <DialogContent className="rounded-2xl sm:max-w-md p-6 bg-card border-border">
-            <DialogHeader className="mb-4">
+            <DialogHeader className="mb-4 text-left">
               <DialogTitle className="text-xl font-bold">Gerenciar Contas</DialogTitle>
               <DialogDescription>
                 Selecione uma conta salva ou adicione uma nova.
@@ -272,6 +273,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
                             size="icon" 
                             className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
                             onClick={(e) => { e.stopPropagation(); removeAccount(account.uid); }}
+                            aria-label={`Remover conta ${account.displayName}`}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -343,7 +345,7 @@ export function Header() {
       mounted && scrolled ? "h-16" : "h-20"
     )}>
       <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href="/" className="flex items-center gap-2 group" aria-label="Ir para o início">
             <Image
               src="/img/logo1.png"
               alt="Infra Mais Logo"
@@ -371,7 +373,7 @@ export function Header() {
                 ))}
             </div>
             
-            <div className="h-6 w-px bg-border" />
+            <div className="h-6 w-px bg-border" aria-hidden="true" />
             
             <div className="flex items-center gap-5">
               <NotificationsDropdown scrolled={scrolled} />
@@ -392,7 +394,7 @@ export function Header() {
             <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-xl">
+                <Button variant="ghost" size="icon" className="rounded-xl" aria-label="Abrir menu de navegação">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
@@ -430,7 +432,7 @@ export function Header() {
 
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
         <DialogContent className="rounded-2xl sm:max-w-md p-8 bg-card border-border">
-          <DialogHeader className="mb-6">
+          <DialogHeader className="mb-6 text-left">
             <DialogTitle className="text-2xl font-bold">Acessar Plataforma</DialogTitle>
             <DialogDescription>
               Seja bem-vindo(a) de volta ao Infra Mais.

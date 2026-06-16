@@ -77,19 +77,19 @@ export async function submitReport(
       return { errors: { _form: ["Por favor, selecione uma localização no mapa."] } };
   }
 
-  const user = await getUserById(validatedFields.data.userId);
-  if (!user) return { errors: { _form: ["Usuário não encontrado."] } };
-
-  const photoFile = formData.get("photo") as File;
-  if (!photoFile || photoFile.size === 0) {
-    return { errors: { photo: ["A foto do problema é obrigatória."] } };
-  }
-  if (photoFile.size > 5 * 1024 * 1024) {
-    return { errors: { photo: ["O tamanho da foto não pode exceder 5MB."] } };
-  }
-  const photoDataUri = await fileToDataUri(photoFile);
-
   try {
+    const user = await getUserById(validatedFields.data.userId);
+    if (!user) return { errors: { _form: ["Usuário não encontrado."] } };
+
+    const photoFile = formData.get("photo") as File;
+    if (!photoFile || photoFile.size === 0) {
+      return { errors: { photo: ["A foto do problema é obrigatória."] } };
+    }
+    if (photoFile.size > 5 * 1024 * 1024) {
+      return { errors: { photo: ["O tamanho da foto não pode exceder 5MB."] } };
+    }
+    const photoDataUri = await fileToDataUri(photoFile);
+
     const { userId, category, problem, city, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
     const location = reference ? `${address} (${reference})` : address;
 
@@ -144,7 +144,6 @@ export async function updateReportStatus(
   const status = formData.get("status") as ReportStatus;
   const photoAfterFile = formData.get("photoAfter") as File | null;
   
-  // Extra data for employee edits
   const category = formData.get("category") as string;
   const problem = formData.get("problem") as string;
   const bairro = formData.get("bairro") as string;
