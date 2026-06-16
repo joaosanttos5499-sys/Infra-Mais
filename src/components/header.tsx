@@ -221,7 +221,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
         </DropdownMenu>
 
         <Dialog open={isSwitchAccountOpen} onOpenChange={setIsSwitchAccountOpen}>
-          <DialogContent className="rounded-2xl sm:max-w-md p-6 bg-card border-border" sideOffset={10}>
+          <DialogContent className="rounded-2xl sm:max-w-md p-6 bg-card border-border">
             <DialogHeader className="mb-4">
               <DialogTitle className="text-xl font-bold">Gerenciar Contas</DialogTitle>
               <DialogDescription>
@@ -430,7 +430,7 @@ export function Header() {
       </div>
 
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-        <DialogContent className="rounded-2xl sm:max-w-md p-8 bg-card border-border" sideOffset={10}>
+        <DialogContent className="rounded-2xl sm:max-w-md p-8 bg-card border-border">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-2xl font-bold">Acessar Plataforma</DialogTitle>
             <DialogDescription>
