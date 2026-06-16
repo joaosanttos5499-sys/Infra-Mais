@@ -65,7 +65,7 @@ export default function FuncionariosPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1 p-6 md:p-10">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1500px] mx-auto">
           <div className="mb-8 text-center md:text-left">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground">
               Painel do Funcionário

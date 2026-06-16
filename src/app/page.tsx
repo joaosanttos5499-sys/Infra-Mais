@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, MapPin, CheckCircle2, BarChart3, Clock, ChevronRight, Plus, ShieldCheck } from "lucide-react";
@@ -48,7 +47,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
 
   return (
     <section className="py-16 md:py-24 bg-background border-t border-border">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-stretch">
           <div className="space-y-8 flex flex-col justify-between">
             <div className="space-y-8">
@@ -101,7 +100,7 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
     <div className="flex flex-col w-full bg-background">
       <main>
         <section className="relative pt-12 pb-24 md:pt-32 md:pb-48 bg-gradient-to-b from-primary/10 to-transparent">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 relative z-10 text-center">
+          <div className="max-w-[1500px] mx-auto px-4 sm:px-8 relative z-10 text-center">
             <h1 className="text-4xl md:text-7xl font-bold text-foreground tracking-tight leading-tight">
               Relate um Problema na <br className="hidden sm:block"/><span className="text-primary italic">Sua Cidade</span>
             </h1>
@@ -118,7 +117,7 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
         </section>
         
         <section id="map-section" className="py-12 md:py-24 -mt-12 md:-mt-24 scroll-mt-20">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
+          <div className="max-w-[1500px] mx-auto px-4 sm:px-8">
             <div className="bg-card p-4 md:p-8 rounded-2xl md:rounded-3xl shadow-2xl border border-border">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                   <div>
@@ -138,7 +137,7 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
         </section>
 
         <section className="py-16 md:py-24 bg-secondary/30">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
+          <div className="max-w-[1500px] mx-auto px-4 sm:px-8">
             <div className="flex items-end justify-between mb-12">
                 <h2 className="text-3xl font-bold text-foreground">Relatos Recentes</h2>
                 <Button asChild variant="link" className="font-bold text-primary p-0 group">

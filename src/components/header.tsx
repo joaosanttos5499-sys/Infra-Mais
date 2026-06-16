@@ -343,7 +343,7 @@ export function Header() {
       "w-full bg-background transition-all duration-300",
       mounted && scrolled ? "h-16" : "h-20"
     )}>
-      <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-8 h-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group" aria-label="Ir para o início">
             <Image
               src="/img/logo1.png"
