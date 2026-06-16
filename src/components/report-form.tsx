@@ -130,11 +130,11 @@ export function ReportForm() {
     setPhotoPreview(null);
     toast({ title: "Formulário limpo", description: "Todas as informações foram apagadas." });
     
-    // Scroll suave para o início do formulário
+    // Ajuste de posição para o início do formulário com offset para o header fixo
     if (formRef.current) {
-      const yOffset = -100; 
-      const y = formRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+        setTimeout(() => {
+            formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
     }
   };
 
@@ -167,7 +167,7 @@ export function ReportForm() {
   }
 
   return (
-    <Card className="w-full border-border shadow-2xl rounded-2xl overflow-hidden bg-card" ref={formRef}>
+    <Card className="w-full border-border shadow-2xl rounded-2xl overflow-hidden bg-card scroll-mt-32" ref={formRef}>
       <CardHeader className="bg-muted/30 border-b border-border p-6 md:p-8">
         <CardTitle className="text-2xl md:text-3xl font-bold text-foreground text-center md:text-left">Relatar Problema</CardTitle>
       </CardHeader>
@@ -301,13 +301,13 @@ export function ReportForm() {
                   <Label className="font-bold flex items-center gap-2 text-foreground">
                     <ImagePlus className="h-5 w-5 text-primary" /> Foto do Problema
                   </Label>
-                  <span className="text-[10px] text-muted-foreground ml-7 font-medium uppercase tracking-wider">(Até 5 Mb)</span>
                 </div>
                 <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-muted border-primary/50" : "bg-muted/50 border-border hover:bg-muted hover:border-primary/30")}>
                     {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : (
                       <div className="text-center p-4">
                         <Camera className="mx-auto h-12 w-12 text-muted-foreground" />
                         <p className="text-sm font-bold mt-2 text-muted-foreground">{deviceLabels.photo}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1">(Até 5 Mb)</p>
                       </div>
                     )}
                     <input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
