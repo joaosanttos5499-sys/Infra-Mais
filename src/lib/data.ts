@@ -1,4 +1,3 @@
-
 import { type Report, type ReportStatus, type NewReport, type UserProfile, type Notification } from "@/lib/types";
 import { isEmailEmployee } from "./config";
 

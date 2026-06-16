@@ -93,7 +93,7 @@ function MyReportItem({ report }: { report: Report }) {
                 {/* Ações no canto inferior direito */}
                 <div className="flex items-center justify-end gap-2 w-full mt-4 sm:mt-0">
                     {isPublic && (
-                        <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold hover:bg-primary/5 transition-colors">
+                        <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold hover:bg-primary/10 transition-colors">
                             <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
                                 <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
                             </Link>
