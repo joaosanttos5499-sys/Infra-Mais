@@ -127,6 +127,7 @@ export function ReportForm() {
       description: '',
       latitude: 0,
       longitude: 0,
+      photo: undefined,
     });
     setPhotoPreview(null);
     toast({ title: "Formulário limpo", description: "Todas as informações foram apagadas." });
@@ -301,13 +302,13 @@ export function ReportForm() {
                   <Label className="font-bold flex items-center gap-2 text-foreground">
                     <ImagePlus className="h-5 w-5 text-primary" /> Foto do Problema
                   </Label>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">(Até 5 Mb)</p>
                 </div>
                 <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-muted border-primary/50" : "bg-muted/50 border-border hover:bg-muted hover:border-primary/30")}>
                     {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : (
                       <div className="text-center p-4">
                         <Camera className="mx-auto h-12 w-12 text-muted-foreground" />
                         <p className="text-sm font-bold mt-2 text-muted-foreground">{deviceLabels.photo}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1">(Até 5 Mb)</p>
                       </div>
                     )}
                     <input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} aria-label="Upload de foto" />
