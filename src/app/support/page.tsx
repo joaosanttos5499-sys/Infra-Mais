@@ -65,7 +65,7 @@ export default function SupportPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1 p-4 md:p-12">
-        <div className="max-w-[2000px] mx-auto">
+        <div className="max-w-[1750px] mx-auto">
           <div className="mb-10 text-center md:text-left space-y-2">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
               Central de Suporte
