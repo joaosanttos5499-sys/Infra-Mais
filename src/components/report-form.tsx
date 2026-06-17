@@ -131,12 +131,15 @@ export function ReportForm() {
     setPhotoPreview(null);
     toast({ title: "Formulário limpo", description: "Todas as informações foram apagadas." });
     
-    // Ajuste de scroll
-    if (formCardRef.current) {
-        const yOffset = -100;
-        const y = formCardRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: 'smooth' });
-    }
+    // O uso do setTimeout é necessário para garantir que a rolagem aconteça
+    // após o fechamento do diálogo e a restauração do foco pelo navegador.
+    setTimeout(() => {
+        if (formCardRef.current) {
+            const yOffset = -100;
+            const y = formCardRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+    }, 100);
   }, [reset, user?.uid, toast]);
 
   const onSubmit = async (values: z.infer<typeof ClientReportSchema>) => {
