@@ -42,7 +42,7 @@ export const categories: Category[] = [
     value: "iluminacao", 
     label: "Iluminação", 
     icon: Lightbulb, 
-    color: "#3c83f6",
+    color: "#60a5fa",
     problems: [
         { value: "poste_apagado", label: "Poste apagado" },
         { value: "oscilacao_luz", label: "Oscilação de luz" },
