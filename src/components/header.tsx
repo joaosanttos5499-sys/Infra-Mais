@@ -36,7 +36,7 @@ interface SavedAccount {
   photoURL: string;
 }
 
-function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
+function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scrolled: boolean }) {
   const { user, isUserLoading } = useUser();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
@@ -45,6 +45,11 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
   const [isSwitchAccountOpen, setIsSwitchAccountOpen] = useState(false);
   const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
   const [isSwitching, setIsSwitching] = useState(false);
+
+  // Cálculo dinâmico para manter 10px abaixo da borda do cabeçalho
+  // h-20 (80px) -> botão h-10 (40px) centralizado. Botão termina em 60px. Header termina em 80px. Offset = (80-60) + 10 = 30px
+  // h-16 (64px) -> botão h-10 (40px) centralizado. Botão termina em 52px. Header termina em 64px. Offset = (64-52) + 10 = 22px
+  const dynamicOffset = scrolled ? 22 : 30;
 
   useEffect(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
@@ -140,7 +145,7 @@ function UserButton({ onLoginClick }: { onLoginClick: () => void }) {
           <DropdownMenuContent 
             className="w-[300px] rounded-2xl border-border bg-card p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200" 
             align="end" 
-            sideOffset={10}
+            sideOffset={dynamicOffset}
             forceMount
           >
             <div className="flex flex-col items-center p-6 pb-4">
@@ -376,7 +381,7 @@ export function Header() {
             
             <div className="flex items-center gap-5">
               <NotificationsDropdown scrolled={scrolled} />
-              <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
+              <UserButton onLoginClick={() => setIsAuthModalOpen(true)} scrolled={scrolled} />
               {user && !isEmployee && (
                 <Button asChild size="sm" className="h-10 rounded-lg font-bold shadow-sm">
                   <Link href="/report/new">
@@ -390,7 +395,7 @@ export function Header() {
 
           <div className="md:hidden flex items-center gap-2">
             <NotificationsDropdown scrolled={scrolled} />
-            <UserButton onLoginClick={() => setIsAuthModalOpen(true)} />
+            <UserButton onLoginClick={() => setIsAuthModalOpen(true)} scrolled={scrolled} />
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-xl" aria-label="Abrir menu de navegação">

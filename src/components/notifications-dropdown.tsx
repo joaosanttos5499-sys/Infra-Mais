@@ -17,6 +17,9 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isPending, startTransition] = useTransition();
 
+  // Cálculo dinâmico para manter 10px abaixo da borda do cabeçalho
+  const dynamicOffset = scrolled ? 22 : 30;
+
   useEffect(() => {
     if (user) {
       getNotificationsAction(user.uid).then(result => {
@@ -62,7 +65,7 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
       <DropdownMenuContent 
         className="w-80 sm:w-96 rounded-2xl shadow-2xl border-border bg-card p-0 overflow-hidden" 
         align="end" 
-        sideOffset={10}
+        sideOffset={dynamicOffset}
       >
         <div className="p-4 bg-muted/30 border-b border-border flex items-center justify-between">
           <h3 className="font-bold text-lg text-foreground tracking-tight">Notificações</h3>
