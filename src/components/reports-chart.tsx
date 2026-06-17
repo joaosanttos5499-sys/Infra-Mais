@@ -16,12 +16,18 @@ interface ReportsChartProps {
 }
 
 export function ReportsChart({ total, resolved, inProgress }: ReportsChartProps) {
+    const [mounted, setMounted] = React.useState(false);
+    
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const pending = total - resolved - inProgress;
-    const chartData = [
+    const chartData = React.useMemo(() => [
         { status: "Pendentes", count: pending, fill: "hsl(var(--chart-1))" },
         { status: "Em Andamento", count: inProgress, fill: "hsl(var(--chart-3))" },
         { status: "Resolvidos", count: resolved, fill: "hsl(var(--chart-2))" },
-    ].filter(item => item.count > 0); // Don't show segments with 0 count
+    ].filter(item => item.count > 0), [pending, inProgress, resolved]);
 
     const chartConfig = {
         count: {
@@ -91,7 +97,7 @@ export function ReportsChart({ total, resolved, inProgress }: ReportsChartProps)
                 dominantBaseline="middle"
                 className="fill-foreground text-3xl font-bold"
             >
-                {totalCount.toLocaleString()}
+                {mounted ? totalCount.toLocaleString() : "..."}
             </text>
             <text
                 x="50%"
@@ -110,7 +116,7 @@ export function ReportsChart({ total, resolved, inProgress }: ReportsChartProps)
                 <div key={item.status} className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.fill }} />
                     <span>{item.status}:</span>
-                    <span className="font-semibold">{item.count}</span>
+                    <span className="font-semibold">{mounted ? item.count.toLocaleString() : "..."}</span>
                 </div>
             ))}
         </div>

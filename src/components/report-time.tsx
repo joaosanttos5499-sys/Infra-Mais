@@ -5,12 +5,23 @@ import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+/**
+ * Componente para exibição de tempo relativo.
+ * Implementa proteção contra erros de hidratação (hydration mismatch)
+ * garantindo que o tempo seja renderizado apenas após a montagem no cliente.
+ */
 export function ReportTime({ date }: { date: Date }) {
-  const [timeAgo, setTimeAgo] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setTimeAgo(formatDistanceToNow(date, { addSuffix: true, locale: ptBR }));
-  }, [date]);
+    setMounted(true);
+  }, []);
 
-  return <>{timeAgo}</>;
+  // No servidor e no primeiro render do cliente, renderizamos um placeholder invisível
+  // para manter o espaço mas evitar discrepância de texto.
+  if (!mounted) {
+    return <span className="opacity-0">...</span>;
+  }
+
+  return <>{formatDistanceToNow(date, { addSuffix: true, locale: ptBR })}</>;
 }

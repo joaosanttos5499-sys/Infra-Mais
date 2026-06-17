@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
@@ -55,7 +56,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={cn("min-h-screen bg-background font-body antialiased flex flex-col", poppins.variable)} suppressHydrationWarning>
+      <body 
+        className={cn("min-h-screen bg-background font-body antialiased flex flex-col", poppins.variable)} 
+        suppressHydrationWarning
+      >
         <ThemeProvider>
           <FirebaseClientProvider>
             <div className="fixed top-0 left-0 w-full z-[2000] border-b border-border bg-background">
