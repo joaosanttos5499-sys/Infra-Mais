@@ -12,17 +12,32 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // Inicializamos com um valor temporário para evitar incompatibilidade na hidratação,
+  // mas o script no layout.tsx já aplicou a classe visualmente.
   const [theme, setThemeState] = useState<Theme>('light');
 
   useEffect(() => {
+    // Sincroniza o estado do React com o que foi aplicado pelo script no head
     const savedTheme = localStorage.getItem('infra_mais_theme') as Theme;
     if (savedTheme) {
       setThemeState(savedTheme);
-      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setThemeState('dark');
-      document.documentElement.classList.add('dark');
+    } else {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      setThemeState(systemTheme);
     }
+
+    // Ouvinte para mudanças no tema do sistema/navegador em tempo real
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem('infra_mais_theme')) {
+        const newTheme = e.matches ? 'dark' : 'light';
+        setThemeState(newTheme);
+        document.documentElement.classList.toggle('dark', e.matches);
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
   const setTheme = (newTheme: Theme) => {
