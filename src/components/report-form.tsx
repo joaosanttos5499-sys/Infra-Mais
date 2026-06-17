@@ -298,17 +298,16 @@ export function ReportForm() {
             </div>
 
             <div className="space-y-4">
-                <div className="flex flex-col gap-1">
-                  <Label className="font-bold flex items-center gap-2 text-foreground">
-                    <ImagePlus className="h-5 w-5 text-primary" /> Foto do Problema
-                  </Label>
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">(Até 5 Mb)</p>
+                <div className="flex items-center gap-2 mb-2">
+                    <ImagePlus className="h-5 w-5 text-primary" />
+                    <Label className="text-lg font-bold text-foreground">Foto do Problema</Label>
                 </div>
                 <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-muted border-primary/50" : "bg-muted/50 border-border hover:bg-muted hover:border-primary/30")}>
                     {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : (
                       <div className="text-center p-4">
                         <Camera className="mx-auto h-12 w-12 text-muted-foreground" />
                         <p className="text-sm font-bold mt-2 text-muted-foreground">{deviceLabels.photo}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1">(Até 5 Mb)</p>
                       </div>
                     )}
                     <input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} aria-label="Upload de foto" />
