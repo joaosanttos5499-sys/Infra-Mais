@@ -102,6 +102,7 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
                       notification.isRead ? "border-l-transparent" : "bg-primary/5 border-l-primary"
                   )}
                   onSelect={(e) => {
+                      // Se o clique foi no link, o fechamento já é tratado pelo comportamento padrão do Radix/Link
                       if ((e.target as HTMLElement).closest('a')) return;
                       handleMarkAsRead(notification.id);
                   }}
@@ -126,10 +127,9 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
                           <ReportTime date={new Date(notification.createdAt)} />
                       </span>
                       <Link 
-                          href={`/dashboard#report-${notification.reportId}`}
+                          href="/minha-conta#meus-relatorios"
                           className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 group/link"
-                          onClick={(e) => {
-                            e.stopPropagation();
+                          onClick={() => {
                             handleMarkAsRead(notification.id);
                           }}
                       >
