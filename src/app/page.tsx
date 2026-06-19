@@ -14,6 +14,7 @@ import { RecentReportCard } from "@/components/recent-report-card";
 import Image from "next/image";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 
 async function RecentReports() {
   const allReports = await getReports();
@@ -138,7 +139,7 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
 
         <section className="py-16 md:py-24 bg-secondary/30">
           <div className="max-w-[1750px] mx-auto px-8 sm:px-12 lg:px-20">
-            <div className="flex items-end justify-between mb-12">
+            <div className="flex items-end justify-between mb-8">
                 <h2 className="text-3xl font-bold text-foreground">Relatos Recentes</h2>
                 <Button asChild variant="link" className="font-bold text-primary p-0 group">
                   <Link href="/dashboard" className="flex items-center gap-2">
@@ -146,6 +147,7 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
                   </Link>
                 </Button>
             </div>
+            <Separator className="mb-12 bg-border" />
             <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-3 gap-6"><Skeleton className="h-64 rounded-xl" /><Skeleton className="h-64 rounded-xl" /><Skeleton className="h-64 rounded-xl" /></div>}>
                 <RecentReports />
             </Suspense>
