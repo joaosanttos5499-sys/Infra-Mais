@@ -9,6 +9,7 @@ import { ReportTime } from "@/components/report-time";
 import { type Report } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 /**
  * Componente cliente para renderizar um cartão de relato individual na Home.
@@ -43,8 +44,21 @@ export function RecentReportCard({ report }: { report: Report }) {
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               loading="lazy"
             />
+            {/* Status no canto superior esquerdo */}
             <div className="absolute top-3 left-3 z-10">
                 <StatusBadge status={report.status} />
+            </div>
+
+            {/* Ver no mapa no canto superior direito */}
+            <div className="absolute top-3 right-3 z-10">
+                <Link 
+                  href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`} 
+                  className="bg-background/80 backdrop-blur-sm text-primary p-2 rounded-full shadow-lg hover:bg-background transition-all hover:scale-110 flex items-center justify-center border border-border/50"
+                  onClick={handleMapClick}
+                  title="Ver no mapa"
+                >
+                    <MapPin className="h-4 w-4" />
+                </Link>
             </div>
         </div>
 
@@ -64,17 +78,8 @@ export function RecentReportCard({ report }: { report: Report }) {
                     <Clock className="h-3.5 w-3.5" />
                     <ReportTime date={new Date(report.createdAt)} />
                 </div>
-                <div className="flex items-center gap-3">
-                    <Link 
-                      href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`} 
-                      className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
-                      onClick={handleMapClick}
-                    >
-                        <MapPin className="h-3 w-3" /> Mapa
-                    </Link>
-                    <div className="flex items-center gap-1 text-sm font-bold text-primary">
-                        Detalhes <ChevronRight className="h-4 w-4" />
-                    </div>
+                <div className="flex items-center gap-1 text-sm font-bold text-primary group-hover:translate-x-1 transition-transform">
+                    Detalhes <ChevronRight className="h-4 w-4" />
                 </div>
             </div>
         </div>
