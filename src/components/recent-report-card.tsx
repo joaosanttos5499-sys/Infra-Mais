@@ -12,8 +12,8 @@ import { useRouter } from "next/navigation";
 
 /**
  * Componente cliente para renderizar um cartão de relato individual na Home.
- * Resolve o erro de passagem de event handlers entre Server e Client Components
- * e evita o aninhamento inválido de links HTML.
+ * Ajustado para respeitar as cores do tema (claro/escuro) e manter consistência
+ * com o estilo do Painel de Problemas.
  */
 export function RecentReportCard({ report }: { report: Report }) {
   const router = useRouter();
@@ -26,7 +26,6 @@ export function RecentReportCard({ report }: { report: Report }) {
 
   const handleMapClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // O redirecionamento acontece naturalmente pelo href do Link
   };
 
   return (
@@ -34,7 +33,7 @@ export function RecentReportCard({ report }: { report: Report }) {
       className="block group cursor-pointer" 
       onClick={handleCardClick}
     >
-      <Card className="overflow-hidden flex flex-col h-full border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg rounded-xl bg-white">
+      <Card className="overflow-hidden flex flex-col h-full border-border shadow-sm transition-all duration-300 hover:shadow-lg rounded-xl bg-card">
         <div className="relative h-48 w-full">
             <Image
               src={report.photoUrl}
@@ -51,24 +50,24 @@ export function RecentReportCard({ report }: { report: Report }) {
 
         <div className="p-5 flex flex-col flex-grow space-y-4">
             <div className="space-y-1">
-                <h3 className="text-lg font-bold text-gray-900 line-clamp-2">
+                <h3 className="text-lg font-bold text-foreground line-clamp-2">
                     {problem?.label || report.problem}
                 </h3>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     {category?.icon && <category.icon className="h-4 w-4" style={{ color: category.color }} />}
                     <span>{category?.label || report.category}</span>
                 </div>
             </div>
 
-            <div className="mt-auto pt-2 flex items-center justify-between border-t border-gray-50 pt-4">
-                <div className="flex items-center gap-1.5 text-xs text-gray-400">
+            <div className="mt-auto pt-2 flex items-center justify-between border-t border-border pt-4">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Clock className="h-3.5 w-3.5" />
                     <ReportTime date={new Date(report.createdAt)} />
                 </div>
                 <div className="flex items-center gap-3">
                     <Link 
                       href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`} 
-                      className="text-xs font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1"
+                      className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
                       onClick={handleMapClick}
                     >
                         <MapPin className="h-3 w-3" /> Mapa
