@@ -46,9 +46,6 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
   const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
   const [isSwitching, setIsSwitching] = useState(false);
 
-  // Cálculo dinâmico para manter 10px abaixo da borda do cabeçalho
-  // h-20 (80px) -> botão h-10 (40px) centralizado. Botão termina em 60px. Header termina em 80px. Offset = (80-60) + 10 = 30px
-  // h-16 (64px) -> botão h-10 (40px) centralizado. Botão termina em 52px. Header termina em 64px. Offset = (64-52) + 10 = 22px
   const dynamicOffset = scrolled ? 22 : 30;
 
   useEffect(() => {
@@ -380,8 +377,6 @@ export function Header() {
             <div className="h-6 w-px bg-border" aria-hidden="true" />
             
             <div className="flex items-center gap-5">
-              <NotificationsDropdown scrolled={scrolled} />
-              <UserButton onLoginClick={() => setIsAuthModalOpen(true)} scrolled={scrolled} />
               {user && !isEmployee && (
                 <Button asChild size="sm" className="h-10 rounded-lg font-bold shadow-sm">
                   <Link href="/report/new">
@@ -390,6 +385,8 @@ export function Header() {
                   </Link>
                 </Button>
               )}
+              <NotificationsDropdown scrolled={scrolled} />
+              <UserButton onLoginClick={() => setIsAuthModalOpen(true)} scrolled={scrolled} />
             </div>
           </nav>
 
