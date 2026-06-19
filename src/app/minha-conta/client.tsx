@@ -4,7 +4,7 @@ import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, Plus, ShieldAlert } from "lucide-react";
+import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, Plus, ShieldAlert, ArrowUpRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -84,9 +84,17 @@ function MyReportItem({ report }: { report: Report }) {
                         <span className="truncate">{displayCity} - {report.bairro}</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        <ReportTime date={new Date(report.createdAt)} />
+                    <div className="flex flex-col gap-1.5 pt-1">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Clock className="h-3.5 w-3.5" />
+                            <ReportTime date={new Date(report.createdAt)} />
+                        </div>
+                        <Link 
+                            href={`/dashboard#report-${report.id}`}
+                            className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider"
+                        >
+                            <ArrowUpRight className="h-3 w-3" /> Mais Detalhes
+                        </Link>
                     </div>
                 </div>
 
