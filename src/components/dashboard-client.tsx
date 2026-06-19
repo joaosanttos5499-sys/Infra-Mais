@@ -17,7 +17,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { statusConfig, StatusBadge } from "./status-badge";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { useUser } from "@/firebase";
 import { isEmailEmployee } from "@/lib/config";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
@@ -176,6 +176,10 @@ const ReportCard = memo(({
                             </button>
                         </DialogTrigger>
                         <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden border-none bg-transparent shadow-none">
+                            <DialogHeader className="sr-only">
+                                <DialogTitle>Visualização da Foto</DialogTitle>
+                                <DialogDescription>Foto em alta resolução do problema relatado.</DialogDescription>
+                            </DialogHeader>
                             <div className="relative w-full h-full flex items-center justify-center p-4">
                                 <img 
                                     src={report.photoUrl} 
@@ -228,6 +232,10 @@ const ReportCard = memo(({
                                         </button>
                                     </DialogTrigger>
                                     <DialogContent className="max-w-4xl p-2 rounded-2xl bg-card border-border">
+                                        <DialogHeader className="sr-only">
+                                            <DialogTitle>Foto da Solução</DialogTitle>
+                                            <DialogDescription>Registro fotográfico do problema resolvido.</DialogDescription>
+                                        </DialogHeader>
                                         <div className="relative aspect-video rounded-xl overflow-hidden bg-muted">
                                             <Image src={report.photoAfterUrl} alt="Trabalho concluído" fill className="object-contain" />
                                         </div>
