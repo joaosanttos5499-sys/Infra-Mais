@@ -84,22 +84,21 @@ function MyReportItem({ report }: { report: Report }) {
                         <span className="truncate">{displayCity} - {report.bairro}</span>
                     </div>
 
-                    <div className="flex flex-col gap-1.5 pt-1">
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Clock className="h-3.5 w-3.5" />
-                            <ReportTime date={new Date(report.createdAt)} />
-                        </div>
-                        <Link 
-                            href={`/dashboard#report-${report.id}`}
-                            className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider"
-                        >
-                            <ArrowUpRight className="h-3 w-3" /> Mais Detalhes
-                        </Link>
+                    <div className="flex items-center gap-1.5 pt-1 text-xs text-muted-foreground">
+                        <Clock className="h-3.5 w-3.5" />
+                        <ReportTime date={new Date(report.createdAt)} />
                     </div>
                 </div>
 
                 {/* Ações no canto inferior direito */}
                 <div className="flex items-center justify-end gap-2 w-full mt-4 sm:mt-0">
+                    <Link 
+                        href={`/dashboard#report-${report.id}`}
+                        className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider mr-auto"
+                    >
+                        <ArrowUpRight className="h-3 w-3" /> Ver Detalhes
+                    </Link>
+
                     {isPublic && (
                         <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold hover:bg-primary/10 transition-colors">
                             <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
