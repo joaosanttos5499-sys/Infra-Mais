@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2 } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -153,7 +153,7 @@ const ReportCard = memo(({
         <Accordion type="single" collapsible disabled={showUpvote}>
           <AccordionItem value={report.id} className="border-b-0">
             <div className="flex flex-col md:flex-row h-full">
-                <div className="relative w-full md:w-56 h-48 md:h-auto overflow-hidden bg-muted shrink-0">
+                <div className="relative w-full md:w-56 h-48 md:h-auto overflow-hidden bg-muted shrink-0 group/photo">
                     <Image
                         src={report.photoUrl}
                         alt="Foto do problema"
@@ -164,6 +164,27 @@ const ReportCard = memo(({
                     <div className="absolute top-3 left-3 z-10">
                         <StatusBadge status={report.status} />
                     </div>
+
+                    {/* Botão de Tela Cheia */}
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <button 
+                                className="absolute bottom-3 right-3 z-20 bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg opacity-0 group-hover/photo:opacity-100 transition-opacity backdrop-blur-sm"
+                                title="Ver em tela cheia"
+                            >
+                                <Maximize2 className="h-4 w-4" />
+                            </button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden border-none bg-transparent shadow-none">
+                            <div className="relative w-full h-full flex items-center justify-center p-4">
+                                <img 
+                                    src={report.photoUrl} 
+                                    alt="Foto em tamanho real" 
+                                    className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-in zoom-in duration-300" 
+                                />
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 </div>
 
                 <div className="p-4 md:p-6 flex flex-col flex-grow min-w-0">
