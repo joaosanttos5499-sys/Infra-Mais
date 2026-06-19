@@ -19,6 +19,7 @@ import { statusConfig, StatusBadge } from "./status-badge";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { useUser } from "@/firebase";
+import { isEmailEmployee } from "@/lib/config";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { ReportTime } from "./report-time";
@@ -136,6 +137,7 @@ const ReportCard = memo(({
   };
 
   const isOwner = user?.uid === report.userId;
+  const isEmployee = isEmailEmployee(user?.email);
   const canDelete = isOwner && report.status === 'UNDER_REVIEW';
   const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
   const nextAllowedStatus = STATUS_PROGRESSION[report.status];
@@ -182,10 +184,12 @@ const ReportCard = memo(({
                             <MapPin className="h-4 w-4 text-primary" />
                             <span>{displayCity} - {report.bairro}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
-                            <Mail className="h-3 w-3" />
-                            <span>{report.relatorEmail}</span>
-                        </div>
+                        {isEmployee && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
+                              <Mail className="h-3 w-3" />
+                              <span>{report.relatorEmail}</span>
+                          </div>
+                        )}
                     </div>
 
                     <div className="mt-auto pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border-t border-border gap-4">
