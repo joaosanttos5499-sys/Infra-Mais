@@ -2,6 +2,7 @@ import { getReports } from "@/lib/data";
 import { MinhaContaClient } from "./client";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 function PageSkeleton() {
     return (
@@ -24,6 +25,7 @@ export default async function MinhaContaPage() {
                         <h1 className="text-3xl font-bold text-foreground mb-2">
                             Minha Conta
                         </h1>
+                        <Separator className="my-4 bg-border" />
                         <p className="text-muted-foreground">
                             Gerencie suas informações pessoais e acompanhe sua atividade na plataforma.
                         </p>
