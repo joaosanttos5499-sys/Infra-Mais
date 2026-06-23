@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2 } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -165,7 +165,6 @@ const ReportCard = memo(({
                         <StatusBadge status={report.status} />
                     </div>
 
-                    {/* Botão de Tela Cheia */}
                     <Dialog>
                         <DialogTrigger asChild>
                             <button 
@@ -294,56 +293,70 @@ const ReportCard = memo(({
             </div>
             
             {!showUpvote && (
-            <AccordionContent className="bg-muted/20 border-t border-border">
+            <AccordionContent className="bg-muted/10 border-t border-border">
               <form action={formAction} ref={formRef}>
-                <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-8">
+                <div className="p-6 md:p-10 space-y-8 max-w-[1400px] mx-auto">
+                    <div className="grid lg:grid-cols-2 gap-10">
+                        {/* Coluna de Dados Básicos */}
                         <div className="space-y-6">
-                            <div className="grid grid-cols-1 gap-4">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Info className="h-5 w-5 text-primary" />
+                                <h4 className="text-sm font-bold text-foreground uppercase tracking-wider">Informações Gerais</h4>
+                            </div>
+                            
+                            <div className="grid sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-muted-foreground uppercase">Categoria</Label>
+                                    <Label className="text-[10px] font-black text-muted-foreground uppercase">Categoria do Problema</Label>
                                     <Select name="category" value={editCategory} onValueChange={setEditCategory}>
-                                        <SelectTrigger className="h-10 rounded-xl bg-card"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
+                                        <SelectTrigger className="h-11 rounded-xl bg-card border-border focus:ring-primary/20"><SelectValue /></SelectTrigger>
+                                        <SelectContent className="rounded-xl border-border bg-card">
                                             {categories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-muted-foreground uppercase">Problema</Label>
+                                    <Label className="text-[10px] font-black text-muted-foreground uppercase">Tipo Específico</Label>
                                     <Select name="problem" value={editProblem} onValueChange={setEditProblem}>
-                                        <SelectTrigger className="h-10 rounded-xl bg-card"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
+                                        <SelectTrigger className="h-11 rounded-xl bg-card border-border focus:ring-primary/20"><SelectValue /></SelectTrigger>
+                                        <SelectContent className="rounded-xl border-border bg-card">
                                             {editProblems.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
+                            </div>
+
+                            <div className="grid sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-muted-foreground uppercase">Bairro</Label>
+                                    <Label className="text-[10px] font-black text-muted-foreground uppercase">Bairro / Localidade</Label>
                                     <Select name="bairro" value={editBairro} onValueChange={setEditBairro}>
-                                        <SelectTrigger className="h-10 rounded-xl bg-card"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
+                                        <SelectTrigger className="h-11 rounded-xl bg-card border-border focus:ring-primary/20"><SelectValue /></SelectTrigger>
+                                        <SelectContent className="rounded-xl border-border bg-card">
                                             {PICUI_NEIGHBORHOODS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] font-black text-muted-foreground uppercase">Endereço Aproximado</Label>
+                                    <Input name="location" value={editLocation} onChange={(e) => setEditLocation(e.target.value)} className="h-11 rounded-xl bg-card border-border focus:ring-primary/20" />
+                                </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label className="text-xs font-bold text-muted-foreground uppercase">Localização / Endereço</Label>
-                                <Input name="location" value={editLocation} onChange={(e) => setEditLocation(e.target.value)} className="h-10 rounded-xl bg-card" />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label className="text-xs font-bold text-muted-foreground uppercase">Descrição</Label>
-                                <Textarea name="description" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="min-h-[80px] rounded-xl bg-card" />
+                                <Label className="text-[10px] font-black text-muted-foreground uppercase">Detalhamento da Ocorrência</Label>
+                                <Textarea name="description" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="min-h-[120px] rounded-xl bg-card border-border focus:ring-primary/20 resize-none" />
                             </div>
                         </div>
 
+                        {/* Coluna de Mapa e Status */}
                         <div className="space-y-6">
+                            <div className="flex items-center gap-2 mb-2">
+                                <MapPin className="h-5 w-5 text-primary" />
+                                <h4 className="text-sm font-bold text-foreground uppercase tracking-wider">Geolocalização e Status</h4>
+                            </div>
+
                             <div className="space-y-2">
-                                <Label className="text-xs font-bold text-muted-foreground uppercase">Ajustar Localização no Mapa</Label>
-                                <div className="h-48 rounded-xl overflow-hidden border border-border">
+                                <Label className="text-[10px] font-black text-muted-foreground uppercase">Ajuste de Precisão no Mapa</Label>
+                                <div className="h-[220px] rounded-2xl overflow-hidden border border-border shadow-inner relative z-0">
                                     <LeafletMap 
                                         interactive={true} 
                                         onLocationSelect={(lat, lng) => { setEditLat(lat); setEditLng(lng); }} 
@@ -354,86 +367,100 @@ const ReportCard = memo(({
                                 <input type="hidden" name="longitude" value={editLng} />
                             </div>
 
-                            <div className="space-y-2">
-                                <Label className="text-xs font-bold text-muted-foreground uppercase">Situação Atual</Label>
-                                <Select name="status" value={selectedStatus} onValueChange={(val) => setSelectedStatus(val as ReportStatus)}>
-                                    <SelectTrigger className="h-10 rounded-xl bg-card border-primary/50"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        {Object.entries(statusConfig).map(([key, { label }]) => (
-                                            <SelectItem key={key} value={key} disabled={key !== nextAllowedStatus && key !== report.status}>
-                                                {label} {key === nextAllowedStatus && "(Próximo)"}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {isPhotoEnabled && (
+                            <div className="grid sm:grid-cols-2 gap-6 items-end">
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-muted-foreground uppercase">Foto da Solução</Label>
-                                    <div className="aspect-video rounded-xl border-2 border-dashed border-border flex items-center justify-center relative overflow-hidden bg-card">
-                                        {(photoAfterPreview || report.photoAfterUrl) ? (
-                                            <Image src={photoAfterPreview || report.photoAfterUrl!} alt="Preview" fill className="object-cover" />
-                                        ) : (
-                                            <div className="text-center p-4">
-                                                <Camera className="mx-auto h-8 w-8 text-muted-foreground" />
-                                                <p className="mt-2 text-xs font-bold text-muted-foreground">Anexar evidência</p>
-                                            </div>
-                                        )}
-                                        <input name="photoAfter" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
-                                    </div>
+                                    <Label className="text-[10px] font-black text-muted-foreground uppercase">Atualizar Estágio</Label>
+                                    <Select name="status" value={selectedStatus} onValueChange={(val) => setSelectedStatus(val as ReportStatus)}>
+                                        <SelectTrigger className="h-11 rounded-xl bg-card border-primary/40 focus:ring-primary/20 font-bold"><SelectValue /></SelectTrigger>
+                                        <SelectContent className="rounded-xl border-border bg-card">
+                                            {Object.entries(statusConfig).map(([key, { label }]) => (
+                                                <SelectItem key={key} value={key} disabled={key !== nextAllowedStatus && key !== report.status}>
+                                                    {label} {key === nextAllowedStatus && "→"}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
-                            )}
+
+                                {isPhotoEnabled && (
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] font-black text-muted-foreground uppercase flex items-center gap-1.5">
+                                            <ImagePlus className="h-3 w-3" /> Evidência da Solução
+                                        </Label>
+                                        <div className="h-11 rounded-xl border-2 border-dashed border-primary/30 flex items-center justify-center relative overflow-hidden bg-card hover:border-primary/60 transition-colors">
+                                            {photoAfterPreview ? (
+                                                <div className="flex items-center gap-2 text-xs font-bold text-emerald-600">
+                                                    <CheckCircle2 className="h-4 w-4" /> Foto Anexada
+                                                </div>
+                                            ) : (
+                                                <div className="text-center flex items-center gap-2">
+                                                    <Camera className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Carregar Foto</span>
+                                                </div>
+                                            )}
+                                            <input name="photoAfter" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-border">
+                    <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-border">
                         <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
                             <AlertDialogTrigger asChild>
-                                <Button type="button" disabled={isPending} className="h-11 px-8 rounded-xl font-bold shadow-md">
+                                <Button type="button" disabled={isPending} className="h-12 px-10 rounded-xl font-bold shadow-lg hover:scale-105 transition-all">
                                     {isPending ? <Loader2 className="animate-spin h-5 w-5 mr-3" /> : <Upload className="h-5 w-5 mr-3" />}
-                                    Salvar Alterações e Atualizar Status
+                                    Salvar Alterações
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent className="rounded-2xl bg-card border-border">
                                 <AlertDialogHeader>
-                                    <AlertDialogTitle>Confirmar Atualizações?</AlertDialogTitle>
-                                    <AlertDialogDescription>As correções de dados e mudança de status serão aplicadas e o cidadão será notificado.</AlertDialogDescription>
+                                    <AlertDialogTitle>Confirmar Atualização?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        As correções e a mudança de status serão aplicadas. O cidadão receberá uma notificação sobre o progresso do seu relato.
+                                    </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => formRef.current?.requestSubmit()} disabled={!isStatusConfirmEnabled || isPending} className="bg-primary text-primary-foreground rounded-xl">
-                                        {isStatusConfirmEnabled ? "Confirmar" : `Aguarde (${statusCountdown}s)`}
+                                    <AlertDialogAction onClick={() => formRef.current?.requestSubmit()} disabled={!isStatusConfirmEnabled || isPending} className="bg-primary text-primary-foreground rounded-xl font-bold">
+                                        {isStatusConfirmEnabled ? "Sim, atualizar" : `Aguarde (${statusCountdown}s)`}
                                     </AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
                     </div>
 
-                    <Separator className="bg-border" />
-
-                    <div className="bg-destructive/5 p-5 rounded-xl border border-destructive/20 space-y-4">
+                    {/* Área de Perigo Separada */}
+                    <div className="bg-destructive/5 p-6 rounded-2xl border border-destructive/20 mt-4 space-y-4">
                         <div className="flex items-center gap-2">
                             <ShieldAlert className="h-5 w-5 text-destructive" />
-                            <h4 className="text-sm font-bold text-destructive uppercase">Moderação</h4>
+                            <h4 className="text-xs font-bold text-destructive uppercase tracking-widest">Zona de Moderação</h4>
                         </div>
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button type="button" variant="outline" className="h-11 border-destructive/20 text-destructive hover:bg-destructive/10 font-bold rounded-xl w-full sm:w-auto">
-                                    <Trash2 className="h-4 w-4 mr-2" /> Excluir Relato Indevido
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-2xl bg-card border-border">
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Excluir permanentemente?</AlertDialogTitle>
-                                    <AlertDialogDescription>Use apenas para spam ou conteúdo ofensivo.</AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl">Sim, excluir</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <p className="text-xs text-muted-foreground max-w-xl">
+                                Utilize esta opção apenas para remover relatos que contenham spam, conteúdo ofensivo ou que não se refiram a problemas de infraestrutura urbana. Esta ação é definitiva.
+                            </p>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button type="button" variant="outline" className="h-10 border-destructive/30 text-destructive hover:bg-destructive/10 font-bold rounded-xl w-full sm:w-auto px-6">
+                                        <Trash2 className="h-4 w-4 mr-2" /> Excluir Registro
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="rounded-2xl bg-card border-border">
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle className="text-destructive">Remover permanentemente?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            O relato será removido de todos os painéis e o banco de dados. Esta ação não pode ser desfeita.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl font-bold">Confirmar Exclusão</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
                     </div>
                 </div>
               </form>
