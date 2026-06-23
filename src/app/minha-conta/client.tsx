@@ -92,12 +92,14 @@ function MyReportItem({ report }: { report: Report }) {
 
                 {/* Ações no canto inferior direito */}
                 <div className="flex items-center justify-end gap-2 w-full mt-4 sm:mt-0">
-                    <Link 
-                        href={`/dashboard#report-${report.id}`}
-                        className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider mr-auto"
-                    >
-                        <ArrowUpRight className="h-3 w-3" /> Ver Detalhes
-                    </Link>
+                    {isPublic && (
+                        <Link 
+                            href={`/dashboard#report-${report.id}`}
+                            className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider mr-auto"
+                        >
+                            <ArrowUpRight className="h-3 w-3" /> Ver Detalhes
+                        </Link>
+                    )}
 
                     {isPublic && (
                         <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold hover:bg-primary/10 transition-colors">
