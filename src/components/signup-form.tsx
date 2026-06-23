@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -64,25 +65,32 @@ export function SignupForm() {
     localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts.slice(0, 5)));
   };
 
+  /**
+   * Efeito para checar automaticamente se o e-mail foi verificado.
+   * Realiza um reload do usuário a cada 2 segundos.
+   */
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    if (isVerificationSent && auth.currentUser) {
+    if (isVerificationSent) {
       interval = setInterval(async () => {
         try {
-          await auth.currentUser?.reload();
-          if (auth.currentUser?.emailVerified) {
-            clearInterval(interval);
-            toast({
-              title: "E-mail verificado!",
-              description: "Sua conta foi ativada com sucesso. Redirecionando...",
-            });
-            router.push('/');
+          const currentUser = auth.currentUser;
+          if (currentUser) {
+            await currentUser.reload();
+            if (currentUser.emailVerified) {
+              clearInterval(interval);
+              toast({
+                title: "E-mail verificado!",
+                description: "Sua conta foi ativada com sucesso. Redirecionando...",
+              });
+              router.push('/');
+            }
           }
         } catch (error) {
           console.error("Erro ao verificar status de ativação:", error);
         }
-      }, 3000);
+      }, 2000);
     }
 
     return () => {
@@ -121,8 +129,8 @@ export function SignupForm() {
             saveAccountLocally(user, data.name, profilePhoto);
 
             toast({
-                title: "Conta criada com sucesso!",
-                description: "Enviamos um link de verificação para o seu e-mail.",
+                title: "Conta criada!",
+                description: "Verifique seu e-mail para ativar sua conta.",
             });
             setIsVerificationSent(true);
         } else {
@@ -132,7 +140,7 @@ export function SignupForm() {
     } catch (error: any) {
         let errorMessage = "Ocorreu um erro inesperado.";
         if (error.code === 'auth/email-already-in-use') {
-            errorMessage = "Este e-mail já está em uso. Se você já possui uma conta, por favor, faça login.";
+            errorMessage = "Este e-mail já está em uso.";
         } else if (error.code === 'auth/invalid-email') {
             errorMessage = "O e-mail informado é inválido.";
         }
@@ -166,7 +174,7 @@ export function SignupForm() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-blue-400">Verifique seu e-mail</h2>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
               Enviamos um link de confirmação para <strong>{auth.currentUser?.email}</strong>. 
-              Acesse seu e-mail para ativar sua conta.
+              Acesse seu e-mail para ativar sua conta e ser redirecionado.
             </p>
         </div>
         
@@ -176,7 +184,7 @@ export function SignupForm() {
                 Aguardando ativação...
             </div>
             <p className="text-[10px] text-gray-400 uppercase tracking-widest">
-                Você será redirecionado automaticamente após clicar no link
+                O redirecionamento será automático após a confirmação
             </p>
         </div>
 
