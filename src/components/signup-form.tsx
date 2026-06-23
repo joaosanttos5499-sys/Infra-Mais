@@ -163,7 +163,7 @@ export function SignupForm() {
           </div>
         </div>
         <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-gray-900">Verifique seu e-mail</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-blue-400">Verifique seu e-mail</h2>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
               Enviamos um link de confirmação para <strong>{auth.currentUser?.email}</strong>. 
               Acesse seu e-mail para ativar sua conta.
