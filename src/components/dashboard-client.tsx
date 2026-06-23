@@ -367,8 +367,8 @@ const ReportCard = memo(({
                                 <input type="hidden" name="longitude" value={editLng} />
                             </div>
 
-                            <div className="grid sm:grid-cols-2 gap-6 items-end">
-                                <div className="space-y-2">
+                            <div className="flex flex-col sm:flex-row items-end gap-3">
+                                <div className="space-y-2 flex-1 w-full">
                                     <Label className="text-[10px] font-black text-muted-foreground uppercase">Atualizar Estágio</Label>
                                     <Select name="status" value={selectedStatus} onValueChange={(val) => setSelectedStatus(val as ReportStatus)}>
                                         <SelectTrigger className="h-11 rounded-xl bg-card border-primary/40 focus:ring-primary/20 font-bold"><SelectValue /></SelectTrigger>
@@ -383,56 +383,54 @@ const ReportCard = memo(({
                                 </div>
 
                                 {isPhotoEnabled && (
-                                    <div className="space-y-2">
+                                    <div className="space-y-2 flex-1 w-full">
                                         <Label className="text-[10px] font-black text-muted-foreground uppercase flex items-center gap-1.5">
-                                            <ImagePlus className="h-3 w-3" /> Evidência da Solução
+                                            <ImagePlus className="h-3 w-3" /> Evidência
                                         </Label>
                                         <div className="h-11 rounded-xl border-2 border-dashed border-primary/30 flex items-center justify-center relative overflow-hidden bg-card hover:border-primary/60 transition-colors">
                                             {photoAfterPreview ? (
                                                 <div className="flex items-center gap-2 text-xs font-bold text-emerald-600">
-                                                    <CheckCircle2 className="h-4 w-4" /> Foto Anexada
+                                                    <CheckCircle2 className="h-4 w-4" /> Anexada
                                                 </div>
                                             ) : (
-                                                <div className="text-center flex items-center gap-2">
-                                                    <Camera className="h-4 w-4 text-muted-foreground" />
-                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Carregar Foto</span>
+                                                <div className="text-center flex items-center gap-2 px-2">
+                                                    <Camera className="h-3 w-3 text-muted-foreground" />
+                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Foto</span>
                                                 </div>
                                             )}
                                             <input name="photoAfter" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
                                         </div>
                                     </div>
                                 )}
+
+                                <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
+                                    <AlertDialogTrigger asChild>
+                                        <Button type="button" disabled={isPending} className="h-11 px-5 rounded-xl font-bold shadow-md hover:scale-105 transition-all shrink-0">
+                                            {isPending ? <Loader2 className="animate-spin h-4 w-4" /> : <Upload className="h-4 w-4" />}
+                                            <span className="ml-2">Salvar</span>
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="rounded-2xl bg-card border-border">
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Confirmar Atualização?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                As correções e a mudança de status serão aplicadas. O cidadão receberá uma notificação sobre o progresso do seu relato.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => formRef.current?.requestSubmit()} disabled={!isStatusConfirmEnabled || isPending} className="bg-primary text-primary-foreground rounded-xl font-bold">
+                                                {isStatusConfirmEnabled ? "Sim, atualizar" : `Aguarde (${statusCountdown}s)`}
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-border">
-                        <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
-                            <AlertDialogTrigger asChild>
-                                <Button type="button" disabled={isPending} className="h-12 px-10 rounded-xl font-bold shadow-lg hover:scale-105 transition-all">
-                                    {isPending ? <Loader2 className="animate-spin h-5 w-5 mr-3" /> : <Upload className="h-5 w-5 mr-3" />}
-                                    Salvar Alterações
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-2xl bg-card border-border">
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Confirmar Atualização?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        As correções e a mudança de status serão aplicadas. O cidadão receberá uma notificação sobre o progresso do seu relato.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => formRef.current?.requestSubmit()} disabled={!isStatusConfirmEnabled || isPending} className="bg-primary text-primary-foreground rounded-xl font-bold">
-                                        {isStatusConfirmEnabled ? "Sim, atualizar" : `Aguarde (${statusCountdown}s)`}
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
-
                     {/* Área de Perigo Separada */}
-                    <div className="bg-destructive/5 p-6 rounded-2xl border border-destructive/20 mt-4 space-y-4">
+                    <div className="bg-destructive/5 p-6 rounded-2xl border border-destructive/20 mt-8 space-y-4">
                         <div className="flex items-center gap-2">
                             <ShieldAlert className="h-5 w-5 text-destructive" />
                             <h4 className="text-xs font-bold text-destructive uppercase tracking-widest">Zona de Moderação</h4>
