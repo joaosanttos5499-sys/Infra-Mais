@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Bell, Info, Check, ArrowRight } from "lucide-react";
+import { Bell, Info, Check, ArrowRight, MessageSquare, Clock } from "lucide-react";
 import { useUser } from "@/firebase";
 import { getNotificationsAction, markAsReadAction, markAllAsReadAction } from "@/lib/actions";
 import { type Notification } from "@/lib/types";
@@ -17,7 +17,6 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isPending, startTransition] = useTransition();
 
-  // Cálculo dinâmico para manter 10px abaixo da borda do cabeçalho
   const dynamicOffset = scrolled ? 22 : 30;
 
   useEffect(() => {
@@ -68,12 +67,15 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
         sideOffset={dynamicOffset}
       >
         <div className="p-4 bg-muted/30 border-b border-border flex items-center justify-between">
-          <h3 className="font-bold text-lg text-foreground tracking-tight">Notificações</h3>
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-primary" />
+            <h3 className="font-bold text-sm text-foreground tracking-tight uppercase">Minhas Mensagens</h3>
+          </div>
           {unreadCount > 0 && (
             <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-auto p-0 text-xs font-bold text-primary hover:bg-transparent hover:underline"
+                className="h-auto p-0 text-[10px] font-bold text-primary hover:bg-transparent hover:underline uppercase tracking-tighter"
                 onClick={handleMarkAllAsRead}
             >
                 Marcar todas como lidas
@@ -102,33 +104,37 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
                       notification.isRead ? "border-l-transparent" : "bg-primary/5 border-l-primary"
                   )}
                   onSelect={(e) => {
-                      // Se o clique foi no link, o fechamento já é tratado pelo comportamento padrão do Radix/Link
                       if ((e.target as HTMLElement).closest('a')) return;
                       handleMarkAsRead(notification.id);
                   }}
                 >
-                  <div className="flex justify-between w-full gap-3">
-                    <div className="flex gap-3">
-                        <div className={cn(
-                            "mt-1.5 h-2 w-2 rounded-full shrink-0",
-                            notification.isRead ? "bg-muted" : "bg-primary"
-                        )} />
+                  <div className="flex w-full gap-3">
+                    <div className={cn(
+                      "h-9 w-9 rounded-full flex items-center justify-center shrink-0 border",
+                      notification.isRead ? "bg-muted text-muted-foreground border-border" : "bg-primary/10 text-primary border-primary/20"
+                    )}>
+                      {notification.message.includes("Resolvido") ? <Check className="h-4 w-4" /> : <Info className="h-4 w-4" />}
+                    </div>
+                    
+                    <div className="flex flex-col gap-1 min-w-0">
                         <p className={cn(
-                            "text-sm leading-relaxed", 
+                            "text-sm leading-tight", 
                             !notification.isRead ? "font-bold text-foreground" : "text-muted-foreground"
                         )}>
                             {notification.message}
                         </p>
+                        
+                        <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground uppercase">
+                          <Clock className="h-3 w-3" />
+                          <ReportTime date={new Date(notification.createdAt)} />
+                        </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between w-full mt-3 pl-5">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                          <ReportTime date={new Date(notification.createdAt)} />
-                      </span>
+                  <div className="flex items-center justify-end w-full mt-3">
                       <Link 
                           href="/minha-conta#meus-relatorios"
-                          className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 group/link"
+                          className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 group/link bg-primary/5 px-2 py-1 rounded-md"
                           onClick={() => {
                             handleMarkAsRead(notification.id);
                           }}
@@ -147,7 +153,7 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
            <div className="p-3 border-t border-border bg-muted/10 text-center">
               <Link 
                 href="/minha-conta#meus-relatorios" 
-                className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors"
+                className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest"
               >
                 Gerenciar todos os relatos
               </Link>
