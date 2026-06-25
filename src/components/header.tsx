@@ -180,7 +180,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
               )}
 
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="h-11 rounded-xl cursor-pointer px-3 group">
+                <DropdownMenuSubTrigger hideChevron className="h-11 rounded-xl cursor-pointer px-3 group">
                   <Palette className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-primary" />
                   <span className="font-semibold text-sm">Tema</span>
                 </DropdownMenuSubTrigger>
