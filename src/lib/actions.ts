@@ -216,7 +216,7 @@ export async function deleteReportAction(reportId: string) {
 export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'photoURL' | 'role'> & { photoURL?: string }): Promise<{ success: boolean; error?: string; photoURL?: string; }> {
   try {
     const role = isEmailEmployee(userProfile.email) ? "EMPLOYEE" : "USER";
-    const avatarSvg = createAvatarSvg(userProfile.email);
+    const avatarSvg = userProfile.photoURL || createAvatarSvg(userProfile.email);
     const finalUserProfile: UserProfile = { ...userProfile, photoURL: avatarSvg, role };
     await saveUser(finalUserProfile);
     revalidatePath('/'); revalidatePath('/minha-conta');

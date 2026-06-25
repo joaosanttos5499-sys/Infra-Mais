@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
@@ -27,6 +28,8 @@ import { createAvatarSvg } from "@/lib/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { isEmailEmployee } from "@/lib/config";
 import { cn } from "@/lib/utils";
+
+const LOCAL_STORAGE_ACCOUNTS_KEY = 'infra_mais_saved_accounts';
 
 function MyReportItem({ report }: { report: Report }) {
     const { toast } = useToast();
@@ -358,6 +361,17 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         }
         setIsEditingName(true);
     };
+
+    const updateLocalStorageAccount = (uid: string, name: string) => {
+        const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
+        if (saved) {
+            try {
+                let accounts = JSON.parse(saved);
+                accounts = accounts.map((a: any) => a.uid === uid ? { ...a, displayName: name } : a);
+                localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts));
+            } catch (e) {}
+        }
+    };
     
     const onSubmit = async (data: z.infer<typeof UpdateProfileSchema>) => {
       if (!user) return;
@@ -366,6 +380,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         if (auth.currentUser) {
           updateProfile(auth.currentUser, { displayName: data.name }).catch(console.error);
         }
+        updateLocalStorageAccount(user.uid, data.name);
         setUserProfile(prev => prev ? { ...prev, name: data.name, nameLastUpdatedAt: new Date().toISOString() } : null);
         toast({ title: "Sucesso!", description: "Seu nome foi atualizado." });
         setIsEditingName(false);
