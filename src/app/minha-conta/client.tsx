@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
@@ -57,7 +56,6 @@ function MyReportItem({ report }: { report: Report }) {
     return (
         <div className="flex flex-col sm:flex-row gap-4 border border-border rounded-xl p-4 bg-card group relative animate-in fade-in slide-in-from-bottom-4 min-h-[160px]">
             
-            {/* Status no canto superior direito */}
             <div className="absolute top-4 right-4 z-20">
                 <StatusBadge status={report.status} />
             </div>
@@ -93,7 +91,6 @@ function MyReportItem({ report }: { report: Report }) {
                     </div>
                 </div>
 
-                {/* Ações no canto inferior direito */}
                 <div className="flex items-center justify-end gap-2 w-full mt-4 sm:mt-0">
                     {isPublic && (
                         <Link 
@@ -232,13 +229,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         }
     }, [user, isUserLoading, allReports, router, isEmployee]);
     
-    // Lógica para rolagem suave ao carregar a página com hash #meus-relatorios
     useEffect(() => {
         if (typeof window !== 'undefined' && window.location.hash === '#meus-relatorios' && reportsRef.current && !isProfileLoading) {
             setTimeout(() => {
                 const element = reportsRef.current;
                 if (element) {
-                    const yOffset = -100; // Offset para encobrir a zona de exclusão e focar nos relatos
+                    const yOffset = -100;
                     const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
                     window.scrollTo({ top: y, behavior: 'smooth' });
                 }
@@ -254,7 +250,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                     if (result.success && result.data) {
                         setUserProfile(result.data);
                         form.reset({ name: result.data.name });
-                    } else {
+                    } else if (user) {
                         const fallbackProfile: UserProfile = {
                             id: user.uid,
                             name: user.displayName || 'Usuário',

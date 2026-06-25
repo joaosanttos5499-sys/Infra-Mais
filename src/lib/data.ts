@@ -92,7 +92,11 @@ export async function saveUser(user: UserProfile): Promise<UserProfile> {
 
     const existingUserIndex = users.findIndex(u => u.id === user.id);
     if (existingUserIndex > -1) {
-        users[existingUserIndex] = userToSave;
+        // Preserva campos existentes caso não sejam enviados na atualização
+        users[existingUserIndex] = {
+            ...users[existingUserIndex],
+            ...userToSave
+        };
     } else {
         users.push(userToSave);
     }
@@ -109,7 +113,6 @@ export async function deleteUser(id: string): Promise<boolean> {
 
   let i = reports.length;
   while (i--) {
-    // Regra de Negócio: Preservar relatos que já saíram de análise (Patrimônio da Cidade)
     if (reports[i].userId === id && reports[i].status === 'UNDER_REVIEW') {
       reports.splice(i, 1);
     }
