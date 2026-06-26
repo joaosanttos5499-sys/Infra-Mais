@@ -172,14 +172,12 @@ export function ReportForm() {
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="p-6 md:p-8 space-y-8">
-            <div className="space-y-6">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-primary" />
-                    <Label className="text-lg font-bold text-foreground">Localização</Label>
-                </div>
-                <p className="text-xs text-muted-foreground italic">{deviceLabels.map}</p>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2 mb-6">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <Label className="text-lg font-bold text-foreground">Localização</Label>
               </div>
+              <p className="text-xs text-muted-foreground italic mb-2">{deviceLabels.map}</p>
               <div className="rounded-2xl overflow-hidden border border-border h-[300px] md:h-[400px] relative z-0 bg-muted">
                   <LeafletMap interactive={true} onLocationSelect={handleMapClick} selectedLocation={locationObject} />
               </div>
