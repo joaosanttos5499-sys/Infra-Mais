@@ -98,6 +98,13 @@ export function ReportForm() {
     });
   }, []);
 
+  // Ensure the userId is always synced with the auth state
+  useEffect(() => {
+    if (user?.uid) {
+      setValue('userId', user.uid);
+    }
+  }, [user, setValue]);
+
   const handleMapClick = useCallback((lat: number, lng: number) => {
     setValue('latitude', lat, { shouldValidate: true });
     setValue('longitude', lng, { shouldValidate: true });
@@ -132,6 +139,11 @@ export function ReportForm() {
   }, [reset, user?.uid, toast]);
 
   const onSubmit = async (values: z.infer<typeof ClientReportSchema>) => {
+    if (!user) {
+        toast({ variant: 'destructive', title: 'Erro', description: 'Você precisa estar logado para enviar um relato.' });
+        return;
+    }
+
     const formData = new FormData();
     formData.append('photo', values.photo);
     Object.keys(values).forEach(key => {
@@ -145,7 +157,11 @@ export function ReportForm() {
           toast({ title: "Sucesso!", description: "Relatório enviado com sucesso." });
           router.push('/minha-conta#meus-relatorios');
         } else {
-          toast({ variant: 'destructive', title: 'Erro ao enviar', description: result?.errors?._form?.[0] || "Verifique os campos do formulário." });
+          toast({ 
+            variant: 'destructive', 
+            title: 'Erro ao enviar', 
+            description: result?.errors?._form?.[0] || result?.errors?.userId?.[0] || "Verifique os campos do formulário." 
+          });
         }
     } catch (error) {
         toast({ variant: 'destructive', title: 'Erro', description: "Ocorreu um erro ao processar sua solicitação." });
@@ -173,7 +189,7 @@ export function ReportForm() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="p-6 md:p-8 space-y-8">
             <div className="flex flex-col">
-              <div className="flex items-center gap-2 mb-6">
+              <div className="flex items-center gap-2 mb-10">
                   <MapPin className="h-5 w-5 text-primary" />
                   <Label className="text-lg font-bold text-foreground">Localização</Label>
               </div>

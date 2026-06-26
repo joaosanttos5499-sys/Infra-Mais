@@ -1,4 +1,3 @@
-
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -24,6 +23,7 @@ import { ReportSchema, UpdateProfileSchema } from "./schemas";
 import { createAvatarSvg } from "./avatar";
 import { isEmailEmployee } from "./config";
 import { statusConfig } from "@/components/status-badge";
+import { getCategory } from "./categories";
 
 export type FormState = {
   message?: string | null;
@@ -79,29 +79,38 @@ export async function submitReport(
 
   try {
     const user = await getUserById(validatedFields.data.userId);
-    if (!user) return { errors: { _form: ["Usuário não encontrado."] } };
+    if (!user) return { errors: { _form: ["Usuário não encontrado. Por favor, tente sair e entrar novamente."] } };
 
     const photoFile = formData.get("photo") as File;
     if (!photoFile || photoFile.size === 0) {
       return { errors: { photo: ["A foto do problema é obrigatória."] } };
-    }
-    if (photoFile.size > 5 * 1024 * 1024) {
-      return { errors: { photo: ["O tamanho da foto não pode exceder 5MB."] } };
     }
     const photoDataUri = await fileToDataUri(photoFile);
 
     const { userId, category, problem, city, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
     const location = reference ? `${address} (${reference})` : address;
 
-    const aiSummary = await summarizeReport({
-      category,
-      problem,
-      city,
-      bairro,
-      location,
-      description: description || "Nenhuma descrição fornecida.",
-      photoDataUri,
-    });
+    // Get readable labels for the AI summary
+    const categoryInfo = getCategory(category);
+    const categoryLabel = categoryInfo?.label || category;
+    const problemLabel = categoryInfo?.problems.find(p => p.value === problem)?.label || problem;
+
+    let aiSummaryText = "Resumo automático indisponível.";
+    try {
+      const aiSummary = await summarizeReport({
+        category: categoryLabel,
+        problem: problemLabel,
+        city,
+        bairro,
+        location,
+        description: description || "Nenhuma descrição fornecida.",
+        photoDataUri,
+      });
+      aiSummaryText = aiSummary.summary;
+    } catch (aiError) {
+      console.error("AI Summarization failed, using default:", aiError);
+      aiSummaryText = `${problemLabel} em ${bairro}. ${description || ''}`;
+    }
 
     const newReport: NewReport = {
       userId,
@@ -112,7 +121,7 @@ export async function submitReport(
       bairro,
       location,
       description: description || "",
-      summary: aiSummary.summary,
+      summary: aiSummaryText,
       photoUrl: photoDataUri,
       latitude,
       longitude,
@@ -129,7 +138,7 @@ export async function submitReport(
   } catch (e) {
     console.error("Erro ao processar relatório:", e);
     return {
-      errors: { _form: ["Erro ao processar relatório. Tente novamente."] },
+      errors: { _form: ["Erro ao processar o envio. Verifique sua conexão e tente novamente."] },
     };
   }
 }
@@ -156,7 +165,6 @@ export async function updateReportStatus(
 
   try {
     if (photoAfterFile && photoAfterFile.size > 0) {
-      if (photoAfterFile.size > 5 * 1024 * 1024) return { success: false, message: "A foto deve ter menos de 5MB." };
       photoAfterUrl = await fileToDataUri(photoAfterFile);
     }
 

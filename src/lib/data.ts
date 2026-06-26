@@ -9,17 +9,16 @@ const globalForStore = globalThis as unknown as {
   notificationCounter: number | undefined;
 };
 
-const reports = globalForStore.reports ?? [];
-const users = globalForStore.users ?? [];
-const notifications = globalForStore.notifications ?? [];
-let idCounter = globalForStore.idCounter ?? 1;
-let notificationCounter = globalForStore.notificationCounter ?? 1;
+// Initialize global storage if not present to ensure persistence across reloads
+if (!globalForStore.reports) globalForStore.reports = [];
+if (!globalForStore.users) globalForStore.users = [];
+if (!globalForStore.notifications) globalForStore.notifications = [];
+if (globalForStore.idCounter === undefined) globalForStore.idCounter = 1;
+if (globalForStore.notificationCounter === undefined) globalForStore.notificationCounter = 1;
 
-if (process.env.NODE_ENV !== "production") {
-  globalForStore.reports = reports;
-  globalForStore.users = users;
-  globalForStore.notifications = notifications;
-}
+const reports = globalForStore.reports;
+const users = globalForStore.users;
+const notifications = globalForStore.notifications;
 
 export async function getReports(limit?: number): Promise<Report[]> {
   const sorted = [...reports].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -29,15 +28,12 @@ export async function getReports(limit?: number): Promise<Report[]> {
 export function addReport(report: NewReport): Report {
   const newReport: Report = {
     ...report,
-    id: String(idCounter++),
+    id: String(globalForStore.idCounter!++),
     status: "UNDER_REVIEW",
     createdAt: new Date().toISOString(),
     upvotes: 0,
   };
   reports.push(newReport);
-  if (process.env.NODE_ENV !== 'production') {
-    globalForStore.idCounter = idCounter;
-  }
   return newReport;
 }
 
@@ -92,7 +88,6 @@ export async function saveUser(user: UserProfile): Promise<UserProfile> {
 
     const existingUserIndex = users.findIndex(u => u.id === user.id);
     if (existingUserIndex > -1) {
-        // Preserva campos existentes caso não sejam enviados na atualização
         users[existingUserIndex] = {
             ...users[existingUserIndex],
             ...userToSave
@@ -134,7 +129,7 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
 
 export function addNotification(userId: string, reportId: string, message: string): Notification {
     const newNotification: Notification = {
-        id: String(notificationCounter++),
+        id: String(globalForStore.notificationCounter!++),
         userId,
         reportId,
         message,
@@ -142,9 +137,6 @@ export function addNotification(userId: string, reportId: string, message: strin
         createdAt: new Date().toISOString(),
     };
     notifications.push(newNotification);
-    if (process.env.NODE_ENV !== 'production') {
-        globalForStore.notificationCounter = notificationCounter;
-    }
     return newNotification;
 }
 
