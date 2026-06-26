@@ -110,6 +110,8 @@ const ReportCard = memo(({
         setIsStatusConfirmOpen(false);
         if (onSuccess) onSuccess();
         router.refresh();
+        // Recarrega a página automaticamente para garantir que os dados de status sejam atualizados
+        window.location.reload();
     }
   }, [formState, toast, router, onSuccess]);
 
@@ -130,6 +132,7 @@ const ReportCard = memo(({
             toast({ title: "Relatório removido", description: "O registro indevido foi excluído do sistema." });
             router.refresh();
             if (onSuccess) onSuccess();
+            window.location.reload();
         } else {
             toast({ variant: "destructive", title: "Erro ao excluir", description: result.message });
         }
