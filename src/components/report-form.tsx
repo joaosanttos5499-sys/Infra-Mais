@@ -172,8 +172,8 @@ export function ReportForm() {
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="p-6 md:p-8 space-y-8">
-            <div className="space-y-4">
-              <div className="space-y-1">
+            <div className="space-y-6">
+              <div className="space-y-3">
                 <div className="flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-primary" />
                     <Label className="text-lg font-bold text-foreground">Localização</Label>
