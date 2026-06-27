@@ -108,10 +108,15 @@ const ReportCard = memo(({
         toast({ title: "Sucesso", description: formState.message });
         setPhotoAfterPreview(null);
         setIsStatusConfirmOpen(false);
-        if (onSuccess) onSuccess();
-        router.refresh();
-        // Recarrega a página automaticamente para garantir que os dados de status sejam atualizados
-        window.location.reload();
+        
+        // Aguarda o processamento e recarrega a página para garantir sincronização total
+        const timeout = setTimeout(() => {
+          if (onSuccess) onSuccess();
+          router.refresh();
+          window.location.reload();
+        }, 800);
+
+        return () => clearTimeout(timeout);
     }
   }, [formState, toast, router, onSuccess]);
 
