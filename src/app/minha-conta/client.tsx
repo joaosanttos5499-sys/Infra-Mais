@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
@@ -477,11 +476,10 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             )}
                             
                             {!isEditingName && (
-                              <div className="pt-6 border-t border-border flex justify-between items-center">
-                                <span className="text-xs text-muted-foreground font-medium uppercase tracking-tight">Gerenciamento de Dados</span>
+                              <div className="pt-6 border-t border-border flex justify-start items-center">
                                 <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                                   <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" className="text-destructive hover:bg-destructive/5 text-xs font-bold gap-2">
+                                    <Button variant="ghost" className="text-destructive hover:bg-destructive/5 text-xs font-bold gap-2 p-0 h-auto">
                                       <Trash2 className="h-3.5 w-3.5" /> Excluir Conta
                                     </Button>
                                   </AlertDialogTrigger>
