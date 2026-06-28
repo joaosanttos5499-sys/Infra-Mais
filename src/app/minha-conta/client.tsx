@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, Plus, ShieldAlert, ArrowUpRight } from "lucide-react";
+import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, Plus, ShieldAlert, ArrowUpRight, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -17,8 +18,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UpdateProfileSchema } from "@/lib/schemas";
-import { updateUserProfileAction, fetchUserProfileAction, deleteReportAction } from "@/lib/actions";
-import { updateProfile } from "firebase/auth";
+import { updateUserProfileAction, fetchUserProfileAction, deleteReportAction, deleteAccountAction } from "@/lib/actions";
+import { updateProfile, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ import { createAvatarSvg } from "@/lib/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { isEmailEmployee } from "@/lib/config";
 import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 const LOCAL_STORAGE_ACCOUNTS_KEY = 'infra_mais_saved_accounts';
 
@@ -200,9 +202,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const [countdown, setCountdown] = useState(5);
 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [deleteCountdown, setDeleteCountdown] = useState(5);
-    const [isDeleteConfirmEnabled, setIsDeleteConfirmEnabled] = useState(false);
-
+    const [deletePassword, setDeletePassword] = useState("");
+    const [isDeletingProcess, setIsDeletingProcess] = useState(false);
 
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [isProfileLoading, setIsProfileLoading] = useState(true);
@@ -307,32 +308,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         }
     }, [isConfirmOpen]);
 
-    useEffect(() => {
-        if (isDeleteDialogOpen) {
-            setIsDeleteConfirmEnabled(false);
-            setDeleteCountdown(5);
-            
-            const countdownInterval = setInterval(() => {
-                setDeleteCountdown(prev => {
-                    if (prev <= 1) {
-                        clearInterval(countdownInterval);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-
-            const enableTimeout = setTimeout(() => {
-                setIsDeleteConfirmEnabled(true);
-            }, 5000);
-
-            return () => {
-                clearInterval(countdownInterval);
-                clearTimeout(enableTimeout);
-            };
-        }
-    }, [isDeleteDialogOpen]);
-
     const getCooldownInfo = () => {
         if (!userProfile?.nameLastUpdatedAt) return { onCooldown: false, remainingDays: 0 };
         const lastUpdate = new Date(userProfile.nameLastUpdatedAt);
@@ -393,8 +368,29 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         });
     };
 
-    const handleProceedToDelete = () => {
-        router.push('/exclusao-da-conta');
+    const handleAccountDeletion = async () => {
+        if (!user || !auth.currentUser) return;
+        
+        setIsDeletingProcess(true);
+        try {
+            const credential = EmailAuthProvider.credential(user.email!, deletePassword);
+            await reauthenticateWithCredential(auth.currentUser, credential);
+            
+            const result = await deleteAccountAction(user.uid);
+            if (result.success) {
+                await deleteUser(auth.currentUser);
+                toast({ title: "Conta excluída", description: "Sentiremos sua falta! Seus dados foram removidos." });
+                router.push('/');
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (error: any) {
+            console.error("Deletion error:", error);
+            let message = "Erro ao processar a exclusão. Verifique sua senha.";
+            if (error.code === 'auth/wrong-password') message = "Senha incorreta.";
+            toast({ variant: 'destructive', title: "Erro na exclusão", description: message });
+            setIsDeletingProcess(false);
+        }
     };
 
     if (isUserLoading || !user) {
@@ -407,7 +403,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     return (
         <div className="space-y-8">
-             <Card className="bg-card rounded-2xl shadow-md border border-border p-6 sm:p-8 space-y-6 overflow-hidden mx-4 sm:mx-0">
+             <Card className="bg-card rounded-2xl shadow-md border border-border p-6 sm:p-8 space-y-6 overflow-hidden mx-4 sm:mx-0 relative">
                 <div className="flex flex-col items-center gap-4 mb-2">
                     <Avatar className="h-24 w-24 shadow-md border-4 border-background">
                         <AvatarImage src={userProfile?.photoURL || createAvatarSvg(user.email || 'U')} />
@@ -478,6 +474,62 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     </Button>
                                 </div>
                             )}
+                            
+                            {!isEditingName && (
+                              <div className="pt-6 border-t border-border flex justify-between items-center">
+                                <span className="text-xs text-muted-foreground font-medium uppercase tracking-tight">Gerenciamento de Dados</span>
+                                <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" className="text-destructive hover:bg-destructive/5 text-xs font-bold gap-2">
+                                      <Trash2 className="h-3.5 w-3.5" /> Excluir Conta
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent className="rounded-2xl max-w-sm">
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                                        <ShieldAlert className="h-5 w-5" /> Confirmar Exclusão
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription className="text-sm">
+                                        Esta ação é permanente. Informe sua senha para confirmar a exclusão da sua conta.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <div className="py-4 space-y-4">
+                                      <div className="space-y-2">
+                                        <Label htmlFor="del-pass" className="text-xs font-bold uppercase">Senha</Label>
+                                        <Input 
+                                          id="del-pass"
+                                          type="password" 
+                                          value={deletePassword} 
+                                          onChange={(e) => setDeletePassword(e.target.value)} 
+                                          placeholder="********"
+                                          className="h-11 rounded-xl"
+                                        />
+                                      </div>
+                                      <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+                                        <p className="text-[10px] text-destructive leading-relaxed font-medium">
+                                          <AlertTriangle className="h-3 w-3 inline mr-1" />
+                                          Todos os seus relatos e dados pessoais serão removidos definitivamente.
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <AlertDialogFooter className="gap-2">
+                                      <AlertDialogCancel className="rounded-xl w-full sm:w-auto" onClick={() => setDeletePassword("")}>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction 
+                                        disabled={!deletePassword || isDeletingProcess}
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          handleAccountDeletion();
+                                        }}
+                                        className="bg-destructive text-destructive-foreground rounded-xl font-bold w-full sm:w-auto"
+                                      >
+                                        {isDeletingProcess ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                        Confirmar Exclusão
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            )}
                           </form>
                         </Form>
                     )}
@@ -511,44 +563,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                     </CardContent>
                 </Card>
             )}
-
-            <div className="bg-destructive/10 border border-destructive/30 rounded-2xl p-6 space-y-4 mx-4 sm:mx-0 !mt-20">
-                <div className="flex items-center gap-2">
-                    <ShieldAlert className="h-5 w-5 text-destructive" />
-                    <h3 className="text-destructive font-bold text-lg uppercase tracking-tight">Exclusão da Conta</h3>
-                </div>
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="space-y-1 text-center sm:text-left">
-                        <p className="text-sm text-destructive dark:text-destructive font-bold">
-                            {isEmployee 
-                                ? "Ação irreversível. Todos os seus dados de funcionário serão removidos." 
-                                : "Ação irreversível. Todos os seus dados e relatos serão removidos permanentemente."}
-                        </p>
-                    </div>
-                    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="rounded-xl px-6 h-11 shadow-sm w-full sm:w-auto font-bold">
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir Conta
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-2xl mx-4 sm:mx-0 bg-card border-border">
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Protocolo de Segurança</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    Para sua proteção, você será redirecionado para uma página de confirmação de identidade. Deseja prosseguir com a exclusão definitiva?
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter className="mt-6 gap-2">
-                                <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleProceedToDelete} disabled={!isDeleteConfirmEnabled} className="bg-destructive text-destructive-foreground rounded-xl font-bold w-full sm:w-auto">
-                                    {isDeleteConfirmEnabled ? 'Sim, excluir meus dados' : `Aguarde (${deleteCountdown}s)`}
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                </div>
-            </div>
         </div>
     )
 }
