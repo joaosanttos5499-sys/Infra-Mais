@@ -61,7 +61,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <FirebaseClientProvider>
-            <div className="fixed top-0 left-0 w-full z-[2000] border-b border-border bg-background">
+            <div className="fixed top-0 left-0 w-full z-[2000] border-b border-border bg-card">
               <Header />
             </div>
             <div className="flex-grow pt-20 bg-background">
