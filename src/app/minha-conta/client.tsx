@@ -4,7 +4,7 @@ import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, Plus, ShieldAlert, ArrowUpRight, AlertTriangle } from "lucide-react";
+import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, Plus, ShieldAlert, ArrowUpRight, AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -29,6 +29,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { isEmailEmployee } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const LOCAL_STORAGE_ACCOUNTS_KEY = 'infra_mais_saved_accounts';
 
@@ -203,6 +204,10 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [deletePassword, setDeletePassword] = useState("");
+    const [showDeletePassword, setShowDeletePassword] = useState(false);
+    const [isAwareChecked, setIsAwareChecked] = useState(false);
+    const [deleteButtonCountdown, setDeleteButtonCountdown] = useState(3);
+    const [isDeleteButtonEnabled, setIsDeleteButtonEnabled] = useState(false);
     const [isDeletingProcess, setIsDeletingProcess] = useState(false);
 
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -307,6 +312,24 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             };
         }
     }, [isConfirmOpen]);
+
+    useEffect(() => {
+        if (isDeleteDialogOpen) {
+            setDeleteButtonCountdown(3);
+            setIsDeleteButtonEnabled(false);
+            const interval = setInterval(() => {
+                setDeleteButtonCountdown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(interval);
+                        setIsDeleteButtonEnabled(true);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [isDeleteDialogOpen]);
 
     const getCooldownInfo = () => {
         if (!userProfile?.nameLastUpdatedAt) return { onCooldown: false, remainingDays: 0 };
@@ -444,7 +467,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
                                         <FormLabel className="text-sm font-bold text-foreground uppercase tracking-wider">E-mail</FormLabel>
-                                        <Mail className="h-3.5 w-3.5 text-foreground/70" />
+                                        <Mail className="h-3.5 w-3.5 text-foreground" />
                                     </div>
                                     <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-xl bg-muted/60 text-foreground cursor-not-allowed opacity-100 border-border font-medium" />
                                 </div>
@@ -452,7 +475,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
                                         <FormLabel className="text-sm font-bold text-foreground uppercase tracking-wider">Data de Nascimento</FormLabel>
-                                        <Calendar className="h-3.5 w-3.5 text-foreground/70" />
+                                        <Calendar className="h-3.5 w-3.5 text-foreground" />
                                     </div>
                                     <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-xl bg-muted/60 text-foreground cursor-not-allowed opacity-100 border-border font-medium" />
                                 </div>
@@ -477,11 +500,18 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             
                             {!isEditingName && (
                               <div className="pt-6 border-t border-border flex justify-start items-center">
-                                <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                                <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => {
+                                    setIsDeleteDialogOpen(open);
+                                    if(!open) {
+                                        setDeletePassword("");
+                                        setIsAwareChecked(false);
+                                        setShowDeletePassword(false);
+                                    }
+                                }}>
                                   <AlertDialogTrigger asChild>
                                     <Button 
                                         variant="destructive" 
-                                        className="h-9 px-4 rounded-xl text-xs font-bold gap-2 shadow-sm hover:scale-110 transition-all"
+                                        className="h-9 px-4 rounded-xl text-xs font-bold gap-2 shadow-sm hover:scale-110 transition-all bg-destructive text-destructive-foreground"
                                     >
                                       <Trash2 className="h-3.5 w-3.5" /> Excluir Conta
                                     </Button>
@@ -498,26 +528,51 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     <div className="py-4 space-y-4">
                                       <div className="space-y-2">
                                         <Label htmlFor="del-pass" className="text-xs font-bold uppercase">Senha</Label>
-                                        <Input 
-                                          id="del-pass"
-                                          type="password" 
-                                          value={deletePassword} 
-                                          onChange={(e) => setDeletePassword(e.target.value)} 
-                                          placeholder="********"
-                                          className="h-11 rounded-xl"
-                                        />
+                                        <div className="relative">
+                                          <Input 
+                                            id="del-pass"
+                                            type={showDeletePassword ? "text" : "password"} 
+                                            value={deletePassword} 
+                                            onChange={(e) => setDeletePassword(e.target.value)} 
+                                            placeholder="********"
+                                            className="h-11 rounded-xl pr-10"
+                                          />
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                            onClick={() => setShowDeletePassword(!showDeletePassword)}
+                                          >
+                                            {showDeletePassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                                            <span className="sr-only">{showDeletePassword ? "Ocultar senha" : "Mostrar senha"}</span>
+                                          </Button>
+                                        </div>
                                       </div>
+
+                                      <div className="flex items-start space-x-3 p-3 bg-muted/20 rounded-xl border border-border">
+                                        <Checkbox 
+                                          id="confirm-delete-aware" 
+                                          checked={isAwareChecked} 
+                                          onCheckedChange={(val) => setIsAwareChecked(val as boolean)}
+                                          className="mt-1"
+                                        />
+                                        <Label htmlFor="confirm-delete-aware" className="text-xs leading-relaxed text-muted-foreground cursor-pointer font-medium">
+                                          Estou ciente de que esta ação não pode ser desfeita.
+                                        </Label>
+                                      </div>
+
                                       <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
                                         <p className="text-[10px] text-destructive leading-relaxed font-medium">
                                           <AlertTriangle className="h-3 w-3 inline mr-1" />
-                                          Todos os seus relatos e dados pessoais serão removidos definitivamente.
+                                          Todos os seus relatos em análise e dados pessoais serão removidos permanentemente.
                                         </p>
                                       </div>
                                     </div>
                                     <AlertDialogFooter className="gap-2">
-                                      <AlertDialogCancel className="rounded-xl w-full sm:w-auto" onClick={() => setDeletePassword("")}>Cancelar</AlertDialogCancel>
+                                      <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Cancelar</AlertDialogCancel>
                                       <AlertDialogAction 
-                                        disabled={!deletePassword || isDeletingProcess}
+                                        disabled={!deletePassword || !isAwareChecked || !isDeleteButtonEnabled || isDeletingProcess}
                                         onClick={(e) => {
                                           e.preventDefault();
                                           handleAccountDeletion();
@@ -525,7 +580,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                         className="bg-destructive text-destructive-foreground rounded-xl font-bold w-full sm:w-auto"
                                       >
                                         {isDeletingProcess ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                                        Confirmar Exclusão
+                                        {isDeleteButtonEnabled ? "Excluir Conta" : `Aguarde (${deleteButtonCountdown}s)`}
                                       </AlertDialogAction>
                                     </AlertDialogFooter>
                                   </AlertDialogContent>
