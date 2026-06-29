@@ -433,7 +433,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     )}
                                   </div>
                                   <FormControl>
-                                      <Input {...field} disabled={!isEditingName} className="h-12 rounded-xl bg-muted/40 focus:bg-background border-border" />
+                                      <Input {...field} disabled={!isEditingName} className="h-12 rounded-xl bg-muted/40 focus:bg-background border-border font-medium" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -444,17 +444,17 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
                                         <FormLabel className="text-sm font-bold text-foreground uppercase tracking-wider">E-mail</FormLabel>
-                                        <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                                        <Mail className="h-3.5 w-3.5 text-foreground/70" />
                                     </div>
-                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-xl bg-muted/60 text-muted-foreground cursor-not-allowed opacity-100 border-border" />
+                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-xl bg-muted/60 text-foreground cursor-not-allowed opacity-100 border-border font-medium" />
                                 </div>
 
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
                                         <FormLabel className="text-sm font-bold text-foreground uppercase tracking-wider">Data de Nascimento</FormLabel>
-                                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                                        <Calendar className="h-3.5 w-3.5 text-foreground/70" />
                                     </div>
-                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-xl bg-muted/60 text-muted-foreground cursor-not-allowed opacity-100 border-border" />
+                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-xl bg-muted/60 text-foreground cursor-not-allowed opacity-100 border-border font-medium" />
                                 </div>
                             </div>
 
@@ -481,7 +481,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                   <AlertDialogTrigger asChild>
                                     <Button 
                                         variant="destructive" 
-                                        className="h-9 px-4 rounded-xl text-xs font-bold gap-2 shadow-sm hover:scale-105 transition-all"
+                                        className="h-9 px-4 rounded-xl text-xs font-bold gap-2 shadow-sm hover:scale-110 transition-all"
                                     >
                                       <Trash2 className="h-3.5 w-3.5" /> Excluir Conta
                                     </Button>
