@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
@@ -65,7 +64,7 @@ export default function RootLayout({
             <div className="fixed top-0 left-0 w-full z-[2000] border-b border-border bg-background">
               <Header />
             </div>
-            <div className="flex-grow pt-20">
+            <div className="flex-grow pt-20 bg-background">
               {children}
             </div>
             <Toaster />
