@@ -433,7 +433,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     )}
                                   </div>
                                   <FormControl>
-                                      <Input {...field} disabled={!isEditingName} className="h-12 rounded-xl bg-muted/30 focus:bg-background border-border" />
+                                      <Input {...field} disabled={!isEditingName} className="h-12 rounded-xl bg-muted/40 focus:bg-background border-border" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -446,7 +446,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                         <FormLabel className="text-sm font-bold text-foreground uppercase tracking-wider">E-mail</FormLabel>
                                         <Mail className="h-3.5 w-3.5 text-muted-foreground" />
                                     </div>
-                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-xl bg-muted/50 text-muted-foreground cursor-not-allowed opacity-100 border-border" />
+                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-xl bg-muted/60 text-muted-foreground cursor-not-allowed opacity-100 border-border" />
                                 </div>
 
                                 <div className="space-y-2">
@@ -454,7 +454,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                         <FormLabel className="text-sm font-bold text-foreground uppercase tracking-wider">Data de Nascimento</FormLabel>
                                         <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
                                     </div>
-                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-xl bg-muted/50 text-muted-foreground cursor-not-allowed opacity-100 border-border" />
+                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-xl bg-muted/60 text-muted-foreground cursor-not-allowed opacity-100 border-border" />
                                 </div>
                             </div>
 
