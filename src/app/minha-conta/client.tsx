@@ -479,7 +479,10 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               <div className="pt-6 border-t border-border flex justify-start items-center">
                                 <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                                   <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" className="text-destructive hover:bg-destructive/5 text-xs font-bold gap-2 p-0 h-auto">
+                                    <Button 
+                                        variant="destructive" 
+                                        className="h-9 px-4 rounded-xl text-xs font-bold gap-2 shadow-sm hover:scale-105 transition-all"
+                                    >
                                       <Trash2 className="h-3.5 w-3.5" /> Excluir Conta
                                     </Button>
                                   </AlertDialogTrigger>
