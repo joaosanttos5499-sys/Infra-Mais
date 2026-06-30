@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, ShieldAlert, AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, ShieldAlert, AlertTriangle, Eye, EyeOff, Maximize2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -27,6 +26,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createAvatarSvg } from "@/lib/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { isEmailEmployee } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -61,13 +61,36 @@ function MyReportItem({ report }: { report: Report }) {
             <div className="absolute top-4 right-4 z-20">
                 <StatusBadge status={report.status} />
             </div>
-            <div className="relative w-full sm:w-32 h-40 sm:h-auto rounded-lg overflow-hidden shrink-0 z-10 shadow-sm bg-muted">
+            <div className="relative w-full sm:w-32 h-40 sm:h-auto rounded-lg overflow-hidden shrink-0 z-10 shadow-sm bg-muted group/photo">
                 <Image
                     src={report.photoUrl}
                     alt={report.description || "Foto do problema"}
                     fill
                     className="object-cover"
                 />
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <button 
+                            className="absolute bottom-2 right-2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-lg opacity-0 group-hover/photo:opacity-100 transition-all backdrop-blur-md scale-90 group-hover/photo:scale-100"
+                            title="Ver em tela cheia"
+                        >
+                            <Maximize2 className="h-4 w-4" />
+                        </button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden border-none bg-transparent shadow-none">
+                        <DialogHeader className="sr-only">
+                            <DialogTitle>Visualização da Foto</DialogTitle>
+                            <DialogDescription>Foto em alta resolução do problema relatado.</DialogDescription>
+                        </DialogHeader>
+                        <div className="relative w-full h-full flex items-center justify-center p-4">
+                            <img 
+                                src={report.photoUrl} 
+                                alt="Foto em tamanho real" 
+                                className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in duration-300" 
+                            />
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </div>
             <div className="flex flex-col flex-grow min-w-0 z-10 w-full justify-between">
                 <div className="space-y-1 pr-24 sm:pr-28">
