@@ -5,8 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Search, HelpCircle } from "lucide-react";
+import { HelpCircle } from "lucide-react";
 
 export default function SupportPage() {
   const faqs = [
@@ -78,15 +77,6 @@ export default function SupportPage() {
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
               Tudo o que você precisa saber sobre como utilizar o Infra Mais.
             </p>
-          </div>
-
-          <div className="relative mb-8">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input 
-              type="text" 
-              placeholder="Buscar dúvida..." 
-              className="w-full pl-12 pr-4 py-6 rounded-xl border-border shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-base bg-card text-foreground"
-            />
           </div>
 
           <Card className="rounded-2xl border-border shadow-sm overflow-hidden bg-card">
