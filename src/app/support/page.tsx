@@ -28,7 +28,7 @@ export default function SupportPage() {
     {
       question: "Como eu relato um problema?",
       answer:
-        'Após fazer login, clique em "Relatar um Problema". No formulário: \n1. Marque o local exato no mapa. \n2. Escolha a categoria e o problema específico. \n3. Selecione a cidade e o bairro correspondente. \n4. Anexe obrigatoriamente uma foto do problema (até 5MB). \n5. Adicione uma descrição detalhada se desejar.',
+        'Após fazer login, clique em "Relatar um Problema". No formulário: \n1. Marque o local exato no mapa. \n2. Escolha a categoria e o problema específico. \n3. Selecione a cidade e o bairro correspondente. \n4. Anexe obrigatoriamente uma foto do problema (até 10MB). \n5. Adicione uma descrição detalhada se desejar.',
     },
     {
       question: "Por que a foto é obrigatória?",
@@ -38,7 +38,7 @@ export default function SupportPage() {
     {
       question: "O que acontece depois que eu envio um relatório?",
       answer:
-        "Seu relatório é processado por uma Inteligência Artificial que gera um resumo conciso para otimizar a leitura dos gestores. O relato fica visível publicamente para que outros cidadãos possam apoiar. Embora o site seja independente, as informações são estruturadas para que possam ser facilmente utilizadas pelas equipes de manutenção das cidades parceiras ou notificadas via canais públicos.",
+        "Seu relatório é enviado para uma fila de análise interna. Um funcionário credenciado revisará as informações e, se necessário, fará ajustes técnicos (como correção de categoria ou precisão da localização) para garantir que a demanda seja clara. Se o relato for aprovado, o status mudará para 'Pendente' e ele ficará visível publicamente. Atenção: uma vez que o relato é aprovado e torna-se 'Pendente', ele passa a integrar o registro público de zeladoria da cidade e não poderá mais ser excluído pelo usuário, mesmo que a conta pessoal seja removida.",
     },
     {
       question: "Para que serve o botão 'Apoiar'?",
@@ -48,7 +48,7 @@ export default function SupportPage() {
     {
       question: "Posso excluir um relatório que eu enviei?",
       answer:
-        "Sim. Você tem total controle sobre seus relatos. Se enviou algo por engano ou o problema foi resolvido, basta ir em 'Minha Conta' e clicar no ícone de lixeira no card do relatório correspondente.",
+        "Você só pode excluir um relatório enquanto ele estiver com o status 'Em Análise'. Após ser aprovado e publicado (status 'Pendente', 'Em Andamento' ou 'Resolvido'), o relato torna-se um dado público e permanente para fins de histórico e cobrança de transparência urbana.",
     },
     {
       question: "Quais cidades o Infra Mais atende?",
