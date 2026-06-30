@@ -181,19 +181,16 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
       defaultValues: { name: "" },
     });
 
-    // Monitora o estado de autenticação e busca o perfil no Firestore imediatamente
     useEffect(() => {
         if (!isUserLoading) {
             if (!user) {
                 router.push('/report/auth');
             } else {
-                // Sincroniza relatórios do usuário logado
                 if (!isEmployee) {
                     const filteredReports = allReports.filter(report => report.userId === user.uid);
                     setUserReports(filteredReports);
                 }
 
-                // Busca dados complementares (Data de Nascimento) no Firestore
                 setIsProfileLoading(true);
                 fetchUserProfileAction(user.uid)
                     .then((result) => {
@@ -201,7 +198,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             setUserProfile(result.data);
                             form.reset({ name: result.data.name });
                         } else {
-                            // Fallback caso o documento não exista (ex: erro no cadastro inicial)
                             const fallback: UserProfile = {
                                 id: user.uid,
                                 name: user.displayName || 'Usuário',
@@ -355,7 +351,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     )}
                                   </div>
                                   <FormControl>
-                                      <Input {...field} disabled={!isEditingName} className="h-12 rounded-xl bg-muted/40 focus:bg-background border-border font-medium text-foreground" />
+                                      <Input {...field} disabled={!isEditingName} className="h-12 rounded-xl bg-muted/60 focus:bg-background border-border font-medium text-foreground" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -368,7 +364,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                         <Label className="text-xs font-bold text-foreground uppercase tracking-widest">E-mail</Label>
                                         <Mail className="h-3.5 w-3.5 text-foreground" />
                                     </div>
-                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-xl bg-muted/40 text-foreground cursor-not-allowed border-border font-medium opacity-100" />
+                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-xl bg-muted/60 text-foreground cursor-not-allowed border-border font-medium opacity-100" />
                                 </div>
 
                                 <div className="space-y-2">
@@ -376,7 +372,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                         <Label className="text-xs font-bold text-foreground uppercase tracking-widest">Data de Nascimento</Label>
                                         <Calendar className="h-3.5 w-3.5 text-foreground" />
                                     </div>
-                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-xl bg-muted/40 text-foreground cursor-not-allowed border-border font-medium opacity-100" />
+                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-xl bg-muted/60 text-foreground cursor-not-allowed border-border font-medium opacity-100" />
                                 </div>
                             </div>
 
