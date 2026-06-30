@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
@@ -440,38 +441,35 @@ const ReportCard = memo(({
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Rodapé de Moderação */}
-                    <div className="bg-destructive/5 p-8 rounded-3xl border border-destructive/20 mt-4 space-y-6">
-                        <div className="flex items-center gap-3">
-                            <ShieldAlert className="h-6 w-6 text-destructive" />
-                            <h4 className="text-xs font-bold text-destructive uppercase tracking-[0.2em]">Área de Moderação Crítica</h4>
-                        </div>
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                            <p className="text-sm text-muted-foreground/80 max-w-2xl leading-relaxed">
-                                Exclua relatos apenas se forem spam, impróprios ou duplicados. <strong>Atenção:</strong> esta ação apagará permanentemente todos os dados e fotos vinculados a este registro no banco de dados.
-                            </p>
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button type="button" variant="outline" className="h-12 border-destructive/40 text-destructive hover:bg-destructive hover:text-white font-bold rounded-xl w-full sm:w-auto px-8 transition-all shadow-sm">
-                                        <Trash2 className="h-5 w-5 mr-2" /> Excluir permanentemente
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent className="rounded-3xl bg-card border-border shadow-2xl p-8">
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle className="text-2xl font-bold text-destructive">Confirmar Exclusão?</AlertDialogTitle>
-                                        <AlertDialogDescription className="text-base pt-2">
-                                            Esta operação não pode ser desfeita. O relato desaparecerá de todos os dashboards.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter className="mt-8 gap-3">
-                                        <AlertDialogCancel className="rounded-xl h-12 px-6">Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white rounded-xl h-12 px-8 font-bold shadow-lg">Confirmar e Excluir</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                            <Separator className="my-6 opacity-50" />
+                            
+                            {/* Área de Moderação Simplificada */}
+                            <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-destructive/5 border border-destructive/20">
+                                <div className="flex items-center gap-2 text-destructive">
+                                    <ShieldAlert className="h-4 w-4" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Moderação</span>
+                                </div>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button type="button" variant="ghost" className="h-8 text-[10px] text-destructive hover:bg-destructive hover:text-white font-bold rounded-lg uppercase tracking-widest transition-all">
+                                            <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Excluir Relato
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="rounded-3xl bg-card border-border shadow-2xl p-8">
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle className="text-2xl font-bold text-destructive">Confirmar Exclusão?</AlertDialogTitle>
+                                            <AlertDialogDescription className="text-base pt-2">
+                                                Esta operação não pode ser desfeita. O relato desaparecerá permanentemente.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter className="mt-8 gap-3">
+                                            <AlertDialogCancel className="rounded-xl h-12 px-6">Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white rounded-xl h-12 px-8 font-bold shadow-lg">Confirmar e Excluir</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
                         </div>
                     </div>
                 </div>
