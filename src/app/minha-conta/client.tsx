@@ -4,8 +4,8 @@ import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, Plus, ShieldAlert, ArrowUpRight, AlertTriangle, Eye, EyeOff } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, ShieldAlert, AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
 import Image from "next/image";
@@ -28,7 +28,6 @@ import { createAvatarSvg } from "@/lib/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { isEmailEmployee } from "@/lib/config";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const LOCAL_STORAGE_ACCOUNTS_KEY = 'infra_mais_saved_accounts';
@@ -58,11 +57,9 @@ function MyReportItem({ report }: { report: Report }) {
 
     return (
         <div className="flex flex-col sm:flex-row gap-4 border border-border rounded-xl p-4 bg-card group relative animate-in fade-in slide-in-from-bottom-4 min-h-[160px]">
-            
             <div className="absolute top-4 right-4 z-20">
                 <StatusBadge status={report.status} />
             </div>
-
             <div className="relative w-full sm:w-32 h-40 sm:h-auto rounded-lg overflow-hidden shrink-0 z-10 shadow-sm bg-muted">
                 <Image
                     src={report.photoUrl}
@@ -71,39 +68,23 @@ function MyReportItem({ report }: { report: Report }) {
                     className="object-cover"
                 />
             </div>
-
             <div className="flex flex-col flex-grow min-w-0 z-10 w-full justify-between">
                 <div className="space-y-1 pr-24 sm:pr-28">
-                    <h3 className="font-bold text-lg text-foreground truncate">
-                        {problem?.label || report.problem}
-                    </h3>
-
+                    <h3 className="font-bold text-lg text-foreground truncate">{problem?.label || report.problem}</h3>
                     <div className="text-sm text-muted-foreground flex items-center gap-1.5">
                         {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
                         <span className="truncate">{category?.label || report.category}</span>
                     </div>
-
                     <div className="text-sm text-muted-foreground flex items-center gap-1.5">
                         <MapPin className="h-3.5 w-3.5 text-primary" />
                         <span className="truncate">{displayCity} - {report.bairro}</span>
                     </div>
-
                     <div className="flex items-center gap-1.5 pt-1 text-xs text-muted-foreground">
                         <Clock className="h-3.5 w-3.5" />
                         <ReportTime date={new Date(report.createdAt)} />
                     </div>
                 </div>
-
                 <div className="flex items-center justify-end gap-2 w-full mt-4 sm:mt-0">
-                    {isPublic && (
-                        <Link 
-                            href={`/dashboard#report-${report.id}`}
-                            className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider mr-auto"
-                        >
-                            <ArrowUpRight className="h-3 w-3" /> Ver Detalhes
-                        </Link>
-                    )}
-
                     {isPublic && (
                         <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold hover:bg-primary/10 transition-colors">
                             <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
@@ -111,25 +92,22 @@ function MyReportItem({ report }: { report: Report }) {
                             </Link>
                         </Button>
                     )}
-
                     {canDelete && (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition shrink-0" onClick={(e) => e.stopPropagation()}>
+                                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition shrink-0">
                                     {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                                     <span className="sr-only">Excluir</span>
                                 </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                            <AlertDialogContent>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
                                     <AlertDialogDescription>Esta ação não pode ser desfeita. O relatório será removido permanentemente.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl font-bold">
-                                        Excluir
-                                    </AlertDialogAction>
+                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl font-bold">Excluir</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
@@ -151,7 +129,6 @@ function MyReportsList({ reports }: { reports: Report[] }) {
             </div>
         );
     }
-
     return (
         <div className="space-y-6 px-4 sm:px-0">
             <div className="space-y-4">
@@ -159,34 +136,16 @@ function MyReportsList({ reports }: { reports: Report[] }) {
                     <MyReportItem key={report.id} report={report} />
                 ))}
             </div>
-            
-            <div className="pt-6 flex justify-center">
-                <Button asChild className="w-full sm:w-auto rounded-xl h-12 px-10 shadow-lg hover:scale-105 transition-all">
-                    <Link href="/report/new" className="flex items-center gap-2">
-                        <Plus className="h-5 w-5" />
-                        Relatar um Problema
-                    </Link>
-                </Button>
-            </div>
         </div>
-    )
+    );
 }
 
 function UserDataSkeleton() {
     return (
         <div className="space-y-6">
-            <div className="space-y-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-10 w-full" />
-            </div>
-            <div className="space-y-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-10 w-full" />
-            </div>
-            <div className="space-y-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-10 w-full" />
-            </div>
+            <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-12 w-full" /></div>
+            <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-12 w-full" /></div>
+            <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-12 w-full" /></div>
         </div>
     )
 }
@@ -212,28 +171,52 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [isProfileLoading, setIsProfileLoading] = useState(true);
-
     const [userReports, setUserReports] = useState<Report[]>([]);
     
     const reportsRef = useRef<HTMLDivElement>(null);
-
     const isEmployee = isEmailEmployee(user?.email);
 
     const form = useForm<z.infer<typeof UpdateProfileSchema>>({
       resolver: zodResolver(UpdateProfileSchema),
-      defaultValues: {
-        name: "",
-      },
+      defaultValues: { name: "" },
     });
 
+    // Monitora o estado de autenticação e busca o perfil no Firestore imediatamente
     useEffect(() => {
-        if (!isUserLoading && !user) {
-            router.push('/report/auth');
-        } else if (user && !isEmployee) {
-            const filteredReports = allReports.filter(report => report.userId === user.uid);
-            setUserReports(filteredReports);
+        if (!isUserLoading) {
+            if (!user) {
+                router.push('/report/auth');
+            } else {
+                // Sincroniza relatórios do usuário logado
+                if (!isEmployee) {
+                    const filteredReports = allReports.filter(report => report.userId === user.uid);
+                    setUserReports(filteredReports);
+                }
+
+                // Busca dados complementares (Data de Nascimento) no Firestore
+                setIsProfileLoading(true);
+                fetchUserProfileAction(user.uid)
+                    .then((result) => {
+                        if (result.success && result.data) {
+                            setUserProfile(result.data);
+                            form.reset({ name: result.data.name });
+                        } else {
+                            // Fallback caso o documento não exista (ex: erro no cadastro inicial)
+                            const fallback: UserProfile = {
+                                id: user.uid,
+                                name: user.displayName || 'Usuário',
+                                email: user.email || '',
+                                dateOfBirth: 'Não informada',
+                                role: isEmailEmployee(user.email) ? 'EMPLOYEE' : 'USER'
+                            };
+                            setUserProfile(fallback);
+                            form.reset({ name: fallback.name });
+                        }
+                    })
+                    .finally(() => setIsProfileLoading(false));
+            }
         }
-    }, [user, isUserLoading, allReports, router, isEmployee]);
+    }, [user, isUserLoading, allReports, router, isEmployee, form]);
     
     useEffect(() => {
         if (typeof window !== 'undefined' && window.location.hash === '#meus-relatorios' && reportsRef.current && !isProfileLoading) {
@@ -249,67 +232,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     }, [isProfileLoading]);
 
     useEffect(() => {
-        if (user?.uid) {
-            setIsProfileLoading(true);
-            fetchUserProfileAction(user.uid)
-                .then(async (result) => {
-                    if (result.success && result.data) {
-                        setUserProfile(result.data);
-                        form.reset({ name: result.data.name });
-                    } else if (user) {
-                        const fallbackProfile: UserProfile = {
-                            id: user.uid,
-                            name: user.displayName || 'Usuário',
-                            email: user.email || '',
-                            dateOfBirth: 'Não informada',
-                            role: isEmailEmployee(user.email) ? 'EMPLOYEE' : 'USER'
-                        };
-                        setUserProfile(fallbackProfile);
-                        form.reset({ name: fallbackProfile.name });
-                    }
-                })
-                .catch(() => {
-                   if (user) {
-                        const fallbackProfile: UserProfile = {
-                            id: user.uid,
-                            name: user.displayName || 'Usuário',
-                            email: user.email || '',
-                            dateOfBirth: 'Não informada',
-                            role: isEmailEmployee(user.email) ? 'EMPLOYEE' : 'USER'
-                        };
-                        setUserProfile(fallbackProfile);
-                        form.reset({ name: fallbackProfile.name });
-                   }
-                })
-                .finally(() => {
-                    setIsProfileLoading(false);
-                });
-        }
-    }, [user, form]);
-
-    useEffect(() => {
         if (isConfirmOpen) {
             setIsConfirmEnabled(false);
             setCountdown(5);
-            
-            const countdownInterval = setInterval(() => {
-                setCountdown(prev => {
-                    if (prev <= 1) {
-                        clearInterval(countdownInterval);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-
-            const enableTimeout = setTimeout(() => {
-                setIsConfirmEnabled(true);
-            }, 5000);
-
-            return () => {
-                clearInterval(countdownInterval);
-                clearTimeout(enableTimeout);
-            };
+            const interval = setInterval(() => setCountdown(p => p > 0 ? p - 1 : 0), 1000);
+            const timeout = setTimeout(() => setIsConfirmEnabled(true), 5000);
+            return () => { clearInterval(interval); clearTimeout(timeout); };
         }
     }, [isConfirmOpen]);
 
@@ -317,29 +245,18 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         if (isDeleteDialogOpen) {
             setDeleteButtonCountdown(3);
             setIsDeleteButtonEnabled(false);
-            const interval = setInterval(() => {
-                setDeleteButtonCountdown(prev => {
-                    if (prev <= 1) {
-                        clearInterval(interval);
-                        setIsDeleteButtonEnabled(true);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-            return () => clearInterval(interval);
+            const interval = setInterval(() => setDeleteButtonCountdown(p => p > 0 ? p - 1 : 0), 1000);
+            const timeout = setTimeout(() => setIsDeleteButtonEnabled(true), 3000);
+            return () => { clearInterval(interval); clearTimeout(timeout); };
         }
     }, [isDeleteDialogOpen]);
 
     const getCooldownInfo = () => {
         if (!userProfile?.nameLastUpdatedAt) return { onCooldown: false, remainingDays: 0 };
-        const lastUpdate = new Date(userProfile.nameLastUpdatedAt);
-        const nextAvailable = new Date(lastUpdate.getTime() + 7 * 24 * 60 * 60 * 1000);
-        const now = new Date();
-        const diff = nextAvailable.getTime() - now.getTime();
+        const nextAvailable = new Date(new Date(userProfile.nameLastUpdatedAt).getTime() + 7 * 24 * 60 * 60 * 1000);
+        const diff = nextAvailable.getTime() - Date.now();
         if (diff <= 0) return { onCooldown: false, remainingDays: 0 };
-        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-        return { onCooldown: true, remainingDays: days };
+        return { onCooldown: true, remainingDays: Math.ceil(diff / (1000 * 60 * 60 * 24)) };
     };
 
     const cooldown = getCooldownInfo();
@@ -371,44 +288,30 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
       if (!user) return;
       const result = await updateUserProfileAction(user.uid, { name: data.name });
       if (result.success) {
-        if (auth.currentUser) {
-          updateProfile(auth.currentUser, { displayName: data.name }).catch(console.error);
-        }
+        if (auth.currentUser) updateProfile(auth.currentUser, { displayName: data.name }).catch(console.error);
         updateLocalStorageAccount(user.uid, data.name);
         setUserProfile(prev => prev ? { ...prev, name: data.name, nameLastUpdatedAt: new Date().toISOString() } : null);
         toast({ title: "Sucesso!", description: "Seu nome foi atualizado." });
         setIsEditingName(false);
       } else {
-        toast({ variant: 'destructive', title: 'Erro', description: result.error || "Não foi possível atualizar o perfil." });
+        toast({ variant: 'destructive', title: 'Erro', description: result.error || "Não foi possível atualizar." });
       }
       setIsConfirmOpen(false);
     };
 
-    const handleSaveClick = () => {
-        form.trigger().then(isValid => {
-            if (isValid && form.formState.isDirty) setIsConfirmOpen(true);
-            else setIsEditingName(false);
-        });
-    };
-
     const handleAccountDeletion = async () => {
         if (!user || !auth.currentUser) return;
-        
         setIsDeletingProcess(true);
         try {
             const credential = EmailAuthProvider.credential(user.email!, deletePassword);
             await reauthenticateWithCredential(auth.currentUser, credential);
-            
             const result = await deleteAccountAction(user.uid);
             if (result.success) {
                 await deleteUser(auth.currentUser);
-                toast({ title: "Conta excluída", description: "Sentiremos sua falta! Seus dados foram removidos." });
+                toast({ title: "Conta excluída", description: "Seus dados foram removidos." });
                 router.push('/');
-            } else {
-                throw new Error(result.error);
-            }
+            } else throw new Error(result.error);
         } catch (error: any) {
-            console.error("Deletion error:", error);
             let message = "Erro ao processar a exclusão. Verifique sua senha.";
             if (error.code === 'auth/wrong-password') message = "Senha incorreta.";
             toast({ variant: 'destructive', title: "Erro na exclusão", description: message });
@@ -417,11 +320,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     };
 
     if (isUserLoading || !user) {
-        return (
-            <div className="flex items-center justify-center p-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        )
+        return <div className="flex items-center justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
     }
 
     return (
@@ -448,7 +347,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               render={({ field }) => (
                                 <FormItem>
                                   <div className="flex justify-between items-center mb-1">
-                                    <FormLabel className="text-sm font-bold text-foreground uppercase tracking-wider">Nome Completo</FormLabel>
+                                    <FormLabel className="text-xs font-bold text-foreground uppercase tracking-widest">Nome Completo</FormLabel>
                                     {!isEditingName && (
                                         <Button type="button" variant="link" className="p-0 h-auto text-sm text-primary font-bold hover:text-primary/80" onClick={handleEditClick}>
                                             Alterar
@@ -456,7 +355,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     )}
                                   </div>
                                   <FormControl>
-                                      <Input {...field} disabled={!isEditingName} className="h-12 rounded-xl bg-muted/40 focus:bg-background border-border font-medium" />
+                                      <Input {...field} disabled={!isEditingName} className="h-12 rounded-xl bg-muted/40 focus:bg-background border-border font-medium text-foreground" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -466,121 +365,64 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             <div className="space-y-6 pt-2">
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        <FormLabel className="text-sm font-bold text-foreground uppercase tracking-wider">E-mail</FormLabel>
+                                        <Label className="text-xs font-bold text-foreground uppercase tracking-widest">E-mail</Label>
                                         <Mail className="h-3.5 w-3.5 text-foreground" />
                                     </div>
-                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-xl bg-muted/60 text-foreground cursor-not-allowed opacity-100 border-border font-medium" />
+                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-xl bg-muted/40 text-foreground cursor-not-allowed border-border font-medium opacity-100" />
                                 </div>
 
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        <FormLabel className="text-sm font-bold text-foreground uppercase tracking-wider">Data de Nascimento</FormLabel>
+                                        <Label className="text-xs font-bold text-foreground uppercase tracking-widest">Data de Nascimento</Label>
                                         <Calendar className="h-3.5 w-3.5 text-foreground" />
                                     </div>
-                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-xl bg-muted/60 text-foreground cursor-not-allowed opacity-100 border-border font-medium" />
+                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-xl bg-muted/40 text-foreground cursor-not-allowed border-border font-medium opacity-100" />
                                 </div>
                             </div>
 
-                            {isEditingName && (
+                            {isEditingName ? (
                                 <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-border">
-                                    <Button type="button" variant="outline" onClick={() => { setIsEditingName(false); form.reset(); }} className="h-11 px-6 rounded-xl font-bold w-full sm:w-auto">
-                                        Cancelar
-                                    </Button>
-                                    <Button 
-                                        type="button" 
-                                        onClick={handleSaveClick} 
-                                        disabled={form.formState.isSubmitting || !form.formState.isDirty}
-                                        className="h-11 px-6 rounded-xl font-bold shadow-md w-full sm:w-auto"
-                                    >
-                                        {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                        Salvar Alterações
+                                    <Button type="button" variant="outline" onClick={() => { setIsEditingName(false); form.reset(); }} className="h-11 px-6 rounded-xl font-bold w-full sm:w-auto">Cancelar</Button>
+                                    <Button type="button" onClick={() => setIsConfirmOpen(true)} disabled={!form.formState.isDirty} className="h-11 px-6 rounded-xl font-bold shadow-md w-full sm:w-auto">
+                                        <Save className="mr-2 h-4 w-4" /> Salvar Alterações
                                     </Button>
                                 </div>
-                            )}
-                            
-                            {!isEditingName && (
+                            ) : (
                               <div className="pt-6 border-t border-border flex justify-start items-center">
-                                <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => {
-                                    setIsDeleteDialogOpen(open);
-                                    if(!open) {
-                                        setDeletePassword("");
-                                        setIsAwareChecked(false);
-                                        setShowDeletePassword(false);
-                                    }
-                                }}>
+                                <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => { setIsDeleteDialogOpen(open); if(!open) { setDeletePassword(""); setIsAwareChecked(false); setShowDeletePassword(false); } }}>
                                   <AlertDialogTrigger asChild>
-                                    <Button 
-                                        variant="destructive" 
-                                        className="h-9 px-4 rounded-xl text-xs font-bold gap-2 shadow-sm hover:scale-110 transition-all bg-destructive text-destructive-foreground"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" /> Excluir Conta
+                                    <Button variant="destructive" className="h-10 px-6 rounded-xl text-xs font-bold gap-2 shadow-lg hover:scale-105 transition-all bg-destructive text-destructive-foreground uppercase tracking-widest">
+                                      <Trash2 className="h-4 w-4" /> Excluir Conta
                                     </Button>
                                   </AlertDialogTrigger>
                                   <AlertDialogContent className="rounded-2xl max-w-sm">
                                     <AlertDialogHeader>
-                                      <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-                                        <ShieldAlert className="h-5 w-5" /> Confirmar Exclusão
-                                      </AlertDialogTitle>
-                                      <AlertDialogDescription className="text-sm">
-                                        Esta ação é permanente. Informe sua senha para confirmar a exclusão da sua conta.
-                                      </AlertDialogDescription>
+                                      <AlertDialogTitle className="flex items-center gap-2 text-destructive"><ShieldAlert className="h-5 w-5" /> Confirmar Exclusão</AlertDialogTitle>
+                                      <AlertDialogDescription className="text-sm">Esta ação é permanente. Informe sua senha para confirmar a exclusão da sua conta.</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <div className="py-4 space-y-4">
                                       <div className="space-y-2">
                                         <Label htmlFor="del-pass" className="text-xs font-bold uppercase">Senha</Label>
                                         <div className="relative">
-                                          <Input 
-                                            id="del-pass"
-                                            type={showDeletePassword ? "text" : "password"} 
-                                            value={deletePassword} 
-                                            onChange={(e) => setDeletePassword(e.target.value)} 
-                                            placeholder="********"
-                                            className="h-11 rounded-xl pr-10"
-                                          />
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                            onClick={() => setShowDeletePassword(!showDeletePassword)}
-                                          >
+                                          <Input id="del-pass" type={showDeletePassword ? "text" : "password"} value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} placeholder="********" className="h-11 rounded-xl pr-10" />
+                                          <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent" onClick={() => setShowDeletePassword(!showDeletePassword)}>
                                             {showDeletePassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-                                            <span className="sr-only">{showDeletePassword ? "Ocultar senha" : "Mostrar senha"}</span>
                                           </Button>
                                         </div>
                                       </div>
-
                                       <div className="flex items-start space-x-3 p-3 bg-muted/20 rounded-xl border border-border">
-                                        <Checkbox 
-                                          id="confirm-delete-aware" 
-                                          checked={isAwareChecked} 
-                                          onCheckedChange={(val) => setIsAwareChecked(val as boolean)}
-                                          className="mt-1"
-                                        />
-                                        <Label htmlFor="confirm-delete-aware" className="text-xs leading-relaxed text-muted-foreground cursor-pointer font-medium">
-                                          Estou ciente de que esta ação não pode ser desfeita.
-                                        </Label>
+                                        <Checkbox id="confirm-delete-aware" checked={isAwareChecked} onCheckedChange={(val) => setIsAwareChecked(val as boolean)} className="mt-1" />
+                                        <Label htmlFor="confirm-delete-aware" className="text-xs leading-relaxed text-muted-foreground cursor-pointer font-medium">Estou ciente de que esta ação não pode ser desfeita.</Label>
                                       </div>
-
                                       <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
-                                        <p className="text-[10px] text-destructive leading-relaxed font-medium">
-                                          <AlertTriangle className="h-3 w-3 inline mr-1" />
-                                          Todos os seus relatos em análise e dados pessoais serão removidos permanentemente.
-                                        </p>
+                                        <p className="text-[10px] text-destructive leading-relaxed font-bold"><AlertTriangle className="h-3 w-3 inline mr-1" />Todos os seus relatos em análise e dados pessoais serão removidos permanentemente.</p>
                                       </div>
                                     </div>
                                     <AlertDialogFooter className="gap-2">
                                       <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Cancelar</AlertDialogCancel>
-                                      <AlertDialogAction 
-                                        disabled={!deletePassword || !isAwareChecked || !isDeleteButtonEnabled || isDeletingProcess}
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          handleAccountDeletion();
-                                        }}
-                                        className="bg-destructive text-destructive-foreground rounded-xl font-bold w-full sm:w-auto"
-                                      >
+                                      <AlertDialogAction disabled={!deletePassword || !isAwareChecked || !isDeleteButtonEnabled || isDeletingProcess} onClick={(e) => { e.preventDefault(); handleAccountDeletion(); }} className="bg-destructive text-destructive-foreground rounded-xl font-bold w-full sm:w-auto">
                                         {isDeletingProcess ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                                        {isDeleteButtonEnabled ? "Excluir Conta" : `Aguarde (${deleteButtonCountdown}s)`}
+                                        {isDeleteButtonEnabled ? "Confirmar Exclusão" : `Aguarde (${deleteButtonCountdown}s)`}
                                       </AlertDialogAction>
                                     </AlertDialogFooter>
                                   </AlertDialogContent>
@@ -597,9 +439,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 <AlertDialogContent className="rounded-2xl mx-4 sm:mx-0 bg-card border-border">
                     <AlertDialogHeader>
                         <AlertDialogTitle>Aviso de Alteração</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Alterações de nome só são permitidas uma vez a cada 7 dias. Deseja confirmar?
-                        </AlertDialogDescription>
+                        <AlertDialogDescription>Alterações de nome só são permitidas uma vez a cada 7 dias. Deseja confirmar?</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="mt-4 gap-2">
                         <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Voltar</AlertDialogCancel>
@@ -612,9 +452,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
             {!isEmployee && (
                 <Card className="bg-card rounded-2xl shadow-md border border-border p-6 mx-4 sm:mx-0 scroll-mt-24" id="meus-relatorios" ref={reportsRef}>
-                    <CardHeader className="p-0 mb-6">
-                        <CardTitle className="text-xl font-bold text-foreground">Meus Relatórios</CardTitle>
-                    </CardHeader>
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-bold text-foreground">Meus Relatórios</h2>
+                        <Button asChild variant="link" className="p-0 h-auto text-primary font-bold">
+                            <Link href="/report/new">Novo Relato</Link>
+                        </Button>
+                    </div>
                     <CardContent className="p-0">
                         <MyReportsList reports={userReports} />
                     </CardContent>
