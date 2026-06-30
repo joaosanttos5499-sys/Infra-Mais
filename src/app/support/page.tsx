@@ -70,13 +70,10 @@ export default function SupportPage() {
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1 p-8 md:p-16">
         <div className="max-w-[1750px] mx-auto">
-          <div className="mb-10 text-center md:text-left space-y-2">
+          <div className="mb-10 text-center md:text-left">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
               Central de Suporte
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
-              Tudo o que você precisa saber sobre como utilizar o Infra Mais.
-            </p>
           </div>
 
           <Card className="rounded-2xl border-border shadow-sm overflow-hidden bg-card">
