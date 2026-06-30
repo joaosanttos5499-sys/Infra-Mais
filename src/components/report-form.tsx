@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
@@ -24,6 +25,7 @@ import { isEmailEmployee } from "@/lib/config";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Separator } from "./ui/separator";
+import imageCompression from 'browser-image-compression';
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -49,7 +51,7 @@ const PICUI_NEIGHBORHOODS = [
 const ClientReportSchema = ReportSchema.extend({
     photo: z.instanceof(File, { message: 'A foto é obrigatória.'})
         .refine(file => file.size > 0, 'A foto é obrigatória.')
-        .refine(file => file.size <= 5 * 1024 * 1024, 'O tamanho da foto não pode exceder 5MB.'),
+        .refine(file => file.size <= 10 * 1024 * 1024, 'O tamanho da foto original não pode exceder 10MB.'),
 });
 
 export function ReportForm() {
@@ -57,6 +59,7 @@ export function ReportForm() {
   const { user } = useUser();
   const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [deviceLabels, setDeviceLabels] = useState({
     photo: "Clique para anexar uma foto",
     map: "Clique no mapa para marcar o local exato do problema."
@@ -98,7 +101,6 @@ export function ReportForm() {
     });
   }, []);
 
-  // Ensure the userId is always synced with the auth state
   useEffect(() => {
     if (user?.uid) {
       setValue('userId', user.uid);
@@ -110,13 +112,36 @@ export function ReportForm() {
     setValue('longitude', lng, { shouldValidate: true });
   }, [setValue]);
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setValue('photo', file, { shouldValidate: true });
-      const reader = new FileReader();
-      reader.onloadend = () => setPhotoPreview(reader.result as string);
-      reader.readAsDataURL(file);
+      setIsCompressing(true);
+      try {
+        const options = {
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          fileType: 'image/webp',
+          initialQuality: 0.8
+        };
+        
+        const compressedFile = await imageCompression(file, options);
+        
+        // Create a new File object from the blob if it's not already one
+        const finalFile = new File([compressedFile], compressedFile.name.replace(/\.[^/.]+$/, "") + ".webp", {
+            type: 'image/webp',
+        });
+
+        setValue('photo', finalFile, { shouldValidate: true });
+        
+        const reader = new FileReader();
+        reader.onloadend = () => setPhotoPreview(reader.result as string);
+        reader.readAsDataURL(finalFile);
+      } catch (error) {
+        console.error("Compression error:", error);
+        toast({ variant: 'destructive', title: 'Erro na imagem', description: 'Não foi possível processar a foto. Tente novamente.' });
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -310,15 +335,31 @@ export function ReportForm() {
                     <ImagePlus className="h-5 w-5 text-primary" />
                     <Label className="text-lg font-bold text-foreground">Foto do Problema</Label>
                 </div>
-                <div className={cn("aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all", photoPreview ? "bg-muted border-primary/50" : "bg-muted/50 border-border hover:bg-muted hover:border-primary/30")}>
-                    {photoPreview ? <Image src={photoPreview} alt="Preview" fill className="object-cover" /> : (
+                <div className={cn(
+                    "aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all mx-auto w-full max-w-3xl",
+                    photoPreview ? "bg-muted border-primary/50 shadow-inner" : "bg-muted/50 border-border hover:bg-muted hover:border-primary/30"
+                )}>
+                    {isCompressing ? (
+                      <div className="flex flex-col items-center justify-center gap-3 animate-pulse">
+                          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                          <p className="text-sm font-bold text-primary uppercase tracking-widest">Otimizando foto...</p>
+                      </div>
+                    ) : photoPreview ? (
+                        <Image 
+                            src={photoPreview} 
+                            alt="Preview" 
+                            fill 
+                            className="object-cover" 
+                            priority
+                        />
+                    ) : (
                       <div className="text-center p-4">
                         <Camera className="mx-auto h-12 w-12 text-muted-foreground" />
                         <p className="text-sm font-bold mt-2 text-muted-foreground">{deviceLabels.photo}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1">(Até 5 Mb)</p>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1">(Qualidade WebP Otimizada)</p>
                       </div>
                     )}
-                    <input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} aria-label="Upload de foto" />
+                    <input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} aria-label="Upload de foto" disabled={isCompressing || isRedirecting} />
                 </div>
                 <FormMessage />
             </div>
@@ -341,7 +382,7 @@ export function ReportForm() {
           <CardFooter className="bg-muted/30 border-t border-border p-6 md:p-8 flex flex-col sm:flex-row justify-between gap-4">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" type="button" className="h-12 rounded-xl font-bold w-full sm:w-auto text-muted-foreground hover:text-foreground" disabled={isRedirecting}>
+                  <Button variant="outline" type="button" className="h-12 rounded-xl font-bold w-full sm:w-auto text-muted-foreground hover:text-foreground" disabled={isRedirecting || isCompressing}>
                     <RotateCcw className="mr-2 h-4 w-4" /> Limpar Formulário
                   </Button>
                 </AlertDialogTrigger>
@@ -359,9 +400,9 @@ export function ReportForm() {
                 </AlertDialogContent>
               </AlertDialog>
 
-              <Button type="submit" className="h-12 px-12 rounded-xl font-bold w-full sm:w-auto shadow-lg" disabled={form.formState.isSubmitting || isRedirecting}>
+              <Button type="submit" className="h-12 px-12 rounded-xl font-bold w-full sm:w-auto shadow-lg" disabled={form.formState.isSubmitting || isRedirecting || isCompressing}>
                 {(form.formState.isSubmitting || isRedirecting) ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
-                Enviar Relatório
+                {isCompressing ? "Aguarde..." : "Enviar Relatório"}
               </Button>
           </CardFooter>
         </form>
