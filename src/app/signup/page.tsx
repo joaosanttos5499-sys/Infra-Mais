@@ -1,5 +1,5 @@
 import { SignupForm } from "@/components/signup-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function SignupPage() {
   return (
@@ -8,7 +8,6 @@ export default function SignupPage() {
         <Card className="w-full max-w-md bg-card border-border shadow-xl">
             <CardHeader>
                 <CardTitle className="text-foreground">Criar Conta</CardTitle>
-                <CardDescription className="text-muted-foreground">Preencha os campos abaixo para criar sua conta no Infra Mais.</CardDescription>
             </CardHeader>
             <CardContent>
                 <SignupForm />
