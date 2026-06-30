@@ -26,6 +26,11 @@ export default function SupportPage() {
         "Sim. Para garantir a seriedade dos relatos e permitir que você acompanhe o progresso das suas solicitações, é necessário criar uma conta. Isso ajuda a evitar dados falsos e mantém a integridade da plataforma.",
     },
     {
+      question: "Meus dados pessoais são exibidos para outros usuários?",
+      answer:
+        "Não. Seus dados pessoais, como nome completo e data de nascimento, nunca são exibidos publicamente para outros usuários da plataforma. Embora cada relato esteja vinculado internamente à conta de quem o enviou, apenas funcionários credenciados do Infra Mais têm acesso ao e-mail do relator para fins de verificação técnica e moderação. Para o público geral, os relatos são exibidos sem identificar o autor.",
+    },
+    {
       question: "Como eu relato um problema?",
       answer:
         'Após fazer login, clique em "Relatar um Problema". No formulário: \n1. Marque o local exato no mapa. \n2. Escolha a categoria e o problema específico. \n3. Selecione a cidade e o bairro correspondente. \n4. Anexe obrigatoriamente uma foto do problema (até 10MB). \n5. Adicione uma descrição detalhada se desejar.',
