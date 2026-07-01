@@ -356,7 +356,6 @@ export function ReportForm() {
                       <div className="text-center p-4">
                         <Camera className="mx-auto h-12 w-12 text-muted-foreground" />
                         <p className="text-sm font-bold mt-2 text-muted-foreground">{deviceLabels.photo}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1">(Qualidade WebP Otimizada)</p>
                       </div>
                     )}
                     <input id="photo" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} aria-label="Upload de foto" disabled={isCompressing || isRedirecting} />
