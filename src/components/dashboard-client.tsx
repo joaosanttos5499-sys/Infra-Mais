@@ -18,7 +18,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { statusConfig, StatusBadge } from "./status-badge";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
 import { useUser } from "@/firebase";
 import { isEmailEmployee } from "@/lib/config";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
@@ -27,6 +27,7 @@ import { ReportTime } from "./report-time";
 import { Separator } from "./ui/separator";
 import Link from "next/link";
 import dynamic from 'next/dynamic';
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
@@ -44,6 +45,14 @@ const PICUI_NEIGHBORHOODS = [
   "Cenecista", "Centro", "JK", "Limeira", "Monte Santo", 
   "Pedro Salustino de Lima", "Pedro Tomáz Dantas", "São José", "Zona Rural"
 ].sort((a, b) => a.localeCompare(b));
+
+const REPORT_REASONS = [
+  { value: "offensive", label: "Linguagem Ofensiva / Imprópria" },
+  { value: "fake", label: "Foto Falsa ou Irrelevante" },
+  { value: "duplicate", label: "Relato Duplicado" },
+  { value: "trote", label: "Localização Incorreta / Trote" },
+  { value: "other", label: "Outros (Descreva abaixo)" },
+];
 
 const ReportCard = memo(({ 
     report,
@@ -80,6 +89,12 @@ const ReportCard = memo(({
   const [editLat, setEditLat] = useState(report.latitude);
   const [editLng, setEditLng] = useState(report.longitude);
 
+  // States for reporting menu
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+  const [isReporting, setIsReporting] = useState(false);
+
   const editProblems = useMemo(() => getCategory(editCategory)?.problems || [], [editCategory]);
 
   const [formState, formAction, isPending] = useActionState(async (prev: any, formData: FormData) => {
@@ -102,11 +117,28 @@ const ReportCard = memo(({
     }
   };
 
-  const handleReportContent = () => {
-    toast({
-      title: "Denúncia Enviada",
-      description: "Este relato foi marcado para revisão de moderação superior.",
-    });
+  const handleReportSubmit = async () => {
+    if (!reportReason) {
+      toast({ variant: "destructive", title: "Selecione um motivo", description: "É necessário escolher o motivo da denúncia." });
+      return;
+    }
+    if (reportReason === "other" && !reportDetails.trim()) {
+      toast({ variant: "destructive", title: "Detalhes necessários", description: "Para o motivo 'Outros', por favor descreva o problema." });
+      return;
+    }
+
+    setIsReporting(true);
+    // Simulating a backend call for the report
+    setTimeout(() => {
+      setIsReporting(false);
+      setIsReportDialogOpen(false);
+      setReportReason("");
+      setReportDetails("");
+      toast({
+        title: "Denúncia Enviada",
+        description: "O relato foi marcado para revisão da administração superior.",
+      });
+    }, 1000);
   };
 
   useEffect(() => {
@@ -353,7 +385,7 @@ const ReportCard = memo(({
                                   name="description" 
                                   value={editDescription} 
                                   onChange={(e) => setEditDescription(e.target.value)} 
-                                  className="flex-grow min-h-[140px] rounded-lg bg-card border-border resize-none p-3 text-sm" 
+                                  className="flex-grow min-h-[220px] rounded-lg bg-card border-border resize-none p-3 text-sm" 
                                 />
                             </div>
                         </div>
@@ -425,7 +457,6 @@ const ReportCard = memo(({
                                 )}
                             </Card>
 
-                            {/* Nova área de ações adicionais organizada abaixo do status */}
                             <div className="grid grid-cols-2 gap-3">
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
@@ -445,14 +476,61 @@ const ReportCard = memo(({
                                     </AlertDialogContent>
                                 </AlertDialog>
 
-                                <Button 
-                                    type="button" 
-                                    variant="outline" 
-                                    onClick={handleReportContent}
-                                    className="h-11 rounded-lg border-amber-500/20 text-amber-600 hover:bg-amber-500/10 hover:border-amber-500 font-bold gap-2"
-                                >
-                                    <AlertTriangle className="h-4 w-4" /> Denunciar
-                                </Button>
+                                <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+                                  <DialogTrigger asChild>
+                                    <Button 
+                                        type="button" 
+                                        variant="outline" 
+                                        className="h-11 rounded-lg border-amber-500/20 text-amber-600 hover:bg-amber-500/10 hover:border-amber-500 font-bold gap-2"
+                                    >
+                                        <AlertTriangle className="h-4 w-4" /> Denunciar
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="rounded-2xl sm:max-w-md">
+                                    <DialogHeader>
+                                      <DialogTitle className="flex items-center gap-2 text-amber-600">
+                                        <ShieldAlert className="h-5 w-5" /> Denunciar Relato
+                                      </DialogTitle>
+                                      <DialogDescription>
+                                        Selecione o motivo da denúncia para análise superior.
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    
+                                    <div className="py-4 space-y-4">
+                                      <div className="space-y-3">
+                                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Motivo Principal</Label>
+                                        <RadioGroup value={reportReason} onValueChange={setReportReason} className="grid gap-2">
+                                          {REPORT_REASONS.map((reason) => (
+                                            <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setReportReason(reason.value)}>
+                                              <RadioGroupItem value={reason.value} id={`reason-${reason.value}`} />
+                                              <Label htmlFor={`reason-${reason.value}`} className="flex-grow cursor-pointer font-medium">{reason.label}</Label>
+                                            </div>
+                                          ))}
+                                        </RadioGroup>
+                                      </div>
+
+                                      {reportReason === "other" && (
+                                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Detalhes Adicionais</Label>
+                                          <Textarea 
+                                            placeholder="Descreva o problema de forma detalhada..." 
+                                            value={reportDetails}
+                                            onChange={(e) => setReportDetails(e.target.value)}
+                                            className="min-h-[100px] rounded-xl bg-muted/20 border-border resize-none"
+                                          />
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <DialogFooter className="gap-2 sm:gap-0">
+                                      <Button variant="ghost" onClick={() => setIsReportDialogOpen(false)} className="rounded-xl font-bold">Cancelar</Button>
+                                      <Button onClick={handleReportSubmit} disabled={isReporting || !reportReason} className="rounded-xl font-bold bg-amber-600 hover:bg-amber-700">
+                                        {isReporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Flag className="h-4 w-4 mr-2" />}
+                                        Enviar Denúncia
+                                      </Button>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
                             </div>
                         </div>
                     </div>
