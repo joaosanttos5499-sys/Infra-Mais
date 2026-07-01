@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
@@ -189,8 +190,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const [deletePassword, setDeletePassword] = useState("");
     const [showDeletePassword, setShowDeletePassword] = useState(false);
     const [isAwareChecked, setIsAwareChecked] = useState(false);
-    const [deleteButtonCountdown, setDeleteButtonCountdown] = useState(3);
-    const [isDeleteButtonEnabled, setIsDeleteButtonEnabled] = useState(false);
     const [isDeletingProcess, setIsDeletingProcess] = useState(false);
 
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -260,16 +259,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             return () => { clearInterval(interval); clearTimeout(timeout); };
         }
     }, [isConfirmOpen]);
-
-    useEffect(() => {
-        if (isDeleteDialogOpen) {
-            setDeleteButtonCountdown(3);
-            setIsDeleteButtonEnabled(false);
-            const interval = setInterval(() => setDeleteButtonCountdown(p => p > 0 ? p - 1 : 0), 1000);
-            const timeout = setTimeout(() => setIsDeleteButtonEnabled(true), 3000);
-            return () => { clearInterval(interval); clearTimeout(timeout); };
-        }
-    }, [isDeleteDialogOpen]);
 
     const getCooldownInfo = () => {
         if (!userProfile?.nameLastUpdatedAt) return { onCooldown: false, remainingDays: 0 };
@@ -440,9 +429,9 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     </div>
                                     <AlertDialogFooter className="gap-2">
                                       <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Cancelar</AlertDialogCancel>
-                                      <AlertDialogAction disabled={!deletePassword || !isAwareChecked || !isDeleteButtonEnabled || isDeletingProcess} onClick={(e) => { e.preventDefault(); handleAccountDeletion(); }} className="bg-destructive text-destructive-foreground rounded-xl font-bold w-full sm:w-auto">
+                                      <AlertDialogAction disabled={!deletePassword || !isAwareChecked || isDeletingProcess} onClick={(e) => { e.preventDefault(); handleAccountDeletion(); }} className="bg-destructive text-destructive-foreground rounded-xl font-bold w-full sm:w-auto">
                                         {isDeletingProcess ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                                        {isDeleteButtonEnabled ? "Confirmar Exclusão" : `Aguarde (${deleteButtonCountdown}s)`}
+                                        Confirmar Exclusão
                                       </AlertDialogAction>
                                     </AlertDialogFooter>
                                   </AlertDialogContent>
