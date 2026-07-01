@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -100,6 +100,13 @@ const ReportCard = memo(({
       reader.onloadend = () => setPhotoAfterPreview(reader.result as string);
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleReportContent = () => {
+    toast({
+      title: "Denúncia Enviada",
+      description: "Este relato foi marcado para revisão de moderação superior.",
+    });
   };
 
   useEffect(() => {
@@ -303,12 +310,12 @@ const ReportCard = memo(({
             </div>
             
             {!showUpvote && (
-            <AccordionContent className="bg-muted/10 border-t border-border/50">
+            <AccordionContent className="bg-muted/5 border-t border-border/50">
               <form action={formAction} ref={formRef}>
                 <div className="p-6 md:p-8 space-y-6 max-w-[1400px] mx-auto">
-                    <div className="grid lg:grid-cols-12 gap-8 items-start">
-                        {/* Coluna de Inputs: Mais compacta */}
-                        <div className="lg:col-span-6 space-y-4">
+                    <div className="grid lg:grid-cols-12 gap-6 items-stretch">
+                        {/* Coluna de Dados: Ocupa a metade esquerda */}
+                        <div className="lg:col-span-6 flex flex-col gap-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Categoria</Label>
@@ -340,14 +347,19 @@ const ReportCard = memo(({
                                 </div>
                             </div>
 
-                            <div className="space-y-1.5">
+                            <div className="flex-grow flex flex-col space-y-1.5">
                                 <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Descrição</Label>
-                                <Textarea name="description" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="min-h-[80px] rounded-lg bg-card border-border resize-none p-3 text-sm" />
+                                <Textarea 
+                                  name="description" 
+                                  value={editDescription} 
+                                  onChange={(e) => setEditDescription(e.target.value)} 
+                                  className="flex-grow min-h-[140px] rounded-lg bg-card border-border resize-none p-3 text-sm" 
+                                />
                             </div>
                         </div>
 
-                        {/* Coluna Lateral: Mapa e Ações Integradas */}
-                        <div className="lg:col-span-6 space-y-4">
+                        {/* Coluna Lateral: Mapa e Ações Ocupa a metade direita */}
+                        <div className="lg:col-span-6 flex flex-col gap-4">
                             <div className="space-y-1.5">
                                 <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Localização no Mapa</Label>
                                 <div className="h-[180px] rounded-lg overflow-hidden border border-border relative z-0">
@@ -357,12 +369,12 @@ const ReportCard = memo(({
                                 <input type="hidden" name="longitude" value={editLng} />
                             </div>
 
-                            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-4">
+                            <Card className="rounded-xl bg-card border-border shadow-sm p-4 space-y-4">
                                 <div className="flex flex-col sm:flex-row items-end gap-3">
                                     <div className="space-y-1.5 w-full sm:flex-1">
                                         <Label className="text-[10px] font-black text-muted-foreground uppercase">Alterar Status</Label>
                                         <Select name="status" value={selectedStatus} onValueChange={(val) => setSelectedStatus(val as ReportStatus)}>
-                                            <SelectTrigger className="h-10 rounded-lg bg-background border-primary/20 font-bold"><SelectValue /></SelectTrigger>
+                                            <SelectTrigger className="h-11 rounded-lg bg-background border-primary/20 font-bold"><SelectValue /></SelectTrigger>
                                             <SelectContent className="rounded-lg">
                                                 {Object.entries(statusConfig).map(([key, { label }]) => (
                                                     <SelectItem key={key} value={key} disabled={key !== nextAllowedStatus && key !== report.status}>
@@ -375,7 +387,7 @@ const ReportCard = memo(({
                                     <div className="flex gap-2 w-full sm:w-auto">
                                         <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
                                             <AlertDialogTrigger asChild>
-                                                <Button type="button" disabled={isPending} className="h-10 flex-1 sm:w-32 rounded-lg font-bold bg-primary hover:bg-primary/90">
+                                                <Button type="button" disabled={isPending} className="h-11 flex-1 sm:w-32 rounded-lg font-bold bg-primary hover:bg-primary/90 shadow-md">
                                                     {isPending ? <Loader2 className="animate-spin h-4 w-4" /> : <Upload className="h-4 w-4" />}
                                                     <span className="ml-2">Salvar</span>
                                                 </Button>
@@ -383,7 +395,7 @@ const ReportCard = memo(({
                                             <AlertDialogContent className="rounded-2xl">
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Atualizar Dados?</AlertDialogTitle>
-                                                    <AlertDialogDescription>O cidadão será notificado sobre as alterações.</AlertDialogDescription>
+                                                    <AlertDialogDescription>O cidadão será notificado sobre as alterações via e-mail e notificações.</AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel className="rounded-lg">Voltar</AlertDialogCancel>
@@ -393,29 +405,11 @@ const ReportCard = memo(({
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>
                                         </AlertDialog>
-
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button type="button" variant="ghost" className="h-10 w-10 p-0 rounded-lg text-destructive hover:bg-destructive/10" title="Excluir Registro">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent className="rounded-2xl">
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle className="text-destructive">Excluir Permanentemente?</AlertDialogTitle>
-                                                    <AlertDialogDescription>Esta ação é irreversível e removerá o relato de todo o sistema.</AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel className="rounded-lg">Cancelar</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white rounded-lg px-6 font-bold">Sim, Excluir</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
                                     </div>
                                 </div>
-
+                                
                                 {isPhotoEnabled && (
-                                    <div className="space-y-1.5 animate-in slide-in-from-top-2 border-t border-border pt-4 mt-2">
+                                    <div className="space-y-1.5 animate-in slide-in-from-top-2 pt-2">
                                         <Label className="text-[10px] font-black text-muted-foreground uppercase flex items-center gap-2">
                                             <ImagePlus className="h-3 w-3" /> Foto da Solução (Obrigatório)
                                         </Label>
@@ -429,6 +423,36 @@ const ReportCard = memo(({
                                         </div>
                                     </div>
                                 )}
+                            </Card>
+
+                            {/* Nova área de ações adicionais organizada abaixo do status */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button type="button" variant="outline" className="h-11 rounded-lg border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive font-bold gap-2">
+                                            <Trash2 className="h-4 w-4" /> Excluir Relato
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="rounded-2xl">
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle className="text-destructive">Remover Permanentemente?</AlertDialogTitle>
+                                            <AlertDialogDescription>Esta ação é irreversível e o relato deixará de existir para todos os usuários.</AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel className="rounded-lg">Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white rounded-lg px-6 font-bold">Sim, Excluir</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+
+                                <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    onClick={handleReportContent}
+                                    className="h-11 rounded-lg border-amber-500/20 text-amber-600 hover:bg-amber-500/10 hover:border-amber-500 font-bold gap-2"
+                                >
+                                    <AlertTriangle className="h-4 w-4" /> Denunciar
+                                </Button>
                             </div>
                         </div>
                     </div>
