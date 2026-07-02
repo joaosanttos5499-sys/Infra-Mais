@@ -1,24 +1,30 @@
-import { type Report, type ReportStatus, type NewReport, type UserProfile, type Notification } from "@/lib/types";
+
+import { type Report, type ReportStatus, type NewReport, type UserProfile, type Notification, type Complaint } from "@/lib/types";
 import { isEmailEmployee } from "./config";
 
 const globalForStore = globalThis as unknown as {
   reports: Report[] | undefined;
   users: UserProfile[] | undefined;
   notifications: Notification[] | undefined;
+  complaints: Complaint[] | undefined;
   idCounter: number | undefined;
   notificationCounter: number | undefined;
+  complaintCounter: number | undefined;
 };
 
 // Initialize global storage if not present to ensure persistence across reloads
 if (!globalForStore.reports) globalForStore.reports = [];
 if (!globalForStore.users) globalForStore.users = [];
 if (!globalForStore.notifications) globalForStore.notifications = [];
+if (!globalForStore.complaints) globalForStore.complaints = [];
 if (globalForStore.idCounter === undefined) globalForStore.idCounter = 1;
 if (globalForStore.notificationCounter === undefined) globalForStore.notificationCounter = 1;
+if (globalForStore.complaintCounter === undefined) globalForStore.complaintCounter = 1;
 
 const reports = globalForStore.reports;
 const users = globalForStore.users;
 const notifications = globalForStore.notifications;
+const complaints = globalForStore.complaints;
 
 export async function getReports(limit?: number): Promise<Report[]> {
   const sorted = [...reports].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -76,7 +82,8 @@ export async function downvoteReport(id: string): Promise<Report | undefined> {
 export async function deleteReport(id: string): Promise<boolean> {
   const index = reports.findIndex(r => r.id === id);
   if (index !== -1) {
-    reports.splice(index, 1);
+    // Soft delete: muda o status para EXCLUDED em vez de remover do array
+    reports[index].status = 'EXCLUDED';
     return true;
   }
   return false;
@@ -153,4 +160,20 @@ export async function markAllNotificationsAsRead(userId: string): Promise<void> 
     notifications.forEach(n => {
         if (n.userId === userId) n.isRead = true;
     });
+}
+
+// Funções para Denúncias
+export async function addComplaint(complaint: Omit<Complaint, 'id' | 'createdAt' | 'status'>): Promise<Complaint> {
+  const newComplaint: Complaint = {
+    ...complaint,
+    id: String(globalForStore.complaintCounter!++),
+    createdAt: new Date().toISOString(),
+    status: 'PENDING'
+  };
+  complaints.push(newComplaint);
+  return newComplaint;
+}
+
+export async function getComplaints(): Promise<Complaint[]> {
+  return [...complaints].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }

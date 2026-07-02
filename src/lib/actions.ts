@@ -1,3 +1,4 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -16,9 +17,11 @@ import {
     addNotification,
     getNotifications,
     markNotificationAsRead as dbMarkAsRead,
-    markAllNotificationsAsRead as dbMarkAllAsRead
+    markAllNotificationsAsRead as dbMarkAllAsRead,
+    addComplaint,
+    getComplaints
 } from "@/lib/data";
-import { type Report, type ReportStatus, type NewReport, type UserProfile } from "@/lib/types";
+import { type Report, type ReportStatus, type NewReport, type UserProfile, type Complaint } from "@/lib/types";
 import { ReportSchema, UpdateProfileSchema } from "./schemas";
 import { createAvatarSvg } from "./avatar";
 import { isEmailEmployee } from "./config";
@@ -216,7 +219,7 @@ export async function deleteReportAction(reportId: string) {
   try {
     const success = await dbDeleteReport(reportId);
     if (!success) return { success: false, message: "Falha ao remover." };
-    revalidatePath("/"); revalidatePath("/dashboard"); revalidatePath("/minha-conta");
+    revalidatePath("/"); revalidatePath("/dashboard"); revalidatePath("/minha-conta"); revalidatePath("/funcionarios");
     return { success: true };
   } catch (error) { return { success: false }; }
 }
@@ -292,4 +295,19 @@ export async function markAllAsReadAction(userId: string) {
 
 export async function getAllReportsAction(): Promise<Report[]> {
   return await getReports();
+}
+
+export async function submitComplaintAction(complaintData: Omit<Complaint, 'id' | 'createdAt' | 'status'>) {
+  try {
+    const result = await addComplaint(complaintData);
+    revalidatePath("/funcionarios");
+    return { success: true, data: result };
+  } catch (error) {
+    console.error(error);
+    return { success: false };
+  }
+}
+
+export async function getAllComplaintsAction(): Promise<Complaint[]> {
+  return await getComplaints();
 }

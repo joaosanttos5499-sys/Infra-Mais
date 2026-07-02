@@ -1,12 +1,13 @@
+
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { DashboardClient } from "@/components/dashboard-client";
-import { getAllReportsAction } from "@/lib/actions";
+import { getAllReportsAction, getAllComplaintsAction } from "@/lib/actions";
 import { Loader2, ShieldAlert } from "lucide-react";
 import { useUser } from "@/firebase";
 import { isEmailEmployee } from "@/lib/config";
-import { type Report } from "@/lib/types";
+import { type Report, type Complaint } from "@/lib/types";
 import { Separator } from "@/components/ui/separator";
 
 function LoadingScreen() {
@@ -40,12 +41,17 @@ function AccessDenied() {
 export default function FuncionariosPage() {
   const { user, isUserLoading } = useUser();
   const [reports, setReports] = useState<Report[]>([]);
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [isLoadingReports, setIsLoadingReports] = useState(true);
 
-  const fetchReports = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     if (user && isEmailEmployee(user.email)) {
-      const data = await getAllReportsAction();
-      setReports(data);
+      const [reportsData, complaintsData] = await Promise.all([
+        getAllReportsAction(),
+        getAllComplaintsAction()
+      ]);
+      setReports(reportsData);
+      setComplaints(complaintsData);
       setIsLoadingReports(false);
     } else if (!isUserLoading && (!user || !isEmailEmployee(user.email))) {
       setIsLoadingReports(false);
@@ -53,8 +59,8 @@ export default function FuncionariosPage() {
   }, [user, isUserLoading]);
 
   useEffect(() => {
-    fetchReports();
-  }, [fetchReports]);
+    fetchData();
+  }, [fetchData]);
 
   if (isUserLoading) return <LoadingScreen />;
 
@@ -79,13 +85,14 @@ export default function FuncionariosPage() {
           {isLoadingReports ? (
               <div className="flex items-center justify-center p-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <p className="ml-4 text-muted-foreground">Carregando relatórios...</p>
+                  <p className="ml-4 text-muted-foreground">Carregando dados...</p>
               </div>
           ) : (
             <DashboardClient 
                 reports={reports} 
+                complaints={complaints}
                 showUpvote={false} 
-                onSuccess={fetchReports}
+                onSuccess={fetchData}
             />
           )}
         </div>

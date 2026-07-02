@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { type ReportStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,10 @@ export const statusConfig: Record<
   RESOLVED: {
     label: "Resolvido",
     className: "bg-emerald-600 text-white border-transparent hover:bg-emerald-700",
+  },
+  EXCLUDED: {
+    label: "Excluído",
+    className: "bg-red-500 text-white border-transparent hover:bg-red-600",
   },
 };
 

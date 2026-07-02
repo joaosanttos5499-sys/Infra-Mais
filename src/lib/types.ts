@@ -1,5 +1,5 @@
 
-export type ReportStatus = "UNDER_REVIEW" | "PENDING" | "IN_PROGRESS" | "RESOLVED";
+export type ReportStatus = "UNDER_REVIEW" | "PENDING" | "IN_PROGRESS" | "RESOLVED" | "EXCLUDED";
 
 export interface Report {
   id: string;
@@ -42,4 +42,14 @@ export interface Notification {
   message: string;
   isRead: boolean;
   createdAt: string;
+}
+
+export interface Complaint {
+  id: string;
+  reportId: string;
+  userId: string; // ID do usuário que denunciou (pode ser o próprio sistema/funcionário)
+  reason: string;
+  details?: string;
+  createdAt: string;
+  status: 'PENDING' | 'RESOLVED';
 }

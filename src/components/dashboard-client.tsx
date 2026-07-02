@@ -3,8 +3,8 @@
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
 import Image from "next/image";
-import { updateReportStatus, upvoteReportAction, downvoteReportAction, deleteReportAction } from "@/lib/actions";
-import { type Report, type ReportStatus } from "@/lib/types";
+import { updateReportStatus, upvoteReportAction, downvoteReportAction, deleteReportAction, submitComplaintAction } from "@/lib/actions";
+import { type Report, type ReportStatus, type Complaint } from "@/lib/types";
 import { categories, getCategory } from "@/lib/categories";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle, ShieldCheck, MessageSquare } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -39,6 +39,7 @@ const STATUS_PROGRESSION: Record<ReportStatus, ReportStatus | null> = {
   PENDING: "IN_PROGRESS",
   IN_PROGRESS: "RESOLVED",
   RESOLVED: null,
+  EXCLUDED: null,
 };
 
 const PICUI_NEIGHBORHOODS = [
@@ -47,10 +48,14 @@ const PICUI_NEIGHBORHOODS = [
 ].sort((a, b) => a.localeCompare(b));
 
 const REPORT_REASONS = [
-  { value: "offensive", label: "Linguagem Ofensiva / Imprópria" },
-  { value: "fake", label: "Foto Falsa ou Irrelevante" },
-  { value: "duplicate", label: "Relato Duplicado" },
-  { value: "trote", label: "Localização Incorreta / Trote" },
+  { value: "conteudo_improprio", label: "Conteúdo impróprio" },
+  { value: "imagem_incompativel", label: "Imagem incompatível" },
+  { value: "relato_falso", label: "Relato falso" },
+  { value: "localizacao_incorreta", label: "Localização incorreta" },
+  { value: "relato_duplicado", label: "Relato duplicado" },
+  { value: "informacoes_insuficientes", label: "Informações insuficientes" },
+  { value: "uso_indevido", label: "Uso indevido da plataforma" },
+  { value: "violacao_normas", label: "Violação das normas da plataforma" },
   { value: "other", label: "Outros (Descreva abaixo)" },
 ];
 
@@ -89,7 +94,6 @@ const ReportCard = memo(({
   const [editLat, setEditLat] = useState(report.latitude);
   const [editLng, setEditLng] = useState(report.longitude);
 
-  // States for reporting menu
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportDetails, setReportDetails] = useState("");
@@ -128,17 +132,26 @@ const ReportCard = memo(({
     }
 
     setIsReporting(true);
-    // Simulating a backend call for the report
-    setTimeout(() => {
-      setIsReporting(false);
+    const result = await submitComplaintAction({
+      reportId: report.id,
+      userId: user?.uid || "anonymous",
+      reason: reportReason,
+      details: reportDetails
+    });
+
+    setIsReporting(false);
+    if (result.success) {
       setIsReportDialogOpen(false);
       setReportReason("");
       setReportDetails("");
       toast({
         title: "Denúncia Enviada",
-        description: "O relato foi marcado para revisão da administração superior.",
+        description: "O relato foi marcado para revisão administrativa.",
       });
-    }, 1000);
+      if (onSuccess) onSuccess();
+    } else {
+      toast({ variant: "destructive", title: "Erro", description: "Falha ao enviar denúncia." });
+    }
   };
 
   useEffect(() => {
@@ -152,7 +165,6 @@ const ReportCard = memo(({
         const timeout = setTimeout(() => {
           if (onSuccess) onSuccess();
           router.refresh();
-          window.location.reload();
         }, 800);
 
         return () => clearTimeout(timeout);
@@ -173,10 +185,8 @@ const ReportCard = memo(({
     startDeleteTransition(async () => {
         const result = await deleteReportAction(report.id);
         if (result.success) {
-            toast({ title: "Relatório removido", description: "O registro indevido foi excluído do sistema." });
-            router.refresh();
+            toast({ title: "Relatório removido", description: "O registro foi movido para a Central de Moderação." });
             if (onSuccess) onSuccess();
-            window.location.reload();
         } else {
             toast({ variant: "destructive", title: "Erro ao excluir", description: result.message });
         }
@@ -185,15 +195,18 @@ const ReportCard = memo(({
 
   const isOwner = user?.uid === report.userId;
   const isEmployee = isEmailEmployee(user?.email);
-  const canDelete = isOwner && report.status === 'UNDER_REVIEW';
+  const canDelete = isEmployee || (isOwner && report.status === 'UNDER_REVIEW');
   const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
   const nextAllowedStatus = STATUS_PROGRESSION[report.status];
   const isPhotoEnabled = selectedStatus === 'RESOLVED';
-  const isPublic = report.status !== 'UNDER_REVIEW';
+  const isPublic = report.status !== 'UNDER_REVIEW' && report.status !== 'EXCLUDED';
 
   return (
     <Card 
-      className="overflow-hidden bg-card border-border shadow-sm transition-all duration-300 hover:shadow-lg rounded-2xl animate-in fade-in" 
+      className={cn(
+        "overflow-hidden bg-card border-border shadow-sm transition-all duration-300 hover:shadow-lg rounded-2xl animate-in fade-in",
+        report.status === 'EXCLUDED' && "opacity-75 grayscale-[0.5]"
+      )}
       id={`report-${report.id}`}
     >
       <CardContent className="p-0">
@@ -299,7 +312,7 @@ const ReportCard = memo(({
                                 </Button>
                             )}
 
-                            {canDelete && (
+                            {canDelete && report.status !== 'EXCLUDED' && (
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <Button variant="ghost" size="sm" className="text-destructive h-10 px-4 hover:bg-destructive/10 rounded-xl font-bold">
@@ -310,7 +323,7 @@ const ReportCard = memo(({
                                         <AlertDialogHeader>
                                             <AlertDialogTitle className="text-2xl font-bold">Excluir Relatório?</AlertDialogTitle>
                                             <AlertDialogDescription className="text-base pt-2">
-                                              Esta ação é irreversível e removerá permanentemente o relato do sistema.
+                                              O relato será movido para a Central de Moderação e deixará de ser visível para o público.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter className="mt-6 gap-3">
@@ -332,7 +345,10 @@ const ReportCard = memo(({
                                     Apoiar ({report.upvotes})
                                 </Button>
                             ) : (
-                                <AccordionTrigger className="py-0 px-6 h-10 rounded-xl bg-primary/10 text-primary font-bold hover:bg-primary/20 hover:no-underline flex items-center gap-2 text-xs transition-all active:scale-95">
+                                <AccordionTrigger className={cn(
+                                  "py-0 px-6 h-10 rounded-xl font-bold hover:no-underline flex items-center gap-2 text-xs transition-all active:scale-95",
+                                  report.status === 'EXCLUDED' ? "bg-orange-100 text-orange-600 hover:bg-orange-200" : "bg-primary/10 text-primary hover:bg-primary/20"
+                                )}>
                                     <Settings2 className="h-4 w-4" /> Gerenciar Relato
                                 </AccordionTrigger>
                             )}
@@ -346,7 +362,6 @@ const ReportCard = memo(({
               <form action={formAction} ref={formRef}>
                 <div className="p-6 md:p-8 space-y-6 max-w-[1400px] mx-auto">
                     <div className="grid lg:grid-cols-12 gap-6 items-stretch">
-                        {/* Coluna de Dados: Ocupa a metade esquerda */}
                         <div className="lg:col-span-6 flex flex-col gap-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
@@ -385,12 +400,11 @@ const ReportCard = memo(({
                                   name="description" 
                                   value={editDescription} 
                                   onChange={(e) => setEditDescription(e.target.value)} 
-                                  className="flex-grow min-h-[220px] rounded-lg bg-card border-border resize-none p-3 text-sm" 
+                                  className="flex-grow min-h-[120px] rounded-lg bg-card border-border resize-none p-3 text-sm" 
                                 />
                             </div>
                         </div>
 
-                        {/* Coluna Lateral: Mapa e Ações Ocupa a metade direita */}
                         <div className="lg:col-span-6 flex flex-col gap-4">
                             <div className="space-y-1.5">
                                 <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Localização no Mapa</Label>
@@ -427,7 +441,7 @@ const ReportCard = memo(({
                                             <AlertDialogContent className="rounded-2xl">
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Atualizar Dados?</AlertDialogTitle>
-                                                    <AlertDialogDescription>O cidadão será notificado sobre as alterações via e-mail e notificações.</AlertDialogDescription>
+                                                    <AlertDialogDescription>O cidadão será notificado sobre as alterações.</AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel className="rounded-lg">Voltar</AlertDialogCancel>
@@ -443,7 +457,7 @@ const ReportCard = memo(({
                                 {isPhotoEnabled && (
                                     <div className="space-y-1.5 animate-in slide-in-from-top-2 pt-2">
                                         <Label className="text-[10px] font-black text-muted-foreground uppercase flex items-center gap-2">
-                                            <ImagePlus className="h-3 w-3" /> Foto da Solução (Obrigatório)
+                                            <ImagePlus className="h-3 w-3" /> Foto da Solução
                                         </Label>
                                         <div className="h-10 rounded-lg border border-dashed border-emerald-500/40 flex items-center justify-center relative overflow-hidden bg-emerald-500/5 hover:bg-emerald-500/10 cursor-pointer transition-colors">
                                             {photoAfterPreview ? (
@@ -458,37 +472,39 @@ const ReportCard = memo(({
                             </Card>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button type="button" variant="outline" className="h-11 rounded-lg border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive font-bold gap-2">
-                                            <Trash2 className="h-4 w-4" /> Excluir Relato
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent className="rounded-2xl">
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle className="text-destructive">Remover Permanentemente?</AlertDialogTitle>
-                                            <AlertDialogDescription>Esta ação é irreversível e o relato deixará de existir para todos os usuários.</AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel className="rounded-lg">Cancelar</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white rounded-lg px-6 font-bold">Sim, Excluir</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
+                                {report.status !== 'EXCLUDED' && (
+                                  <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                          <Button type="button" variant="outline" className="h-11 rounded-lg border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive font-bold gap-2">
+                                              <Trash2 className="h-4 w-4" /> Excluir Relato
+                                          </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent className="rounded-2xl">
+                                          <AlertDialogHeader>
+                                              <AlertDialogTitle className="text-destructive">Mover para Moderação?</AlertDialogTitle>
+                                              <AlertDialogDescription>O relato será removido da visualização pública e movido para a Central de Moderação.</AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter>
+                                              <AlertDialogCancel className="rounded-lg">Cancelar</AlertDialogCancel>
+                                              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white rounded-lg px-6 font-bold">Sim, Excluir</AlertDialogAction>
+                                          </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                  </AlertDialog>
+                                )}
 
                                 <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
                                   <DialogTrigger asChild>
                                     <Button 
                                         type="button" 
                                         variant="outline" 
-                                        className="h-11 rounded-lg border-amber-500/20 text-amber-600 hover:bg-amber-500/10 hover:border-amber-500 font-bold gap-2"
+                                        className="h-11 rounded-lg border-orange-500/20 text-orange-600 hover:bg-orange-500/10 hover:border-orange-500 font-bold gap-2"
                                     >
                                         <AlertTriangle className="h-4 w-4" /> Denunciar
                                     </Button>
                                   </DialogTrigger>
                                   <DialogContent className="rounded-2xl sm:max-w-md">
                                     <DialogHeader>
-                                      <DialogTitle className="flex items-center gap-2 text-amber-600">
+                                      <DialogTitle className="flex items-center gap-2 text-orange-600">
                                         <ShieldAlert className="h-5 w-5" /> Denunciar Relato
                                       </DialogTitle>
                                       <DialogDescription>
@@ -524,7 +540,7 @@ const ReportCard = memo(({
 
                                     <DialogFooter className="gap-2 sm:gap-0">
                                       <Button variant="ghost" onClick={() => setIsReportDialogOpen(false)} className="rounded-xl font-bold">Cancelar</Button>
-                                      <Button onClick={handleReportSubmit} disabled={isReporting || !reportReason} className="rounded-xl font-bold bg-amber-600 hover:bg-amber-700">
+                                      <Button onClick={handleReportSubmit} disabled={isReporting || !reportReason} className="rounded-xl font-bold bg-orange-600 hover:bg-orange-700">
                                         {isReporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Flag className="h-4 w-4 mr-2" />}
                                         Enviar Denúncia
                                       </Button>
@@ -551,9 +567,19 @@ type OptimisticUpdate = { type: 'upvote', id: string, amount: 1 | -1 } | { type:
 
 const LOCAL_STORAGE_UPVOTES_KEY = 'infra_mais_upvoted_reports';
 
-export function DashboardClient({ reports, showUpvote = true, onSuccess }: { reports: Report[], showUpvote?: boolean, onSuccess?: () => void }) {
+export function DashboardClient({ 
+  reports, 
+  complaints = [],
+  showUpvote = true, 
+  onSuccess 
+}: { 
+  reports: Report[], 
+  complaints?: Complaint[],
+  showUpvote?: boolean, 
+  onSuccess?: () => void 
+}) {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<ReportStatus>(showUpvote ? "PENDING" : "UNDER_REVIEW");
+  const [activeTab, setActiveTab] = useState<ReportStatus | 'MODERATION'>(showUpvote ? "PENDING" : "UNDER_REVIEW");
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'upvotes'>('newest');
   
@@ -622,12 +648,13 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
   }, [optimisticReports, sortBy]);
 
   const filteredReports = useMemo(() => {
+      if (activeTab === 'MODERATION') return [];
       return sortedReports.filter(r => r.status === activeTab);
   }, [sortedReports, activeTab]);
 
   return (
     <div className="space-y-10" ref={tabsRef}>
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ReportStatus)} className="w-full">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-8 mb-10">
             <TabsList className="bg-muted/50 p-1.5 rounded-2xl w-full lg:w-auto overflow-x-auto no-scrollbar shadow-inner border border-border/40">
                 {!showUpvote && (
@@ -636,37 +663,126 @@ export function DashboardClient({ reports, showUpvote = true, onSuccess }: { rep
                 <TabsTrigger value="PENDING" className="rounded-xl px-6 py-3 text-sm font-bold transition-all data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:shadow-lg">Pendente</TabsTrigger>
                 <TabsTrigger value="IN_PROGRESS" className="rounded-xl px-6 py-3 text-sm font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg">Em Andamento</TabsTrigger>
                 <TabsTrigger value="RESOLVED" className="rounded-xl px-6 py-3 text-sm font-bold transition-all data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg">Resolvido</TabsTrigger>
+                {!showUpvote && (
+                  <TabsTrigger value="MODERATION" className="rounded-xl px-6 py-3 text-sm font-bold transition-all data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:shadow-lg">Central de Moderação</TabsTrigger>
+                )}
             </TabsList>
             
-            <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
-              <div className="flex items-center gap-2.5 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-70"><Filter className="h-4 w-4" /> Ordenar</div>
-              <Select onValueChange={(v) => setSortBy(v as any)} defaultValue={sortBy}>
-                <SelectTrigger className="h-12 w-[200px] bg-card border-border rounded-xl shadow-sm focus:ring-primary/10 transition-all"><SelectValue /></SelectTrigger>
-                <SelectContent side="bottom" position="popper" className="bg-card border-border rounded-xl shadow-2xl z-[2100]">
-                  <SelectItem value="newest" className="font-medium">Mais Recentes</SelectItem>
-                  <SelectItem value="oldest" className="font-medium">Mais Antigos</SelectItem>
-                  <SelectItem value="upvotes" className="font-medium">Mais Apoiados</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {activeTab !== 'MODERATION' && (
+              <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
+                <div className="flex items-center gap-2.5 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-70"><Filter className="h-4 w-4" /> Ordenar</div>
+                <Select onValueChange={(v) => setSortBy(v as any)} defaultValue={sortBy}>
+                  <SelectTrigger className="h-12 w-[200px] bg-card border-border rounded-xl shadow-sm focus:ring-primary/10 transition-all"><SelectValue /></SelectTrigger>
+                  <SelectContent side="bottom" position="popper" className="bg-card border-border rounded-xl shadow-2xl z-[2100]">
+                    <SelectItem value="newest" className="font-medium">Mais Recentes</SelectItem>
+                    <SelectItem value="oldest" className="font-medium">Mais Antigos</SelectItem>
+                    <SelectItem value="upvotes" className="font-medium">Mais Apoiados</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           
           <div className="space-y-6">
             <TabsContent value={activeTab} className="mt-0 outline-none">
-                <div className="grid gap-6">
-                  {filteredReports.length > 0 ? (
-                    filteredReports.map(r => (
-                      <ReportCard key={r.id} report={r} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} onSuccess={onSuccess} isUpvoted={upvotedReports.has(r.id)} showUpvote={showUpvote} />
-                    ))
-                  ) : (
-                    <div className="text-center py-24 bg-muted/20 rounded-3xl border-2 border-dashed border-border/60 shadow-inner flex flex-col items-center gap-4">
-                      <div className="p-4 bg-muted/40 rounded-full">
-                        <Filter className="h-8 w-8 text-muted-foreground/40" />
+                {activeTab === 'MODERATION' ? (
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <Tabs defaultValue="excluded" className="w-full">
+                      <TabsList className="bg-orange-50 p-1 rounded-xl mb-6 border border-orange-100">
+                        <TabsTrigger value="excluded" className="rounded-lg px-6 py-2 text-xs font-bold data-[state=active]:bg-orange-600 data-[state=active]:text-white">Relatos Excluídos</TabsTrigger>
+                        <TabsTrigger value="complaints" className="rounded-lg px-6 py-2 text-xs font-bold data-[state=active]:bg-orange-600 data-[state=active]:text-white">Denúncias de Usuários</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="excluded" className="space-y-4">
+                        {sortedReports.filter(r => r.status === 'EXCLUDED').length > 0 ? (
+                          sortedReports.filter(r => r.status === 'EXCLUDED').map(r => (
+                            <ReportCard key={r.id} report={r} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} onSuccess={onSuccess} isUpvoted={upvotedReports.has(r.id)} showUpvote={showUpvote} />
+                          ))
+                        ) : (
+                          <div className="text-center py-20 bg-muted/20 rounded-3xl border-2 border-dashed border-border flex flex-col items-center gap-4">
+                            <Trash2 className="h-8 w-8 text-muted-foreground/40" />
+                            <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">Nenhum relato excluído.</p>
+                          </div>
+                        )}
+                      </TabsContent>
+                      
+                      <TabsContent value="complaints" className="space-y-4">
+                        {complaints.length > 0 ? (
+                          <div className="grid gap-4">
+                            {complaints.map((complaint) => {
+                              const relatedReport = reports.find(r => r.id === complaint.reportId);
+                              const reasonLabel = REPORT_REASONS.find(r => r.value === complaint.reason)?.label || complaint.reason;
+                              
+                              return (
+                                <Card key={complaint.id} className="border-orange-100 bg-orange-50/20 overflow-hidden">
+                                  <CardContent className="p-6">
+                                    <div className="flex flex-col md:flex-row justify-between gap-6">
+                                      <div className="space-y-4 flex-grow">
+                                        <div className="flex items-center gap-3">
+                                          <div className="p-2 bg-orange-100 rounded-lg">
+                                            <Flag className="h-5 w-5 text-orange-600" />
+                                          </div>
+                                          <div>
+                                            <h4 className="font-bold text-orange-900">{reasonLabel}</h4>
+                                            <p className="text-xs text-orange-700/70 font-medium">Protocolo #{complaint.id} • <ReportTime date={new Date(complaint.createdAt)} /></p>
+                                          </div>
+                                        </div>
+                                        
+                                        {complaint.details && (
+                                          <div className="bg-white/50 p-4 rounded-xl border border-orange-100/50">
+                                            <Label className="text-[10px] font-black text-orange-800 uppercase tracking-widest block mb-1">Detalhes da Denúncia</Label>
+                                            <p className="text-sm text-orange-900/80 italic">"{complaint.details}"</p>
+                                          </div>
+                                        )}
+                                        
+                                        <div className="flex items-center gap-4 pt-2">
+                                          <Button variant="outline" size="sm" className="rounded-lg h-9 border-orange-200 text-orange-700 hover:bg-orange-100 font-bold text-xs" asChild>
+                                            <Link href={`#report-${complaint.reportId}`}>
+                                              <ArrowRight className="h-3.5 w-3.5 mr-2" /> Localizar Relato
+                                            </Link>
+                                          </Button>
+                                        </div>
+                                      </div>
+                                      
+                                      {relatedReport && (
+                                        <div className="w-full md:w-48 h-32 relative rounded-xl overflow-hidden shadow-sm border border-orange-200 shrink-0">
+                                          <Image src={relatedReport.photoUrl} alt="Relato denunciado" fill className="object-cover" />
+                                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                            <span className="text-[10px] text-white font-bold uppercase">Ver Relato</span>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="text-center py-20 bg-muted/20 rounded-3xl border-2 border-dashed border-border flex flex-col items-center gap-4">
+                            <MessageSquare className="h-8 w-8 text-muted-foreground/40" />
+                            <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">Nenhuma denúncia registrada.</p>
+                          </div>
+                        )}
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+                ) : (
+                  <div className="grid gap-6">
+                    {filteredReports.length > 0 ? (
+                      filteredReports.map(r => (
+                        <ReportCard key={r.id} report={r} onUpvote={handleUpvote} onStatusUpdate={handleStatusUpdate} onSuccess={onSuccess} isUpvoted={upvotedReports.has(r.id)} showUpvote={showUpvote} />
+                      ))
+                    ) : (
+                      <div className="text-center py-24 bg-muted/20 rounded-3xl border-2 border-dashed border-border/60 shadow-inner flex flex-col items-center gap-4">
+                        <div className="p-4 bg-muted/40 rounded-full">
+                          <Filter className="h-8 w-8 text-muted-foreground/40" />
+                        </div>
+                        <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">Nenhum relato nesta categoria.</p>
                       </div>
-                      <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">Nenhum relato nesta categoria.</p>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
             </TabsContent>
           </div>
       </Tabs>
