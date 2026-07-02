@@ -35,10 +35,14 @@ export interface UserProfile {
     role: UserRole;
 }
 
+export type NotificationType = 'SENT' | 'APPROVED' | 'PENDING' | 'IN_PROGRESS' | 'RESOLVED' | 'EDITED' | 'EXCLUDED' | 'COMPLAINT';
+
 export interface Notification {
   id: string;
   userId: string;
   reportId: string;
+  type: NotificationType;
+  title: string;
   message: string;
   isRead: boolean;
   createdAt: string;

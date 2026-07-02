@@ -19,13 +19,13 @@ import {
     markNotificationAsRead as dbMarkAsRead,
     markAllNotificationsAsRead as dbMarkAllAsRead,
     addComplaint,
-    getComplaints
+    getComplaints,
+    getReportById
 } from "@/lib/data";
 import { type Report, type ReportStatus, type NewReport, type UserProfile, type Complaint } from "@/lib/types";
 import { ReportSchema, UpdateProfileSchema } from "./schemas";
 import { createAvatarSvg } from "./avatar";
 import { isEmailEmployee } from "./config";
-import { statusConfig } from "@/components/status-badge";
 import { getCategory } from "./categories";
 
 export type FormState = {
@@ -93,7 +93,6 @@ export async function submitReport(
     const { userId, category, problem, city, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
     const location = reference ? `${address} (${reference})` : address;
 
-    // Get readable labels for the AI summary
     const categoryInfo = getCategory(category);
     const categoryLabel = categoryInfo?.label || category;
     const problemLabel = categoryInfo?.problems.find(p => p.value === problem)?.label || problem;
@@ -111,7 +110,6 @@ export async function submitReport(
       });
       aiSummaryText = aiSummary.summary;
     } catch (aiError) {
-      console.error("AI Summarization failed, using default:", aiError);
       aiSummaryText = `${problemLabel} em ${bairro}. ${description || ''}`;
     }
 
@@ -130,7 +128,16 @@ export async function submitReport(
       longitude,
     };
 
-    addReport(newReport);
+    const createdReport = addReport(newReport);
+    
+    // Notificação: RELATO ENVIADO
+    await addNotification(
+      userId,
+      createdReport.id,
+      'SENT',
+      'Relato enviado com sucesso',
+      'Seu relato foi enviado com sucesso e agora está em análise pela equipe do Infra Mais.\n\nApós a validação, você será informado sobre todas as alterações realizadas durante o andamento da ocorrência.'
+    );
     
     revalidatePath("/");
     revalidatePath("/dashboard");
@@ -153,6 +160,10 @@ export async function updateReportStatus(
   payload: { reportId: string, formData: FormData }
 ): Promise<UpdateActionState> {
   const { reportId, formData } = payload;
+  
+  const oldReport = await getReportById(reportId);
+  if (!oldReport) return { success: false, message: "Relato não encontrado." };
+
   const status = formData.get("status") as ReportStatus;
   const photoAfterFile = formData.get("photoAfter") as File | null;
   
@@ -180,12 +191,61 @@ export async function updateReportStatus(
     });
     
     if (updatedReport) {
-        const statusLabel = statusConfig[status].label;
-        await addNotification(
-            updatedReport.userId,
-            reportId,
-            `Seu relato sobre ${updatedReport.category} foi atualizado para: ${statusLabel}.`
-        );
+        // Detecção de Aprovação
+        if (oldReport.status === 'UNDER_REVIEW' && status !== 'UNDER_REVIEW') {
+            await addNotification(
+                updatedReport.userId,
+                reportId,
+                'APPROVED',
+                'Relato aprovado',
+                'Seu relato foi analisado e aprovado pela equipe do Infra Mais.\n\nAgora ele seguirá para acompanhamento público e poderá receber apoio de outros usuários da plataforma.'
+            );
+        }
+
+        // Notificações de Status Específicas
+        if (status === 'PENDING' && oldReport.status !== 'PENDING') {
+            await addNotification(
+                updatedReport.userId,
+                reportId,
+                'PENDING',
+                'Relato disponível para acompanhamento',
+                'Seu relato foi aprovado e agora está no status "Pendente".\n\nA partir deste momento ele está disponível para visualização pública e poderá receber apoios da comunidade.'
+            );
+        } else if (status === 'IN_PROGRESS' && oldReport.status !== 'IN_PROGRESS') {
+            await addNotification(
+                updatedReport.userId,
+                reportId,
+                'IN_PROGRESS',
+                'Atendimento iniciado',
+                'Seu relato entrou na etapa "Em Andamento".\n\nA equipe responsável iniciou os procedimentos necessários para solucionar o problema informado.'
+            );
+        } else if (status === 'RESOLVED' && oldReport.status !== 'RESOLVED') {
+            await addNotification(
+                updatedReport.userId,
+                reportId,
+                'RESOLVED',
+                'Problema resolvido',
+                'Seu relato foi marcado como resolvido.\n\nCaso deseje, consulte as informações e evidências disponibilizadas pela equipe responsável.\n\nAgradecemos por contribuir com a melhoria da infraestrutura da comunidade.'
+            );
+        }
+
+        // Detecção de Edição (ajustes durante análise)
+        const fieldsChanged = 
+            category !== oldReport.category || 
+            problem !== oldReport.problem || 
+            bairro !== oldReport.bairro || 
+            location !== oldReport.location || 
+            description !== oldReport.description;
+
+        if (fieldsChanged) {
+            await addNotification(
+                updatedReport.userId,
+                reportId,
+                'EDITED',
+                'Relato atualizado',
+                'Durante a etapa de análise, algumas informações do seu relato foram ajustadas pela equipe do Infra Mais para melhorar a precisão e a qualidade das informações apresentadas.'
+            );
+        }
     }
 
     revalidatePath("/");
@@ -215,10 +275,23 @@ export async function downvoteReportAction(reportId: string) {
     } catch (error) { return { success: false }; }
 }
 
-export async function deleteReportAction(reportId: string) {
+export async function deleteReportAction(reportId: string, reason?: string) {
   try {
+    const report = await getReportById(reportId);
+    if (!report) return { success: false, message: "Relato não encontrado." };
+
     const success = await dbDeleteReport(reportId);
     if (!success) return { success: false, message: "Falha ao remover." };
+    
+    // Notificação: RELATO EXCLUÍDO
+    await addNotification(
+        report.userId,
+        reportId,
+        'EXCLUDED',
+        'Relato removido',
+        `Após análise da equipe do Infra Mais, seu relato foi removido da plataforma.\n\nMotivo da exclusão:\n${reason || "Informações inconsistentes ou duplicadas."}\n\nCaso considere necessário, você poderá registrar um novo relato com as informações corrigidas.`
+    );
+
     revalidatePath("/"); revalidatePath("/dashboard"); revalidatePath("/minha-conta"); revalidatePath("/funcionarios");
     return { success: true };
   } catch (error) { return { success: false }; }
@@ -300,6 +373,20 @@ export async function getAllReportsAction(): Promise<Report[]> {
 export async function submitComplaintAction(complaintData: Omit<Complaint, 'id' | 'createdAt' | 'status'>) {
   try {
     const result = await addComplaint(complaintData);
+    
+    // Notificação: DENÚNCIA REGISTRADA
+    // Precisamos encontrar o dono do relato para notificá-lo
+    const report = await getReportById(complaintData.reportId);
+    if (report) {
+        await addNotification(
+            report.userId,
+            report.id,
+            'COMPLAINT',
+            'Ocorrência administrativa registrada',
+            'Foi registrada uma ocorrência administrativa relacionada à utilização da plataforma.\n\nA equipe do Infra Mais realizará uma análise antes de qualquer decisão.\n\nAté o momento, nenhuma medida foi aplicada à sua conta.'
+        );
+    }
+
     revalidatePath("/funcionarios");
     return { success: true, data: result };
   } catch (error) {

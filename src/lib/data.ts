@@ -1,5 +1,5 @@
 
-import { type Report, type ReportStatus, type NewReport, type UserProfile, type Notification, type Complaint } from "@/lib/types";
+import { type Report, type ReportStatus, type NewReport, type UserProfile, type Notification, type Complaint, type NotificationType } from "@/lib/types";
 import { isEmailEmployee } from "./config";
 
 const globalForStore = globalThis as unknown as {
@@ -134,11 +134,13 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-export function addNotification(userId: string, reportId: string, message: string): Notification {
+export function addNotification(userId: string, reportId: string, type: NotificationType, title: string, message: string): Notification {
     const newNotification: Notification = {
         id: String(globalForStore.notificationCounter!++),
         userId,
         reportId,
+        type,
+        title,
         message,
         isRead: false,
         createdAt: new Date().toISOString(),
@@ -176,4 +178,8 @@ export async function addComplaint(complaint: Omit<Complaint, 'id' | 'createdAt'
 
 export async function getComplaints(): Promise<Complaint[]> {
   return [...complaints].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export async function getReportById(id: string): Promise<Report | undefined> {
+  return reports.find(r => r.id === id);
 }
