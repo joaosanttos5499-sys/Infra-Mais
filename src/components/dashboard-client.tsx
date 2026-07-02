@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle, ShieldCheck, MessageSquare } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle, ShieldCheck, MessageSquare, ArrowRight } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -688,9 +688,19 @@ export function DashboardClient({
                 {activeTab === 'MODERATION' ? (
                   <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <Tabs defaultValue="excluded" className="w-full">
-                      <TabsList className="bg-orange-50 p-1 rounded-xl mb-6 border border-orange-100">
-                        <TabsTrigger value="excluded" className="rounded-lg px-6 py-2 text-xs font-bold data-[state=active]:bg-orange-600 data-[state=active]:text-white">Relatos Excluídos</TabsTrigger>
-                        <TabsTrigger value="complaints" className="rounded-lg px-6 py-2 text-xs font-bold data-[state=active]:bg-orange-600 data-[state=active]:text-white">Denúncias de Usuários</TabsTrigger>
+                      <TabsList className="bg-transparent p-0 rounded-none mb-6 border-b border-border w-full justify-start gap-4">
+                        <TabsTrigger 
+                          value="excluded" 
+                          className="rounded-none px-6 py-3 text-xs font-bold border-b-2 border-transparent data-[state=active]:border-red-500 data-[state=active]:text-red-500 bg-transparent shadow-none"
+                        >
+                          Relatos Excluídos
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="complaints" 
+                          className="rounded-none px-6 py-3 text-xs font-bold border-b-2 border-transparent data-[state=active]:border-orange-500 data-[state=active]:text-orange-500 bg-transparent shadow-none"
+                        >
+                          Relatos Denunciados
+                        </TabsTrigger>
                       </TabsList>
                       
                       <TabsContent value="excluded" className="space-y-4">
