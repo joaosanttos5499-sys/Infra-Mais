@@ -49,12 +49,13 @@ const PICUI_NEIGHBORHOODS = [
 
 const REPORT_REASONS = [
   { value: "conteudo_improprio", label: "Conteúdo impróprio" },
-  { value: "imagem_inadequada", label: "Imagem inadequada" },
-  { value: "spam", label: "Spam" },
-  { value: "tentativa_fraude", label: "Tentativa de fraude" },
-  { value: "relatos_falsos_recorrentes", label: "Relatos falsos recorrentes" },
-  { value: "divulgacao_infos_pessoais", label: "Divulgação de informações pessoais" },
-  { value: "violacao_normas", label: "Violação das normas da plataforma" },
+  { value: "imagem_incompativel", label: "Imagem incompatível" },
+  { value: "relato_falso", label: "Relato falso" },
+  { value: "localizacao_incorreta", label: "Localização incorreta" },
+  { value: "relato_duplicado", label: "Relato duplicado" },
+  { value: "informacoes_insuficientes", label: "Informações insuficientes" },
+  { value: "uso_indevido_plataforma", label: "Uso indevido da plataforma" },
+  { value: "violacao_normas_plataforma", label: "Violação das normas da plataforma" },
   { value: "other", label: "Outro" },
 ];
 
@@ -315,25 +316,6 @@ const ReportCard = memo(({
                                 <Clock className="h-3.5 w-3.5" />
                                 <ReportTime date={new Date(report.createdAt)} />
                             </div>
-                            
-                            {report.status === 'RESOLVED' && report.photoAfterUrl && (
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <button className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors">
-                                            <CheckCircle2 className="h-3.5 w-3.5" /> Ver Solução
-                                        </button>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-4xl p-2 rounded-2xl bg-card border-border">
-                                        <DialogHeader className="sr-only">
-                                            <DialogTitle>Foto da Solução</DialogTitle>
-                                            <DialogDescription>Registro fotográfico do problema resolvido.</DialogDescription>
-                                        </DialogHeader>
-                                        <div className="relative aspect-video rounded-xl overflow-hidden bg-muted">
-                                            <Image src={report.photoAfterUrl} alt="Trabalho concluído" fill className="object-contain" />
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
-                            )}
                         </div>
 
                         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
@@ -343,62 +325,6 @@ const ReportCard = memo(({
                                         <MapPin className="h-4 w-4 mr-2" /> No mapa
                                     </Link>
                                 </Button>
-                            )}
-
-                            {canDelete && report.status !== 'EXCLUDED' && (
-                                <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="text-destructive h-10 px-4 hover:bg-destructive/10 rounded-xl font-bold">
-                                            <Trash2 className="h-4 w-4 mr-2" /> Excluir
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent className="rounded-3xl bg-card border-border shadow-2xl p-8">
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle className="text-2xl font-bold">Excluir Relato</AlertDialogTitle>
-                                            <AlertDialogDescription className="text-base pt-2">
-                                              Selecione o motivo da exclusão deste relato.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        
-                                        <div className="py-4 space-y-4">
-                                            <div className="space-y-3">
-                                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Motivo da exclusão</Label>
-                                                <RadioGroup value={deleteReasonValue} onValueChange={setDeleteReasonValue} className="grid gap-2">
-                                                    {EXCLUSION_REASONS.map((reason) => (
-                                                        <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setDeleteReasonValue(reason.value)}>
-                                                            <RadioGroupItem value={reason.value} id={`del-reason-${reason.value}`} />
-                                                            <Label htmlFor={`del-reason-${reason.value}`} className="flex-grow cursor-pointer font-medium">{reason.label}</Label>
-                                                        </div>
-                                                    ))}
-                                                </RadioGroup>
-                                            </div>
-
-                                            {deleteReasonValue === "other" && (
-                                                <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Descrição do motivo</Label>
-                                                    <Textarea 
-                                                        placeholder="Descreva o motivo detalhadamente..." 
-                                                        value={deleteOtherDescription}
-                                                        onChange={(e) => setDeleteOtherDescription(e.target.value)}
-                                                        className="min-h-[100px] rounded-xl bg-muted/20 border-border resize-none"
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <AlertDialogFooter className="mt-6 gap-3">
-                                            <AlertDialogCancel className="rounded-xl h-12 px-6">Cancelar</AlertDialogCancel>
-                                            <AlertDialogAction 
-                                                onClick={(e) => { e.preventDefault(); handleDelete(); }} 
-                                                className="bg-destructive text-destructive-foreground rounded-xl h-12 px-8 font-bold shadow-lg"
-                                                disabled={isDeleting || !deleteReasonValue || (deleteReasonValue === 'other' && !deleteOtherDescription.trim())}
-                                            >
-                                                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                                                Confirmar Exclusão
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
                             )}
                             
                             {showUpvote ? (
@@ -467,7 +393,7 @@ const ReportCard = memo(({
                                   name="description" 
                                   value={editDescription} 
                                   onChange={(e) => setEditDescription(e.target.value)} 
-                                  className="flex-grow min-h-[160px] rounded-lg bg-card border-border resize-none p-3 text-sm" 
+                                  className="flex-grow min-h-[300px] rounded-lg bg-card border-border resize-none p-3 text-sm" 
                                 />
                             </div>
                         </div>
@@ -475,7 +401,7 @@ const ReportCard = memo(({
                         <div className="lg:col-span-4 flex flex-col gap-4">
                             <div className="space-y-1.5">
                                 <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Localização no Mapa</Label>
-                                <div className="h-[180px] rounded-lg overflow-hidden border border-border relative z-0">
+                                <div className="h-[200px] rounded-lg overflow-hidden border border-border relative z-0">
                                     <LeafletMap interactive={true} onLocationSelect={(lat, lng) => { setEditLat(lat); setEditLng(lng); }} selectedLocation={{ lat: editLat, lng: editLng }} />
                                 </div>
                                 <input type="hidden" name="latitude" value={editLat} />
@@ -499,7 +425,7 @@ const ReportCard = memo(({
                                     </div>
                                     <Button type="button" onClick={() => setIsStatusConfirmOpen(true)} disabled={isPending} className="h-11 rounded-lg font-bold bg-primary hover:bg-primary/90 shadow-md w-full">
                                         {isPending ? <Loader2 className="animate-spin h-4 w-4" /> : <Upload className="h-4 w-4" />}
-                                        <span className="ml-2">Salvar</span>
+                                        <span className="ml-2">Salvar Alterações</span>
                                     </Button>
                                     
                                     <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
@@ -517,102 +443,135 @@ const ReportCard = memo(({
                                         </AlertDialogContent>
                                     </AlertDialog>
                                 </div>
-                                
-                                {isPhotoEnabled && (
-                                    <div className="space-y-1.5 animate-in slide-in-from-top-2 pt-2">
-                                        <Label className="text-[10px] font-black text-muted-foreground uppercase flex items-center gap-2">
-                                            <ImagePlus className="h-3 w-3" /> Foto da Solução
-                                        </Label>
-                                        <div className="h-10 rounded-lg border border-dashed border-emerald-500/40 flex items-center justify-center relative overflow-hidden bg-emerald-500/5 hover:bg-emerald-500/10 cursor-pointer transition-colors">
-                                            {photoAfterPreview ? (
-                                                <span className="text-[10px] font-bold text-emerald-700">✓ Foto Selecionada</span>
-                                            ) : (
-                                                <span className="text-[10px] font-bold text-emerald-700 uppercase">Anexar Registro de Reparo</span>
-                                            )}
-                                            <input name="photoAfter" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handlePhotoChange} />
-                                        </div>
-                                    </div>
-                                )}
-                            </Card>
 
-                            <div className="flex flex-col gap-2">
-                                {report.status !== 'EXCLUDED' && (
-                                  <Button 
-                                    type="button" 
-                                    variant="outline" 
-                                    onClick={() => setIsDeleteDialogOpen(true)}
-                                    className="h-11 rounded-lg border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive font-bold gap-2 w-full"
-                                  >
-                                      <Trash2 className="h-4 w-4" /> Excluir Relato
-                                  </Button>
-                                )}
+                                <div className="grid grid-cols-1 gap-2 pt-2 border-t border-border mt-2">
+                                  {report.status !== 'EXCLUDED' && (
+                                    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                                      <AlertDialogTrigger asChild>
+                                        <Button 
+                                          type="button" 
+                                          variant="outline" 
+                                          className="h-11 rounded-lg border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive font-bold gap-2 w-full"
+                                        >
+                                            <Trash2 className="h-4 w-4" /> Excluir Relato
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent className="rounded-3xl bg-card border-border shadow-2xl p-8">
+                                          <AlertDialogHeader>
+                                              <AlertDialogTitle className="text-2xl font-bold">Excluir Relato</AlertDialogTitle>
+                                              <AlertDialogDescription className="text-base pt-2">
+                                                Selecione o motivo da exclusão deste relato.
+                                              </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          
+                                          <div className="py-4 space-y-4">
+                                              <div className="space-y-3">
+                                                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Motivo da exclusão</Label>
+                                                  <RadioGroup value={deleteReasonValue} onValueChange={setDeleteReasonValue} className="grid gap-2">
+                                                      {EXCLUSION_REASONS.map((reason) => (
+                                                          <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setDeleteReasonValue(reason.value)}>
+                                                              <RadioGroupItem value={reason.value} id={`del-reason-${reason.value}`} />
+                                                              <Label htmlFor={`del-reason-${reason.value}`} className="flex-grow cursor-pointer font-medium">{reason.label}</Label>
+                                                          </div>
+                                                      ))}
+                                                  </RadioGroup>
+                                              </div>
 
-                                <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-                                  <DialogTrigger asChild>
-                                    <Button 
-                                        type="button" 
-                                        variant="outline" 
-                                        className="h-11 rounded-lg border-orange-500/20 text-orange-600 hover:bg-orange-500/10 hover:border-orange-500 font-bold gap-2 w-full"
-                                    >
-                                        <Flag className="h-4 w-4" /> Denunciar Usuário
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="rounded-2xl sm:max-w-md">
-                                    <DialogHeader>
-                                      <DialogTitle className="flex items-center gap-2 text-orange-600">
-                                        <ShieldAlert className="h-5 w-5" /> Denunciar Usuário
-                                      </DialogTitle>
-                                      <DialogDescription>
-                                        Utilize esta opção somente em casos de uso indevido da plataforma ou violação das normas.
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    
-                                    <div className="py-4 space-y-4">
-                                      <div className="space-y-3">
-                                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Motivo da denúncia</Label>
-                                        <RadioGroup value={reportReason} onValueChange={setReportReason} className="grid gap-2">
-                                          {REPORT_REASONS.map((reason) => (
-                                            <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setReportReason(reason.value)}>
-                                              <RadioGroupItem value={reason.value} id={`reason-${reason.value}`} />
-                                              <Label htmlFor={`reason-${reason.value}`} className="flex-grow cursor-pointer font-medium">{reason.label}</Label>
-                                            </div>
-                                          ))}
-                                        </RadioGroup>
-                                      </div>
+                                              {deleteReasonValue === "other" && (
+                                                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                                      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Descrição do motivo</Label>
+                                                      <Textarea 
+                                                          placeholder="Descreva o motivo detalhadamente..." 
+                                                          value={deleteOtherDescription}
+                                                          onChange={(e) => setDeleteOtherDescription(e.target.value)}
+                                                          className="min-h-[100px] rounded-xl bg-muted/20 border-border resize-none"
+                                                      />
+                                                  </div>
+                                              )}
+                                          </div>
 
-                                      {reportReason === "other" && (
-                                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Descrição obrigatória</Label>
-                                          <Textarea 
-                                            placeholder="Descreva o problema de forma detalhada..." 
-                                            value={reportDetails}
-                                            onChange={(e) => setReportDetails(e.target.value)}
-                                            className="min-h-[80px] rounded-xl bg-muted/20 border-border resize-none"
-                                          />
-                                        </div>
-                                      )}
+                                          <AlertDialogFooter className="mt-6 gap-3">
+                                              <AlertDialogCancel className="rounded-xl h-12 px-6">Cancelar</AlertDialogCancel>
+                                              <AlertDialogAction 
+                                                  onClick={(e) => { e.preventDefault(); handleDelete(); }} 
+                                                  className="bg-destructive text-destructive-foreground rounded-xl h-12 px-8 font-bold shadow-lg"
+                                                  disabled={isDeleting || !deleteReasonValue || (deleteReasonValue === 'other' && !deleteOtherDescription.trim())}
+                                              >
+                                                  {isDeleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                                  Confirmar Exclusão
+                                              </AlertDialogAction>
+                                          </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  )}
 
-                                      <div className="space-y-2">
-                                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Observações do funcionário (opcional)</Label>
-                                          <Textarea 
-                                            placeholder="Informações adicionais para a análise superior..." 
-                                            value={reportObservations}
-                                            onChange={(e) => setReportObservations(e.target.value)}
-                                            className="min-h-[80px] rounded-xl bg-muted/20 border-border resize-none"
-                                          />
-                                      </div>
-                                    </div>
-
-                                    <DialogFooter className="gap-2 sm:gap-0">
-                                      <Button variant="ghost" onClick={() => setIsReportDialogOpen(false)} className="rounded-xl font-bold">Cancelar</Button>
-                                      <Button onClick={handleReportSubmit} disabled={isReporting || !reportReason || (reportReason === 'other' && !reportDetails.trim())} className="rounded-xl font-bold bg-orange-600 hover:bg-orange-700">
-                                        {isReporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Flag className="h-4 w-4 mr-2" />}
-                                        Enviar Denúncia
+                                  <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+                                    <DialogTrigger asChild>
+                                      <Button 
+                                          type="button" 
+                                          variant="outline" 
+                                          className="h-11 rounded-lg border-orange-500/20 text-orange-600 hover:bg-orange-500/10 hover:border-orange-500 font-bold gap-2 w-full"
+                                      >
+                                          <Flag className="h-4 w-4" /> 🚩 Denunciar Usuário
                                       </Button>
-                                    </DialogFooter>
-                                  </DialogContent>
-                                </Dialog>
-                            </div>
+                                    </DialogTrigger>
+                                    <DialogContent className="rounded-2xl sm:max-w-md">
+                                      <DialogHeader>
+                                        <DialogTitle className="flex items-center gap-2 text-orange-600">
+                                          <ShieldAlert className="h-5 w-5" /> Denunciar Usuário
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                          Utilize esta opção somente em casos de uso indevido da plataforma ou violação das normas.
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      
+                                      <div className="py-4 space-y-4">
+                                        <div className="space-y-3">
+                                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Motivo da denúncia</Label>
+                                          <RadioGroup reportReason={reportReason} onValueChange={setReportReason} className="grid gap-2">
+                                            {REPORT_REASONS.map((reason) => (
+                                              <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setReportReason(reason.value)}>
+                                                <RadioGroupItem value={reason.value} id={`reason-${reason.value}`} />
+                                                <Label htmlFor={`reason-${reason.value}`} className="flex-grow cursor-pointer font-medium">{reason.label}</Label>
+                                              </div>
+                                            ))}
+                                          </RadioGroup>
+                                        </div>
+
+                                        {reportReason === "other" && (
+                                          <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Descrição obrigatória</Label>
+                                            <Textarea 
+                                              placeholder="Descreva o problema de forma detalhada..." 
+                                              value={reportDetails}
+                                              onChange={(e) => setReportDetails(e.target.value)}
+                                              className="min-h-[80px] rounded-xl bg-muted/20 border-border resize-none"
+                                            />
+                                          </div>
+                                        )}
+
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Observações do funcionário (opcional)</Label>
+                                            <Textarea 
+                                              placeholder="Informações adicionais para a análise superior..." 
+                                              value={reportObservations}
+                                              onChange={(e) => setReportObservations(e.target.value)}
+                                              className="min-h-[80px] rounded-xl bg-muted/20 border-border resize-none"
+                                            />
+                                        </div>
+                                      </div>
+
+                                      <DialogFooter className="gap-2 sm:gap-0">
+                                        <Button variant="ghost" onClick={() => setIsReportDialogOpen(false)} className="rounded-xl font-bold">Cancelar</Button>
+                                        <Button onClick={handleReportSubmit} disabled={isReporting || !reportReason || (reportReason === 'other' && !reportDetails.trim())} className="rounded-xl font-bold bg-orange-600 hover:bg-orange-700">
+                                          {isReporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Flag className="h-4 w-4 mr-2" />}
+                                          Enviar Denúncia
+                                        </Button>
+                                      </DialogFooter>
+                                    </DialogContent>
+                                  </Dialog>
+                                </div>
+                            </Card>
                         </div>
                     </div>
                 </div>
@@ -666,8 +625,8 @@ export function DashboardClient({
 
   return (
     <Tabs defaultValue={isEmployee ? "under_review" : "pending"} className="w-full">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-        <TabsList className="bg-muted/50 p-1 rounded-2xl h-12 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 overflow-x-auto pb-2">
+        <TabsList className="bg-muted/50 p-1 rounded-2xl h-12 flex-nowrap w-max">
           <TabsTrigger value="under_review" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Em Análise</TabsTrigger>
           <TabsTrigger value="pending" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Pendente</TabsTrigger>
           <TabsTrigger value="in_progress" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Em Andamento</TabsTrigger>
@@ -752,11 +711,11 @@ export function DashboardClient({
         <TabsContent value="moderation">
           <Card className="rounded-2xl border-orange-500/20 bg-card/50 overflow-hidden">
             <Tabs defaultValue="excluded" className="w-full">
-              <div className="bg-orange-500/5 p-4 border-b border-orange-500/10">
+              <div className="bg-muted/10 p-4 border-b border-border">
                 <TabsList className="bg-transparent h-auto p-0 gap-8">
                   <TabsTrigger 
                     value="excluded" 
-                    className="data-[state=active]:text-red-500 data-[state=active]:border-b-2 data-[state=active]:border-red-500 rounded-none bg-transparent px-0 pb-2 h-auto text-sm font-bold uppercase tracking-widest border-b-2 border-transparent transition-all"
+                    className="data-[state=active]:text-red-600 data-[state=active]:border-b-2 data-[state=active]:border-red-600 rounded-none bg-transparent px-0 pb-2 h-auto text-sm font-bold uppercase tracking-widest border-b-2 border-transparent transition-all"
                   >
                     Relatos Excluídos
                   </TabsTrigger>
@@ -800,16 +759,16 @@ export function DashboardClient({
                           <div className="flex justify-between items-start">
                             <div>
                               <h3 className="text-lg font-bold text-foreground">Denúncia: {complaint.reason}</h3>
-                              <p className="text-sm text-muted-foreground font-medium">Usuário: {complaint.denouncedUserEmail}</p>
+                              <p className="text-sm text-muted-foreground font-medium">Usuário Denunciado: {complaint.denouncedUserEmail}</p>
                             </div>
                             <span className="text-xs font-bold text-muted-foreground uppercase bg-muted px-3 py-1 rounded-full">
-                                {complaint.status === 'PENDING' ? 'Pendente' : 'Resolvida'}
+                                {complaint.status === 'PENDING' ? 'Pendente de análise' : 'Resolvida'}
                             </span>
                           </div>
                           
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted/30 p-4 rounded-xl border border-border">
                             <div className="flex items-center gap-2">
-                                <User className="h-3.5 w-3.5" /> Denunciado por ID: {complaint.reporterUserId}
+                                <User className="h-3.5 w-3.5" /> Registrado por: {complaint.reporterUserId === user?.uid ? 'Você' : 'Funcionário'}
                             </div>
                             <div className="flex items-center gap-2">
                                 <Clock className="h-3.5 w-3.5" /> <ReportTime date={new Date(complaint.createdAt)} />
@@ -818,7 +777,7 @@ export function DashboardClient({
 
                           {complaint.details && (
                             <div className="space-y-2">
-                              <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Observações:</p>
+                              <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Descrição do motivo:</p>
                               <div className="p-4 bg-muted/20 border border-border rounded-xl text-sm italic">
                                 "{complaint.details}"
                               </div>
@@ -828,7 +787,7 @@ export function DashboardClient({
                           <div className="flex justify-end gap-3 pt-2">
                             <Button asChild variant="outline" size="sm" className="rounded-lg font-bold">
                                 <Link href={`/dashboard#report-${complaint.reportId}`}>
-                                    <MessageSquare className="h-4 w-4 mr-2" /> Abrir Relato
+                                    <MessageSquare className="h-4 w-4 mr-2" /> Abrir Relato Relacionado
                                 </Link>
                             </Button>
                           </div>
