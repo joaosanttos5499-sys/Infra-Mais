@@ -625,3 +625,237 @@ const ReportCard = memo(({
     </Card>
   );
 });
+
+export function DashboardClient({ 
+    reports, 
+    complaints = [], 
+    showUpvote = true, 
+    onSuccess 
+}: { 
+    reports: Report[], 
+    complaints?: Complaint[], 
+    showUpvote?: boolean, 
+    onSuccess?: () => void 
+}) {
+  const { user } = useUser();
+  const isEmployee = isEmailEmployee(user?.email);
+  const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
+
+  const handleUpvote = async (id: string) => {
+    if (upvotedReports.has(id)) {
+      await downvoteReportAction(id);
+      setUpvotedReports(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    } else {
+      await upvoteReportAction(id);
+      setUpvotedReports(prev => new Set(prev).add(id));
+    }
+    if (onSuccess) onSuccess();
+  };
+
+  const filteredReports = useMemo(() => ({
+    under_review: reports.filter(r => r.status === "UNDER_REVIEW"),
+    pending: reports.filter(r => r.status === "PENDING"),
+    in_progress: reports.filter(r => r.status === "IN_PROGRESS"),
+    resolved: reports.filter(r => r.status === "RESOLVED"),
+    excluded: reports.filter(r => r.status === "EXCLUDED"),
+  }), [reports]);
+
+  return (
+    <Tabs defaultValue={isEmployee ? "under_review" : "pending"} className="w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+        <TabsList className="bg-muted/50 p-1 rounded-2xl h-12 flex-wrap">
+          <TabsTrigger value="under_review" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Em Análise</TabsTrigger>
+          <TabsTrigger value="pending" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Pendente</TabsTrigger>
+          <TabsTrigger value="in_progress" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Em Andamento</TabsTrigger>
+          <TabsTrigger value="resolved" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Resolvido</TabsTrigger>
+          {isEmployee && (
+            <TabsTrigger value="moderation" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+              Central de Moderação
+            </TabsTrigger>
+          )}
+        </TabsList>
+      </div>
+
+      <TabsContent value="under_review" className="space-y-6">
+        {filteredReports.under_review.length === 0 ? (
+          <EmptyState message="Nenhum relato em análise no momento." />
+        ) : (
+          filteredReports.under_review.map(report => (
+            <ReportCard 
+              key={report.id} 
+              report={report} 
+              onUpvote={handleUpvote} 
+              isUpvoted={upvotedReports.has(report.id)} 
+              showUpvote={showUpvote} 
+              onSuccess={onSuccess}
+            />
+          ))
+        )}
+      </TabsContent>
+
+      <TabsContent value="pending" className="space-y-6">
+        {filteredReports.pending.length === 0 ? (
+          <EmptyState message="Nenhum relato pendente no momento." />
+        ) : (
+          filteredReports.pending.map(report => (
+            <ReportCard 
+              key={report.id} 
+              report={report} 
+              onUpvote={handleUpvote} 
+              isUpvoted={upvotedReports.has(report.id)} 
+              showUpvote={showUpvote} 
+              onSuccess={onSuccess}
+            />
+          ))
+        )}
+      </TabsContent>
+
+      <TabsContent value="in_progress" className="space-y-6">
+        {filteredReports.in_progress.length === 0 ? (
+          <EmptyState message="Nenhum relato em andamento no momento." />
+        ) : (
+          filteredReports.in_progress.map(report => (
+            <ReportCard 
+              key={report.id} 
+              report={report} 
+              onUpvote={handleUpvote} 
+              isUpvoted={upvotedReports.has(report.id)} 
+              showUpvote={showUpvote} 
+              onSuccess={onSuccess}
+            />
+          ))
+        )}
+      </TabsContent>
+
+      <TabsContent value="resolved" className="space-y-6">
+        {filteredReports.resolved.length === 0 ? (
+          <EmptyState message="Nenhum relato resolvido no momento." />
+        ) : (
+          filteredReports.resolved.map(report => (
+            <ReportCard 
+              key={report.id} 
+              report={report} 
+              onUpvote={handleUpvote} 
+              isUpvoted={upvotedReports.has(report.id)} 
+              showUpvote={showUpvote} 
+              onSuccess={onSuccess}
+            />
+          ))
+        )}
+      </TabsContent>
+
+      {isEmployee && (
+        <TabsContent value="moderation">
+          <Card className="rounded-2xl border-orange-500/20 bg-card/50 overflow-hidden">
+            <Tabs defaultValue="excluded" className="w-full">
+              <div className="bg-orange-500/5 p-4 border-b border-orange-500/10">
+                <TabsList className="bg-transparent h-auto p-0 gap-8">
+                  <TabsTrigger 
+                    value="excluded" 
+                    className="data-[state=active]:text-red-500 data-[state=active]:border-b-2 data-[state=active]:border-red-500 rounded-none bg-transparent px-0 pb-2 h-auto text-sm font-bold uppercase tracking-widest border-b-2 border-transparent transition-all"
+                  >
+                    Relatos Excluídos
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="complaints" 
+                    className="data-[state=active]:text-orange-500 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none bg-transparent px-0 pb-2 h-auto text-sm font-bold uppercase tracking-widest border-b-2 border-transparent transition-all"
+                  >
+                    Relatos Denunciados
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="excluded" className="p-6 space-y-6">
+                {filteredReports.excluded.length === 0 ? (
+                  <EmptyState message="Nenhum relato excluído para exibir." />
+                ) : (
+                  filteredReports.excluded.map(report => (
+                    <ReportCard 
+                      key={report.id} 
+                      report={report} 
+                      onUpvote={handleUpvote} 
+                      isUpvoted={upvotedReports.has(report.id)} 
+                      showUpvote={showUpvote} 
+                      onSuccess={onSuccess}
+                    />
+                  ))
+                )}
+              </TabsContent>
+
+              <TabsContent value="complaints" className="p-6 space-y-6">
+                {complaints.length === 0 ? (
+                  <EmptyState message="Nenhuma denúncia registrada no momento." />
+                ) : (
+                  complaints.map(complaint => (
+                    <Card key={complaint.id} className="p-6 border-orange-500/20 bg-card rounded-2xl shadow-sm">
+                      <div className="flex flex-col md:flex-row gap-6">
+                        <div className="bg-orange-500/10 p-4 rounded-xl flex items-center justify-center shrink-0">
+                          <Flag className="h-8 w-8 text-orange-600" />
+                        </div>
+                        <div className="flex-grow space-y-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="text-lg font-bold text-foreground">Denúncia: {complaint.reason}</h3>
+                              <p className="text-sm text-muted-foreground font-medium">Usuário: {complaint.denouncedUserEmail}</p>
+                            </div>
+                            <span className="text-xs font-bold text-muted-foreground uppercase bg-muted px-3 py-1 rounded-full">
+                                {complaint.status === 'PENDING' ? 'Pendente' : 'Resolvida'}
+                            </span>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted/30 p-4 rounded-xl border border-border">
+                            <div className="flex items-center gap-2">
+                                <User className="h-3.5 w-3.5" /> Denunciado por ID: {complaint.reporterUserId}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Clock className="h-3.5 w-3.5" /> <ReportTime date={new Date(complaint.createdAt)} />
+                            </div>
+                          </div>
+
+                          {complaint.details && (
+                            <div className="space-y-2">
+                              <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Observações:</p>
+                              <div className="p-4 bg-muted/20 border border-border rounded-xl text-sm italic">
+                                "{complaint.details}"
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex justify-end gap-3 pt-2">
+                            <Button asChild variant="outline" size="sm" className="rounded-lg font-bold">
+                                <Link href={`/dashboard#report-${complaint.reportId}`}>
+                                    <MessageSquare className="h-4 w-4 mr-2" /> Abrir Relato
+                                </Link>
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                )}
+              </TabsContent>
+            </Tabs>
+          </Card>
+        </TabsContent>
+      )}
+    </Tabs>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-card/50 rounded-3xl border border-dashed border-border shadow-inner animate-in fade-in zoom-in duration-500">
+      <div className="bg-muted p-6 rounded-full mb-6">
+        <Filter className="h-10 w-10 text-muted-foreground/30" />
+      </div>
+      <p className="text-lg font-bold text-foreground">{message}</p>
+      <p className="text-sm text-muted-foreground mt-2 max-w-md">
+        Continue acompanhando as atualizações da comunidade. Novas ocorrências aparecerão aqui assim que forem registradas.
+      </p>
+    </div>
+  );
+}
