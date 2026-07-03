@@ -85,7 +85,7 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
-        className="w-[calc(100vw-32px)] sm:w-[400px] md:w-[420px] rounded-2xl shadow-2xl border-border bg-card p-0 overflow-hidden" 
+        className="w-[calc(100vw-32px)] sm:w-[380px] md:w-[400px] rounded-2xl shadow-2xl border-border bg-card p-0 overflow-hidden" 
         align="end" 
         sideOffset={dynamicOffset}
         collisionPadding={16}
@@ -109,10 +109,10 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
           )}
         </div>
 
-        <ScrollArea className="max-h-[min(500px,70vh)] overflow-y-auto">
+        <ScrollArea className="max-h-[min(400px,60vh)] overflow-y-auto">
           <div className="p-4 space-y-4">
             {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center px-8">
+              <div className="flex flex-col items-center justify-center py-16 text-center px-8">
                 <div className="bg-muted p-6 rounded-full mb-5 shadow-inner">
                   <Bell className="h-10 w-10 text-muted-foreground/30" />
                 </div>
