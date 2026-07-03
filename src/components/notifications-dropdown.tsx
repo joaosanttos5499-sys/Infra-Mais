@@ -85,9 +85,10 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
-        className="w-[340px] sm:w-[450px] rounded-2xl shadow-2xl border-border bg-card p-0 overflow-hidden" 
+        className="w-[calc(100vw-32px)] sm:w-[400px] md:w-[420px] rounded-2xl shadow-2xl border-border bg-card p-0 overflow-hidden" 
         align="end" 
         sideOffset={dynamicOffset}
+        collisionPadding={16}
       >
         <div className="p-5 bg-muted/30 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -108,10 +109,10 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
           )}
         </div>
 
-        <ScrollArea className="h-[500px]">
+        <ScrollArea className="max-h-[min(500px,70vh)] overflow-y-auto">
           <div className="p-4 space-y-4">
             {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 text-center px-8">
+              <div className="flex flex-col items-center justify-center py-20 text-center px-8">
                 <div className="bg-muted p-6 rounded-full mb-5 shadow-inner">
                   <Bell className="h-10 w-10 text-muted-foreground/30" />
                 </div>
@@ -142,7 +143,6 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
                             ? "bg-card border-border hover:border-primary/30" 
                             : "bg-primary/5 border-primary/20 shadow-md"
                     )}>
-                      {/* Indicador lateral de status */}
                       <div className={cn(
                           "absolute left-0 top-0 bottom-0 w-1.5",
                           notification.isRead ? "bg-transparent" : "bg-primary"
