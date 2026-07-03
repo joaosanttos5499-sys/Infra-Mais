@@ -275,12 +275,12 @@ export async function downvoteReportAction(reportId: string) {
     } catch (error) { return { success: false }; }
 }
 
-export async function deleteReportAction(reportId: string, reason?: string) {
+export async function deleteReportAction(reportId: string, reason: string, employeeId: string) {
   try {
     const report = await getReportById(reportId);
     if (!report) return { success: false, message: "Relato não encontrado." };
 
-    const success = await dbDeleteReport(reportId);
+    const success = await dbDeleteReport(reportId, reason, employeeId);
     if (!success) return { success: false, message: "Falha ao remover." };
     
     // Notificação: RELATO EXCLUÍDO
@@ -289,7 +289,7 @@ export async function deleteReportAction(reportId: string, reason?: string) {
         reportId,
         'EXCLUDED',
         'Relato removido',
-        `Após análise da equipe do Infra Mais, seu relato foi removido da plataforma.\n\nMotivo da exclusão:\n${reason || "Informações inconsistentes ou duplicadas."}\n\nCaso considere necessário, você poderá registrar um novo relato com as informações corrigidas.`
+        `Após análise da equipe do Infra Mais, seu relato foi removido da plataforma.\n\nMotivo da exclusão:\n${reason}\n\nCaso considere necessário, você poderá registrar um novo relato com as informações corrigidas.`
     );
 
     revalidatePath("/"); revalidatePath("/dashboard"); revalidatePath("/minha-conta"); revalidatePath("/funcionarios");
@@ -375,7 +375,6 @@ export async function submitComplaintAction(complaintData: Omit<Complaint, 'id' 
     const result = await addComplaint(complaintData);
     
     // Notificação: DENÚNCIA REGISTRADA
-    // Precisamos encontrar o dono do relato para notificá-lo
     const report = await getReportById(complaintData.reportId);
     if (report) {
         await addNotification(

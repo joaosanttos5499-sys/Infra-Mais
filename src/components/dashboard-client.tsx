@@ -49,14 +49,25 @@ const PICUI_NEIGHBORHOODS = [
 
 const REPORT_REASONS = [
   { value: "conteudo_improprio", label: "Conteúdo impróprio" },
-  { value: "imagem_incompativel", label: "Imagem incompatível" },
-  { value: "relato_falso", label: "Relato falso" },
-  { value: "localizacao_incorreta", label: "Localização incorreta" },
+  { value: "imagem_inadequada", label: "Imagem inadequada" },
+  { value: "spam", label: "Spam" },
+  { value: "tentativa_fraude", label: "Tentativa de fraude" },
+  { value: "relatos_falsos_recorrentes", label: "Relatos falsos recorrentes" },
+  { value: "divulgacao_infos_pessoais", label: "Divulgação de informações pessoais" },
+  { value: "violacao_normas", label: "Violação das normas da plataforma" },
+  { value: "other", label: "Outro" },
+];
+
+const EXCLUSION_REASONS = [
   { value: "relato_duplicado", label: "Relato duplicado" },
   { value: "informacoes_insuficientes", label: "Informações insuficientes" },
-  { value: "uso_indevido", label: "Uso indevido da plataforma" },
-  { value: "violacao_normas", label: "Violação das normas da plataforma" },
-  { value: "other", label: "Outros (Descreva abaixo)" },
+  { value: "categoria_incorreta", label: "Categoria incorreta" },
+  { value: "localizacao_incorreta", label: "Localização incorreta" },
+  { value: "problema_inexistente", label: "Problema inexistente" },
+  { value: "problema_ja_resolvido", label: "Problema já resolvido" },
+  { value: "nao_relacionado_infraestrutura", label: "Não relacionado à infraestrutura" },
+  { value: "relato_enviado_engano", label: "Relato enviado por engano" },
+  { value: "other", label: "Outro" },
 ];
 
 const ReportCard = memo(({ 
@@ -98,9 +109,11 @@ const ReportCard = memo(({
   const [reportReason, setReportReason] = useState("");
   const [reportDetails, setReportDetails] = useState("");
   const [isReporting, setIsReporting] = useState(false);
+  const [reportObservations, setReportObservations] = useState("");
   
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deleteReason, setDeleteReason] = useState("");
+  const [deleteReasonValue, setDeleteReasonValue] = useState("");
+  const [deleteOtherDescription, setDeleteOtherDescription] = useState("");
 
   const editProblems = useMemo(() => getCategory(editCategory)?.problems || [], [editCategory]);
 
@@ -130,16 +143,20 @@ const ReportCard = memo(({
       return;
     }
     if (reportReason === "other" && !reportDetails.trim()) {
-      toast({ variant: "destructive", title: "Detalhes necessários", description: "Para o motivo 'Outros', por favor descreva o problema." });
+      toast({ variant: "destructive", title: "Detalhes necessários", description: "Para o motivo 'Outro', por favor descreva o problema." });
       return;
     }
 
     setIsReporting(true);
+    const finalReason = reportReason === "other" ? reportDetails : REPORT_REASONS.find(r => r.value === reportReason)?.label || reportReason;
+    
     const result = await submitComplaintAction({
       reportId: report.id,
-      userId: user?.uid || "anonymous",
-      reason: reportReason,
-      details: reportDetails
+      denouncedUserId: report.userId,
+      denouncedUserEmail: report.relatorEmail,
+      reporterUserId: user?.uid || "anonymous",
+      reason: finalReason,
+      details: reportObservations
     });
 
     setIsReporting(false);
@@ -147,9 +164,10 @@ const ReportCard = memo(({
       setIsReportDialogOpen(false);
       setReportReason("");
       setReportDetails("");
+      setReportObservations("");
       toast({
         title: "Denúncia Enviada",
-        description: "O relato foi marcado para revisão administrativa.",
+        description: "A conduta do usuário foi marcada para análise administrativa.",
       });
       if (onSuccess) onSuccess();
     } else {
@@ -185,12 +203,19 @@ const ReportCard = memo(({
   }, [isStatusConfirmOpen]);
 
   const handleDelete = async () => {
-    if (isEmployee && !deleteReason.trim()) {
-        toast({ variant: "destructive", title: "Motivo obrigatório", description: "Informe o motivo da exclusão para notificar o cidadão." });
+    if (!deleteReasonValue) {
+        toast({ variant: "destructive", title: "Motivo obrigatório", description: "Selecione um motivo para a exclusão." });
         return;
     }
+    if (deleteReasonValue === "other" && !deleteOtherDescription.trim()) {
+        toast({ variant: "destructive", title: "Descrição obrigatória", description: "Informe o motivo no campo de descrição." });
+        return;
+    }
+
+    const finalReason = deleteReasonValue === "other" ? deleteOtherDescription : EXCLUSION_REASONS.find(r => r.value === deleteReasonValue)?.label || deleteReasonValue;
+
     startDeleteTransition(async () => {
-        const result = await deleteReportAction(report.id, deleteReason);
+        const result = await deleteReportAction(report.id, finalReason, user?.uid || "unknown");
         if (result.success) {
             toast({ title: "Relatório removido", description: "O registro foi movido para a Central de Moderação." });
             setIsDeleteDialogOpen(false);
@@ -329,28 +354,44 @@ const ReportCard = memo(({
                                     </AlertDialogTrigger>
                                     <AlertDialogContent className="rounded-3xl bg-card border-border shadow-2xl p-8">
                                         <AlertDialogHeader>
-                                            <AlertDialogTitle className="text-2xl font-bold">Excluir Relatório?</AlertDialogTitle>
+                                            <AlertDialogTitle className="text-2xl font-bold">Excluir Relato</AlertDialogTitle>
                                             <AlertDialogDescription className="text-base pt-2">
-                                              O relato será movido para a Central de Moderação e deixará de ser visível para o público.
+                                              Selecione o motivo da exclusão deste relato.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
-                                        {isEmployee && (
-                                            <div className="py-4 space-y-2">
-                                                <Label className="text-sm font-bold">Motivo da Exclusão (Notificado ao cidadão)</Label>
-                                                <Textarea 
-                                                    placeholder="Descreva o motivo para informar o relator..." 
-                                                    value={deleteReason}
-                                                    onChange={(e) => setDeleteReason(e.target.value)}
-                                                    className="rounded-xl min-h-[100px]"
-                                                />
+                                        
+                                        <div className="py-4 space-y-4">
+                                            <div className="space-y-3">
+                                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Motivo da exclusão</Label>
+                                                <RadioGroup value={deleteReasonValue} onValueChange={setDeleteReasonValue} className="grid gap-2">
+                                                    {EXCLUSION_REASONS.map((reason) => (
+                                                        <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setDeleteReasonValue(reason.value)}>
+                                                            <RadioGroupItem value={reason.value} id={`del-reason-${reason.value}`} />
+                                                            <Label htmlFor={`del-reason-${reason.value}`} className="flex-grow cursor-pointer font-medium">{reason.label}</Label>
+                                                        </div>
+                                                    ))}
+                                                </RadioGroup>
                                             </div>
-                                        )}
+
+                                            {deleteReasonValue === "other" && (
+                                                <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Descrição do motivo</Label>
+                                                    <Textarea 
+                                                        placeholder="Descreva o motivo detalhadamente..." 
+                                                        value={deleteOtherDescription}
+                                                        onChange={(e) => setDeleteOtherDescription(e.target.value)}
+                                                        className="min-h-[100px] rounded-xl bg-muted/20 border-border resize-none"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+
                                         <AlertDialogFooter className="mt-6 gap-3">
                                             <AlertDialogCancel className="rounded-xl h-12 px-6">Cancelar</AlertDialogCancel>
                                             <AlertDialogAction 
                                                 onClick={(e) => { e.preventDefault(); handleDelete(); }} 
                                                 className="bg-destructive text-destructive-foreground rounded-xl h-12 px-8 font-bold shadow-lg"
-                                                disabled={isDeleting || (isEmployee && !deleteReason.trim())}
+                                                disabled={isDeleting || !deleteReasonValue || (deleteReasonValue === 'other' && !deleteOtherDescription.trim())}
                                             >
                                                 {isDeleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                                                 Confirmar Exclusão
@@ -388,7 +429,7 @@ const ReportCard = memo(({
               <form action={formAction} ref={formRef}>
                 <div className="p-6 md:p-8 space-y-6 max-w-[1400px] mx-auto">
                     <div className="grid lg:grid-cols-12 gap-6 items-stretch">
-                        <div className="lg:col-span-6 flex flex-col gap-4">
+                        <div className="lg:col-span-8 flex flex-col gap-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Categoria</Label>
@@ -426,12 +467,12 @@ const ReportCard = memo(({
                                   name="description" 
                                   value={editDescription} 
                                   onChange={(e) => setEditDescription(e.target.value)} 
-                                  className="flex-grow min-h-[120px] rounded-lg bg-card border-border resize-none p-3 text-sm" 
+                                  className="flex-grow min-h-[160px] rounded-lg bg-card border-border resize-none p-3 text-sm" 
                                 />
                             </div>
                         </div>
 
-                        <div className="lg:col-span-6 flex flex-col gap-4">
+                        <div className="lg:col-span-4 flex flex-col gap-4">
                             <div className="space-y-1.5">
                                 <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Localização no Mapa</Label>
                                 <div className="h-[180px] rounded-lg overflow-hidden border border-border relative z-0">
@@ -442,8 +483,8 @@ const ReportCard = memo(({
                             </div>
 
                             <Card className="rounded-xl bg-card border-border shadow-sm p-4 space-y-4">
-                                <div className="flex flex-col sm:flex-row items-end gap-3">
-                                    <div className="space-y-1.5 w-full sm:flex-1">
+                                <div className="flex flex-col items-stretch gap-3">
+                                    <div className="space-y-1.5">
                                         <Label className="text-[10px] font-black text-muted-foreground uppercase">Alterar Status</Label>
                                         <Select name="status" value={selectedStatus} onValueChange={(val) => setSelectedStatus(val as ReportStatus)}>
                                             <SelectTrigger className="h-11 rounded-lg bg-background border-primary/20 font-bold"><SelectValue /></SelectTrigger>
@@ -456,28 +497,25 @@ const ReportCard = memo(({
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <div className="flex gap-2 w-full sm:w-auto">
-                                        <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
-                                            <AlertDialogTrigger asChild>
-                                                <Button type="button" disabled={isPending} className="h-11 flex-1 sm:w-32 rounded-lg font-bold bg-primary hover:bg-primary/90 shadow-md">
-                                                    {isPending ? <Loader2 className="animate-spin h-4 w-4" /> : <Upload className="h-4 w-4" />}
-                                                    <span className="ml-2">Salvar</span>
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent className="rounded-2xl">
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Atualizar Dados?</AlertDialogTitle>
-                                                    <AlertDialogDescription>O cidadão será notificado sobre as alterações.</AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel className="rounded-lg">Voltar</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => formRef.current?.requestSubmit()} disabled={!isStatusConfirmEnabled || isPending} className="rounded-lg px-6 font-bold">
-                                                        {isStatusConfirmEnabled ? "Confirmar" : `Aguarde (${statusCountdown}s)`}
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
+                                    <Button type="button" onClick={() => setIsStatusConfirmOpen(true)} disabled={isPending} className="h-11 rounded-lg font-bold bg-primary hover:bg-primary/90 shadow-md w-full">
+                                        {isPending ? <Loader2 className="animate-spin h-4 w-4" /> : <Upload className="h-4 w-4" />}
+                                        <span className="ml-2">Salvar</span>
+                                    </Button>
+                                    
+                                    <AlertDialog open={isStatusConfirmOpen} onOpenChange={setIsStatusConfirmOpen}>
+                                        <AlertDialogContent className="rounded-2xl">
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Atualizar Dados?</AlertDialogTitle>
+                                                <AlertDialogDescription>O cidadão será notificado sobre as alterações.</AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel className="rounded-lg">Voltar</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => formRef.current?.requestSubmit()} disabled={!isStatusConfirmEnabled || isPending} className="rounded-lg px-6 font-bold">
+                                                    {isStatusConfirmEnabled ? "Confirmar" : `Aguarde (${statusCountdown}s)`}
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </div>
                                 
                                 {isPhotoEnabled && (
@@ -497,13 +535,13 @@ const ReportCard = memo(({
                                 )}
                             </Card>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="flex flex-col gap-2">
                                 {report.status !== 'EXCLUDED' && (
                                   <Button 
                                     type="button" 
                                     variant="outline" 
                                     onClick={() => setIsDeleteDialogOpen(true)}
-                                    className="h-11 rounded-lg border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive font-bold gap-2"
+                                    className="h-11 rounded-lg border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive font-bold gap-2 w-full"
                                   >
                                       <Trash2 className="h-4 w-4" /> Excluir Relato
                                   </Button>
@@ -514,24 +552,24 @@ const ReportCard = memo(({
                                     <Button 
                                         type="button" 
                                         variant="outline" 
-                                        className="h-11 rounded-lg border-orange-500/20 text-orange-600 hover:bg-orange-500/10 hover:border-orange-500 font-bold gap-2"
+                                        className="h-11 rounded-lg border-orange-500/20 text-orange-600 hover:bg-orange-500/10 hover:border-orange-500 font-bold gap-2 w-full"
                                     >
-                                        <AlertTriangle className="h-4 w-4" /> Denunciar
+                                        <Flag className="h-4 w-4" /> Denunciar Usuário
                                     </Button>
                                   </DialogTrigger>
                                   <DialogContent className="rounded-2xl sm:max-w-md">
                                     <DialogHeader>
                                       <DialogTitle className="flex items-center gap-2 text-orange-600">
-                                        <ShieldAlert className="h-5 w-5" /> Denunciar Relato
+                                        <ShieldAlert className="h-5 w-5" /> Denunciar Usuário
                                       </DialogTitle>
                                       <DialogDescription>
-                                        Selecione o motivo da denúncia para análise superior.
+                                        Utilize esta opção somente em casos de uso indevido da plataforma ou violação das normas.
                                       </DialogDescription>
                                     </DialogHeader>
                                     
                                     <div className="py-4 space-y-4">
                                       <div className="space-y-3">
-                                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Motivo Principal</Label>
+                                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Motivo da denúncia</Label>
                                         <RadioGroup value={reportReason} onValueChange={setReportReason} className="grid gap-2">
                                           {REPORT_REASONS.map((reason) => (
                                             <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setReportReason(reason.value)}>
@@ -544,20 +582,30 @@ const ReportCard = memo(({
 
                                       {reportReason === "other" && (
                                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Detalhes Adicionais</Label>
+                                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Descrição obrigatória</Label>
                                           <Textarea 
                                             placeholder="Descreva o problema de forma detalhada..." 
                                             value={reportDetails}
                                             onChange={(e) => setReportDetails(e.target.value)}
-                                            className="min-h-[100px] rounded-xl bg-muted/20 border-border resize-none"
+                                            className="min-h-[80px] rounded-xl bg-muted/20 border-border resize-none"
                                           />
                                         </div>
                                       )}
+
+                                      <div className="space-y-2">
+                                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Observações do funcionário (opcional)</Label>
+                                          <Textarea 
+                                            placeholder="Informações adicionais para a análise superior..." 
+                                            value={reportObservations}
+                                            onChange={(e) => setReportObservations(e.target.value)}
+                                            className="min-h-[80px] rounded-xl bg-muted/20 border-border resize-none"
+                                          />
+                                      </div>
                                     </div>
 
                                     <DialogFooter className="gap-2 sm:gap-0">
                                       <Button variant="ghost" onClick={() => setIsReportDialogOpen(false)} className="rounded-xl font-bold">Cancelar</Button>
-                                      <Button onClick={handleReportSubmit} disabled={isReporting || !reportReason} className="rounded-xl font-bold bg-orange-600 hover:bg-orange-700">
+                                      <Button onClick={handleReportSubmit} disabled={isReporting || !reportReason || (reportReason === 'other' && !reportDetails.trim())} className="rounded-xl font-bold bg-orange-600 hover:bg-orange-700">
                                         {isReporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Flag className="h-4 w-4 mr-2" />}
                                         Enviar Denúncia
                                       </Button>

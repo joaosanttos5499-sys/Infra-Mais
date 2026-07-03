@@ -19,9 +19,13 @@ export interface Report {
   upvotes: number;
   latitude: number;
   longitude: number;
+  // Auditoria de exclusão
+  excludedBy?: string;
+  exclusionReason?: string;
+  excludedAt?: string;
 }
 
-export type NewReport = Omit<Report, "id" | "createdAt" | "status" | "upvotes" | "photoAfterUrl">;
+export type NewReport = Omit<Report, "id" | "createdAt" | "status" | "upvotes" | "photoAfterUrl" | "excludedBy" | "exclusionReason" | "excludedAt">;
 
 export type UserRole = "USER" | "EMPLOYEE";
 
@@ -51,9 +55,11 @@ export interface Notification {
 export interface Complaint {
   id: string;
   reportId: string;
-  userId: string; // ID do usuário que denunciou (pode ser o próprio sistema/funcionário)
+  denouncedUserId: string;
+  denouncedUserEmail: string;
+  reporterUserId: string; // Funcionário que denunciou
   reason: string;
-  details?: string;
+  details?: string; // Observações
   createdAt: string;
   status: 'PENDING' | 'RESOLVED';
 }

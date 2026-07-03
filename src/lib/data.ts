@@ -79,11 +79,13 @@ export async function downvoteReport(id: string): Promise<Report | undefined> {
     return undefined;
 }
 
-export async function deleteReport(id: string): Promise<boolean> {
+export async function deleteReport(id: string, reason: string, employeeId: string): Promise<boolean> {
   const index = reports.findIndex(r => r.id === id);
   if (index !== -1) {
-    // Soft delete: muda o status para EXCLUDED em vez de remover do array
     reports[index].status = 'EXCLUDED';
+    reports[index].exclusionReason = reason;
+    reports[index].excludedBy = employeeId;
+    reports[index].excludedAt = new Date().toISOString();
     return true;
   }
   return false;
