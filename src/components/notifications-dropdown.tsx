@@ -109,7 +109,7 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
         </div>
 
         <ScrollArea className="h-[500px]">
-          <div className="p-3 space-y-3">
+          <div className="p-4 space-y-4">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 text-center px-8">
                 <div className="bg-muted p-6 rounded-full mb-5 shadow-inner">
@@ -140,7 +140,7 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
                         "w-full rounded-2xl border transition-all duration-300 p-4 relative overflow-hidden",
                         notification.isRead 
                             ? "bg-card border-border hover:border-primary/30" 
-                            : "bg-primary/5 border-primary/20 shadow-sm"
+                            : "bg-primary/5 border-primary/20 shadow-md"
                     )}>
                       {/* Indicador lateral de status */}
                       <div className={cn(
@@ -156,7 +156,7 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
                           <Icon className="h-6 w-6" />
                         </div>
                         
-                        <div className="flex flex-col gap-1.5 min-w-0 flex-grow">
+                        <div className="flex flex-col gap-2 min-w-0 flex-grow">
                             <div className="flex justify-between items-start gap-2">
                                 <h4 className={cn(
                                     "text-sm font-bold leading-tight",
@@ -165,18 +165,18 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
                                     {notification.title}
                                 </h4>
                                 {!notification.isRead && (
-                                    <div className="h-2 w-2 rounded-full bg-primary animate-pulse shrink-0 mt-1" />
+                                    <div className="h-2.5 w-2.5 rounded-full bg-primary animate-pulse shrink-0 mt-1" />
                                 )}
                             </div>
                             
                             <p className={cn(
-                                "text-xs leading-relaxed font-medium", 
+                                "text-xs leading-relaxed font-medium whitespace-pre-wrap", 
                                 !notification.isRead ? "text-foreground/80" : "text-muted-foreground/70"
                             )}>
                                 {notification.message}
                             </p>
                             
-                            <div className="flex items-center justify-between gap-2 mt-4">
+                            <div className="flex items-center justify-between gap-2 mt-4 pt-2 border-t border-border/40">
                                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
                                     <Clock className="h-3.5 w-3.5" />
                                     <ReportTime date={new Date(notification.createdAt)} />
@@ -189,7 +189,7 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
                                         handleMarkAsRead(notification.id);
                                     }}
                                 >
-                                    Abrir Relato
+                                    Relato Relacionado
                                     <ArrowRight className="h-3 w-3 group-hover/link:translate-x-1 transition-transform" />
                                 </Link>
                             </div>
