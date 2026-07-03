@@ -25,14 +25,14 @@ const notificationIcons: Record<NotificationType, any> = {
 };
 
 const notificationColors: Record<NotificationType, string> = {
-    SENT: "text-blue-500 bg-blue-50",
-    APPROVED: "text-emerald-500 bg-emerald-50",
-    PENDING: "text-amber-500 bg-amber-50",
-    IN_PROGRESS: "text-primary bg-primary/10",
-    RESOLVED: "text-emerald-600 bg-emerald-100",
-    EDITED: "text-indigo-500 bg-indigo-50",
-    EXCLUDED: "text-destructive bg-destructive/10",
-    COMPLAINT: "text-orange-600 bg-orange-50",
+    SENT: "text-blue-500 bg-blue-50 border-blue-200",
+    APPROVED: "text-emerald-500 bg-emerald-50 border-emerald-200",
+    PENDING: "text-amber-500 bg-amber-50 border-amber-200",
+    IN_PROGRESS: "text-primary bg-primary/10 border-primary/20",
+    RESOLVED: "text-emerald-600 bg-emerald-100 border-emerald-300",
+    EDITED: "text-indigo-500 bg-indigo-50 border-indigo-200",
+    EXCLUDED: "text-destructive bg-destructive/10 border-destructive/20",
+    COMPLAINT: "text-orange-600 bg-orange-50 border-orange-200",
 };
 
 export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean }) {
@@ -85,96 +85,116 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
-        className="w-[340px] sm:w-[420px] rounded-2xl shadow-2xl border-border bg-card p-0 overflow-hidden" 
+        className="w-[340px] sm:w-[450px] rounded-2xl shadow-2xl border-border bg-card p-0 overflow-hidden" 
         align="end" 
         sideOffset={dynamicOffset}
       >
-        <div className="p-4 bg-muted/30 border-b border-border flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-primary" />
-            <h3 className="font-bold text-sm text-foreground tracking-tight uppercase">Minhas Mensagens</h3>
+        <div className="p-5 bg-muted/30 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-primary/10 p-2 rounded-lg">
+                <MessageSquare className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="font-black text-xs text-foreground tracking-widest uppercase">Central de Avisos</h3>
           </div>
           {unreadCount > 0 && (
             <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-auto p-0 text-[10px] font-bold text-primary hover:bg-transparent hover:underline uppercase tracking-tighter"
+                className="h-auto p-0 text-[10px] font-bold text-primary hover:bg-transparent hover:underline uppercase tracking-widest"
                 onClick={handleMarkAllAsRead}
             >
-                Marcar todas como lidas
+                Marcar tudo como lido
             </Button>
           )}
         </div>
 
-        <ScrollArea className="h-[450px]">
-          <div className="divide-y divide-border">
+        <ScrollArea className="h-[500px]">
+          <div className="p-3 space-y-3">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 text-center px-8">
-                <div className="bg-muted p-5 rounded-full mb-4">
+                <div className="bg-muted p-6 rounded-full mb-5 shadow-inner">
                   <Bell className="h-10 w-10 text-muted-foreground/30" />
                 </div>
-                <p className="text-base font-bold text-foreground">Nada por aqui</p>
-                <p className="text-xs text-muted-foreground mt-2 max-w-[240px] leading-relaxed">
-                  Avisaremos você assim que houver atualizações nos seus relatos.
+                <p className="text-base font-bold text-foreground">Sua caixa está vazia</p>
+                <p className="text-xs text-muted-foreground mt-2 max-w-[240px] leading-relaxed font-medium">
+                  Você receberá atualizações aqui assim que seus relatos forem analisados.
                 </p>
               </div>
             ) : (
               notifications.map((notification) => {
                 const Icon = notificationIcons[notification.type] || Info;
-                const colorClass = notificationColors[notification.type] || "text-muted-foreground bg-muted";
+                const colorClass = notificationColors[notification.type] || "text-muted-foreground bg-muted border-muted";
 
                 return (
                   <DropdownMenuItem 
                     key={notification.id} 
                     className={cn(
-                        "flex flex-col items-start gap-1 p-5 cursor-pointer focus:bg-muted/50 transition-all border-l-4",
-                        notification.isRead ? "border-l-transparent" : "bg-primary/5 border-l-primary"
+                        "flex flex-col items-start gap-0 p-0 cursor-pointer focus:bg-transparent bg-transparent transition-all group/item outline-none select-none",
                     )}
                     onSelect={(e) => {
                         if ((e.target as HTMLElement).closest('a')) return;
                         handleMarkAsRead(notification.id);
                     }}
                   >
-                    <div className="flex w-full gap-4">
+                    <div className={cn(
+                        "w-full rounded-2xl border transition-all duration-300 p-4 relative overflow-hidden",
+                        notification.isRead 
+                            ? "bg-card border-border hover:border-primary/30" 
+                            : "bg-primary/5 border-primary/20 shadow-sm"
+                    )}>
+                      {/* Indicador lateral de status */}
                       <div className={cn(
-                        "h-11 w-11 rounded-xl flex items-center justify-center shrink-0 border border-transparent shadow-sm",
-                        colorClass
-                      )}>
-                        <Icon className="h-5 w-5" />
+                          "absolute left-0 top-0 bottom-0 w-1.5",
+                          notification.isRead ? "bg-transparent" : "bg-primary"
+                      )} />
+
+                      <div className="flex gap-4">
+                        <div className={cn(
+                          "h-12 w-12 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover/item:scale-105",
+                          colorClass
+                        )}>
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        
+                        <div className="flex flex-col gap-1.5 min-w-0 flex-grow">
+                            <div className="flex justify-between items-start gap-2">
+                                <h4 className={cn(
+                                    "text-sm font-bold leading-tight",
+                                    !notification.isRead ? "text-foreground" : "text-muted-foreground"
+                                )}>
+                                    {notification.title}
+                                </h4>
+                                {!notification.isRead && (
+                                    <div className="h-2 w-2 rounded-full bg-primary animate-pulse shrink-0 mt-1" />
+                                )}
+                            </div>
+                            
+                            <p className={cn(
+                                "text-xs leading-relaxed font-medium", 
+                                !notification.isRead ? "text-foreground/80" : "text-muted-foreground/70"
+                            )}>
+                                {notification.message}
+                            </p>
+                            
+                            <div className="flex items-center justify-between gap-2 mt-4">
+                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    <ReportTime date={new Date(notification.createdAt)} />
+                                </div>
+                                
+                                <Link 
+                                    href="/minha-conta#meus-relatorios"
+                                    className="text-[10px] font-black text-primary hover:text-primary/80 flex items-center gap-1.5 group/link transition-colors bg-primary/10 px-3 py-1.5 rounded-lg uppercase tracking-tighter"
+                                    onClick={() => {
+                                        handleMarkAsRead(notification.id);
+                                    }}
+                                >
+                                    Abrir Relato
+                                    <ArrowRight className="h-3 w-3 group-hover/link:translate-x-1 transition-transform" />
+                                </Link>
+                            </div>
+                        </div>
                       </div>
-                      
-                      <div className="flex flex-col gap-1 min-w-0">
-                          <h4 className={cn(
-                              "text-sm font-bold leading-none mb-1",
-                              !notification.isRead ? "text-foreground" : "text-muted-foreground"
-                          )}>
-                              {notification.title}
-                          </h4>
-                          <p className={cn(
-                              "text-xs leading-relaxed whitespace-pre-wrap", 
-                              !notification.isRead ? "text-foreground/80" : "text-muted-foreground/70"
-                          )}>
-                              {notification.message}
-                          </p>
-                          
-                          <div className="flex items-center gap-2 mt-3 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                            <Clock className="h-3.5 w-3.5" />
-                            <ReportTime date={new Date(notification.createdAt)} />
-                          </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-end w-full mt-4">
-                        <Link 
-                            href="/minha-conta#meus-relatorios"
-                            className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1.5 group/link bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/10"
-                            onClick={() => {
-                              handleMarkAsRead(notification.id);
-                            }}
-                        >
-                            Ver relato relacionado
-                            <ArrowRight className="h-3.5 w-3.5 group-hover/link:translate-x-1 transition-transform" />
-                        </Link>
                     </div>
                   </DropdownMenuItem>
                 );
@@ -184,12 +204,12 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
         </ScrollArea>
         
         {notifications.length > 0 && (
-           <div className="p-4 border-t border-border bg-muted/10 text-center">
+           <div className="p-4 border-t border-border bg-muted/5 text-center">
               <Link 
                 href="/minha-conta#meus-relatorios" 
-                className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.1em]"
+                className="text-[10px] font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em]"
               >
-                Gerenciar todos os meus relatos
+                Gerenciar Histórico Completo
               </Link>
            </div>
         )}
