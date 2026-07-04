@@ -105,6 +105,8 @@ export function SignupForm() {
         const user = userCredential.user;
 
         try {
+          // Define o idioma para Português (Brasil) antes de enviar a verificação
+          auth.languageCode = 'pt';
           await sendEmailVerification(user);
         } catch (verificationError) {
           console.error("Failed to send verification email:", verificationError);
