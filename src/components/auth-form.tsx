@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -135,7 +136,12 @@ export function AuthForm({
     setIsSubmitting(true);
     try {
         auth.languageCode = 'pt';
-        await sendPasswordResetEmail(auth, email);
+        // Configura o redirecionamento para a nossa página personalizada de ação
+        const actionCodeSettings = {
+          url: `${window.location.origin}/auth/action`,
+          handleCodeInApp: true,
+        };
+        await sendPasswordResetEmail(auth, email, actionCodeSettings);
         setView('resetSuccess');
     } catch (err: any) {
         console.error("Reset error:", err);
