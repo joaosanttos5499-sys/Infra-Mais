@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, useCallback } from "react";
 import { Bell, Info, Check, ArrowRight, MessageSquare, Clock, FileText, CheckCircle2, TrafficCone, Construction, Wrench, Edit, Trash2, Flag } from "lucide-react";
 import { useUser } from "@/firebase";
 import { getNotificationsAction, markAsReadAction, markAllAsReadAction } from "@/lib/actions";
@@ -12,6 +12,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { ReportTime } from "./report-time";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const notificationIcons: Record<NotificationType, any> = {
     SENT: FileText,
@@ -37,12 +38,13 @@ const notificationColors: Record<NotificationType, string> = {
 
 export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean }) {
   const { user } = useUser();
+  const pathname = usePathname();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isPending, startTransition] = useTransition();
 
   const dynamicOffset = scrolled ? 22 : 30;
 
-  useEffect(() => {
+  const fetchNotifications = useCallback(() => {
     if (user) {
       getNotificationsAction(user.uid).then(result => {
         if (result.success && result.data) {
@@ -51,6 +53,11 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
       });
     }
   }, [user]);
+
+  // Atualiza quando o usuário loga ou quando muda de página (útil após redirecionamento de envio)
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications, pathname]);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -69,10 +76,16 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
     });
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      fetchNotifications();
+    }
+  };
+
   if (!user) return null;
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-xl hover:bg-primary/10 transition-colors group">
           <Bell className="h-5 w-5 text-muted-foreground transition-colors group-hover:text-primary" />
