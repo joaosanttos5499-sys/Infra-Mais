@@ -55,7 +55,7 @@ const REPORT_REASONS = [
   { value: "relato_duplicado", label: "Relato duplicado" },
   { value: "informacoes_insuficientes", label: "Informações insuficientes" },
   { value: "uso_indevido_plataforma", label: "Uso indevido da plataforma" },
-  { value: "violacao_normas_plataforma", label: "Violação das normas da plataforma" },
+  { value: "violação_normas_plataforma", label: "Violação das normas da plataforma" },
   { value: "other", label: "Outro" },
 ];
 
@@ -238,8 +238,8 @@ const ReportCard = memo(({
   return (
     <Card 
       className={cn(
-        "overflow-hidden bg-card border-border shadow-sm transition-all duration-300 hover:shadow-lg rounded-2xl animate-in fade-in",
-        report.status === 'EXCLUDED' && "opacity-75 grayscale-[0.5]"
+        "overflow-hidden bg-card border-border shadow-sm transition-all duration-300 hover:shadow-lg rounded-2xl animate-in fade-in"
+        // Removido o efeito de grayscale para relatos excluídos a pedido do usuário
       )}
       id={`report-${report.id}`}
     >
@@ -528,7 +528,7 @@ const ReportCard = memo(({
                                       <div className="py-4 space-y-4">
                                         <div className="space-y-3">
                                           <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Motivo da denúncia</Label>
-                                          <RadioGroup reportReason={reportReason} onValueChange={setReportReason} className="grid gap-2">
+                                          <RadioGroup value={reportReason} onValueChange={setReportReason} className="grid gap-2">
                                             {REPORT_REASONS.map((reason) => (
                                               <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setReportReason(reason.value)}>
                                                 <RadioGroupItem value={reason.value} id={`reason-${reason.value}`} />
