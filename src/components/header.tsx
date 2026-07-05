@@ -46,7 +46,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
   const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
   const [isSwitching, setIsSwitching] = useState(false);
 
-  const dynamicOffset = scrolled ? 22 : 30;
+  const dynamicOffset = scrolled ? 18 : 26;
 
   useEffect(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
@@ -342,7 +342,7 @@ export function Header() {
 
   return (
     <header className={cn(
-      "w-full bg-card border-b border-border transition-[height] duration-300",
+      "fixed top-0 left-0 w-full z-[2000] bg-card border-b border-border transition-[height] duration-300",
       mounted && scrolled ? "h-16" : "h-20"
     )}>
       <div className="max-w-[1750px] mx-auto px-4 sm:px-8 h-full flex items-center justify-between">
