@@ -134,7 +134,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
                     <div className="space-y-2.5">
                         <IndicatorItem label="Em Análise" value={stats.underReview} colorClass="bg-slate-400" />
                         <IndicatorItem label="Pendentes" value={stats.pending} colorClass="bg-amber-500" />
-                        <IndicatorItem label="Em Andamento" value={stats.inProgress} colorClass="bg-primary" />
+                        <IndicatorItem label="Em Andamento" value={stats.primary} colorClass="bg-primary" />
                         <IndicatorItem label="Resolvidos" value={stats.resolved} colorClass="bg-emerald-500" />
                     </div>
                 </div>
