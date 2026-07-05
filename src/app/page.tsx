@@ -43,12 +43,16 @@ async function RecentReports() {
 
 function BenefitCard({ icon: Icon, title, description }: { icon: any, title: string, description: string }) {
   return (
-    <div className="p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 group flex flex-col items-center md:items-start text-center md:text-left h-full">
-      <div className="bg-primary/10 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-        <Icon className="h-6 w-6 text-primary" />
+    <div className="p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 group flex flex-col h-full overflow-hidden">
+      <div className="flex flex-col items-center md:items-start text-center md:text-left gap-y-3">
+        <div className="bg-primary/10 w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+          <Icon className="h-6 w-6 text-primary" />
+        </div>
+        <div className="space-y-1 w-full">
+          <h4 className="font-bold text-foreground text-base leading-tight truncate">{title}</h4>
+          <p className="text-sm text-muted-foreground leading-relaxed break-words">{description}</p>
+        </div>
       </div>
-      <h4 className="font-bold text-foreground text-base mb-2">{title}</h4>
-      <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
     </div>
   );
 }
