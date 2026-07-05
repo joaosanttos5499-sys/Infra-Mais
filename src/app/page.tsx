@@ -44,12 +44,12 @@ async function RecentReports() {
 
 function BenefitCard({ icon: Icon, title, description }: { icon: any, title: string, description: string }) {
   return (
-    <div className="p-5 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
-      <div className="bg-primary/10 w-10 h-10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-        <Icon className="h-5 w-5 text-primary" />
+    <div className="p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 group flex flex-col items-center md:items-start text-center md:text-left">
+      <div className="bg-primary/10 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+        <Icon className="h-6 w-6 text-primary" />
       </div>
-      <h4 className="font-bold text-foreground text-sm mb-1">{title}</h4>
-      <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
+      <h4 className="font-bold text-foreground text-base mb-2">{title}</h4>
+      <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
     </div>
   );
 }
@@ -93,11 +93,22 @@ function AboutSection({ reports }: { reports: Report[] }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4">
-              <BenefitCard icon={MapPin} title="Geolocalização" description="Localização precisa dos relatos." />
-              <BenefitCard icon={Camera} title="Evidências" description="Envio de imagens para análise." />
-              <BenefitCard icon={BarChart3} title="Acompanhamento" description="Atualizações em tempo real." />
-              <BenefitCard icon={Handshake} title="Participação" description="Comunidade fortalecendo os relatos." />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <BenefitCard 
+                icon={MapPin} 
+                title="Geolocalização" 
+                description="Localização precisa dos relatos no mapa." 
+              />
+              <BenefitCard 
+                icon={BarChart3} 
+                title="Acompanhamento" 
+                description="Atualizações em tempo real sobre cada ocorrência." 
+              />
+              <BenefitCard 
+                icon={Camera} 
+                title="Evidências" 
+                description="Envio de imagens para facilitar a análise dos problemas." 
+              />
             </div>
           </div>
 
