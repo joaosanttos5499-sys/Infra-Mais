@@ -44,7 +44,7 @@ async function RecentReports() {
 
 function BenefitCard({ icon: Icon, title, description }: { icon: any, title: string, description: string }) {
   return (
-    <div className="p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 group flex flex-col items-center md:items-start text-center md:text-left">
+    <div className="p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 group flex flex-col items-center md:items-start text-center md:text-left h-full">
       <div className="bg-primary/10 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
         <Icon className="h-6 w-6 text-primary" />
       </div>
@@ -77,10 +77,10 @@ function AboutSection({ reports }: { reports: Report[] }) {
   const total = stats.underReview + stats.pending + stats.inProgress + stats.resolved;
 
   return (
-    <section className="py-20 md:py-28 bg-background border-t border-border animate-in fade-in duration-700">
+    <section className="py-20 md:py-32 bg-background border-t border-border animate-in fade-in duration-700">
       <div className="max-w-[1750px] mx-auto px-8 sm:px-12 lg:px-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
-          <div className="space-y-10">
+        <div className="grid lg:grid-cols-2 gap-16 items-stretch">
+          <div className="flex flex-col justify-between space-y-12">
             <div className="space-y-6">
               <h2 className="text-4xl md:text-5xl font-extrabold text-foreground leading-[1.1] tracking-tight text-center md:text-left">
                 Infra Mais: <br />
@@ -107,19 +107,19 @@ function AboutSection({ reports }: { reports: Report[] }) {
               <BenefitCard 
                 icon={Camera} 
                 title="Evidências" 
-                description="Envio de imagens para facilitar a análise dos problemas." 
+                description="Envio de imagens para facilitar a análise." 
               />
             </div>
           </div>
 
-          <Card className="rounded-3xl border-border shadow-2xl p-6 md:p-10 bg-card overflow-hidden relative">
+          <Card className="rounded-3xl border-border shadow-2xl p-6 md:p-10 bg-card overflow-hidden relative flex flex-col h-full">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl" />
             <CardHeader className="text-center pb-8 p-0">
                 <CardTitle className="text-xl md:text-2xl font-bold flex items-center justify-center gap-3 text-foreground">
                   <BarChart3 className="h-6 w-6 text-primary" /> Panorama dos Relatos
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-0 space-y-8">
+            <CardContent className="p-0 space-y-8 flex-grow flex flex-col justify-center">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                     <div className="space-y-2">
                         <ReportsChart 
@@ -139,9 +139,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
                     </div>
                 </div>
 
-                <Separator className="bg-border/50" />
-
-                <div className="space-y-4">
+                <div className="mt-auto pt-8 border-t border-border/50 space-y-4">
                     {total === 0 ? (
                         <div className="bg-muted/10 border border-dashed border-border p-5 rounded-2xl flex items-start gap-4">
                             <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
