@@ -15,12 +15,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ShieldCheck, Eye, EyeOff, Lock, AlertTriangle } from 'lucide-react';
+import { Loader2, ShieldCheck, Eye, EyeOff, Lock, AlertTriangle, Check, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+type PasswordStrength = 'Muito fraca' | 'Fraca' | 'Média' | 'Forte' | 'Muito forte';
 
 export function AuthActionClient() {
   const auth = useAuth();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { toast } = useToast();
   
   const [isValidating, setIsValidating] = useState(true);
@@ -35,7 +37,47 @@ export function AuthActionClient() {
   const form = useForm<z.infer<typeof ResetPasswordSchema>>({
     resolver: zodResolver(ResetPasswordSchema),
     defaultValues: { password: '', confirmPassword: '' },
+    mode: 'onChange'
   });
+
+  const passwordValue = form.watch('password');
+
+  const getPasswordStrength = (password: string): { strength: PasswordStrength; color: string; percent: number } => {
+    if (!password) return { strength: 'Muito fraca', color: 'bg-muted', percent: 0 };
+    
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+
+    switch (score) {
+      case 0:
+      case 1:
+        return { strength: 'Muito fraca', color: 'bg-destructive', percent: 20 };
+      case 2:
+        return { strength: 'Fraca', color: 'bg-orange-500', percent: 40 };
+      case 3:
+        return { strength: 'Média', color: 'bg-amber-500', percent: 60 };
+      case 4:
+        return { strength: 'Forte', color: 'bg-primary', percent: 80 };
+      case 5:
+        return { strength: 'Muito forte', color: 'bg-emerald-500', percent: 100 };
+      default:
+        return { strength: 'Muito fraca', color: 'bg-muted', percent: 0 };
+    }
+  };
+
+  const strengthInfo = getPasswordStrength(passwordValue);
+
+  const passwordRequirements = [
+    { label: 'Pelo menos 8 caracteres', met: passwordValue.length >= 8 },
+    { label: 'Pelo menos uma letra maiúscula', met: /[A-Z]/.test(passwordValue) },
+    { label: 'Pelo menos uma letra minúscula', met: /[a-z]/.test(passwordValue) },
+    { label: 'Pelo menos um número', met: /[0-9]/.test(passwordValue) },
+    { label: 'Pelo menos um caractere especial', met: /[^A-Za-z0-9]/.test(passwordValue) },
+  ];
 
   useEffect(() => {
     if (!mode || !oobCode || mode !== 'resetPassword') {
@@ -105,10 +147,10 @@ export function AuthActionClient() {
             A senha da sua conta foi alterada com sucesso. Agora você já pode utilizar suas novas credenciais para acessar o Infra Mais.
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-8">
-           <Button asChild className="w-full h-12 rounded-xl font-bold text-base shadow-lg hover:scale-[1.02] transition-all">
-             <Link href="/report/auth">Voltar para o Login</Link>
-           </Button>
+        <CardContent className="p-8 text-center">
+            <p className="text-sm text-muted-foreground font-medium italic">
+                Você pode fechar esta página agora.
+            </p>
         </CardContent>
       </Card>
     );
@@ -126,11 +168,6 @@ export function AuthActionClient() {
             Este link não é mais válido. Por favor, solicite uma nova recuperação de senha através da tela de login.
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-8 pt-0">
-          <Button asChild variant="outline" className="w-full h-11 rounded-xl font-bold">
-            <Link href="/report/auth">Ir para Login</Link>
-          </Button>
-        </CardContent>
       </Card>
     );
   }
@@ -171,6 +208,34 @@ export function AuthActionClient() {
                       {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                     </Button>
                   </div>
+                  
+                  {/* Strength Meter */}
+                  <div className="space-y-2 mt-2">
+                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className={cn("h-full transition-all duration-500", strengthInfo.color)} 
+                        style={{ width: `${strengthInfo.percent}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                      <span className="text-muted-foreground">Força da senha:</span>
+                      <span className={cn(strengthInfo.color.replace('bg-', 'text-'))}>{strengthInfo.strength}</span>
+                    </div>
+                  </div>
+
+                  {/* Requirements List */}
+                  <div className="grid grid-cols-1 gap-1.5 pt-2">
+                    {passwordRequirements.map((req, i) => (
+                      <div key={i} className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground">
+                        {req.met ? (
+                          <Check className="h-3 w-3 text-emerald-500" />
+                        ) : (
+                          <X className="h-3 w-3 text-destructive/40" />
+                        )}
+                        <span className={cn(req.met ? "text-foreground" : "text-muted-foreground")}>{req.label}</span>
+                      </div>
+                    ))}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -209,7 +274,7 @@ export function AuthActionClient() {
             <Button
               type="submit"
               className="w-full h-12 rounded-xl font-bold text-base shadow-lg hover:scale-[1.02] transition-all"
-              disabled={form.formState.isSubmitting}
+              disabled={form.formState.isSubmitting || !form.formState.isValid}
             >
               {form.formState.isSubmitting ? (
                 <Loader2 className="h-5 w-5 animate-spin mr-2" />
