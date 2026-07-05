@@ -96,7 +96,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
               <BenefitCard 
                 icon={MapPin} 
                 title="Geolocalização" 
-                description="Localização precisa dos relatos no mapa." 
+                description="Localização precisa dos relatos." 
               />
               <BenefitCard 
                 icon={BarChart3} 
@@ -113,13 +113,13 @@ function AboutSection({ reports }: { reports: Report[] }) {
 
           <Card className="rounded-3xl border-border shadow-2xl p-6 md:p-10 bg-card overflow-hidden relative w-full lg:max-w-[600px] ml-auto">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl" />
-            <CardHeader className="text-center pb-16 p-0">
+            <CardHeader className="text-center pb-12 p-0">
                 <CardTitle className="text-xl md:text-2xl font-bold flex items-center justify-center gap-3 text-foreground">
                   <BarChart3 className="h-6 w-6 text-primary" /> Panorama dos Relatos
                 </CardTitle>
             </CardHeader>
-            <CardContent className="p-0 space-y-8">
-                <div className="grid md:grid-cols-2 gap-8 items-center">
+            <CardContent className="px-2 space-y-10">
+                <div className="grid md:grid-cols-2 gap-10 items-center">
                     <div className="space-y-2">
                         <ReportsChart 
                           total={total} 
@@ -130,7 +130,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
                         />
                     </div>
                     
-                    <div className="space-y-2.5">
+                    <div className="space-y-3">
                         <IndicatorItem label="Em Análise" value={stats.underReview} colorClass="bg-slate-400" />
                         <IndicatorItem label="Pendentes" value={stats.pending} colorClass="bg-amber-500" />
                         <IndicatorItem label="Em Andamento" value={stats.inProgress} colorClass="bg-primary" />
@@ -138,7 +138,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
                     </div>
                 </div>
 
-                <div className="pt-8 border-t border-border/50 space-y-4">
+                <div className="pt-10 border-t border-border/50 space-y-4">
                     {total === 0 ? (
                         <div className="bg-muted/10 border border-dashed border-border p-5 rounded-2xl flex items-start gap-4">
                             <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
