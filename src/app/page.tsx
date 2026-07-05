@@ -104,7 +104,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
               />
               <BenefitCard 
                 icon={BarChart3} 
-                title="Acompanhamento" 
+                title="Transparência" 
                 description="Atualizações em tempo real." 
               />
               <BenefitCard 
