@@ -1,5 +1,5 @@
 
-import { type Report, type ReportStatus, type NewReport, type UserProfile, type Notification, type Complaint, type NotificationType } from "@/lib/types";
+import { type Report, type ReportStatus, type NewReport, type UserProfile, type Notification, type Complaint, type NotificationType, type PasswordResetRequest } from "@/lib/types";
 import { isEmailEmployee } from "./config";
 
 const globalForStore = globalThis as unknown as {
@@ -7,6 +7,7 @@ const globalForStore = globalThis as unknown as {
   users: UserProfile[] | undefined;
   notifications: Notification[] | undefined;
   complaints: Complaint[] | undefined;
+  passwordResets: PasswordResetRequest[] | undefined;
   idCounter: number | undefined;
   notificationCounter: number | undefined;
   complaintCounter: number | undefined;
@@ -17,6 +18,7 @@ if (!globalForStore.reports) globalForStore.reports = [];
 if (!globalForStore.users) globalForStore.users = [];
 if (!globalForStore.notifications) globalForStore.notifications = [];
 if (!globalForStore.complaints) globalForStore.complaints = [];
+if (!globalForStore.passwordResets) globalForStore.passwordResets = [];
 if (globalForStore.idCounter === undefined) globalForStore.idCounter = 1;
 if (globalForStore.notificationCounter === undefined) globalForStore.notificationCounter = 1;
 if (globalForStore.complaintCounter === undefined) globalForStore.complaintCounter = 1;
@@ -25,6 +27,7 @@ const reports = globalForStore.reports;
 const users = globalForStore.users;
 const notifications = globalForStore.notifications;
 const complaints = globalForStore.complaints;
+const passwordResets = globalForStore.passwordResets;
 
 export async function getReports(limit?: number): Promise<Report[]> {
   const sorted = [...reports].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -184,4 +187,31 @@ export async function getComplaints(): Promise<Complaint[]> {
 
 export async function getReportById(id: string): Promise<Report | undefined> {
   return reports.find(r => r.id === id);
+}
+
+// Funções para Recuperação de Senha (Sync)
+export async function createPasswordResetRequest(email: string): Promise<string> {
+  const id = Math.random().toString(36).substring(7);
+  const request: PasswordResetRequest = {
+    id,
+    email,
+    status: 'WAITING',
+    createdAt: new Date().toISOString()
+  };
+  passwordResets.push(request);
+  return id;
+}
+
+export async function verifyPasswordResetRequest(id: string, oobCode: string): Promise<boolean> {
+  const index = passwordResets.findIndex(r => r.id === id);
+  if (index !== -1) {
+    passwordResets[index].status = 'VERIFIED';
+    passwordResets[index].oobCode = oobCode;
+    return true;
+  }
+  return false;
+}
+
+export async function getPasswordResetRequest(id: string): Promise<PasswordResetRequest | undefined> {
+  return passwordResets.find(r => r.id === id);
 }

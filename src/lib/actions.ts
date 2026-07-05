@@ -20,7 +20,10 @@ import {
     markAllNotificationsAsRead as dbMarkAllAsRead,
     addComplaint,
     getComplaints,
-    getReportById
+    getReportById,
+    createPasswordResetRequest as dbCreateReset,
+    verifyPasswordResetRequest as dbVerifyReset,
+    getPasswordResetRequest as dbGetReset
 } from "@/lib/data";
 import { type Report, type ReportStatus, type NewReport, type UserProfile, type Complaint } from "@/lib/types";
 import { ReportSchema, UpdateProfileSchema } from "./schemas";
@@ -396,4 +399,17 @@ export async function submitComplaintAction(complaintData: Omit<Complaint, 'id' 
 
 export async function getAllComplaintsAction(): Promise<Complaint[]> {
   return await getComplaints();
+}
+
+// Actions para Recuperação de Senha
+export async function createResetRequestAction(email: string) {
+  return await dbCreateReset(email);
+}
+
+export async function verifyResetRequestAction(requestId: string, oobCode: string) {
+  return await dbVerifyReset(requestId, oobCode);
+}
+
+export async function getResetRequestAction(requestId: string) {
+  return await dbGetReset(requestId);
 }

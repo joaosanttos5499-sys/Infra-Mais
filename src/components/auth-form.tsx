@@ -1,21 +1,20 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/firebase';
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
-  updateProfile
 } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft, Mail, Eye, EyeOff } from 'lucide-react';
-import { fetchUserProfileAction } from '@/lib/actions';
-import { useSearchParams } from 'next/navigation';
+import { fetchUserProfileAction, createResetRequestAction, getResetRequestAction } from '@/lib/actions';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { createAvatarSvg } from '@/lib/avatar';
 
 const LOCAL_STORAGE_ACCOUNTS_KEY = 'infra_mais_saved_accounts';
@@ -28,13 +27,15 @@ export function AuthForm({
   onSignupClick?: () => void;
 }) {
   const auth = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [view, setView] = useState<'signIn' | 'resetPassword' | 'resetSuccess'>('signIn');
+  const [view, setView] = useState<'signIn' | 'resetPassword' | 'resetWaiting'>('signIn');
+  const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
 
   useEffect(() => {
     const emailParam = searchParams.get('email');
@@ -42,6 +43,22 @@ export function AuthForm({
       setEmail(emailParam.trim());
     }
   }, [searchParams]);
+
+  // Listener para o status da recuperação de senha
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (view === 'resetWaiting' && currentRequestId) {
+      interval = setInterval(async () => {
+        const request = await getResetRequestAction(currentRequestId);
+        if (request && request.status === 'VERIFIED') {
+          clearInterval(interval);
+          toast({ title: "Identidade Confirmada", description: "Redirecionando para definir sua nova senha." });
+          router.push(`/report/auth/reset-password?requestId=${currentRequestId}&oobCode=${request.oobCode}`);
+        }
+      }, 2000);
+    }
+    return () => clearInterval(interval);
+  }, [view, currentRequestId, router, toast]);
 
   const saveAccountLocally = (user: any, profileName: string, profilePhoto: string) => {
     const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
@@ -84,8 +101,7 @@ export function AuthForm({
       toast({ title: 'Bem-vindo(a) de volta!' });
       if (onAuthSuccess) onAuthSuccess();
     } catch (err: any) {
-      let errorMessage = 'E-mail ou senha incorretos.';
-      toast({ title: 'Erro de Autenticação', description: errorMessage, variant: 'destructive' });
+      toast({ title: 'Erro de Autenticação', description: 'E-mail ou senha incorretos.', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
@@ -98,13 +114,17 @@ export function AuthForm({
     }
     setIsSubmitting(true);
     try {
+        // Criar um pedido de recuperação no nosso banco simulado para sincronização
+        const requestId = await createResetRequestAction(email.trim());
+        setCurrentRequestId(requestId);
+
         auth.languageCode = 'pt';
         const actionCodeSettings = {
-          url: `${window.location.origin}/auth/action`,
+          url: `${window.location.origin}/auth/action?requestId=${requestId}`,
           handleCodeInApp: true,
         };
         await sendPasswordResetEmail(auth, email.trim(), actionCodeSettings);
-        setView('resetSuccess');
+        setView('resetWaiting');
     } catch (err: any) {
         toast({
             title: "Erro",
@@ -116,22 +136,26 @@ export function AuthForm({
     }
   };
 
-  if (view === 'resetSuccess') {
+  if (view === 'resetWaiting') {
     return (
         <div className="space-y-6 text-center py-8 animate-in fade-in zoom-in duration-500">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
                 <Mail className="h-8 w-8 text-primary animate-pulse" />
             </div>
             <div className="space-y-2">
-                <h3 className="text-xl font-bold">Aguardando Verificação</h3>
+                <h3 className="text-xl font-bold">Verifique seu E-mail</h3>
                 <p className='text-sm text-muted-foreground max-w-[280px] mx-auto'>
                     Enviamos um link de confirmação para <strong>{email}</strong>. 
-                    Acesse seu e-mail e clique no link para ser redirecionado à redefinição de senha.
+                    Mantenha esta tela aberta. Após clicar no link, você será redirecionado automaticamente.
                 </p>
             </div>
-            <div className="pt-4 border-t border-border mt-4">
-                <Button variant="ghost" className="w-full text-muted-foreground" onClick={() => setView('signIn')}>
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para o login
+            <div className="flex flex-col items-center gap-4 pt-4 border-t border-border mt-4">
+                <div className="flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-widest">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Aguardando validação...
+                </div>
+                <Button variant="ghost" className="w-full text-muted-foreground text-xs" onClick={() => setView('signIn')}>
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Cancelar solicitação
                 </Button>
             </div>
         </div>
@@ -148,7 +172,7 @@ export function AuthForm({
                 </Button>
                 <h3 className="font-bold text-lg">Recuperar Senha</h3>
             </div>
-            <p className='text-sm text-muted-foreground'>Informe seu e-mail cadastrado para receber o link de verificação.</p>
+            <p className='text-sm text-muted-foreground'>Informe seu e-mail cadastrado para receber o link de verificação da conta.</p>
           <div className="space-y-2">
             <Label htmlFor="email-reset">Seu E-mail</Label>
             <Input

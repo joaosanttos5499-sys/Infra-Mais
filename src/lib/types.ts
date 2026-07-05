@@ -63,3 +63,11 @@ export interface Complaint {
   createdAt: string;
   status: 'PENDING' | 'RESOLVED';
 }
+
+export interface PasswordResetRequest {
+  id: string;
+  email: string;
+  status: 'WAITING' | 'VERIFIED' | 'COMPLETED';
+  oobCode?: string;
+  createdAt: string;
+}
