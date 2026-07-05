@@ -53,7 +53,7 @@ export function ReportsChart({ total, underReview, pending, inProgress, resolved
         <div className="relative w-full aspect-square max-w-[200px] mx-auto">
             <style dangerouslySetInnerHTML={{ __html: `
                 :root { --empty-chart: #e2e8f0; }
-                .dark { --empty-chart: #1e293b; }
+                .dark { --empty-chart: #334155; }
             `}} />
             <ChartContainer config={chartConfig} className="w-full h-full">
                 <PieChart>
