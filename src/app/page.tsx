@@ -53,7 +53,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
           <div className="space-y-8 flex flex-col justify-between">
             <div className="space-y-8">
               <h2 className="text-3xl md:text-5xl font-bold text-foreground leading-tight text-center md:text-left">
-                Zeladoria Urbana <br className="hidden md:block"/><span className="text-primary">Inteligente e Transparente</span>
+                Infra Mais: <br className="hidden md:block"/><span className="text-primary">tecnologia para uma cidade melhor</span>
               </h2>
               <div className="space-y-6 text-base md:text-lg text-muted-foreground leading-relaxed text-center md:text-left">
                 <p>O Infra Mais conecta a população às demandas de infraestrutura da região. Através de relatórios geolocalizados, acompanhamento em tempo real e participação da comunidade, a plataforma torna o processo de identificação e monitoramento de problemas mais simples, transparente e acessível para todos.</p>
