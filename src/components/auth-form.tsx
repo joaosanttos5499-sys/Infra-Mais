@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft, Mail, Eye, EyeOff } from 'lucide-react';
-import { fetchUserProfileAction, createResetRequestAction, getResetRequestAction } from '@/lib/actions';
+import { fetchUserProfileAction } from '@/lib/actions';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createAvatarSvg } from '@/lib/avatar';
 
@@ -34,8 +34,7 @@ export function AuthForm({
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [view, setView] = useState<'signIn' | 'resetPassword' | 'resetWaiting'>('signIn');
-  const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
+  const [view, setView] = useState<'signIn' | 'resetPassword' | 'resetLinkSent'>('signIn');
 
   useEffect(() => {
     const emailParam = searchParams.get('email');
@@ -43,21 +42,6 @@ export function AuthForm({
       setEmail(emailParam.trim());
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (view === 'resetWaiting' && currentRequestId) {
-      interval = setInterval(async () => {
-        const request = await getResetRequestAction(currentRequestId);
-        if (request && request.status === 'VERIFIED') {
-          clearInterval(interval);
-          toast({ title: "Identidade Confirmada", description: "Redirecionando para a redefinição de senha." });
-          router.push(`/report/auth/reset-password?requestId=${currentRequestId}&oobCode=${request.oobCode}`);
-        }
-      }, 2000);
-    }
-    return () => clearInterval(interval);
-  }, [view, currentRequestId, router, toast]);
 
   const saveAccountLocally = (user: any, profileName: string, profilePhoto: string) => {
     const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
@@ -113,48 +97,41 @@ export function AuthForm({
     }
     setIsSubmitting(true);
     try {
-        const requestId = await createResetRequestAction(email.trim());
-        setCurrentRequestId(requestId);
-
         auth.languageCode = 'pt';
         const actionCodeSettings = {
-          // Importante: A URL de redirecionamento após a verificação no Firebase
-          url: `${window.location.origin}/auth/action?requestId=${requestId}`,
+          // URL que processará a redefinição personalizada dentro do app
+          url: `${window.location.origin}/auth/action`,
           handleCodeInApp: true,
         };
         await sendPasswordResetEmail(auth, email.trim(), actionCodeSettings);
-        setView('resetWaiting');
+        setView('resetLinkSent');
     } catch (err: any) {
-        toast({
-            title: "Erro",
-            description: "Não foi possível enviar o link. Verifique se o e-mail está correto.",
-            variant: "destructive",
-        });
+        // Exibimos a mensagem de sucesso mesmo em caso de erro para segurança (enumeração)
+        setView('resetLinkSent');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (view === 'resetWaiting') {
+  if (view === 'resetLinkSent') {
     return (
         <div className="space-y-6 text-center py-8 animate-in fade-in zoom-in duration-500">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-                <Mail className="h-8 w-8 text-primary animate-pulse" />
+                <Mail className="h-8 w-8 text-primary" />
             </div>
-            <div className="space-y-2">
-                <h3 className="text-xl font-bold">Aguardando Verificação</h3>
-                <p className='text-sm text-muted-foreground max-w-[280px] mx-auto'>
-                    Enviamos um link de validação para <strong>{email}</strong>. 
-                    Mantenha esta tela aberta. Assim que você clicar no link do e-mail, esta página será redirecionada automaticamente.
+            <div className="space-y-2 px-4">
+                <h3 className="text-xl font-bold text-foreground">Link Enviado</h3>
+                <p className='text-sm text-muted-foreground leading-relaxed'>
+                    Se existir uma conta vinculada ao endereço informado, um link para redefinição de senha foi enviado para seu e-mail.
                 </p>
             </div>
-            <div className="flex flex-col items-center gap-4 pt-4 border-t border-border mt-4">
-                <div className="flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-widest">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Aguardando você clicar no link...
-                </div>
-                <Button variant="ghost" className="w-full text-muted-foreground text-xs" onClick={() => setView('signIn')}>
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Cancelar
+            <div className="pt-6 border-t border-border mt-4">
+                <Button 
+                    variant="default" 
+                    className="w-full h-12 rounded-xl font-bold" 
+                    onClick={() => setView('signIn')}
+                >
+                    Fazer login novamente
                 </Button>
             </div>
         </div>
@@ -171,7 +148,7 @@ export function AuthForm({
                 </Button>
                 <h3 className="font-bold text-lg">Recuperação de Senha</h3>
             </div>
-            <p className='text-sm text-muted-foreground'>Informe seu e-mail cadastrado para enviarmos o link de verificação.</p>
+            <p className='text-sm text-muted-foreground'>Informe seu e-mail cadastrado para enviarmos o link de recuperação.</p>
           <div className="space-y-2">
             <Label htmlFor="email-reset">E-mail da Conta</Label>
             <Input
@@ -192,7 +169,7 @@ export function AuthForm({
             className="w-full h-12 rounded-xl font-bold"
         >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Enviar Link de Validação
+            Enviar link de recuperação
         </Button>
       </div>
     );

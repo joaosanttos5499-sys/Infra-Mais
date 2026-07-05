@@ -1,4 +1,3 @@
-
 export type ReportStatus = "UNDER_REVIEW" | "PENDING" | "IN_PROGRESS" | "RESOLVED" | "EXCLUDED";
 
 export interface Report {
@@ -62,12 +61,4 @@ export interface Complaint {
   details?: string; // Observações
   createdAt: string;
   status: 'PENDING' | 'RESOLVED';
-}
-
-export interface PasswordResetRequest {
-  id: string;
-  email: string;
-  status: 'WAITING' | 'VERIFIED' | 'COMPLETED';
-  oobCode?: string;
-  createdAt: string;
 }

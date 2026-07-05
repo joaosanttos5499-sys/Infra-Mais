@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { confirmPasswordReset } from 'firebase/auth';
 import { useAuth } from '@/firebase';
 import { useForm } from 'react-hook-form';
@@ -18,7 +18,6 @@ import { Loader2, ShieldCheck, Eye, EyeOff, Lock } from 'lucide-react';
 
 export function ResetPasswordClient() {
   const auth = useAuth();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   
@@ -76,9 +75,9 @@ export function ResetPasswordClient() {
   return (
     <Card className="w-full max-w-md border-border shadow-2xl rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
       <CardHeader className="p-8 border-b border-border bg-muted/30 text-center">
-        <CardTitle className="text-2xl font-bold">Redefinir Senha</CardTitle>
+        <CardTitle className="text-2xl font-bold">Criar nova senha</CardTitle>
         <CardDescription>
-          Identidade validada. Escolha sua nova senha de acesso abaixo.
+          Informe sua nova senha para concluir a recuperação da sua conta.
         </CardDescription>
       </CardHeader>
       <CardContent className="p-8">
@@ -154,7 +153,7 @@ export function ResetPasswordClient() {
               ) : (
                 <Lock className="h-4 w-4 mr-2" />
               )}
-              Armazenar Nova Senha
+              Salvar nova senha
             </Button>
           </form>
         </Form>
