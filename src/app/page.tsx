@@ -43,7 +43,7 @@ async function RecentReports() {
 
 function BenefitCard({ icon: Icon, title, description }: { icon: any, title: string, description: string }) {
   return (
-    <div className="p-4 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 group flex flex-col h-full overflow-hidden">
+    <div className="p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 group flex flex-col h-full overflow-hidden">
       <div className="flex flex-col items-center md:items-start text-center md:text-left gap-y-3">
         <div className="bg-primary/10 w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
           <Icon className="h-6 w-6 text-primary" />
@@ -221,7 +221,6 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
             <div className="flex items-end justify-between mb-8">
                 <div className="space-y-2">
                     <h2 className="text-3xl md:text-4xl font-bold text-foreground">Relatos Recentes</h2>
-                    <p className="text-muted-foreground text-sm">Confira as últimas demandas registradas pela comunidade.</p>
                 </div>
                 <Button asChild variant="link" className="font-bold text-primary p-0 group hidden sm:flex">
                   <Link href="/dashboard" className="flex items-center gap-2">
