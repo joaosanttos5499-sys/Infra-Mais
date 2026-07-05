@@ -39,7 +39,7 @@ export function AuthForm({
   useEffect(() => {
     const emailParam = searchParams.get('email');
     if (emailParam) {
-      setEmail(emailParam);
+      setEmail(emailParam.trim());
     }
   }, [searchParams]);
 
@@ -59,7 +59,6 @@ export function AuthForm({
       photoURL: profilePhoto
     };
 
-    // Remove duplicates and add the newest one
     accounts = accounts.filter((a: any) => a.email !== user.email);
     accounts.unshift(newAccount);
     localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts.slice(0, 5)));
@@ -68,57 +67,25 @@ export function AuthForm({
   const handleSignIn = async () => {
     setIsSubmitting(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
       const user = userCredential.user;
-
-      if (!user.emailVerified) {
-        toast({
-          title: 'E-mail não verificado',
-          description: 'Por favor, verifique seu e-mail para ter acesso total a todas as funções.',
-          variant: 'default',
-        });
-      }
 
       let profileName = user.displayName || 'Usuário';
       let profilePhoto = user.photoURL || createAvatarSvg(user.email || 'U');
 
-      try {
-        const profileResult = await fetchUserProfileAction(user.uid);
-        if (profileResult.success && profileResult.data) {
-          const ourProfile = profileResult.data;
-          profileName = ourProfile.name;
-          profilePhoto = ourProfile.photoURL || profilePhoto;
-          if (user.displayName !== ourProfile.name || user.photoURL !== ourProfile.photoURL) {
-            await updateProfile(user, {
-              displayName: ourProfile.name,
-              photoURL: ourProfile.photoURL
-            });
-          }
-        }
-      } catch (syncError) {
-        console.error("Failed to sync profile on login:", syncError);
+      const profileResult = await fetchUserProfileAction(user.uid);
+      if (profileResult.success && profileResult.data) {
+        profileName = profileResult.data.name;
+        profilePhoto = profileResult.data.photoURL || profilePhoto;
       }
       
       saveAccountLocally(user, profileName, profilePhoto);
 
-      toast({
-        title: 'Bem-vindo(a) de volta!',
-      });
+      toast({ title: 'Bem-vindo(a) de volta!' });
       if (onAuthSuccess) onAuthSuccess();
     } catch (err: any) {
-      let errorMessage = 'Ocorreu um erro. Tente novamente.';
-      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        errorMessage = 'E-mail ou senha incorretos.';
-      } else if (err.code === 'auth/user-not-found') {
-        errorMessage = 'Nenhuma conta encontrada com este e-mail.';
-      } else if (err.code === 'auth/too-many-requests') {
-        errorMessage = 'Muitas tentativas falhas. Tente novamente mais tarde.';
-      }
-      toast({
-        title: 'Erro de Autenticação',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      let errorMessage = 'E-mail ou senha incorretos.';
+      toast({ title: 'Erro de Autenticação', description: errorMessage, variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
@@ -126,28 +93,22 @@ export function AuthForm({
   
   const handlePasswordReset = async () => {
     if (!email) {
-      toast({
-        title: "Atenção",
-        description: "Por favor, digite seu e-mail primeiro.",
-        variant: "destructive"
-      });
+      toast({ title: "Atenção", description: "Digite seu e-mail para prosseguir.", variant: "destructive" });
       return;
     }
     setIsSubmitting(true);
     try {
         auth.languageCode = 'pt';
-        // Configura o redirecionamento para a nossa página personalizada de ação
         const actionCodeSettings = {
           url: `${window.location.origin}/auth/action`,
           handleCodeInApp: true,
         };
-        await sendPasswordResetEmail(auth, email, actionCodeSettings);
+        await sendPasswordResetEmail(auth, email.trim(), actionCodeSettings);
         setView('resetSuccess');
     } catch (err: any) {
-        console.error("Reset error:", err);
         toast({
             title: "Erro",
-            description: err.code === 'auth/user-not-found' ? 'Nenhuma conta encontrada com este e-mail.' : 'Ocorreu um erro ao enviar o e-mail de recuperação.',
+            description: "Não foi possível enviar o link. Verifique se o e-mail está correto.",
             variant: "destructive",
         });
     } finally {
@@ -157,37 +118,39 @@ export function AuthForm({
 
   if (view === 'resetSuccess') {
     return (
-        <div className="space-y-6 text-center py-4">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                <Mail className="h-6 w-6 text-green-600" />
+        <div className="space-y-6 text-center py-8 animate-in fade-in zoom-in duration-500">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
+                <Mail className="h-8 w-8 text-primary animate-pulse" />
             </div>
             <div className="space-y-2">
-                <h3 className="text-lg font-medium">Link enviado!</h3>
-                <p className='text-sm text-muted-foreground'>
-                    Enviamos as instruções para <strong>{email}</strong>. 
-                    Verifique sua caixa de entrada e a pasta de spam.
+                <h3 className="text-xl font-bold">Aguardando Verificação</h3>
+                <p className='text-sm text-muted-foreground max-w-[280px] mx-auto'>
+                    Enviamos um link de confirmação para <strong>{email}</strong>. 
+                    Acesse seu e-mail e clique no link para ser redirecionado à redefinição de senha.
                 </p>
             </div>
-            <Button variant="outline" className="w-full" onClick={() => setView('signIn')}>
-                <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para o login
-            </Button>
+            <div className="pt-4 border-t border-border mt-4">
+                <Button variant="ghost" className="w-full text-muted-foreground" onClick={() => setView('signIn')}>
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para o login
+                </Button>
+            </div>
         </div>
     )
   }
 
   if (view === 'resetPassword') {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
         <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setView('signIn')}>
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <h3 className="font-semibold text-lg">Recuperar Senha</h3>
+                <h3 className="font-bold text-lg">Recuperar Senha</h3>
             </div>
-            <p className='text-sm text-muted-foreground'>Digite seu e-mail cadastrado. Enviaremos um link para você criar uma nova senha com segurança.</p>
+            <p className='text-sm text-muted-foreground'>Informe seu e-mail cadastrado para receber o link de verificação.</p>
           <div className="space-y-2">
-            <Label htmlFor="email-reset">E-mail</Label>
+            <Label htmlFor="email-reset">Seu E-mail</Label>
             <Input
               id="email-reset"
               type="email"
@@ -195,6 +158,7 @@ export function AuthForm({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
+              className="h-12 rounded-xl"
             />
           </div>
         </div>
@@ -202,10 +166,10 @@ export function AuthForm({
         <Button
             onClick={handlePasswordReset}
             disabled={isSubmitting || !email}
-            className="w-full"
+            className="w-full h-12 rounded-xl font-bold"
         >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Enviar link de recuperação
+            Enviar Link de Verificação
         </Button>
       </div>
     );
@@ -223,6 +187,7 @@ export function AuthForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
+            className="h-12 rounded-xl"
           />
         </div>
         <div className="space-y-2">
@@ -235,7 +200,7 @@ export function AuthForm({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isSubmitting}
-              className="pr-10"
+              className="pr-10 h-12 rounded-xl"
             />
             <Button
               type="button"
@@ -245,13 +210,12 @@ export function AuthForm({
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-              <span className="sr-only">{showPassword ? "Ocultar senha" : "Mostrar senha"}</span>
             </Button>
           </div>
            <div className="flex justify-end">
              <Button 
                 variant="link" 
-                className="p-0 h-auto text-xs text-muted-foreground hover:text-primary" 
+                className="p-0 h-auto text-xs text-muted-foreground hover:text-primary font-bold" 
                 onClick={() => setView('resetPassword')}
              >
                 Esqueci minha senha
@@ -263,7 +227,7 @@ export function AuthForm({
         <Button
           onClick={handleSignIn}
           disabled={isSubmitting || !email || !password}
-          className="w-full"
+          className="w-full h-12 rounded-xl font-bold shadow-md"
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Entrar
@@ -273,7 +237,7 @@ export function AuthForm({
         Não tem uma conta?{' '}
         <Link 
           href="/signup" 
-          className="underline font-medium hover:text-primary transition-colors"
+          className="text-primary font-bold hover:underline"
           onClick={() => onSignupClick?.()}
         >
           Crie uma agora

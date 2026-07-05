@@ -43,12 +43,7 @@ export const UpdateProfileSchema = z.object({
 });
 
 export const ResetPasswordSchema = z.object({
-  password: z.string()
-    .min(8, "A senha deve ter pelo menos 8 caracteres.")
-    .regex(/[A-Z]/, "Pelo menos uma letra maiúscula")
-    .regex(/[a-z]/, "Pelo menos uma letra minúscula")
-    .regex(/[0-9]/, "Pelo menos um número")
-    .regex(/[^A-Za-z0-9]/, "Pelo menos um caractere especial"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres."),
   confirmPassword: z.string().min(1, "A confirmação da senha é obrigatória."),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não coincidem.",
