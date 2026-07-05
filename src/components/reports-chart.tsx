@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { Pie, PieChart, Sector } from "recharts"
+import { Pie, PieChart, Cell } from "recharts"
 import {
   ChartContainer,
   ChartTooltip,
@@ -11,115 +11,89 @@ import {
 
 interface ReportsChartProps {
     total: number;
-    resolved: number;
+    underReview: number;
+    pending: number;
     inProgress: number;
+    resolved: number;
 }
 
-export function ReportsChart({ total, resolved, inProgress }: ReportsChartProps) {
+export function ReportsChart({ total, underReview, pending, inProgress, resolved }: ReportsChartProps) {
     const [mounted, setMounted] = React.useState(false);
     
     React.useEffect(() => {
         setMounted(true);
     }, []);
 
-    const pending = total - resolved - inProgress;
-    const chartData = React.useMemo(() => [
-        { status: "Pendentes", count: pending, fill: "hsl(var(--chart-1))" },
-        { status: "Em Andamento", count: inProgress, fill: "hsl(var(--chart-3))" },
-        { status: "Resolvidos", count: resolved, fill: "hsl(var(--chart-2))" },
-    ].filter(item => item.count > 0), [pending, inProgress, resolved]);
+    // Se o total for 0, exibimos um gráfico neutro conforme solicitado
+    const isChartEmpty = total === 0;
+    
+    const chartData = React.useMemo(() => {
+        if (isChartEmpty) {
+            return [{ status: "Sem Dados", count: 1, fill: "hsl(var(--muted))" }];
+        }
+        return [
+            { status: "Em Análise", count: underReview, fill: "#94a3b8" }, // Slate-400
+            { status: "Pendentes", count: pending, fill: "#f59e0b" },    // Amber-500
+            { status: "Em Andamento", count: inProgress, fill: "hsl(var(--primary))" },
+            { status: "Resolvidos", count: resolved, fill: "#10b981" },   // Emerald-500
+        ].filter(item => item.count > 0);
+    }, [underReview, pending, inProgress, resolved, isChartEmpty]);
 
     const chartConfig = {
-        count: {
-            label: "Count",
-        },
-        Pendentes: {
-            label: "Pendentes",
-            color: "hsl(var(--chart-1))",
-        },
-        "Em Andamento": {
-            label: "Em Andamento",
-            color: "hsl(var(--chart-3))",
-        },
-        Resolvidos: {
-            label: "Resolvidos",
-            color: "hsl(var(--chart-2))",
-        },
-    }
-
-    const totalCount = React.useMemo(() => {
-        return chartData.reduce((acc, curr) => acc + curr.count, 0)
-    }, [chartData]);
-    
-    const activeIndex = React.useMemo(() => {
-        return chartData.findIndex((item) => item.status === "Resolvidos");
-    }, [chartData]);
-
-
-    if (total === 0) {
-        return (
-            <div className="flex items-center justify-center h-48 text-muted-foreground">
-                Ainda não há dados para exibir.
-            </div>
-        )
+        count: { label: "Quantidade" },
+        "Em Análise": { label: "Em Análise", color: "#94a3b8" },
+        Pendentes: { label: "Pendentes", color: "#f59e0b" },
+        "Em Andamento": { label: "Em Andamento", color: "hsl(var(--primary))" },
+        Resolvidos: { label: "Resolvidos", color: "#10b981" },
+        "Sem Dados": { label: "Sem Dados", color: "hsl(var(--muted))" }
     }
 
     return (
-      <div className="flex flex-col sm:flex-row items-center gap-6">
-        <ChartContainer
-            config={chartConfig}
-            className="mx-auto aspect-square h-48"
-        >
-        <PieChart>
-            <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-            />
-             <Pie
-                data={chartData}
-                dataKey="count"
-                nameKey="status"
-                innerRadius={60}
-                strokeWidth={5}
-                activeIndex={activeIndex}
-                activeShape={({ outerRadius = 0, ...props }) => (
-                    <g>
-                        <Sector {...props} outerRadius={outerRadius + 8} />
-                        <Sector {...props} outerRadius={outerRadius} innerRadius={outerRadius-8} />
-                    </g>
-                )}
-            >
-            </Pie>
-             <text
-                x="50%"
-                y="50%"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                className="fill-foreground text-3xl font-bold"
-            >
-                {mounted ? totalCount.toLocaleString() : "..."}
-            </text>
-            <text
-                x="50%"
-                y="50%"
-                dy="1.5em"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                className="fill-muted-foreground text-sm"
-            >
-                Total
-            </text>
-        </PieChart>
-        </ChartContainer>
-         <div className="flex flex-col gap-2 text-sm">
-            {chartData.map((item) => (
-                <div key={item.status} className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.fill }} />
-                    <span>{item.status}:</span>
-                    <span className="font-semibold">{mounted ? item.count.toLocaleString() : "..."}</span>
-                </div>
-            ))}
+        <div className="relative w-full aspect-square max-w-[200px] mx-auto">
+            <ChartContainer config={chartConfig} className="w-full h-full">
+                <PieChart>
+                    {!isChartEmpty && (
+                        <ChartTooltip
+                            cursor={false}
+                            content={<ChartTooltipContent hideLabel />}
+                        />
+                    )}
+                    <Pie
+                        data={chartData}
+                        dataKey="count"
+                        nameKey="status"
+                        innerRadius={60}
+                        outerRadius={80}
+                        strokeWidth={4}
+                        stroke="hsl(var(--card))"
+                        animationBegin={0}
+                        animationDuration={1500}
+                    >
+                        {chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                    </Pie>
+                    <text
+                        x="50%"
+                        y="50%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-foreground text-3xl font-bold"
+                    >
+                        {mounted ? total.toLocaleString() : "..."}
+                    </text>
+                    <text
+                        x="50%"
+                        y="50%"
+                        dy="1.5em"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-muted-foreground text-[10px] font-black uppercase tracking-widest"
+                    >
+                        Total
+                    </text>
+                </PieChart>
+            </ChartContainer>
         </div>
-      </div>
-  )
+    )
 }
