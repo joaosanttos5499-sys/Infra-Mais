@@ -27,10 +27,10 @@ export function AuthActionClient() {
 
     const validateAction = async () => {
       try {
-        // Valida o código do Firebase
+        // Valida o código do Firebase para garantir que o link é legítimo
         await verifyPasswordResetCode(auth, oobCode);
         
-        // Se houver um requestId, notifica o banco simulado para a outra aba
+        // Se houver um requestId, notifica o banco simulado para que a aba original saiba que pode prosseguir
         if (requestId) {
           await verifyResetRequestAction(requestId, oobCode);
         }
@@ -63,13 +63,13 @@ export function AuthActionClient() {
               <MailCheck className="h-12 w-12 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Conta Verificada!</CardTitle>
+          <CardTitle className="text-2xl font-bold">Identidade Confirmada!</CardTitle>
           <CardDescription className="text-base mt-2">
-            Sua identidade foi confirmada com sucesso. Agora você pode fechar esta aba e voltar para a janela onde solicitou a recuperação para definir sua nova senha.
+            Sua conta foi verificada com sucesso. Agora você pode fechar esta aba e voltar para a janela onde solicitou a recuperação para definir sua nova senha no site do Infra Mais.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-8 pt-0 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">O Infra Mais agradece sua colaboração.</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Obrigado por colaborar com a segurança da plataforma.</p>
         </CardContent>
       </Card>
     );
