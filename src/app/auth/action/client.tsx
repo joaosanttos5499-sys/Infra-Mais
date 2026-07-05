@@ -7,7 +7,7 @@ import { verifyPasswordResetCode } from 'firebase/auth';
 import { useAuth } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { verifyResetRequestAction } from '@/lib/actions';
-import { Loader2, ShieldCheck, MailCheck, AlertTriangle } from 'lucide-react';
+import { Loader2, MailCheck, AlertTriangle } from 'lucide-react';
 
 export function AuthActionClient() {
   const auth = useAuth();
@@ -20,24 +20,30 @@ export function AuthActionClient() {
   const requestId = searchParams.get('requestId');
 
   useEffect(() => {
-    if (!mode || !oobCode || mode !== 'resetPassword') {
-      setStatus('error');
-      return;
+    // Se o Firebase redirecionar para cá com mode=resetPassword
+    if (!oobCode || (mode && mode !== 'resetPassword')) {
+      // Tenta capturar requestId se existir, para casos de redirecionamento interno
+      if (!requestId) {
+        setStatus('error');
+        return;
+      }
     }
 
     const validateAction = async () => {
       try {
-        // Valida o código do Firebase para garantir que o link é legítimo
-        await verifyPasswordResetCode(auth, oobCode);
-        
-        // Se houver um requestId, notifica o banco simulado para que a aba original saiba que pode prosseguir
-        if (requestId) {
-          await verifyResetRequestAction(requestId, oobCode);
+        if (oobCode) {
+          // Valida o código do Firebase apenas para garantir que é legítimo
+          await verifyPasswordResetCode(auth, oobCode);
+          
+          // Se tivermos o requestId, notificamos o sistema para que a aba original saiba que pode prosseguir
+          if (requestId) {
+            await verifyResetRequestAction(requestId, oobCode);
+          }
         }
         
         setStatus('verified');
       } catch (error) {
-        console.error('Link de verificação inválido:', error);
+        console.error('Falha na validação:', error);
         setStatus('error');
       }
     };
@@ -49,15 +55,15 @@ export function AuthActionClient() {
     return (
       <div className="flex flex-col items-center justify-center p-12 space-y-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="text-muted-foreground font-bold">Verificando sua identidade...</p>
+        <p className="text-muted-foreground font-bold">Validando sua conta...</p>
       </div>
     );
   }
 
   if (status === 'verified') {
     return (
-      <Card className="w-full max-w-md border-primary/20 shadow-xl overflow-hidden animate-in fade-in zoom-in duration-500">
-        <CardHeader className="bg-primary/5 p-8 text-center">
+      <Card className="w-full max-w-md border-primary/20 shadow-xl text-center animate-in fade-in zoom-in duration-500">
+        <CardHeader className="bg-primary/5 p-8">
           <div className="flex justify-center mb-4">
             <div className="p-3 bg-primary/10 rounded-full">
               <MailCheck className="h-12 w-12 text-primary" />
@@ -65,11 +71,11 @@ export function AuthActionClient() {
           </div>
           <CardTitle className="text-2xl font-bold">Identidade Confirmada!</CardTitle>
           <CardDescription className="text-base mt-2">
-            Sua conta foi verificada com sucesso. Agora você pode fechar esta aba e voltar para a janela onde solicitou a recuperação para definir sua nova senha no site do Infra Mais.
+            Sua conta foi validada com sucesso. Você já pode fechar esta janela e voltar para a página onde solicitou a recuperação para definir sua nova senha.
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-8 pt-0 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Obrigado por colaborar com a segurança da plataforma.</p>
+        <CardContent className="p-8 pt-0">
+            <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Infra Mais • Segurança</p>
         </CardContent>
       </Card>
     );
@@ -81,9 +87,9 @@ export function AuthActionClient() {
         <div className="flex justify-center mb-4 text-destructive">
           <AlertTriangle className="h-16 w-16" />
         </div>
-        <CardTitle className="text-xl font-bold">Verificação Falhou</CardTitle>
+        <CardTitle className="text-xl font-bold">Link Inválido</CardTitle>
         <CardDescription className="mt-2">
-          Este link de verificação expirou ou já foi utilizado. Por favor, solicite uma nova recuperação de senha no site.
+          Este link expirou ou já foi utilizado. Por favor, solicite uma nova recuperação de senha no site.
         </CardDescription>
       </CardHeader>
     </Card>

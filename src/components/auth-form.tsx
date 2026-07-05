@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/firebase';
 import {
@@ -44,7 +44,6 @@ export function AuthForm({
     }
   }, [searchParams]);
 
-  // Listener para o status da recuperação de senha
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (view === 'resetWaiting' && currentRequestId) {
@@ -52,7 +51,7 @@ export function AuthForm({
         const request = await getResetRequestAction(currentRequestId);
         if (request && request.status === 'VERIFIED') {
           clearInterval(interval);
-          toast({ title: "Identidade Confirmada", description: "Redirecionando para definir sua nova senha." });
+          toast({ title: "Identidade Confirmada", description: "Redirecionando para a redefinição de senha." });
           router.push(`/report/auth/reset-password?requestId=${currentRequestId}&oobCode=${request.oobCode}`);
         }
       }, 2000);
@@ -114,12 +113,12 @@ export function AuthForm({
     }
     setIsSubmitting(true);
     try {
-        // Criar um pedido de recuperação no nosso banco simulado para sincronização
         const requestId = await createResetRequestAction(email.trim());
         setCurrentRequestId(requestId);
 
         auth.languageCode = 'pt';
         const actionCodeSettings = {
+          // Importante: A URL de redirecionamento após a verificação no Firebase
           url: `${window.location.origin}/auth/action?requestId=${requestId}`,
           handleCodeInApp: true,
         };
@@ -132,7 +131,7 @@ export function AuthForm({
             variant: "destructive",
         });
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -143,19 +142,19 @@ export function AuthForm({
                 <Mail className="h-8 w-8 text-primary animate-pulse" />
             </div>
             <div className="space-y-2">
-                <h3 className="text-xl font-bold">Verifique seu E-mail</h3>
+                <h3 className="text-xl font-bold">Aguardando Verificação</h3>
                 <p className='text-sm text-muted-foreground max-w-[280px] mx-auto'>
-                    Enviamos um link de confirmação para <strong>{email}</strong>. 
-                    Mantenha esta tela aberta. Após clicar no link, você será redirecionado automaticamente.
+                    Enviamos um link de validação para <strong>{email}</strong>. 
+                    Mantenha esta tela aberta. Assim que você clicar no link do e-mail, esta página será redirecionada automaticamente.
                 </p>
             </div>
             <div className="flex flex-col items-center gap-4 pt-4 border-t border-border mt-4">
                 <div className="flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-widest">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Aguardando validação...
+                    Aguardando você clicar no link...
                 </div>
                 <Button variant="ghost" className="w-full text-muted-foreground text-xs" onClick={() => setView('signIn')}>
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Cancelar solicitação
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Cancelar
                 </Button>
             </div>
         </div>
@@ -170,11 +169,11 @@ export function AuthForm({
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setView('signIn')}>
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <h3 className="font-bold text-lg">Recuperar Senha</h3>
+                <h3 className="font-bold text-lg">Recuperação de Senha</h3>
             </div>
-            <p className='text-sm text-muted-foreground'>Informe seu e-mail cadastrado para receber o link de verificação da conta.</p>
+            <p className='text-sm text-muted-foreground'>Informe seu e-mail cadastrado para enviarmos o link de verificação.</p>
           <div className="space-y-2">
-            <Label htmlFor="email-reset">Seu E-mail</Label>
+            <Label htmlFor="email-reset">E-mail da Conta</Label>
             <Input
               id="email-reset"
               type="email"
@@ -193,7 +192,7 @@ export function AuthForm({
             className="w-full h-12 rounded-xl font-bold"
         >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Enviar Link de Verificação
+            Enviar Link de Validação
         </Button>
       </div>
     );

@@ -12,7 +12,6 @@ import { ResetPasswordSchema } from '@/lib/schemas';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ShieldCheck, Eye, EyeOff, Lock } from 'lucide-react';
@@ -41,8 +40,8 @@ export function ResetPasswordClient() {
       await confirmPasswordReset(auth, oobCode, values.password);
       setIsSuccess(true);
       toast({
-        title: 'Sucesso!',
-        description: 'Sua senha foi atualizada.',
+        title: 'Senha alterada!',
+        description: 'Sua conta foi atualizada com sucesso.',
       });
     } catch (error) {
       toast({
@@ -64,13 +63,11 @@ export function ResetPasswordClient() {
           </div>
           <CardTitle className="text-2xl font-bold">Senha Alterada!</CardTitle>
           <CardDescription className="text-base mt-2">
-            A senha da sua conta foi atualizada com sucesso. Você já pode utilizar suas novas credenciais para acessar o Infra Mais.
+            A senha da sua conta foi atualizada com sucesso. Sua conta já pode ser acessada utilizando sua nova credencial.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-8 pt-0 text-center">
-            <Button className="w-full h-12 rounded-xl font-bold" onClick={() => router.push('/report/auth')}>
-                Ir para o Login
-            </Button>
+            <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Infra Mais • Zeladoria Urbana</p>
         </CardContent>
       </Card>
     );
@@ -79,9 +76,9 @@ export function ResetPasswordClient() {
   return (
     <Card className="w-full max-w-md border-border shadow-2xl rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
       <CardHeader className="p-8 border-b border-border bg-muted/30 text-center">
-        <CardTitle className="text-2xl font-bold">Criar nova senha</CardTitle>
+        <CardTitle className="text-2xl font-bold">Redefinir Senha</CardTitle>
         <CardDescription>
-          Identidade verificada. Escolha sua nova senha de acesso.
+          Identidade validada. Escolha sua nova senha de acesso abaixo.
         </CardDescription>
       </CardHeader>
       <CardContent className="p-8">
@@ -92,12 +89,12 @@ export function ResetPasswordClient() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nova senha</FormLabel>
+                  <FormLabel>Nova Senha</FormLabel>
                   <div className="relative">
                     <FormControl>
                       <Input
                         type={showPassword ? "text" : "password"}
-                        placeholder="********"
+                        placeholder="Digite a nova senha"
                         className="h-12 rounded-xl pr-12 bg-muted/20"
                         {...field}
                       />
@@ -122,12 +119,12 @@ export function ResetPasswordClient() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirmar nova senha</FormLabel>
+                  <FormLabel>Confirmar Nova Senha</FormLabel>
                   <div className="relative">
                     <FormControl>
                       <Input
                         type={showConfirmPassword ? "text" : "password"}
-                        placeholder="********"
+                        placeholder="Confirme a senha"
                         className="h-12 rounded-xl pr-12 bg-muted/20"
                         {...field}
                       />
@@ -157,7 +154,7 @@ export function ResetPasswordClient() {
               ) : (
                 <Lock className="h-4 w-4 mr-2" />
               )}
-              Salvar nova senha
+              Armazenar Nova Senha
             </Button>
           </form>
         </Form>
