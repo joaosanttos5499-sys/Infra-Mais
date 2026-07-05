@@ -29,7 +29,8 @@ export function ReportsChart({ total, underReview, pending, inProgress, resolved
     
     const chartData = React.useMemo(() => {
         if (isChartEmpty) {
-            return [{ status: "Sem Dados", count: 1, fill: "hsl(var(--muted))" }];
+            // Usando uma cor suave e visível para o estado vazio
+            return [{ status: "Sem Dados", count: 1, fill: "var(--empty-chart)" }];
         }
         return [
             { status: "Em Análise", count: underReview, fill: "#94a3b8" }, // Slate-400
@@ -45,11 +46,15 @@ export function ReportsChart({ total, underReview, pending, inProgress, resolved
         Pendentes: { label: "Pendentes", color: "#f59e0b" },
         "Em Andamento": { label: "Em Andamento", color: "hsl(var(--primary))" },
         Resolvidos: { label: "Resolvidos", color: "#10b981" },
-        "Sem Dados": { label: "Sem Dados", color: "hsl(var(--muted))" }
+        "Sem Dados": { label: "Sem Dados", color: "var(--empty-chart)" }
     }
 
     return (
         <div className="relative w-full aspect-square max-w-[200px] mx-auto">
+            <style dangerouslySetInnerHTML={{ __html: `
+                :root { --empty-chart: #e2e8f0; }
+                .dark { --empty-chart: #1e293b; }
+            `}} />
             <ChartContainer config={chartConfig} className="w-full h-full">
                 <PieChart>
                     {!isChartEmpty && (
