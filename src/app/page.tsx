@@ -86,12 +86,12 @@ function AboutSection({ reports }: { reports: Report[] }) {
                 Infra Mais: <br />
                 <span className="text-primary">tecnologia para uma cidade melhor</span>
               </h2>
-              <div className="text-base md:text-lg text-muted-foreground leading-relaxed text-center md:text-left max-w-xl">
+              <div className="space-y-5 text-base md:text-lg text-muted-foreground leading-relaxed text-center md:text-left max-w-xl">
                 <p>
                   O Infra Mais permite registrar, acompanhar e visualizar problemas de infraestrutura urbana de forma simples, transparente e acessível. 
                   Por meio de relatos geolocalizados, evidências visuais e acompanhamento em tempo real, a plataforma aproxima a população da identificação e da solução dos problemas da cidade. 
                 </p>
-                <p className="font-bold text-primary mt-4">
+                <p className="font-bold text-primary pt-2">
                   Sua participação faz a diferença na melhoria da cidade.
                 </p>
               </div>
