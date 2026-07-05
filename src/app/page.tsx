@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, MapPin, CheckCircle2, BarChart3, Clock, ChevronRight, Plus, ShieldCheck, Camera, Handshake, TrafficCone, Wrench, Info } from "lucide-react";
@@ -114,7 +113,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
 
           <Card className="rounded-3xl border-border shadow-2xl p-6 md:p-10 bg-card overflow-hidden relative w-full lg:max-w-[600px] ml-auto">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl" />
-            <CardHeader className="text-center pb-8 p-0">
+            <CardHeader className="text-center pb-12 p-0">
                 <CardTitle className="text-xl md:text-2xl font-bold flex items-center justify-center gap-3 text-foreground">
                   <BarChart3 className="h-6 w-6 text-primary" /> Panorama dos Relatos
                 </CardTitle>
@@ -134,7 +133,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
                     <div className="space-y-2.5">
                         <IndicatorItem label="Em Análise" value={stats.underReview} colorClass="bg-slate-400" />
                         <IndicatorItem label="Pendentes" value={stats.pending} colorClass="bg-amber-500" />
-                        <IndicatorItem label="Em Andamento" value={stats.inProgress} colorClass="bg-primary" />
+                        <IndicatorItem label="Em Andamento" value={stats.primary} colorClass="bg-primary" />
                         <IndicatorItem label="Resolvidos" value={stats.resolved} colorClass="bg-emerald-500" />
                     </div>
                 </div>
