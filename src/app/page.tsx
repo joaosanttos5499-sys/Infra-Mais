@@ -1,17 +1,14 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, MapPin, CheckCircle2, BarChart3, Clock, ChevronRight, Plus, ShieldCheck, Camera, Handshake, TrafficCone, Wrench, Info } from "lucide-react";
+import { ArrowRight, MapPin, BarChart3, Clock, Camera, Info } from "lucide-react";
 import { getReports } from "@/lib/data";
 import { type Report } from "@/lib/types";
 import { HomeMapClient } from "@/components/home-map-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCategory } from "@/lib/categories";
-import { StatusBadge } from "@/components/status-badge";
 import { ReportsChart } from "@/components/reports-chart";
-import { ReportTime } from "@/components/report-time";
 import { HomeCtaClient } from "@/components/home-cta-client";
 import { RecentReportCard } from "@/components/recent-report-card";
-import Image from "next/image";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
@@ -89,10 +86,12 @@ function AboutSection({ reports }: { reports: Report[] }) {
                 Infra Mais: <br />
                 <span className="text-primary">tecnologia para uma cidade melhor</span>
               </h2>
-              <div className="space-y-5 text-base md:text-lg text-muted-foreground leading-relaxed text-center md:text-left max-w-xl">
-                <p>O Infra Mais permite registrar, acompanhar e visualizar problemas de infraestrutura urbana de forma simples, transparente e acessível.</p>
-                <p>Por meio de relatos geolocalizados, evidências visuais e acompanhamento em tempo real, a plataforma aproxima a população da identificação e da solução dos problemas da cidade.</p>
-                <p className="font-bold text-primary pt-2">Sua participação faz a diferença na melhoria da cidade.</p>
+              <div className="text-base md:text-lg text-muted-foreground leading-relaxed text-center md:text-left max-w-xl">
+                <p>
+                  O Infra Mais permite registrar, acompanhar e visualizar problemas de infraestrutura urbana de forma simples, transparente e acessível. 
+                  Por meio de relatos geolocalizados, evidências visuais e acompanhamento em tempo real, a plataforma aproxima a população da identificação e da solução dos problemas da cidade. 
+                  <span className="font-bold text-primary ml-1">Sua participação faz a diferença na melhoria da cidade.</span>
+                </p>
               </div>
             </div>
 
