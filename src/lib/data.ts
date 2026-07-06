@@ -71,17 +71,33 @@ function getDB() {
 
 export async function getReports(limitCount?: number): Promise<Report[]> {
   const firestore = getDB();
-  logFirestoreOp('QUERY', 'collectionGroup:reports', 'Global');
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  // Verifica se existe um usuário autenticado para cumprir a regra de segurança do Firestore
+  if (!user) {
+    console.warn("[Firestore] getReports chamado sem usuário autenticado. Retornando lista vazia.");
+    return [];
+  }
+
+  // Caminho específico do usuário conforme exigido pelas regras de segurança
+  const path = `users/${user.uid}/reports`;
+  logFirestoreOp('QUERY', 'reports', path);
+
   try {
+    // A consulta agora utiliza a coleção específica do usuário em vez de collectionGroup
+    const reportsRef = collection(firestore, "users", user.uid, "reports");
     const reportsQuery = query(
-      collectionGroup(firestore, "reports"),
+      reportsRef,
       orderBy("createdAt", "desc")
     );
+    
     const snapshot = await getDocs(reportsQuery);
     const results = snapshot.docs.map(doc => convertDoc<Report>(doc));
+    
     return limitCount ? results.slice(0, limitCount) : results;
   } catch (error: any) {
-    console.error(`[Firestore Error] Falha em getReports: ${error.message}`, { code: error.code });
+    console.error(`[Firestore Error] Falha em getReports para o usuário ${user.uid}: ${error.message}`, { code: error.code });
     return [];
   }
 }
