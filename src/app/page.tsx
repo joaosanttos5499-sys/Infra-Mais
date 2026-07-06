@@ -119,7 +119,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
 
           <Card className="rounded-3xl border-border shadow-2xl p-6 md:p-10 bg-card overflow-hidden relative w-full lg:max-w-[600px] ml-auto">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl" />
-            <CardHeader className="text-center pb-12 p-0">
+            <CardHeader className="text-center pb-16 md:pb-20 p-0">
                 <CardTitle className="text-xl md:text-2xl font-bold flex items-center justify-center gap-3 text-foreground">
                   <BarChart3 className="h-6 w-6 text-primary" /> Panorama dos Relatos
                 </CardTitle>
