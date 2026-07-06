@@ -1,23 +1,34 @@
 
+'use client';
+
+import { useEffect, useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, MapPin, BarChart3, Clock, Camera, Info } from "lucide-react";
+import { ArrowRight, MapPin, BarChart3, Clock, Camera, Info, Loader2 } from "lucide-react";
 import { getReports } from "@/lib/data";
 import { type Report } from "@/lib/types";
 import { HomeMapClient } from "@/components/home-map-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getCategory } from "@/lib/categories";
 import { ReportsChart } from "@/components/reports-chart";
 import { HomeCtaClient } from "@/components/home-cta-client";
 import { RecentReportCard } from "@/components/recent-report-card";
-import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
 
-async function RecentReports() {
-  const allReports = await getReports();
-  const publicReports = allReports.filter(report => report.status !== 'UNDER_REVIEW' && report.status !== 'EXCLUDED');
+function RecentReports({ reports, isLoading }: { reports: Report[], isLoading: boolean }) {
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl" />
+      </div>
+    );
+  }
+
+  const publicReports = reports.filter(report => report.status !== 'UNDER_REVIEW' && report.status !== 'EXCLUDED');
   const recentReports = publicReports.slice(0, 3);
 
   if (recentReports.length === 0) {
@@ -67,7 +78,15 @@ function IndicatorItem({ label, value, colorClass }: { label: string, value: num
   );
 }
 
-function AboutSection({ reports }: { reports: Report[] }) {
+function AboutSection({ reports, isLoading }: { reports: Report[], isLoading: boolean }) {
+  if (isLoading) {
+    return (
+      <section className="py-20 bg-background border-t border-border flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </section>
+    );
+  }
+
   const stats = {
     underReview: reports.filter(r => r.status === 'UNDER_REVIEW').length,
     pending: reports.filter(r => r.status === 'PENDING').length,
@@ -168,14 +187,32 @@ function AboutSection({ reports }: { reports: Report[] }) {
   );
 }
 
-export default async function Home(props: { searchParams: Promise<{ lat?: string, lng?: string }> }) {
-  const allReports: Report[] = await getReports();
-  const publicReports = allReports.filter(report => report.status !== 'UNDER_REVIEW' && report.status !== 'EXCLUDED');
-  
-  const searchParams = await props.searchParams;
-  const lat = searchParams.lat ? parseFloat(searchParams.lat) : null;
-  const lng = searchParams.lng ? parseFloat(searchParams.lng) : null;
+function HomeContent() {
+  const [reports, setReports] = useState<Report[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    async function loadReports() {
+      try {
+        const data = await getReports();
+        setReports(data);
+      } catch (error) {
+        console.error("Erro ao carregar relatos no cliente:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadReports();
+  }, []);
+
+  const latParam = searchParams.get('lat');
+  const lngParam = searchParams.get('lng');
+  const lat = latParam ? parseFloat(latParam) : null;
+  const lng = lngParam ? parseFloat(lngParam) : null;
   const selectedLocation = (lat && lng) ? { lat, lng } : null;
+
+  const publicReports = reports.filter(report => report.status !== 'UNDER_REVIEW' && report.status !== 'EXCLUDED');
 
   return (
     <div className="flex flex-col w-full bg-background">
@@ -212,7 +249,13 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
                   </div>
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-inner border border-border h-[350px] md:h-[550px]">
-                  <HomeMapClient reports={publicReports} selectedLocation={selectedLocation} />
+                  {isLoading ? (
+                    <div className="w-full h-full flex items-center justify-center bg-muted animate-pulse">
+                      <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <HomeMapClient reports={publicReports} selectedLocation={selectedLocation} />
+                  )}
                 </div>
             </div>
           </div>
@@ -231,9 +274,7 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
                 </Button>
             </div>
             <Separator className="mb-12 bg-border/50" />
-            <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-3 gap-6"><Skeleton className="h-64 rounded-xl" /><Skeleton className="h-64 rounded-xl" /><Skeleton className="h-64 rounded-xl" /></div>}>
-                <RecentReports />
-            </Suspense>
+            <RecentReports reports={reports} isLoading={isLoading} />
             <div className="mt-8 flex justify-center sm:hidden">
               <Button asChild variant="outline" className="w-full h-12 rounded-xl font-bold">
                 <Link href="/dashboard">Ver todos os relatos</Link>
@@ -242,8 +283,16 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
           </div>
         </section>
         
-        <AboutSection reports={allReports} />
+        <AboutSection reports={reports} isLoading={isLoading} />
       </main>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
