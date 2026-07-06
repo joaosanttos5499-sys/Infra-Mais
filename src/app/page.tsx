@@ -225,7 +225,7 @@ function HomeContent() {
             <p className="mt-12 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-in fade-in duration-1000">
               Informe problemas de infraestrutura de forma rápida e precisa.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-24 animate-in slide-in-from-bottom-4 duration-700">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 animate-in slide-in-from-bottom-4 duration-700">
               <HomeCtaClient />
               <Button asChild variant="ghost" size="lg" className="rounded-xl px-10 h-14 font-semibold text-foreground hover:bg-primary/5 transition-all">
                 <Link href="/dashboard">Ver Relatos <MapPin className="ml-2 h-5 w-5" /></Link>
