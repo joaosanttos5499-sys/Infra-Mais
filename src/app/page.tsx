@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, Suspense } from "react";
@@ -223,10 +222,10 @@ function HomeContent() {
             <h1 className="text-4xl md:text-7xl font-bold text-foreground tracking-tight leading-[1.1] animate-in slide-in-from-top-4 duration-700">
               Relate um Problema na <br className="hidden sm:block"/><span className="text-primary italic">Sua Cidade</span>
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-in fade-in duration-1000">
+            <p className="mt-12 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-in fade-in duration-1000">
               Informe problemas de infraestrutura de forma rápida e precisa.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-10 animate-in slide-in-from-bottom-4 duration-700">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-24 animate-in slide-in-from-bottom-4 duration-700">
               <HomeCtaClient />
               <Button asChild variant="ghost" size="lg" className="rounded-xl px-10 h-14 font-semibold text-foreground hover:bg-primary/5 transition-all">
                 <Link href="/dashboard">Ver Relatos <MapPin className="ml-2 h-5 w-5" /></Link>
