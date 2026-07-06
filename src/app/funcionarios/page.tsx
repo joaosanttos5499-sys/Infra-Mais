@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { DashboardClient } from "@/components/dashboard-client";
-import { getAllReportsAction, getAllComplaintsAction } from "@/lib/actions";
+import { getReports, getComplaints } from "@/lib/data";
 import { Loader2, ShieldAlert } from "lucide-react";
 import { useUser } from "@/firebase";
 import { isEmailEmployee } from "@/lib/config";
@@ -42,19 +41,25 @@ export default function FuncionariosPage() {
   const { user, isUserLoading } = useUser();
   const [reports, setReports] = useState<Report[]>([]);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
-  const [isLoadingReports, setIsLoadingReports] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   const fetchData = useCallback(async () => {
     if (user && isEmailEmployee(user.email)) {
-      const [reportsData, complaintsData] = await Promise.all([
-        getAllReportsAction(),
-        getAllComplaintsAction()
-      ]);
-      setReports(reportsData);
-      setComplaints(complaintsData);
-      setIsLoadingReports(false);
+      setIsLoadingData(true);
+      try {
+        const [reportsData, complaintsData] = await Promise.all([
+          getReports(),
+          getComplaints()
+        ]);
+        setReports(reportsData);
+        setComplaints(complaintsData);
+      } catch (error) {
+        console.error("Erro ao carregar dados do funcionário no cliente:", error);
+      } finally {
+        setIsLoadingData(false);
+      }
     } else if (!isUserLoading && (!user || !isEmailEmployee(user.email))) {
-      setIsLoadingReports(false);
+      setIsLoadingData(false);
     }
   }, [user, isUserLoading]);
 
@@ -82,7 +87,7 @@ export default function FuncionariosPage() {
             </p>
           </div>
           
-          {isLoadingReports ? (
+          {isLoadingData ? (
               <div className="flex items-center justify-center p-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   <p className="ml-4 text-muted-foreground">Carregando dados...</p>

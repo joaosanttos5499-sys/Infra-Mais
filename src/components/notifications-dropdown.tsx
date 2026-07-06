@@ -1,10 +1,10 @@
-
 "use client";
 
 import { useEffect, useState, useTransition, useCallback } from "react";
-import { Bell, Info, Check, ArrowRight, MessageSquare, Clock, FileText, CheckCircle2, TrafficCone, Construction, Wrench, Edit, Trash2, Flag } from "lucide-react";
+import { Bell, Info, Check, ArrowRight, MessageSquare, Clock, FileText, CheckCircle2, TrafficCone, Wrench, Edit, Trash2, Flag, Loader2 } from "lucide-react";
 import { useUser } from "@/firebase";
-import { getNotificationsAction, markAsReadAction, markAllAsReadAction } from "@/lib/actions";
+import { markAsReadAction, markAllAsReadAction } from "@/lib/actions";
+import { getNotifications } from "@/lib/data";
 import { type Notification, type NotificationType } from "@/lib/types";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
@@ -40,24 +40,28 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
   const { user } = useUser();
   const pathname = usePathname();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const dynamicOffset = scrolled ? 22 : 30;
 
-  const fetchNotifications = useCallback(() => {
+  const fetchNotificationsData = useCallback(async () => {
     if (user) {
-      getNotificationsAction(user.uid).then(result => {
-        if (result.success && result.data) {
-          setNotifications(result.data);
-        }
-      });
+      setIsLoading(true);
+      try {
+        const data = await getNotifications(user.uid);
+        setNotifications(data);
+      } catch (error) {
+        console.error("Erro ao carregar notificações no cliente:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   }, [user]);
 
-  // Atualiza quando o usuário loga ou quando muda de página (útil após redirecionamento de envio)
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications, pathname]);
+    fetchNotificationsData();
+  }, [fetchNotificationsData, pathname]);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -78,7 +82,7 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
 
   const handleOpenChange = (open: boolean) => {
     if (open) {
-      fetchNotifications();
+      fetchNotificationsData();
     }
   };
 
@@ -124,7 +128,11 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
 
         <ScrollArea className="max-h-[min(400px,60vh)] overflow-y-auto">
           <div className="p-4 space-y-4">
-            {notifications.length === 0 ? (
+            {isLoading && notifications.length === 0 ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary opacity-50" />
+              </div>
+            ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center px-8">
                 <div className="bg-muted p-6 rounded-full mb-5 shadow-inner">
                   <Bell className="h-10 w-10 text-muted-foreground/30" />

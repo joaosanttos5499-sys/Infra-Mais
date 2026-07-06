@@ -17,7 +17,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UpdateProfileSchema } from "@/lib/schemas";
-import { updateUserProfileAction, fetchUserProfileAction, deleteReportAction, deleteAccountAction } from "@/lib/actions";
+import { updateUserProfileAction, deleteReportAction, deleteAccountAction } from "@/lib/actions";
+import { getUserById } from "@/lib/data";
 import { updateProfile, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -46,12 +47,12 @@ function MyReportItem({ report }: { report: Report }) {
 
     const handleDelete = async () => {
         startDeleteTransition(async () => {
-            const result = await deleteReportAction(report.id);
+            const result = await deleteReportAction(report.id, "Removido pelo usuário", report.userId);
             if (result.success) {
                 toast({ title: "Relatório excluído", description: "O problema foi removido do sistema." });
                 router.refresh();
             } else {
-                toast({ variant: "destructive", title: "Erro ao excluir", description: result.message });
+                toast({ variant: "destructive", title: "Erro ao excluir", description: "Falha ao remover o relato." });
             }
         });
     };
@@ -214,11 +215,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 }
 
                 setIsProfileLoading(true);
-                fetchUserProfileAction(user.uid)
-                    .then((result) => {
-                        if (result.success && result.data) {
-                            setUserProfile(result.data);
-                            form.reset({ name: result.data.name });
+                // Fetch directly on client to avoid server-side permission issues
+                getUserById(user.uid)
+                    .then((data) => {
+                        if (data) {
+                            setUserProfile(data);
+                            form.reset({ name: data.name });
                         } else {
                             const fallback: UserProfile = {
                                 id: user.uid,
@@ -231,6 +233,9 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             form.reset({ name: fallback.name });
                         }
                     })
+                    .catch(err => {
+                        console.error("Erro ao carregar perfil no cliente:", err);
+                    })
                     .finally(() => setIsProfileLoading(false));
             }
         }
@@ -242,7 +247,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 const element = reportsRef.current;
                 if (element) {
                     const yOffset = -100;
-                    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
                     window.scrollTo({ top: y, behavior: 'smooth' });
                 }
             }, 300);

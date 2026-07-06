@@ -19,10 +19,6 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
-    }
-
     // ----------------------------------------------------------------------
     // Collection Rules
     // ----------------------------------------------------------------------
@@ -32,31 +28,34 @@ service cloud.firestore {
       allow get: if isOwner(userId);
       allow list: if false;
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
       
       match /reports/{reportId} {
-        // Relatos são públicos para leitura (Mapa e Dashboard)
+        // Relatos individuais são públicos para leitura
         allow read: if true;
-        // Criação e edição restrita ao dono ou lógica de servidor
+        // Criação e edição restrita ao dono
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update, delete: if isExistingOwner(userId);
+        allow update, delete: if isOwner(userId);
       }
     }
 
-    // Permite consultas de Collection Group para relatos (Mapa Global)
+    // Permite consultas de Collection Group para relatos (Mapa Global e Dashboard)
+    // Essencial para o funcionamento do sistema de zeladoria urbana
     match /{path=**}/reports/{reportId} {
       allow read: if true;
     }
 
-    // Notificações e Denúncias (Uso interno/funcionário)
+    // Notificações: apenas o destinatário lê
     match /notifications/{id} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid);
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
       allow write: if isSignedIn();
     }
 
+    // Denúncias: apenas usuários logados (em um cenário real, haveria check de funcionário)
     match /complaints/{id} {
-      allow read, write: if isSignedIn();
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
     }
   }
 }

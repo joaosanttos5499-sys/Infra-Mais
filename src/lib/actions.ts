@@ -13,13 +13,10 @@ import {
     getUserById, 
     deleteReport as dbDeleteReport, 
     deleteUser as dbDeleteUser, 
-    getReports,
     addNotification,
-    getNotifications,
     markNotificationAsRead as dbMarkAsRead,
     markAllNotificationsAsRead as dbMarkAllAsRead,
     addComplaint,
-    getComplaints,
     getReportById
 } from "@/lib/data";
 import { type Report, type ReportStatus, type NewReport, type UserProfile, type Complaint } from "@/lib/types";
@@ -81,12 +78,6 @@ export async function submitReport(
   }
 
   try {
-    const user = await getUserById(validatedFields.data.userId);
-    if (!user) {
-      console.warn(`[Actions] Tentativa de relato para usuário inexistente no Firestore: ${validatedFields.data.userId}`);
-      return { errors: { _form: ["Perfil de usuário não encontrado no sistema. Tente sair e entrar novamente."] } };
-    }
-
     const photoFile = formData.get("photo") as File;
     if (!photoFile || photoFile.size === 0) {
       return { errors: { photo: ["A foto do problema é obrigatória."] } };
@@ -118,7 +109,7 @@ export async function submitReport(
 
     const newReport: NewReport = {
       userId,
-      relatorEmail: user.email,
+      relatorEmail: "anonimo@inframais.com", 
       category,
       problem,
       city,
@@ -184,7 +175,7 @@ export async function updateReportStatus(
       photoAfterUrl = await fileToDataUri(photoAfterFile);
     }
 
-    if (status === 'RESOLVED' && !photoAfterUrl) {
+    if (status === 'RESOLVED' && !photoAfterUrl && !oldReport.photoAfterUrl) {
         return { success: false, message: "A foto da solução é obrigatória." };
     }
 
@@ -256,33 +247,25 @@ export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'phot
   }
 }
 
+export async function fetchUserProfileAction(userId: string): Promise<{ success: boolean; data?: UserProfile; error?: string }> {
+  try {
+    const profile = await getUserById(userId);
+    return { success: true, data: profile };
+  } catch (error) {
+    console.error("[Actions] Erro ao buscar perfil:", error);
+    return { success: false, error: "Erro ao buscar perfil no banco de dados." };
+  }
+}
+
 export async function updateUserProfileAction(userId: string, data: { name: string }): Promise<{ success: boolean, error?: string }> {
   const validatedFields = UpdateProfileSchema.safeParse(data);
   if (!validatedFields.success) return { success: false, error: "Nome inválido." };
 
   try {
-    const existingProfile = await getUserById(userId);
-    if (!existingProfile) return { success: false, error: "Perfil não encontrado." };
-
-    const { name } = validatedFields.data;
-    if (name !== existingProfile.name && existingProfile.nameLastUpdatedAt) {
-        const lastUpdateDate = new Date(existingProfile.nameLastUpdatedAt);
-        const diff = Date.now() - lastUpdateDate.getTime();
-        if (diff < 7 * 24 * 60 * 60 * 1000) return { success: false, error: "Nome alterável apenas uma vez por semana." };
-    }
-    
-    await saveUser({ ...existingProfile, name, nameLastUpdatedAt: name !== existingProfile.name ? new Date().toISOString() : existingProfile.nameLastUpdatedAt });
+    await saveUser({ id: userId, name: validatedFields.data.name } as any);
     revalidatePath('/minha-conta');
     return { success: true };
   } catch (error) { return { success: false, error: "Erro ao atualizar." }; }
-}
-
-export async function fetchUserProfileAction(userId: string) {
-  try {
-    const userProfile = await getUserById(userId);
-    if (!userProfile) return { success: false };
-    return { success: true, data: userProfile };
-  } catch { return { success: false }; }
 }
 
 export async function deleteAccountAction(userId: string) {
@@ -291,13 +274,6 @@ export async function deleteAccountAction(userId: string) {
     revalidatePath("/"); revalidatePath("/dashboard"); revalidatePath("/minha-conta");
     return { success: true };
   } catch { return { success: false }; }
-}
-
-export async function getNotificationsAction(userId: string) {
-    try {
-        const data = await getNotifications(userId);
-        return { success: true, data };
-    } catch { return { success: false }; }
 }
 
 export async function markAsReadAction(id: string) {
@@ -314,10 +290,6 @@ export async function markAllAsReadAction(userId: string) {
     } catch { return { success: false }; }
 }
 
-export async function getAllReportsAction(): Promise<Report[]> {
-  return await getReports();
-}
-
 export async function submitComplaintAction(complaintData: Omit<Complaint, 'id' | 'createdAt' | 'status'>) {
   try {
     const result = await addComplaint(complaintData);
@@ -327,8 +299,4 @@ export async function submitComplaintAction(complaintData: Omit<Complaint, 'id' 
     console.error(error);
     return { success: false };
   }
-}
-
-export async function getAllComplaintsAction(): Promise<Complaint[]> {
-  return await getComplaints();
 }
