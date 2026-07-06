@@ -1,4 +1,3 @@
-
 import { type Report, type ReportStatus, type NewReport, type UserProfile, type Notification, type Complaint, type NotificationType } from "@/lib/types";
 import { isEmailEmployee } from "./config";
 import { 
@@ -15,40 +14,51 @@ import {
   orderBy,
   deleteDoc,
   Timestamp,
-  addDoc
+  addDoc,
+  DocumentSnapshot,
+  QueryDocumentSnapshot
 } from "firebase/firestore";
 import { initializeFirebase } from "@/firebase";
 
-// Inicializa os SDKs do Firebase para uso no servidor ou cliente
 const { firestore } = initializeFirebase();
 
 /**
- * Converte documentos do Firestore em objetos serializáveis (POJOs)
+ * Converte documentos do Firestore em objetos serializáveis (POJOs).
+ * Essencial para evitar erros de serialização (como JSON.parse/useState) 
+ * ao passar dados de Server Components para Client Components.
  */
-function convertDoc<T>(doc: any): T {
+function convertDoc<T>(doc: DocumentSnapshot | QueryDocumentSnapshot): T {
   const data = doc.data();
-  // Converte Timestamps do Firebase para strings ISO para evitar erros de serialização no Next.js
+  if (!data) return {} as T;
+
   const converted: any = { ...data, id: doc.id };
+  
+  // Converte Timestamps e outros objetos complexos para strings ISO
   Object.keys(converted).forEach(key => {
     if (converted[key] instanceof Timestamp) {
       converted[key] = converted[key].toDate().toISOString();
+    } else if (converted[key] instanceof Date) {
+      converted[key] = converted[key].toISOString();
     }
   });
+
   return converted as T;
 }
 
 export async function getReports(limitCount?: number): Promise<Report[]> {
   try {
-    // Busca em todas as subcoleções 'reports' usando collectionGroup
     const reportsQuery = query(
       collectionGroup(firestore, "reports"),
       orderBy("createdAt", "desc")
     );
     const snapshot = await getDocs(reportsQuery);
     const results = snapshot.docs.map(doc => convertDoc<Report>(doc));
+    
+    // Retorna apenas os dados necessários para evitar sobrecarga de memória no servidor
     return limitCount ? results.slice(0, limitCount) : results;
   } catch (error) {
-    console.error("Erro ao buscar relatos no Firestore:", error);
+    console.error("[Firestore] Erro ao buscar relatos:", error);
+    // Retorna array vazio em caso de erro de permissão para não quebrar a UI
     return [];
   }
 }
@@ -60,13 +70,13 @@ export async function getReportById(id: string): Promise<Report | undefined> {
     if (snapshot.empty) return undefined;
     return convertDoc<Report>(snapshot.docs[0]);
   } catch (error) {
-    console.error(`Erro ao buscar relato ${id}:`, error);
+    console.error(`[Firestore] Erro ao buscar relato ${id}:`, error);
     return undefined;
   }
 }
 
 export async function addReport(report: NewReport): Promise<Report> {
-  const id = doc(collection(firestore, "temp")).id; // Gera um ID único
+  const id = doc(collection(firestore, "temp")).id;
   const newReport: Report = {
     ...report,
     id,
@@ -92,9 +102,7 @@ export async function updateReportStatus(
     
     if (snapshot.empty) return undefined;
     
-    const reportDoc = snapshot.docs[0];
-    const reportRef = reportDoc.ref;
-    
+    const reportRef = snapshot.docs[0].ref;
     const updates: any = { status };
     if (photoAfterUrl) updates.photoAfterUrl = photoAfterUrl;
     if (extraData) Object.assign(updates, extraData);
@@ -103,33 +111,46 @@ export async function updateReportStatus(
     const updated = await getDoc(reportRef);
     return convertDoc<Report>(updated);
   } catch (error) {
-    console.error(`Erro ao atualizar status do relato ${id}:`, error);
+    console.error(`[Firestore] Erro ao atualizar status ${id}:`, error);
     return undefined;
   }
 }
 
 export async function upvoteReport(id: string): Promise<Report | undefined> {
-  const report = await getReportById(id);
-  if (!report) return undefined;
-  
-  const reportsQuery = query(collectionGroup(firestore, "reports"), where("id", "==", id));
-  const snapshot = await getDocs(reportsQuery);
-  const reportRef = snapshot.docs[0].ref;
-  
-  await updateDoc(reportRef, { upvotes: (report.upvotes || 0) + 1 });
-  return { ...report, upvotes: (report.upvotes || 0) + 1 };
+  try {
+    const reportsQuery = query(collectionGroup(firestore, "reports"), where("id", "==", id));
+    const snapshot = await getDocs(reportsQuery);
+    if (snapshot.empty) return undefined;
+
+    const reportDoc = snapshot.docs[0];
+    const currentUpvotes = reportDoc.data().upvotes || 0;
+    await updateDoc(reportDoc.ref, { upvotes: currentUpvotes + 1 });
+    
+    const updated = await getDoc(reportDoc.ref);
+    return convertDoc<Report>(updated);
+  } catch (error) {
+    console.error(`[Firestore] Erro no upvote ${id}:`, error);
+    return undefined;
+  }
 }
 
 export async function downvoteReport(id: string): Promise<Report | undefined> {
-  const report = await getReportById(id);
-  if (!report || (report.upvotes || 0) <= 0) return report;
-  
-  const reportsQuery = query(collectionGroup(firestore, "reports"), where("id", "==", id));
-  const snapshot = await getDocs(reportsQuery);
-  const reportRef = snapshot.docs[0].ref;
-  
-  await updateDoc(reportRef, { upvotes: report.upvotes - 1 });
-  return { ...report, upvotes: report.upvotes - 1 };
+  try {
+    const reportsQuery = query(collectionGroup(firestore, "reports"), where("id", "==", id));
+    const snapshot = await getDocs(reportsQuery);
+    if (snapshot.empty) return undefined;
+
+    const reportDoc = snapshot.docs[0];
+    const currentUpvotes = reportDoc.data().upvotes || 0;
+    if (currentUpvotes <= 0) return convertDoc<Report>(reportDoc);
+
+    await updateDoc(reportDoc.ref, { upvotes: currentUpvotes - 1 });
+    const updated = await getDoc(reportDoc.ref);
+    return convertDoc<Report>(updated);
+  } catch (error) {
+    console.error(`[Firestore] Erro no downvote ${id}:`, error);
+    return undefined;
+  }
 }
 
 export async function deleteReport(id: string, reason: string, employeeId: string): Promise<boolean> {
@@ -147,7 +168,7 @@ export async function deleteReport(id: string, reason: string, employeeId: strin
     });
     return true;
   } catch (error) {
-    console.error(`Erro ao excluir relato ${id}:`, error);
+    console.error(`[Firestore] Erro ao marcar como excluído ${id}:`, error);
     return false;
   }
 }
@@ -155,30 +176,18 @@ export async function deleteReport(id: string, reason: string, employeeId: strin
 export async function saveUser(user: UserProfile): Promise<UserProfile> {
   const role = isEmailEmployee(user.email) ? "EMPLOYEE" : "USER";
   const userToSave = { ...user, role };
-  
-  console.log(`[Firestore] Salvando perfil do usuário em /users/${user.id}`);
-  console.log(`[Firestore] Dados:`, JSON.stringify(userToSave));
-  
   const userRef = doc(firestore, "users", user.id);
   await setDoc(userRef, userToSave, { merge: true });
-  
-  console.log(`[Firestore] Perfil salvo com sucesso.`);
   return userToSave;
 }
 
 export async function getUserById(id: string): Promise<UserProfile | undefined> {
   try {
-    console.log(`[Firestore] Buscando perfil do usuário: /users/${id}`);
     const userRef = doc(firestore, "users", id);
     const snapshot = await getDoc(userRef);
-    
     if (snapshot.exists()) {
-      const userData = convertDoc<UserProfile>(snapshot);
-      console.log(`[Firestore] Perfil encontrado para o UID ${id}`);
-      return userData;
+      return convertDoc<UserProfile>(snapshot);
     }
-    
-    console.warn(`[Firestore] Perfil NÃO encontrado para o UID ${id}`);
     return undefined;
   } catch (error) {
     console.error(`[Firestore] Erro ao buscar usuário ${id}:`, error);
@@ -192,7 +201,7 @@ export async function deleteUser(id: string): Promise<boolean> {
     await deleteDoc(userRef);
     return true;
   } catch (error) {
-    console.error(`Erro ao excluir usuário ${id}:`, error);
+    console.error(`[Firestore] Erro ao excluir perfil ${id}:`, error);
     return false;
   }
 }
@@ -207,7 +216,7 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => convertDoc<Notification>(doc));
   } catch (error) {
-    console.error("Erro ao buscar notificações:", error);
+    console.error("[Firestore] Erro ao buscar notificações:", error);
     return [];
   }
 }

@@ -1,32 +1,7 @@
 /**
- * Core Philosophy: This ruleset enforces a strict user-ownership model.
- * All data is private to the user who created it, and actions are restricted
- * to the authenticated owner of the data.
- *
- * Data Structure: The data is organized hierarchically. All user-specific
- * data, including their profile and any reports they create, is nested under a
- * top-level `/users/{userId}` document path. This structure naturally isolates
- * each user's data.
- *
- * Key Security Decisions:
- * - User Listing Disabled: Users are explicitly forbidden from listing the
- *   top-level `/users` collection to protect user privacy and prevent enumeration.
- * - Strict Ownership: A user can only access documents within their own
- *   data tree (i.e., where the path's `{userId}` matches their auth UID).
- * - Path and Data Consistency: On creation, rules ensure that internal ID
- *   fields (`id` on a User doc, `userId` on a Report doc) match the ID in the
- *   document path, creating a secure and unbreakable link between the data
- *   and its owner. These fields are immutable.
- *
- * Denormalization for Authorization: The path-based structure `/users/{userId}`
- * acts as a form of denormalization. The user's ID is part of the path,
- * eliminating the need for extra `get()` calls to check ownership, which results
- * in faster and more secure rules.
- *
- * Structural Segregation: User profile data (`/users/{userId}`) is stored
- * separately from their reports (`/users/{userId}/reports/{reportId}`). This
- * segregation simplifies the rules, as all documents within a given collection
- * share the same security context and access pattern.
+ * Core Philosophy: This ruleset enforces a strict user-ownership model for profile data,
+ * but allows public read access to infrastructure reports so the community can
+ * visualize and support urban maintenance issues.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -36,93 +11,52 @@ service cloud.firestore {
     // Helper Functions
     // ----------------------------------------------------------------------
 
-    /**
-     * Checks if a user is authenticated.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * Validates that the requesting user's UID matches the document's
-     * owner ID from the path. This is the core of the ownership model.
-     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * Ensures an update or delete operation targets an existing document
-     * and is performed by the document's owner.
-     */
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
-    }
-
-    /**
-     * On create, validates that the user document's internal 'id' field
-     * matches the user's UID from the path.
-     */
-    function isUserDataValidOnCreate(userId) {
-      return request.resource.data.id == userId;
-    }
-
-    /**
-     * On update, ensures the user document's internal 'id' field is immutable.
-     */
-    function isUserDataValidOnUpdate() {
-      // The `id` field must not be changed after creation.
-      return request.resource.data.id == resource.data.id;
-    }
-    
-    /**
-     * On create, validates that the report's internal 'userId' field
-     * matches the owner's UID from the path.
-     */
-    function isReportDataValidOnCreate(userId) {
-      return request.resource.data.userId == userId;
-    }
-
-    /**
-     * On update, ensures the report's internal 'userId' field is immutable.
-     */
-    function isReportDataValidOnUpdate() {
-      // The 'userId' field must not be changed after creation.
-      return request.resource.data.userId == resource.data.userId;
     }
 
     // ----------------------------------------------------------------------
     // Collection Rules
     // ----------------------------------------------------------------------
 
-    /**
-     * @description Controls access to a user's own profile document.
-     * @path /users/{userId}
-     * @allow A user with auth.uid 'user123' can (create) their profile at `/users/user123`.
-     * @deny A user with auth.uid 'user456' tries to (get) another user's profile at `/users/user123`.
-     * @principle Restricts access to a user's own data tree and prevents user enumeration.
-     */
     match /users/{userId} {
+      // Perfil privado: apenas o dono lê e edita
       allow get: if isOwner(userId);
       allow list: if false;
-      allow create: if isOwner(userId) && isUserDataValidOnCreate(userId);
-      allow update: if isExistingOwner(userId) && isUserDataValidOnUpdate();
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId);
       
-      /**
-       * @description Controls access to a user's own reports.
-       * @path /users/{userId}/reports/{reportId}
-       * @allow A user with auth.uid 'user123' can (create) a report at `/users/user123/reports/reportABC`.
-       * @deny A user with auth.uid 'user456' tries to (list) reports at `/users/user123/reports`.
-       * @principle Enforces strict document ownership within a user's private subcollection.
-       */
       match /reports/{reportId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
-        allow create: if isOwner(userId) && isReportDataValidOnCreate(userId);
-        allow update: if isExistingOwner(userId) && isReportDataValidOnUpdate();
-        allow delete: if isExistingOwner(userId);
+        // Relatos são públicos para leitura (Mapa e Dashboard)
+        allow read: if true;
+        // Criação e edição restrita ao dono ou lógica de servidor
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update, delete: if isExistingOwner(userId);
       }
+    }
+
+    // Permite consultas de Collection Group para relatos (Mapa Global)
+    match /{path=**}/reports/{reportId} {
+      allow read: if true;
+    }
+
+    // Notificações e Denúncias (Uso interno/funcionário)
+    match /notifications/{id} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid);
+      allow write: if isSignedIn();
+    }
+
+    match /complaints/{id} {
+      allow read, write: if isSignedIn();
     }
   }
 }
