@@ -66,19 +66,27 @@ function getDB() {
 /**
  * Busca relatos da comunidade. 
  * Usa Collection Group para permitir visualização global pública.
+ * Nota: Ordenação feita em memória para evitar erro de índice ausente (Missing Index).
  */
 export async function getReports(limitCount?: number): Promise<Report[]> {
   const firestore = getDB();
   logFirestoreOp('QUERY', 'collectionGroup:reports', 'Global');
 
   try {
+    // Busca sem orderBy para evitar necessidade de índice manual no collectionGroup
     const reportsQuery = query(
-      collectionGroup(firestore, "reports"),
-      orderBy("createdAt", "desc")
+      collectionGroup(firestore, "reports")
     );
     
     const snapshot = await getDocs(reportsQuery);
     const results = snapshot.docs.map(doc => convertDoc<Report>(doc));
+    
+    // Ordenação em memória (descendente por createdAt)
+    results.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA;
+    });
     
     return limitCount ? results.slice(0, limitCount) : results;
   } catch (error: any) {
