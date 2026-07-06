@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, Suspense } from "react";
@@ -6,6 +5,7 @@ import { DashboardClient } from "@/components/dashboard-client";
 import { getReports } from "@/lib/data";
 import { Loader2 } from "lucide-react";
 import { type Report } from "@/lib/types";
+import { Separator } from "@/components/ui/separator";
 
 function DashboardSkeleton() {
   return (
@@ -41,6 +41,7 @@ function DashboardContent() {
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
             Painel de Problemas
           </h1>
+          <Separator className="my-4 bg-border" />
           <p className="text-base md:text-lg text-muted-foreground mt-2">
             Visualize e acompanhe em tempo real as ocorrências registradas na sua região.
           </p>
