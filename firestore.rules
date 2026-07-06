@@ -19,43 +19,56 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function isEmployee() {
+      // Lista de e-mails autorizados (deve bater com src/lib/config.ts)
+      return isSignedIn() && request.auth.token.email.matches('.*@gmail.com') && (
+        request.auth.token.email == 'joaosanttos528@gmail.com'
+      );
+    }
+
     // ----------------------------------------------------------------------
     // Collection Rules
     // ----------------------------------------------------------------------
 
     match /users/{userId} {
-      // Perfil privado: apenas o dono lê e edita
-      allow get: if isOwner(userId);
-      allow list: if false;
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isOwner(userId);
+      // Perfil: dono lê/edita, outros não vêem
+      allow get: if isOwner(userId) || isEmployee();
+      allow list: if isEmployee();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isEmployee();
       allow delete: if isOwner(userId);
       
       match /reports/{reportId} {
-        // Relatos individuais são públicos para leitura
+        // Relatos individuais são públicos para leitura (Mapa/Dashboard)
         allow read: if true;
-        // Criação e edição restrita ao dono
+        // Criação restrita ao dono
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update, delete: if isOwner(userId);
+        // Edição pelo dono ou funcionário
+        allow update: if isOwner(userId) || isEmployee();
+        allow delete: if isOwner(userId) || isEmployee();
       }
     }
 
     // Permite consultas de Collection Group para relatos (Mapa Global e Dashboard)
-    // Essencial para o funcionamento do sistema de zeladoria urbana
     match /{path=**}/reports/{reportId} {
       allow read: if true;
     }
 
     // Notificações: apenas o destinatário lê
     match /notifications/{id} {
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow write: if isSignedIn();
+      // Permite listagem se o filtro da query bater com o dono
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isEmployee());
+      // Criação pelo sistema (qualquer logado pode disparar via trigger/action)
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isEmployee());
+      allow delete: if isEmployee();
     }
 
-    // Denúncias: apenas usuários logados (em um cenário real, haveria check de funcionário)
+    // Denúncias: apenas funcionários
     match /complaints/{id} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read, list: if isEmployee();
+      allow create: if isSignedIn(); // Qualquer usuário pode denunciar
+      allow update, delete: if isEmployee();
     }
   }
 }
