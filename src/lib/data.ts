@@ -270,13 +270,22 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
   
   logFirestoreOp('QUERY', 'notifications', `userId == ${userId}`);
   try {
+    // Removido orderBy da consulta direta para evitar erro de índice ausente
     const q = query(
       collection(firestore, "notifications"),
-      where("userId", "==", userId),
-      orderBy("createdAt", "desc")
+      where("userId", "==", userId)
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => convertDoc<Notification>(doc));
+    const results = snapshot.docs.map(doc => convertDoc<Notification>(doc));
+
+    // Ordenação em memória (descendente por createdAt)
+    results.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA;
+    });
+
+    return results;
   } catch (error: any) {
     console.error(`[Firestore Error] getNotifications: ${error.message}`);
     return [];
@@ -347,9 +356,18 @@ export async function addComplaint(complaint: Omit<Complaint, 'id' | 'createdAt'
 export async function getComplaints(): Promise<Complaint[]> {
   const firestore = getDB();
   try {
-    const q = query(collection(firestore, "complaints"), orderBy("createdAt", "desc"));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => convertDoc<Complaint>(doc));
+    // Removido orderBy da consulta direta para evitar erro de índice ausente
+    const snapshot = await getDocs(collection(firestore, "complaints"));
+    const results = snapshot.docs.map(doc => convertDoc<Complaint>(doc));
+
+    // Ordenação em memória (descendente por createdAt)
+    results.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA;
+    });
+
+    return results;
   } catch (error: any) {
     console.error(`[Firestore Error] getComplaints: ${error.message}`);
     return [];
