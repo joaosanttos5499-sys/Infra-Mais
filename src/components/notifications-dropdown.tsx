@@ -184,13 +184,13 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
                             
                             <p className={cn(
                                 "text-xs leading-relaxed font-medium whitespace-pre-wrap", 
-                                !notification.isRead ? "text-foreground/80" : "text-muted-foreground/70"
+                                !notification.isRead ? "text-foreground" : "text-muted-foreground"
                             )}>
                                 {notification.message}
                             </p>
                             
                             <div className="flex items-center justify-between gap-2 mt-4 pt-2 border-t border-border/40">
-                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                                     <Clock className="h-3.5 w-3.5" />
                                     <ReportTime date={new Date(notification.createdAt)} />
                                 </div>
