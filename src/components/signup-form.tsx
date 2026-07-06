@@ -13,10 +13,12 @@ import { Loader2, MailCheck, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { SignupSchema } from "@/lib/schemas";
-import { useAuth } from "@/firebase";
+import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import { z } from "zod";
 import { createAvatarSvg } from "@/lib/avatar";
+import { isEmailEmployee } from "@/lib/config";
 
 type SignupFormData = z.infer<typeof SignupSchema>;
 
@@ -26,6 +28,7 @@ export function SignupForm() {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
+  const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVerificationSent, setIsVerificationSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -65,10 +68,6 @@ export function SignupForm() {
     localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts.slice(0, 5)));
   };
 
-  /**
-   * Efeito para checar automaticamente se o e-mail foi verificado.
-   * Realiza um reload do usuário a cada 2 segundos.
-   */
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
@@ -101,50 +100,66 @@ export function SignupForm() {
   const handleSignup = async (data: SignupFormData) => {
     setIsSubmitting(true);
     try {
+        console.log(`[Signup] Iniciando criação de conta para: ${data.email}`);
         const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
         const user = userCredential.user;
+        const uid = user.uid;
+
+        console.log(`[Signup] Conta criada no Auth com sucesso. UID: ${uid}`);
+
+        // Configura perfil no Firestore diretamente do cliente para garantir permissões (isOwner)
+        const role = isEmailEmployee(data.email) ? "EMPLOYEE" : "USER";
+        const profilePhoto = createAvatarSvg(data.email);
+        
+        const profileData = {
+          id: uid, // Obrigatório para bater com o path /users/{uid} e regra de segurança
+          name: data.name,
+          email: data.email,
+          dateOfBirth: data.dateOfBirth,
+          photoURL: profilePhoto,
+          role: role,
+          createdAt: new Date().toISOString()
+        };
+
+        console.log(`[Signup] Tentando salvar perfil em /users/${uid}`);
+        console.log(`[Signup] Dados do perfil:`, JSON.stringify(profileData));
 
         try {
-          // Define o idioma para Português (Brasil) antes de enviar a verificação
+          // Gravação direta no Firestore usando o UID como ID do documento
+          const userRef = doc(firestore, "users", uid);
+          await setDoc(userRef, profileData);
+          console.log(`[Signup] Perfil salvo no Firestore com sucesso.`);
+        } catch (firestoreError: any) {
+          console.error(`[Signup] Erro CRÍTICO ao salvar no Firestore:`, firestoreError);
+          throw new Error(`Falha ao salvar perfil no banco de dados: ${firestoreError.message}`);
+        }
+
+        try {
           auth.languageCode = 'pt';
           await sendEmailVerification(user);
+          console.log(`[Signup] E-mail de verificação enviado.`);
         } catch (verificationError) {
-          console.error("Failed to send verification email:", verificationError);
+          console.error("[Signup] Erro ao enviar verificação:", verificationError);
         }
 
-        const result = await saveUserProfileAction({
-            id: user.uid,
-            name: data.name,
-            email: data.email,
-            dateOfBirth: data.dateOfBirth
+        await updateProfile(user, {
+          displayName: data.name,
+          photoURL: profilePhoto,
         });
 
-        if(result.success) {
-            const profilePhoto = result.photoURL || createAvatarSvg(data.email);
-            if (auth.currentUser) {
-              await updateProfile(auth.currentUser, {
-                displayName: data.name,
-                photoURL: profilePhoto,
-              });
-            }
+        saveAccountLocally(user, data.name, profilePhoto);
 
-            saveAccountLocally(user, data.name, profilePhoto);
-
-            toast({
-                title: "Conta criada!",
-                description: "Verifique seu e-mail para ativar sua conta.",
-            });
-            setIsVerificationSent(true);
-        } else {
-            throw new Error(result.error || "Falha ao salvar o perfil.");
-        }
+        toast({
+            title: "Conta criada!",
+            description: "Verifique seu e-mail para ativar sua conta.",
+        });
+        setIsVerificationSent(true);
 
     } catch (error: any) {
-        let errorMessage = "Ocorreu um erro inesperado.";
+        console.error("[Signup] Erro geral no fluxo:", error);
+        let errorMessage = error.message || "Ocorreu um erro inesperado.";
         if (error.code === 'auth/email-already-in-use') {
             errorMessage = "Este e-mail já está em uso.";
-        } else if (error.code === 'auth/invalid-email') {
-            errorMessage = "O e-mail informado é inválido.";
         }
         toast({ variant: 'destructive', title: 'Erro ao criar conta', description: errorMessage });
     } finally {

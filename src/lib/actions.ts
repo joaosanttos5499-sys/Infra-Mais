@@ -82,7 +82,10 @@ export async function submitReport(
 
   try {
     const user = await getUserById(validatedFields.data.userId);
-    if (!user) return { errors: { _form: ["Usuário não encontrado. Por favor, tente sair e entrar novamente."] } };
+    if (!user) {
+      console.warn(`[Actions] Tentativa de relato para usuário inexistente no Firestore: ${validatedFields.data.userId}`);
+      return { errors: { _form: ["Perfil de usuário não encontrado no sistema. Tente sair e entrar novamente."] } };
+    }
 
     const photoFile = formData.get("photo") as File;
     if (!photoFile || photoFile.size === 0) {
@@ -128,15 +131,14 @@ export async function submitReport(
       longitude,
     };
 
-    const createdReport = addReport(newReport);
+    const createdReport = await addReport(newReport);
     
-    // Notificação: RELATO ENVIADO
     await addNotification(
       userId,
       createdReport.id,
       'SENT',
       'Relato enviado com sucesso',
-      'Seu relato foi enviado com sucesso e agora está em análise pela equipe do Infra Mais.\n\nApós a validação, você será informado sobre todas as alterações realizadas durante o andamento da ocorrência.'
+      'Seu relato foi enviado com sucesso e agora está em análise pela equipe do Infra Mais.'
     );
     
     revalidatePath("/");
@@ -191,60 +193,10 @@ export async function updateReportStatus(
     });
     
     if (updatedReport) {
-        // Detecção de Aprovação
         if (oldReport.status === 'UNDER_REVIEW' && status !== 'UNDER_REVIEW') {
-            await addNotification(
-                updatedReport.userId,
-                reportId,
-                'APPROVED',
-                'Relato aprovado',
-                'Seu relato foi analisado e aprovado pela equipe do Infra Mais.\n\nAgora ele seguirá para acompanhamento público e poderá receber apoio de outros usuários da plataforma.'
-            );
-        }
-
-        // Notificações de Status Específicas
-        if (status === 'PENDING' && oldReport.status !== 'PENDING') {
-            await addNotification(
-                updatedReport.userId,
-                reportId,
-                'PENDING',
-                'Relato disponível para acompanhamento',
-                'Seu relato foi aprovado e agora está no status "Pendente".\n\nA partir deste momento ele está disponível para visualização pública e poderá receber apoios da comunidade.'
-            );
-        } else if (status === 'IN_PROGRESS' && oldReport.status !== 'IN_PROGRESS') {
-            await addNotification(
-                updatedReport.userId,
-                reportId,
-                'IN_PROGRESS',
-                'Atendimento iniciado',
-                'Seu relato entrou na etapa "Em Andamento".\n\nA equipe responsável iniciou os procedimentos necessários para solucionar o problema informado.'
-            );
+            await addNotification(updatedReport.userId, reportId, 'APPROVED', 'Relato aprovado', 'Seu relato foi aprovado e agora está disponível para acompanhamento público.');
         } else if (status === 'RESOLVED' && oldReport.status !== 'RESOLVED') {
-            await addNotification(
-                updatedReport.userId,
-                reportId,
-                'RESOLVED',
-                'Problema resolvido',
-                'Seu relato foi marcado como resolvido.\n\nCaso deseje, consulte as informações e evidências disponibilizadas pela equipe responsável.\n\nAgradecemos por contribuir com a melhoria da infraestrutura da comunidade.'
-            );
-        }
-
-        // Detecção de Edição (ajustes durante análise)
-        const fieldsChanged = 
-            category !== oldReport.category || 
-            problem !== oldReport.problem || 
-            bairro !== oldReport.bairro || 
-            location !== oldReport.location || 
-            description !== oldReport.description;
-
-        if (fieldsChanged) {
-            await addNotification(
-                updatedReport.userId,
-                reportId,
-                'EDITED',
-                'Relato atualizado',
-                'Durante a etapa de análise, algumas informações do seu relato foram ajustadas pela equipe do Infra Mais para melhorar a precisão e a qualidade das informações apresentadas.'
-            );
+            await addNotification(updatedReport.userId, reportId, 'RESOLVED', 'Problema resolvido', 'Seu relato foi marcado como resolvido. Agradecemos por contribuir com a cidade.');
         }
     }
 
@@ -283,14 +235,7 @@ export async function deleteReportAction(reportId: string, reason: string, emplo
     const success = await dbDeleteReport(reportId, reason, employeeId);
     if (!success) return { success: false, message: "Falha ao remover." };
     
-    // Notificação: RELATO EXCLUÍDO
-    await addNotification(
-        report.userId,
-        reportId,
-        'EXCLUDED',
-        'Relato removido',
-        `Após análise da equipe do Infra Mais, seu relato foi removido da plataforma.\n\nMotivo da exclusão:\n${reason}\n\nCaso considere necessário, você poderá registrar um novo relato com as informações corrigidas.`
-    );
+    await addNotification(report.userId, reportId, 'EXCLUDED', 'Relato removido', `Seu relato foi removido. Motivo: ${reason}`);
 
     revalidatePath("/"); revalidatePath("/dashboard"); revalidatePath("/minha-conta"); revalidatePath("/funcionarios");
     return { success: true };
@@ -305,7 +250,10 @@ export async function saveUserProfileAction(userProfile: Omit<UserProfile, 'phot
     await saveUser(finalUserProfile);
     revalidatePath('/'); revalidatePath('/minha-conta');
     return { success: true, photoURL: finalUserProfile.photoURL };
-  } catch (error) { return { success: false, error: "Erro ao salvar perfil." }; }
+  } catch (error) { 
+    console.error("[Actions] Erro ao salvar perfil:", error);
+    return { success: false, error: "Erro ao salvar perfil no banco de dados." }; 
+  }
 }
 
 export async function updateUserProfileAction(userId: string, data: { name: string }): Promise<{ success: boolean, error?: string }> {
@@ -373,19 +321,6 @@ export async function getAllReportsAction(): Promise<Report[]> {
 export async function submitComplaintAction(complaintData: Omit<Complaint, 'id' | 'createdAt' | 'status'>) {
   try {
     const result = await addComplaint(complaintData);
-    
-    // Notificação: DENÚNCIA REGISTRADA
-    const report = await getReportById(complaintData.reportId);
-    if (report) {
-        await addNotification(
-            report.userId,
-            report.id,
-            'COMPLAINT',
-            'Ocorrência administrativa registrada',
-            'Foi registrada uma ocorrência administrativa relacionada à utilização da plataforma.\n\nA equipe do Infra Mais realizará uma análise antes de qualquer decisão.\n\nAté o momento, nenhuma medida foi aplicada à sua conta.'
-        );
-    }
-
     revalidatePath("/funcionarios");
     return { success: true, data: result };
   } catch (error) {
