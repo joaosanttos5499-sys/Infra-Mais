@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
 import { 
-    addReport, 
     updateReportStatus as dbUpdateReportStatus, 
     upvoteReport as dbUpvoteReport, 
     downvoteReport as dbDownvoteReport, 
@@ -19,11 +18,10 @@ import {
     addComplaint,
     getReportById
 } from "@/lib/data";
-import { type Report, type ReportStatus, type NewReport, type UserProfile, type Complaint } from "@/lib/types";
-import { ReportSchema, UpdateProfileSchema } from "./schemas";
+import { type Report, type ReportStatus, type UserProfile, type Complaint } from "@/lib/types";
+import { UpdateProfileSchema } from "./schemas";
 import { createAvatarSvg } from "./avatar";
 import { isEmailEmployee } from "./config";
-import { getCategory } from "./categories";
 
 export type FormState = {
   message?: string | null;
@@ -48,103 +46,6 @@ const fileToDataUri = async (file: File) => {
   const base64 = Buffer.from(buffer).toString("base64");
   return `data:${file.type};base64,${base64}`;
 };
-
-export async function submitReport(
-  prevState: FormState | undefined,
-  formData: FormData
-): Promise<FormState> {
-  const validatedFields = ReportSchema.safeParse({
-    userId: formData.get("userId"),
-    category: formData.get("category"),
-    problem: formData.get("problem"),
-    city: formData.get("city"),
-    bairro: formData.get("bairro"),
-    address: formData.get("address"),
-    reference: formData.get("reference"),
-    description: formData.get("description"),
-    latitude: formData.get("latitude"),
-    longitude: formData.get("longitude"),
-  });
-
-  if (!validatedFields.success) {
-    const fieldErrors = validatedFields.error.flatten().fieldErrors;
-    return {
-      errors: { ...fieldErrors, location: fieldErrors.address },
-    };
-  }
-  
-  if(validatedFields.data.latitude === 0 && validatedFields.data.longitude === 0) {
-      return { errors: { _form: ["Por favor, selecione uma localização no mapa."] } };
-  }
-
-  try {
-    const photoFile = formData.get("photo") as File;
-    if (!photoFile || photoFile.size === 0) {
-      return { errors: { photo: ["A foto do problema é obrigatória."] } };
-    }
-    const photoDataUri = await fileToDataUri(photoFile);
-
-    const { userId, category, problem, city, bairro, address, reference, description, latitude, longitude } = validatedFields.data;
-    const location = reference ? `${address} (${reference})` : address;
-
-    const categoryInfo = getCategory(category);
-    const categoryLabel = categoryInfo?.label || category;
-    const problemLabel = categoryInfo?.problems.find(p => p.value === problem)?.label || problem;
-
-    let aiSummaryText = "Resumo automático indisponível.";
-    try {
-      const aiSummary = await summarizeReport({
-        category: categoryLabel,
-        problem: problemLabel,
-        city,
-        bairro,
-        location,
-        description: description || "Nenhuma descrição fornecida.",
-        photoDataUri,
-      });
-      aiSummaryText = aiSummary.summary;
-    } catch (aiError) {
-      aiSummaryText = `${problemLabel} em ${bairro}. ${description || ''}`;
-    }
-
-    const newReport: NewReport = {
-      userId,
-      relatorEmail: "anonimo@inframais.com", 
-      category,
-      problem,
-      city,
-      bairro,
-      location,
-      description: description || "",
-      summary: aiSummaryText,
-      photoUrl: photoDataUri,
-      latitude,
-      longitude,
-    };
-
-    const createdReport = await addReport(newReport);
-    
-    await addNotification(
-      userId,
-      createdReport.id,
-      'SENT',
-      'Relato enviado com sucesso',
-      'Seu relato foi enviado com sucesso e agora está em análise pela equipe do Infra Mais.'
-    );
-    
-    revalidatePath("/");
-    revalidatePath("/dashboard");
-    revalidatePath("/minha-conta");
-    revalidatePath("/funcionarios");
-    
-    return { success: true };
-  } catch (e) {
-    console.error("Erro ao processar relatório:", e);
-    return {
-      errors: { _form: ["Erro ao processar o envio. Verifique sua conexão e tente novamente."] },
-    };
-  }
-}
 
 type UpdateActionState = { success: boolean; message?: string; };
 

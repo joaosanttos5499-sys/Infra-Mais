@@ -4,7 +4,9 @@
 import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
 import { Camera, Loader2, MapPin, ImagePlus, RotateCcw } from "lucide-react";
-import { submitReport } from "@/lib/actions";
+import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
+import { addReport, addNotification } from "@/lib/data";
+import { type NewReport } from "@/lib/types";
 import { categories, getCategory } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,15 +120,14 @@ export function ReportForm() {
       setIsCompressing(true);
       try {
         const options = {
-          maxWidthOrHeight: 1920,
+          maxWidthOrHeight: 1024,
           useWebWorker: true,
           fileType: 'image/webp',
-          initialQuality: 0.8
+          initialQuality: 0.5
         };
         
         const compressedFile = await imageCompression(file, options);
         
-        // Create a new File object from the blob if it's not already one
         const finalFile = new File([compressedFile], compressedFile.name.replace(/\.[^/.]+$/, "") + ".webp", {
             type: 'image/webp',
         });
@@ -169,27 +170,81 @@ export function ReportForm() {
         return;
     }
 
-    const formData = new FormData();
-    formData.append('photo', values.photo);
-    Object.keys(values).forEach(key => {
-        if (key !== 'photo') formData.append(key, String((values as any)[key]));
-    });
+    if(values.latitude === 0 && values.longitude === 0) {
+      toast({ variant: 'destructive', title: 'Erro', description: "Por favor, selecione uma localização no mapa." });
+      return;
+    }
+
+    setIsRedirecting(true);
 
     try {
-        const result = await submitReport(undefined, formData);
-        if (result?.success) {
-          setIsRedirecting(true);
-          toast({ title: "Sucesso!", description: "Relatório enviado com sucesso." });
-          router.push('/minha-conta#meus-relatorios');
-        } else {
-          toast({ 
-            variant: 'destructive', 
-            title: 'Erro ao enviar', 
-            description: result?.errors?._form?.[0] || result?.errors?.userId?.[0] || "Verifique os campos do formulário." 
+        let photoDataUri = photoPreview;
+        if (!photoDataUri) {
+          const reader = new FileReader();
+          photoDataUri = await new Promise((resolve, reject) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(values.photo);
           });
         }
-    } catch (error) {
-        toast({ variant: 'destructive', title: 'Erro', description: "Ocorreu um erro ao processar sua solicitação." });
+
+        const categoryInfo = getCategory(values.category);
+        const categoryLabel = categoryInfo?.label || values.category;
+        const problemLabel = categoryInfo?.problems.find(p => p.value === values.problem)?.label || values.problem;
+        const location = values.reference ? `${values.address} (${values.reference})` : values.address;
+
+        let aiSummaryText = "Resumo automático indisponível.";
+        try {
+          const aiResult = await summarizeReport({
+            category: categoryLabel,
+            problem: problemLabel,
+            city: values.city,
+            bairro: values.bairro,
+            location: location,
+            description: values.description || "Nenhuma descrição fornecida.",
+            photoDataUri: photoDataUri as string,
+          });
+          aiSummaryText = aiResult.summary;
+        } catch (aiError) {
+          console.error("AI Summary failed:", aiError);
+          aiSummaryText = `${problemLabel} em ${values.bairro}. ${values.description || ''}`;
+        }
+
+        const newReportData: NewReport = {
+          userId: user.uid,
+          relatorEmail: user.email || "anonimo@inframais.com", 
+          category: values.category,
+          problem: values.problem,
+          city: values.city,
+          bairro: values.bairro,
+          location: location,
+          description: values.description || "",
+          summary: aiSummaryText,
+          photoUrl: photoDataUri as string,
+          latitude: values.latitude,
+          longitude: values.longitude,
+        };
+
+        const createdReport = await addReport(newReportData);
+        
+        await addNotification(
+          user.uid,
+          createdReport.id,
+          'SENT',
+          'Relato enviado com sucesso',
+          'Seu relato foi enviado com sucesso e agora está em análise pela equipe do Infra Mais.'
+        );
+
+        toast({ title: "Sucesso!", description: "Relatório enviado com sucesso." });
+        router.push('/minha-conta#meus-relatorios');
+    } catch (error: any) {
+        console.error("Submission failed:", error);
+        let message = "Erro ao processar o envio. Verifique sua conexão e tente novamente.";
+        if (error.message?.includes("insufficient permissions")) {
+          message = "Erro de permissão. Tente sair e entrar novamente na sua conta.";
+        }
+        toast({ variant: 'destructive', title: 'Erro', description: message });
+        setIsRedirecting(false);
     }
   };
 
