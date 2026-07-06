@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
@@ -78,16 +77,16 @@ function MyReportItem({ report }: { report: Report }) {
                             <Maximize2 className="h-4 w-4" />
                         </button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden border-none bg-transparent shadow-none">
+                    <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0 overflow-hidden border-none bg-transparent shadow-none">
                         <DialogHeader className="sr-only">
                             <DialogTitle>Visualização da Foto</DialogTitle>
                             <DialogDescription>Foto em alta resolução do problema relatado.</DialogDescription>
                         </DialogHeader>
-                        <div className="relative w-full h-full flex items-center justify-center p-4">
+                        <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
                             <img 
                                 src={report.photoUrl} 
                                 alt="Foto em tamanho real" 
-                                className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in duration-300" 
+                                className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in duration-300" 
                             />
                         </div>
                     </DialogContent>
