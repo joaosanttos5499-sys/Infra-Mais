@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, MapPin, BarChart3, Clock, Camera, Info } from "lucide-react";
@@ -86,7 +87,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
                 Infra Mais: <br />
                 <span className="text-primary">tecnologia para uma cidade melhor</span>
               </h2>
-              <div className="space-y-5 text-base md:text-lg text-muted-foreground leading-relaxed text-center md:text-left max-w-xl">
+              <div className="space-y-10 text-base md:text-lg text-muted-foreground leading-relaxed text-center md:text-left max-w-xl">
                 <p>
                   O Infra Mais permite registrar, acompanhar e visualizar problemas de infraestrutura urbana de forma simples, transparente e acessível. 
                   Por meio de relatos geolocalizados, evidências visuais e acompanhamento em tempo real, a plataforma aproxima a população da identificação e da solução dos problemas da cidade. 
