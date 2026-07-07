@@ -47,7 +47,7 @@ function MyReportItem({ report }: { report: Report }) {
 
     const handleDelete = async () => {
         startDeleteTransition(async () => {
-            const result = await deleteReportAction(report.id, "Removido pelo usuário", report.userId);
+            const result = await deleteReportAction(report.id, report.userId, "Removido pelo usuário", report.userId);
             if (result.success) {
                 toast({ title: "Relatório excluído", description: "O problema foi removido do sistema." });
                 router.refresh();
@@ -215,7 +215,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 }
 
                 setIsProfileLoading(true);
-                // Fetch directly on client to avoid server-side permission issues
+                // Fetch diretamente no cliente para evitar problemas de permissão SSR
                 getUserById(user.uid)
                     .then((data) => {
                         if (data) {

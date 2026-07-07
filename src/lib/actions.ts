@@ -1,4 +1,3 @@
-
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -54,8 +53,11 @@ export async function updateReportStatus(
   payload: { reportId: string, formData: FormData }
 ): Promise<UpdateActionState> {
   const { reportId, formData } = payload;
+  const userId = formData.get("reportUserId") as string;
+
+  if (!userId) return { success: false, message: "ID do usuário relator não fornecido." };
   
-  const oldReport = await getReportById(reportId);
+  const oldReport = await getReportById(reportId, userId);
   if (!oldReport) return { success: false, message: "Relato não encontrado." };
 
   const status = formData.get("status") as ReportStatus;
@@ -80,7 +82,7 @@ export async function updateReportStatus(
         return { success: false, message: "A foto da solução é obrigatória." };
     }
 
-    const updatedReport = await dbUpdateReportStatus(reportId, status, photoAfterUrl, {
+    const updatedReport = await dbUpdateReportStatus(reportId, userId, status, photoAfterUrl, {
         category, problem, bairro, location, description, latitude, longitude
     });
     
@@ -103,31 +105,28 @@ export async function updateReportStatus(
   }
 }
 
-export async function upvoteReportAction(reportId: string) {
+export async function upvoteReportAction(reportId: string, userId: string) {
     try {
-        await dbUpvoteReport(reportId);
+        await dbUpvoteReport(reportId, userId);
         revalidatePath("/"); revalidatePath("/dashboard");
         return { success: true };
     } catch (error) { return { success: false }; }
 }
 
-export async function downvoteReportAction(reportId: string) {
+export async function downvoteReportAction(reportId: string, userId: string) {
     try {
-        await dbDownvoteReport(reportId);
+        await dbDownvoteReport(reportId, userId);
         revalidatePath("/"); revalidatePath("/dashboard");
         return { success: true };
     } catch (error) { return { success: false }; }
 }
 
-export async function deleteReportAction(reportId: string, reason: string, employeeId: string) {
+export async function deleteReportAction(reportId: string, userId: string, reason: string, employeeId: string) {
   try {
-    const report = await getReportById(reportId);
-    if (!report) return { success: false, message: "Relato não encontrado." };
-
-    const success = await dbDeleteReport(reportId, reason, employeeId);
+    const success = await dbDeleteReport(reportId, userId, reason, employeeId);
     if (!success) return { success: false, message: "Falha ao remover." };
     
-    await addNotification(report.userId, reportId, 'EXCLUDED', 'Relato removido', `Seu relato foi removido. Motivo: ${reason}`);
+    await addNotification(userId, reportId, 'EXCLUDED', 'Relato removido', `Seu relato foi removido. Motivo: ${reason}`);
 
     revalidatePath("/"); revalidatePath("/dashboard"); revalidatePath("/minha-conta"); revalidatePath("/funcionarios");
     return { success: true };

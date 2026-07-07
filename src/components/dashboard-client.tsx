@@ -79,7 +79,7 @@ const ReportCard = memo(({
     showUpvote,
 }: { 
     report: Report,
-    onUpvote: (id: string) => void,
+    onUpvote: (id: string, userId: string) => void,
     onStatusUpdate?: (id: string, newStatus: ReportStatus) => void,
     onSuccess?: () => void,
     isUpvoted: boolean,
@@ -215,7 +215,7 @@ const ReportCard = memo(({
     const finalReason = deleteReasonValue === "other" ? deleteOtherDescription : EXCLUSION_REASONS.find(r => r.value === deleteReasonValue)?.label || deleteReasonValue;
 
     startDeleteTransition(async () => {
-        const result = await deleteReportAction(report.id, finalReason, user?.uid || "unknown");
+        const result = await deleteReportAction(report.id, report.userId, finalReason, user?.uid || "unknown");
         if (result.success) {
             toast({ title: "Relatório removido", description: "O registro foi movido para a Central de Moderação." });
             setIsDeleteDialogOpen(false);
@@ -329,7 +329,7 @@ const ReportCard = memo(({
                                 <Button 
                                   variant={isUpvoted ? "default" : "outline"} 
                                   size="sm" 
-                                  onClick={(e) => { e.stopPropagation(); onUpvote(report.id); }}
+                                  onClick={(e) => { e.stopPropagation(); onUpvote(report.id, report.userId); }}
                                   className={cn("rounded-xl font-bold h-10 px-6 text-xs transition-all shadow-sm active:scale-95", isUpvoted ? "bg-primary hover:bg-primary/90" : "bg-muted/30 border-border hover:bg-muted")}
                                 >
                                     <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
@@ -351,6 +351,7 @@ const ReportCard = memo(({
             {!showUpvote && (
             <AccordionContent className="bg-muted/5 border-t border-border/50">
               <form action={formAction} ref={formRef}>
+                <input type="hidden" name="reportUserId" value={report.userId} />
                 <div className="p-6 md:p-8 space-y-6 max-w-[1400px] mx-auto">
                     <div className="grid lg:grid-cols-12 gap-6 items-stretch">
                         <div className="lg:col-span-8 flex flex-col gap-4">
@@ -598,16 +599,16 @@ export function DashboardClient({
   const isEmployee = isEmailEmployee(user?.email);
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
 
-  const handleUpvote = async (id: string) => {
+  const handleUpvote = async (id: string, userId: string) => {
     if (upvotedReports.has(id)) {
-      await downvoteReportAction(id);
+      await downvoteReportAction(id, userId);
       setUpvotedReports(prev => {
         const next = new Set(prev);
         next.delete(id);
         return next;
       });
     } else {
-      await upvoteReportAction(id);
+      await upvoteReportAction(id, userId);
       setUpvotedReports(prev => new Set(prev).add(id));
     }
     if (onSuccess) onSuccess();

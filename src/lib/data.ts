@@ -66,14 +66,12 @@ function getDB() {
 /**
  * Busca relatos da comunidade. 
  * Usa Collection Group para permitir visualização global pública.
- * Nota: Ordenação feita em memória para evitar erro de índice ausente (Missing Index).
  */
 export async function getReports(limitCount?: number): Promise<Report[]> {
   const firestore = getDB();
   logFirestoreOp('QUERY', 'collectionGroup:reports', 'Global');
 
   try {
-    // Busca sem orderBy para evitar necessidade de índice manual no collectionGroup
     const reportsQuery = query(
       collectionGroup(firestore, "reports")
     );
@@ -95,13 +93,17 @@ export async function getReports(limitCount?: number): Promise<Report[]> {
   }
 }
 
-export async function getReportById(id: string): Promise<Report | undefined> {
+/**
+ * Busca um relato específico pelo seu ID e o ID do usuário proprietário.
+ * O uso do caminho direto evita a necessidade de índices de Collection Group.
+ */
+export async function getReportById(id: string, userId: string): Promise<Report | undefined> {
   const firestore = getDB();
   try {
-    const q = query(collectionGroup(firestore, "reports"), where("id", "==", id));
-    const snapshot = await getDocs(q);
-    if (snapshot.empty) return undefined;
-    return convertDoc<Report>(snapshot.docs[0]);
+    const reportRef = doc(firestore, `users/${userId}/reports`, id);
+    const snapshot = await getDoc(reportRef);
+    if (!snapshot.exists()) return undefined;
+    return convertDoc<Report>(snapshot);
   } catch (error: any) {
     console.error(`[Firestore Error] getReportById: ${error.message}`);
     return undefined;
@@ -135,17 +137,17 @@ export async function addReport(report: NewReport): Promise<Report> {
 
 export async function updateReportStatus(
   id: string,
+  userId: string,
   status: ReportStatus,
   photoAfterUrl?: string,
   extraData?: Partial<Pick<Report, 'category' | 'problem' | 'bairro' | 'location' | 'description' | 'latitude' | 'longitude'>>
 ): Promise<Report | undefined> {
   const firestore = getDB();
   try {
-    const q = query(collectionGroup(firestore, "reports"), where("id", "==", id));
-    const snapshot = await getDocs(q);
-    if (snapshot.empty) return undefined;
+    const reportRef = doc(firestore, `users/${userId}/reports`, id);
+    const snapshot = await getDoc(reportRef);
+    if (!snapshot.exists()) return undefined;
     
-    const reportDoc = snapshot.docs[0];
     const updates: any = { status };
     if (photoAfterUrl) updates.photoAfterUrl = photoAfterUrl;
     if (extraData) {
@@ -154,8 +156,8 @@ export async function updateReportStatus(
       });
     }
     
-    await updateDoc(reportDoc.ref, updates);
-    const updated = await getDoc(reportDoc.ref);
+    await updateDoc(reportRef, updates);
+    const updated = await getDoc(reportRef);
     return convertDoc<Report>(updated);
   } catch (error: any) {
     console.error(`[Firestore Error] updateReportStatus: ${error.message}`);
@@ -163,18 +165,17 @@ export async function updateReportStatus(
   }
 }
 
-export async function upvoteReport(id: string): Promise<Report | undefined> {
+export async function upvoteReport(id: string, userId: string): Promise<Report | undefined> {
   const firestore = getDB();
   try {
-    const q = query(collectionGroup(firestore, "reports"), where("id", "==", id));
-    const snapshot = await getDocs(q);
-    if (snapshot.empty) return undefined;
+    const reportRef = doc(firestore, `users/${userId}/reports`, id);
+    const snapshot = await getDoc(reportRef);
+    if (!snapshot.exists()) return undefined;
 
-    const reportDoc = snapshot.docs[0];
-    const currentUpvotes = reportDoc.data().upvotes || 0;
-    await updateDoc(reportDoc.ref, { upvotes: currentUpvotes + 1 });
+    const currentUpvotes = snapshot.data()?.upvotes || 0;
+    await updateDoc(reportRef, { upvotes: currentUpvotes + 1 });
     
-    const updated = await getDoc(reportDoc.ref);
+    const updated = await getDoc(reportRef);
     return convertDoc<Report>(updated);
   } catch (error: any) {
     console.error(`[Firestore Error] upvoteReport: ${error.message}`);
@@ -182,19 +183,18 @@ export async function upvoteReport(id: string): Promise<Report | undefined> {
   }
 }
 
-export async function downvoteReport(id: string): Promise<Report | undefined> {
+export async function downvoteReport(id: string, userId: string): Promise<Report | undefined> {
   const firestore = getDB();
   try {
-    const q = query(collectionGroup(firestore, "reports"), where("id", "==", id));
-    const snapshot = await getDocs(q);
-    if (snapshot.empty) return undefined;
+    const reportRef = doc(firestore, `users/${userId}/reports`, id);
+    const snapshot = await getDoc(reportRef);
+    if (!snapshot.exists()) return undefined;
 
-    const reportDoc = snapshot.docs[0];
-    const currentUpvotes = reportDoc.data().upvotes || 0;
-    if (currentUpvotes <= 0) return convertDoc<Report>(reportDoc);
+    const currentUpvotes = snapshot.data()?.upvotes || 0;
+    if (currentUpvotes <= 0) return convertDoc<Report>(snapshot);
 
-    await updateDoc(reportDoc.ref, { upvotes: currentUpvotes - 1 });
-    const updated = await getDoc(reportDoc.ref);
+    await updateDoc(reportRef, { upvotes: currentUpvotes - 1 });
+    const updated = await getDoc(reportRef);
     return convertDoc<Report>(updated);
   } catch (error: any) {
     console.error(`[Firestore Error] downvoteReport: ${error.message}`);
@@ -202,14 +202,14 @@ export async function downvoteReport(id: string): Promise<Report | undefined> {
   }
 }
 
-export async function deleteReport(id: string, reason: string, employeeId: string): Promise<boolean> {
+export async function deleteReport(id: string, userId: string, reason: string, employeeId: string): Promise<boolean> {
   const firestore = getDB();
   try {
-    const q = query(collectionGroup(firestore, "reports"), where("id", "==", id));
-    const snapshot = await getDocs(q);
-    if (snapshot.empty) return false;
+    const reportRef = doc(firestore, `users/${userId}/reports`, id);
+    const snapshot = await getDoc(reportRef);
+    if (!snapshot.exists()) return false;
     
-    await updateDoc(snapshot.docs[0].ref, {
+    await updateDoc(reportRef, {
       status: 'EXCLUDED',
       exclusionReason: reason,
       excludedBy: employeeId,
@@ -270,7 +270,6 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
   
   logFirestoreOp('QUERY', 'notifications', `userId == ${userId}`);
   try {
-    // Removido orderBy da consulta direta para evitar erro de índice ausente
     const q = query(
       collection(firestore, "notifications"),
       where("userId", "==", userId)
@@ -356,7 +355,6 @@ export async function addComplaint(complaint: Omit<Complaint, 'id' | 'createdAt'
 export async function getComplaints(): Promise<Complaint[]> {
   const firestore = getDB();
   try {
-    // Removido orderBy da consulta direta para evitar erro de índice ausente
     const snapshot = await getDocs(collection(firestore, "complaints"));
     const results = snapshot.docs.map(doc => convertDoc<Complaint>(doc));
 
