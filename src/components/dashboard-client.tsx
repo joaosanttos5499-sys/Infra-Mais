@@ -629,9 +629,12 @@ export function DashboardClient({
           <TabsTrigger value="in_progress" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Em Andamento</TabsTrigger>
           <TabsTrigger value="resolved" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Resolvido</TabsTrigger>
           {isEmployee && (
-            <TabsTrigger value="moderation" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider data-[state=active]:bg-orange-500 data-[state=active]:text-white">
-              Central de Moderação
-            </TabsTrigger>
+            <>
+              <TabsTrigger value="under_review" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Em Análise</TabsTrigger>
+              <TabsTrigger value="moderation" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+                Central de Moderação
+              </TabsTrigger>
+            </>
           )}
         </TabsList>
       </div>
@@ -688,98 +691,117 @@ export function DashboardClient({
       </TabsContent>
 
       {isEmployee && (
-        <TabsContent value="moderation">
-          <Card className="rounded-2xl border-orange-500/20 bg-card/50 overflow-hidden">
-            <Tabs defaultValue="excluded" className="w-full">
-              <div className="bg-muted/10 p-4 border-b border-border">
-                <TabsList className="bg-transparent h-auto p-0 gap-8">
-                  <TabsTrigger 
-                    value="excluded" 
-                    className="data-[state=active]:text-red-600 data-[state=active]:border-b-2 data-[state=active]:border-red-600 rounded-none bg-transparent px-0 pb-2 h-auto text-sm font-bold uppercase tracking-widest border-b-2 border-transparent transition-all"
-                  >
-                    Relatos Excluídos
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="complaints" 
-                    className="data-[state=active]:text-orange-500 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none bg-transparent px-0 pb-2 h-auto text-sm font-bold uppercase tracking-widest border-b-2 border-transparent transition-all"
-                  >
-                    Relatos Denunciados
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+        <>
+          <TabsContent value="under_review" className="space-y-6">
+            {filteredReports.under_review.length === 0 ? (
+              <EmptyState message="Nenhum relato em análise no momento." />
+            ) : (
+              filteredReports.under_review.map(report => (
+                <ReportCard 
+                  key={report.id} 
+                  report={report} 
+                  onUpvote={handleUpvote} 
+                  isUpvoted={upvotedReports.has(report.id)} 
+                  showUpvote={showUpvote} 
+                  onSuccess={onSuccess}
+                />
+              ))
+            )}
+          </TabsContent>
 
-              <TabsContent value="excluded" className="p-6 space-y-6">
-                {filteredReports.excluded.length === 0 ? (
-                  <EmptyState message="Nenhum relato excluído para exibir." />
-                ) : (
-                  filteredReports.excluded.map(report => (
-                    <ReportCard 
-                      key={report.id} 
-                      report={report} 
-                      onUpvote={handleUpvote} 
-                      isUpvoted={upvotedReports.has(report.id)} 
-                      showUpvote={showUpvote} 
-                      onSuccess={onSuccess}
-                    />
-                  ))
-                )}
-              </TabsContent>
+          <TabsContent value="moderation">
+            <Card className="rounded-2xl border-orange-500/20 bg-card/50 overflow-hidden">
+              <Tabs defaultValue="excluded" className="w-full">
+                <div className="bg-muted/10 p-4 border-b border-border">
+                  <TabsList className="bg-transparent h-auto p-0 gap-8">
+                    <TabsTrigger 
+                      value="excluded" 
+                      className="data-[state=active]:text-red-600 data-[state=active]:border-b-2 data-[state=active]:border-red-600 rounded-none bg-transparent px-0 pb-2 h-auto text-sm font-bold uppercase tracking-widest border-b-2 border-transparent transition-all"
+                    >
+                      Relatos Excluídos
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="complaints" 
+                      className="data-[state=active]:text-orange-500 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none bg-transparent px-0 pb-2 h-auto text-sm font-bold uppercase tracking-widest border-b-2 border-transparent transition-all"
+                    >
+                      Relatos Denunciados
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
 
-              <TabsContent value="complaints" className="p-6 space-y-6">
-                {complaints.length === 0 ? (
-                  <EmptyState message="Nenhuma denúncia registrada no momento." />
-                ) : (
-                  complaints.map(complaint => (
-                    <Card key={complaint.id} className="p-6 border-orange-500/20 bg-card rounded-2xl shadow-sm">
-                      <div className="flex flex-col md:flex-row gap-6">
-                        <div className="bg-orange-500/10 p-4 rounded-xl flex items-center justify-center shrink-0">
-                          <Flag className="h-8 w-8 text-orange-600" />
-                        </div>
-                        <div className="flex-grow space-y-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="text-lg font-bold text-foreground">Denúncia: {complaint.reason}</h3>
-                              <p className="text-sm text-muted-foreground font-medium">Usuário Denunciado: {complaint.denouncedUserEmail}</p>
-                            </div>
-                            <span className="text-xs font-bold text-muted-foreground uppercase bg-muted px-3 py-1 rounded-full">
-                                {complaint.status === 'PENDING' ? 'Pendente de análise' : 'Resolvida'}
-                            </span>
+                <TabsContent value="excluded" className="p-6 space-y-6">
+                  {filteredReports.excluded.length === 0 ? (
+                    <EmptyState message="Nenhum relato excluído para exibir." />
+                  ) : (
+                    filteredReports.excluded.map(report => (
+                      <ReportCard 
+                        key={report.id} 
+                        report={report} 
+                        onUpvote={handleUpvote} 
+                        isUpvoted={upvotedReports.has(report.id)} 
+                        showUpvote={showUpvote} 
+                        onSuccess={onSuccess}
+                      />
+                    ))
+                  )}
+                </TabsContent>
+
+                <TabsContent value="complaints" className="p-6 space-y-6">
+                  {complaints.length === 0 ? (
+                    <EmptyState message="Nenhuma denúncia registrada no momento." />
+                  ) : (
+                    complaints.map(complaint => (
+                      <Card key={complaint.id} className="p-6 border-orange-500/20 bg-card rounded-2xl shadow-sm">
+                        <div className="flex flex-col md:flex-row gap-6">
+                          <div className="bg-orange-500/10 p-4 rounded-xl flex items-center justify-center shrink-0">
+                            <Flag className="h-8 w-8 text-orange-600" />
                           </div>
-                          
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted/30 p-4 rounded-xl border border-border">
-                            <div className="flex items-center gap-2">
-                                <User className="h-3.5 w-3.5" /> Registrado por: {complaint.reporterUserId === user?.uid ? 'Você' : 'Funcionário'}
+                          <div className="flex-grow space-y-4">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="text-lg font-bold text-foreground">Denúncia: {complaint.reason}</h3>
+                                <p className="text-sm text-muted-foreground font-medium">Usuário Denunciado: {complaint.denouncedUserEmail}</p>
+                              </div>
+                              <span className="text-xs font-bold text-muted-foreground uppercase bg-muted px-3 py-1 rounded-full">
+                                  {complaint.status === 'PENDING' ? 'Pendente de análise' : 'Resolvida'}
+                              </span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Clock className="h-3.5 w-3.5" /> <ReportTime date={new Date(complaint.createdAt)} />
-                            </div>
-                          </div>
-
-                          {complaint.details && (
-                            <div className="space-y-2">
-                              <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Descrição do motivo:</p>
-                              <div className="p-4 bg-muted/20 border border-border rounded-xl text-sm italic">
-                                "{complaint.details}"
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted/30 p-4 rounded-xl border border-border">
+                              <div className="flex items-center gap-2">
+                                  <User className="h-3.5 w-3.5" /> Registrado por: {complaint.reporterUserId === user?.uid ? 'Você' : 'Funcionário'}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                  <Clock className="h-3.5 w-3.5" /> <ReportTime date={new Date(complaint.createdAt)} />
                               </div>
                             </div>
-                          )}
 
-                          <div className="flex justify-end gap-3 pt-2">
-                            <Button asChild variant="outline" size="sm" className="rounded-lg font-bold">
-                                <Link href={`/dashboard#report-${complaint.reportId}`}>
-                                    <MessageSquare className="h-4 w-4 mr-2" /> Abrir Relato Relacionado
-                                </Link>
-                            </Button>
+                            {complaint.details && (
+                              <div className="space-y-2">
+                                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Descrição do motivo:</p>
+                                <div className="p-4 bg-muted/20 border border-border rounded-xl text-sm italic">
+                                  "{complaint.details}"
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="flex justify-end gap-3 pt-2">
+                              <Button asChild variant="outline" size="sm" className="rounded-lg font-bold">
+                                  <Link href={`/dashboard#report-${complaint.reportId}`}>
+                                      <MessageSquare className="h-4 w-4 mr-2" /> Abrir Relato Relacionado
+                                  </Link>
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Card>
-                  ))
-                )}
-              </TabsContent>
-            </Tabs>
-          </Card>
-        </TabsContent>
+                      </Card>
+                    ))
+                  )}
+                </TabsContent>
+              </Tabs>
+            </Card>
+          </TabsContent>
+        </>
       )}
     </Tabs>
   );
