@@ -1,8 +1,7 @@
-
 'use server';
 
 /**
- * @fileOverview Summarizes a user report for a city employee.
+ * @fileOverview Summarizes a user report for a city employee in Portuguese.
  *
  * - summarizeReport - A function that takes a report and summarizes it.
  * - SummarizeReportInput - The input type for the summarizeReport function.
@@ -28,7 +27,7 @@ const SummarizeReportInputSchema = z.object({
 export type SummarizeReportInput = z.infer<typeof SummarizeReportInputSchema>;
 
 const SummarizeReportOutputSchema = z.object({
-  summary: z.string().describe('A short summary of the infrastructure problem.'),
+  summary: z.string().describe('A short summary of the infrastructure problem in Portuguese.'),
 });
 export type SummarizeReportOutput = z.infer<typeof SummarizeReportOutputSchema>;
 
@@ -40,18 +39,19 @@ const summarizeReportPrompt = ai.definePrompt({
   name: 'summarizeReportPrompt',
   input: { schema: SummarizeReportInputSchema },
   output: { schema: SummarizeReportOutputSchema },
-  prompt: `You are a city employee who needs to understand infrastructure problems reported by citizens.
+  prompt: `Você é um funcionário municipal encarregado de analisar problemas de infraestrutura relatados pelos cidadãos.
 
-  Please summarize the following report so that another city employee can quickly understand the issue. The summary should be concise and direct.
+  Por favor, resuma o relato abaixo de forma que outro funcionário possa entender rapidamente a essência do problema. 
+  O resumo deve ser conciso, direto e escrito obrigatoriamente em Português (Brasil).
 
-  Category: {{{category}}}
-  Problem: {{{problem}}}
-  City: {{{city}}}
+  Categoria: {{{category}}}
+  Problema: {{{problem}}}
+  Cidade: {{{city}}}
   Bairro: {{{bairro}}}
-  Location: {{{location}}}
-  Description: {{{description}}}
-  Photo: {{media url=photoDataUri}}
-  \n  Summary:`,
+  Localização: {{{location}}}
+  Descrição: {{{description}}}
+  Foto: {{media url=photoDataUri}}
+  \n  Resumo em Português:`,
 });
 
 const summarizeReportFlow = ai.defineFlow(
