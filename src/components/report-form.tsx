@@ -4,7 +4,8 @@
 import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
 import { Camera, Loader2, MapPin, ImagePlus, RotateCcw } from "lucide-react";
-import { createReportAction } from "@/lib/actions";
+import { generateReportSummaryAction } from "@/lib/actions";
+import { addReport, addNotification } from "@/lib/data";
 import { getCategory } from "@/lib/categories";
 import { categories } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
@@ -177,7 +178,7 @@ export function ReportForm() {
     setIsRedirecting(true);
 
     try {
-        // Converte a foto para URI se ainda não estiver no preview
+        // 1. Converte a foto para URI
         let photoDataUri = photoPreview;
         if (!photoDataUri) {
           const reader = new FileReader();
@@ -188,32 +189,58 @@ export function ReportForm() {
           });
         }
 
-        const location = values.reference ? `${values.address} (${values.reference})` : values.address;
+        const categoryInfo = getCategory(values.category);
+        const categoryLabel = categoryInfo?.label || values.category;
+        const problemLabel = categoryInfo?.problems.find(p => p.value === values.problem)?.label || values.problem;
+        const locationStr = values.reference ? `${values.address} (${values.reference})` : values.address;
 
-        // Chama a Server Action que centraliza IA e Persistência
-        const result = await createReportAction({
+        // 2. Chama a IA para o resumo no servidor
+        const aiResult = await generateReportSummaryAction({
+          category: categoryLabel,
+          problem: problemLabel,
+          city: values.city,
+          bairro: values.bairro,
+          location: locationStr,
+          description: values.description || "Nenhuma descrição fornecida.",
+          photoUrl: photoDataUri as string,
+        });
+
+        const finalSummary = aiResult.success 
+          ? aiResult.summary 
+          : `${problemLabel} relatado em ${values.bairro}.`;
+
+        // 3. Salva no Firestore (Lado do Cliente) para evitar erros de permissão
+        const createdReport = await addReport({
           userId: user.uid,
           relatorEmail: user.email || "anonimo@inframais.com",
           category: values.category,
           problem: values.problem,
           city: values.city,
           bairro: values.bairro,
-          location: location,
+          location: locationStr,
           description: values.description || "",
+          summary: finalSummary,
           photoUrl: photoDataUri as string,
           latitude: values.latitude,
           longitude: values.longitude,
         });
 
-        if (result.success) {
-          toast({ title: "Sucesso!", description: "Relatório enviado com sucesso." });
-          router.push('/minha-conta#meus-relatorios');
-        } else {
-          throw new Error(result.message);
-        }
+        // 4. Cria notificação (Lado do Cliente)
+        await addNotification(
+          user.uid,
+          createdReport.id,
+          'SENT',
+          'Relato enviado com sucesso',
+          'Seu relato foi enviado com sucesso e agora está em análise pela equipe do Infra Mais.'
+        );
+
+        toast({ title: "Sucesso!", description: "Relatório enviado com sucesso." });
+        router.refresh();
+        router.push('/minha-conta#meus-relatorios');
+        
     } catch (error: any) {
         console.error("Submission failed:", error);
-        toast({ variant: 'destructive', title: 'Erro', description: error.message || "Falha ao processar o envio." });
+        toast({ variant: 'destructive', title: 'Erro', description: error.message || "Falha ao processar o envio. Verifique sua conexão e tente novamente." });
         setIsRedirecting(false);
     }
   };

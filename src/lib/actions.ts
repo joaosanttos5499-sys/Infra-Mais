@@ -52,11 +52,10 @@ const fileToDataUri = async (file: File) => {
 type UpdateActionState = { success: boolean; message?: string; };
 
 /**
- * Server Action para criar um novo relato com integração de IA.
+ * Server Action para gerar o resumo do relato via IA.
+ * A persistência agora ocorre no cliente para evitar erros de permissão no servidor.
  */
-export async function createReportAction(data: {
-  userId: string;
-  relatorEmail: string;
+export async function generateReportSummaryAction(data: {
   category: string;
   problem: string;
   city: string;
@@ -64,69 +63,22 @@ export async function createReportAction(data: {
   location: string;
   description: string;
   photoUrl: string;
-  latitude: number;
-  longitude: number;
 }) {
   try {
-    const categoryInfo = getCategory(data.category);
-    const categoryLabel = categoryInfo?.label || data.category;
-    const problemLabel = categoryInfo?.problems.find(p => p.value === data.problem)?.label || data.problem;
-
-    // 1. Tenta gerar o resumo via IA (Gemini)
-    let aiSummaryText = "";
-    try {
-      const aiResult = await summarizeReport({
-        category: categoryLabel,
-        problem: problemLabel,
-        city: data.city,
-        bairro: data.bairro,
-        location: data.location,
-        description: data.description || "Nenhuma descrição fornecida.",
-        photoDataUri: data.photoUrl,
-      });
-      aiSummaryText = aiResult.summary;
-    } catch (aiError) {
-      console.error("[AI Error] Falha ao gerar resumo:", aiError);
-      // Fallback: Resumo simples caso a IA falhe
-      aiSummaryText = `${problemLabel} relatado em ${data.bairro}. ${data.description.substring(0, 100)}`;
-    }
-
-    // 2. Prepara os dados para o banco
-    const newReportData: NewReport = {
-      userId: data.userId,
-      relatorEmail: data.relatorEmail,
+    const aiResult = await summarizeReport({
       category: data.category,
       problem: data.problem,
       city: data.city,
       bairro: data.bairro,
       location: data.location,
-      description: data.description,
-      summary: aiSummaryText,
-      photoUrl: data.photoUrl,
-      latitude: data.latitude,
-      longitude: data.longitude,
-    };
-
-    // 3. Salva no Firestore
-    const createdReport = await addReport(newReportData);
+      description: data.description || "Nenhuma descrição fornecida.",
+      photoDataUri: data.photoUrl,
+    });
     
-    // 4. Cria notificação de sucesso
-    await addNotification(
-      data.userId,
-      createdReport.id,
-      'SENT',
-      'Relato enviado com sucesso',
-      'Seu relato foi enviado com sucesso e agora está em análise pela equipe do Infra Mais.'
-    );
-
-    revalidatePath("/");
-    revalidatePath("/dashboard");
-    revalidatePath("/minha-conta");
-    
-    return { success: true, reportId: createdReport.id };
+    return { success: true, summary: aiResult.summary };
   } catch (error: any) {
-    console.error("[Action Error] createReportAction:", error);
-    return { success: false, message: error.message || "Erro ao processar o relato." };
+    console.error("[AI Error] Falha ao gerar resumo:", error);
+    return { success: false, message: "Falha ao gerar resumo via IA." };
   }
 }
 
