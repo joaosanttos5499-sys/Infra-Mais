@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
@@ -11,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle, ShieldCheck, MessageSquare, ArrowRight } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle, ShieldCheck, MessageSquare, ArrowRight, Sparkles } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -308,6 +309,16 @@ const ReportCard = memo(({
                         )}
                     </div>
 
+                    {/* Resumo da IA no modo recolhido para o funcionário ver rápido */}
+                    {isEmployee && report.summary && (
+                      <div className="mt-4 p-3 bg-primary/5 rounded-xl border border-primary/10 flex items-start gap-3">
+                        <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed italic">
+                          "{report.summary}"
+                        </p>
+                      </div>
+                    )}
+
                     <div className="mt-auto pt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
                         <div className="flex items-center gap-5">
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold uppercase tracking-tight">
@@ -353,6 +364,19 @@ const ReportCard = memo(({
               <form action={formAction} ref={formRef}>
                 <input type="hidden" name="reportUserId" value={report.userId} />
                 <div className="p-6 md:p-8 space-y-6 max-w-[1400px] mx-auto">
+                    {/* Bloco de Resumo da IA em destaque na expansão */}
+                    {report.summary && (
+                      <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sparkles className="h-4 w-4 text-primary" />
+                          <span className="text-xs font-bold text-primary uppercase tracking-widest">Resumo Inteligente (IA)</span>
+                        </div>
+                        <p className="text-sm text-foreground leading-relaxed italic">
+                          "{report.summary}"
+                        </p>
+                      </div>
+                    )}
+
                     <div className="grid lg:grid-cols-12 gap-6 items-stretch">
                         <div className="lg:col-span-8 flex flex-col gap-4">
                             <div className="grid grid-cols-2 gap-4">

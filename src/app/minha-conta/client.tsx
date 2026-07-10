@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, ShieldAlert, AlertTriangle, Eye, EyeOff, Maximize2 } from "lucide-react";
+import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, ShieldAlert, AlertTriangle, Eye, EyeOff, Maximize2, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
@@ -108,6 +109,16 @@ function MyReportItem({ report }: { report: Report }) {
                         <Clock className="h-3.5 w-3.5" />
                         <ReportTime date={new Date(report.createdAt)} />
                     </div>
+
+                    {/* Resumo da IA no relato pessoal */}
+                    {report.summary && (
+                      <div className="mt-3 p-3 bg-primary/5 rounded-xl border border-primary/10 flex items-start gap-2 max-w-2xl">
+                        <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                        <p className="text-xs text-muted-foreground italic leading-relaxed">
+                          "{report.summary}"
+                        </p>
+                      </div>
+                    )}
                 </div>
                 <div className="flex items-center justify-end gap-2 w-full mt-4 sm:mt-0">
                     {isPublic && (
