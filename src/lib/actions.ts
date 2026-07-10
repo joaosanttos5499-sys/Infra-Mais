@@ -1,3 +1,4 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -15,12 +16,14 @@ import {
     markNotificationAsRead as dbMarkAsRead,
     markAllNotificationsAsRead as dbMarkAllAsRead,
     addComplaint,
-    getReportById
+    getReportById,
+    addReport
 } from "@/lib/data";
-import { type Report, type ReportStatus, type UserProfile, type Complaint } from "@/lib/types";
+import { type Report, type ReportStatus, type UserProfile, type Complaint, type NewReport } from "@/lib/types";
 import { UpdateProfileSchema } from "./schemas";
 import { createAvatarSvg } from "./avatar";
 import { isEmailEmployee } from "./config";
+import { categories, getCategory } from "./categories";
 
 export type FormState = {
   message?: string | null;
@@ -47,6 +50,85 @@ const fileToDataUri = async (file: File) => {
 };
 
 type UpdateActionState = { success: boolean; message?: string; };
+
+/**
+ * Server Action para criar um novo relato com integração de IA.
+ */
+export async function createReportAction(data: {
+  userId: string;
+  relatorEmail: string;
+  category: string;
+  problem: string;
+  city: string;
+  bairro: string;
+  location: string;
+  description: string;
+  photoUrl: string;
+  latitude: number;
+  longitude: number;
+}) {
+  try {
+    const categoryInfo = getCategory(data.category);
+    const categoryLabel = categoryInfo?.label || data.category;
+    const problemLabel = categoryInfo?.problems.find(p => p.value === data.problem)?.label || data.problem;
+
+    // 1. Tenta gerar o resumo via IA (Gemini)
+    let aiSummaryText = "";
+    try {
+      const aiResult = await summarizeReport({
+        category: categoryLabel,
+        problem: problemLabel,
+        city: data.city,
+        bairro: data.bairro,
+        location: data.location,
+        description: data.description || "Nenhuma descrição fornecida.",
+        photoDataUri: data.photoUrl,
+      });
+      aiSummaryText = aiResult.summary;
+    } catch (aiError) {
+      console.error("[AI Error] Falha ao gerar resumo:", aiError);
+      // Fallback: Resumo simples caso a IA falhe
+      aiSummaryText = `${problemLabel} relatado em ${data.bairro}. ${data.description.substring(0, 100)}`;
+    }
+
+    // 2. Prepara os dados para o banco
+    const newReportData: NewReport = {
+      userId: data.userId,
+      relatorEmail: data.relatorEmail,
+      category: data.category,
+      problem: data.problem,
+      city: data.city,
+      bairro: data.bairro,
+      location: data.location,
+      description: data.description,
+      summary: aiSummaryText,
+      photoUrl: data.photoUrl,
+      latitude: data.latitude,
+      longitude: data.longitude,
+    };
+
+    // 3. Salva no Firestore
+    const createdReport = await addReport(newReportData);
+    
+    // 4. Cria notificação de sucesso
+    await addNotification(
+      data.userId,
+      createdReport.id,
+      'SENT',
+      'Relato enviado com sucesso',
+      'Seu relato foi enviado com sucesso e agora está em análise pela equipe do Infra Mais.'
+    );
+
+    revalidatePath("/");
+    revalidatePath("/dashboard");
+    revalidatePath("/minha-conta");
+    
+    return { success: true, reportId: createdReport.id };
+  } catch (error: any) {
+    console.error("[Action Error] createReportAction:", error);
+    return { success: false, message: error.message || "Erro ao processar o relato." };
+  }
+}
 
 export async function updateReportStatus(
   prevState: UpdateActionState,

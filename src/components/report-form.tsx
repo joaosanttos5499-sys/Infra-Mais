@@ -4,10 +4,9 @@
 import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
 import { Camera, Loader2, MapPin, ImagePlus, RotateCcw } from "lucide-react";
-import { summarizeReport } from "@/ai/flows/summarize-report-for-city-employee";
-import { addReport, addNotification } from "@/lib/data";
-import { type NewReport } from "@/lib/types";
-import { categories, getCategory } from "@/lib/categories";
+import { createReportAction } from "@/lib/actions";
+import { getCategory } from "@/lib/categories";
+import { categories } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -178,6 +177,7 @@ export function ReportForm() {
     setIsRedirecting(true);
 
     try {
+        // Converte a foto para URI se ainda não estiver no preview
         let photoDataUri = photoPreview;
         if (!photoDataUri) {
           const reader = new FileReader();
@@ -188,62 +188,32 @@ export function ReportForm() {
           });
         }
 
-        const categoryInfo = getCategory(values.category);
-        const categoryLabel = categoryInfo?.label || values.category;
-        const problemLabel = categoryInfo?.problems.find(p => p.value === values.problem)?.label || values.problem;
         const location = values.reference ? `${values.address} (${values.reference})` : values.address;
 
-        let aiSummaryText = "Resumo automático indisponível.";
-        try {
-          const aiResult = await summarizeReport({
-            category: categoryLabel,
-            problem: problemLabel,
-            city: values.city,
-            bairro: values.bairro,
-            location: location,
-            description: values.description || "Nenhuma descrição fornecida.",
-            photoDataUri: photoDataUri as string,
-          });
-          aiSummaryText = aiResult.summary;
-        } catch (aiError) {
-          console.error("AI Summary failed:", aiError);
-          aiSummaryText = `${problemLabel} em ${values.bairro}. ${values.description || ''}`;
-        }
-
-        const newReportData: NewReport = {
+        // Chama a Server Action que centraliza IA e Persistência
+        const result = await createReportAction({
           userId: user.uid,
-          relatorEmail: user.email || "anonimo@inframais.com", 
+          relatorEmail: user.email || "anonimo@inframais.com",
           category: values.category,
           problem: values.problem,
           city: values.city,
           bairro: values.bairro,
           location: location,
           description: values.description || "",
-          summary: aiSummaryText,
           photoUrl: photoDataUri as string,
           latitude: values.latitude,
           longitude: values.longitude,
-        };
+        });
 
-        const createdReport = await addReport(newReportData);
-        
-        await addNotification(
-          user.uid,
-          createdReport.id,
-          'SENT',
-          'Relato enviado com sucesso',
-          'Seu relato foi enviado com sucesso e agora está em análise pela equipe do Infra Mais.'
-        );
-
-        toast({ title: "Sucesso!", description: "Relatório enviado com sucesso." });
-        router.push('/minha-conta#meus-relatorios');
+        if (result.success) {
+          toast({ title: "Sucesso!", description: "Relatório enviado com sucesso." });
+          router.push('/minha-conta#meus-relatorios');
+        } else {
+          throw new Error(result.message);
+        }
     } catch (error: any) {
         console.error("Submission failed:", error);
-        let message = "Erro ao processar o envio. Verifique sua conexão e tente novamente.";
-        if (error.message?.includes("insufficient permissions")) {
-          message = "Erro de permissão. Tente sair e entrar novamente na sua conta.";
-        }
-        toast({ variant: 'destructive', title: 'Erro', description: message });
+        toast({ variant: 'destructive', title: 'Erro', description: error.message || "Falha ao processar o envio." });
         setIsRedirecting(false);
     }
   };
