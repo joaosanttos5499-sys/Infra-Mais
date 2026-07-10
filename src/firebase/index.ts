@@ -1,7 +1,7 @@
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore } from 'firebase/firestore';
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
@@ -40,10 +40,21 @@ export function getSdks(firebaseApp: FirebaseApp) {
     });
   }
 
+  let firestore;
+  try {
+    // Forçamos o uso de Long Polling para evitar timeouts de 10s comuns em ambientes de rede restritos ou proxies
+    firestore = initializeFirestore(firebaseApp, {
+      experimentalForceLongPolling: true,
+    });
+  } catch (e) {
+    // Caso já tenha sido inicializado, utilizamos a instância existente
+    firestore = getFirestore(firebaseApp);
+  }
+
   return {
     firebaseApp,
     auth,
-    firestore: getFirestore(firebaseApp)
+    firestore
   };
 }
 
