@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
@@ -127,16 +126,6 @@ const ReportCard = memo(({
   }, undefined);
 
   const formRef = useRef<HTMLFormElement>(null);
-  const [photoAfterPreview, setPhotoAfterPreview] = useState<string | null>(null);
-
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setPhotoAfterPreview(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleReportSubmit = async () => {
     if (!reportReason) {
@@ -181,7 +170,6 @@ const ReportCard = memo(({
         toast({ title: "Erro ao Atualizar", description: formState.message, variant: "destructive" });
     } else if (formState?.success === true && formState.message) {
         toast({ title: "Sucesso", description: formState.message });
-        setPhotoAfterPreview(null);
         setIsStatusConfirmOpen(false);
         
         const timeout = setTimeout(() => {
@@ -227,12 +215,9 @@ const ReportCard = memo(({
     });
   };
 
-  const isOwner = user?.uid === report.userId;
   const isEmployee = isEmailEmployee(user?.email);
-  const canDelete = isEmployee || (isOwner && report.status === 'UNDER_REVIEW');
   const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
   const nextAllowedStatus = STATUS_PROGRESSION[report.status];
-  const isPhotoEnabled = selectedStatus === 'RESOLVED';
   const isPublic = report.status !== 'UNDER_REVIEW' && report.status !== 'EXCLUDED';
 
   return (
@@ -309,7 +294,6 @@ const ReportCard = memo(({
                         )}
                     </div>
 
-                    {/* Resumo da IA no modo recolhido para o funcionário ver rápido */}
                     {isEmployee && report.summary && (
                       <div className="mt-4 p-3 bg-primary/5 rounded-xl border border-primary/10 flex items-start gap-3">
                         <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
@@ -364,7 +348,6 @@ const ReportCard = memo(({
               <form action={formAction} ref={formRef}>
                 <input type="hidden" name="reportUserId" value={report.userId} />
                 <div className="p-6 md:p-8 space-y-6 max-w-[1400px] mx-auto">
-                    {/* Bloco de Resumo da IA em destaque na expansão */}
                     {report.summary && (
                       <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-xl">
                         <div className="flex items-center gap-2 mb-2">

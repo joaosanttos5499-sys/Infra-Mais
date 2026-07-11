@@ -1,6 +1,4 @@
-'use client';
-
-import { useEffect, useState, Suspense } from "react";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, MapPin, BarChart3, Clock, Camera, Info, Loader2 } from "lucide-react";
@@ -14,19 +12,8 @@ import { RecentReportCard } from "@/components/recent-report-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { useSearchParams } from "next/navigation";
 
-function RecentReports({ reports, isLoading }: { reports: Report[], isLoading: boolean }) {
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Skeleton className="h-64 rounded-xl" />
-        <Skeleton className="h-64 rounded-xl" />
-        <Skeleton className="h-64 rounded-xl" />
-      </div>
-    );
-  }
-
+async function RecentReports({ reports }: { reports: Report[] }) {
   const publicReports = reports.filter(report => report.status !== 'UNDER_REVIEW' && report.status !== 'EXCLUDED');
   const recentReports = publicReports.slice(0, 3);
 
@@ -77,15 +64,7 @@ function IndicatorItem({ label, value, colorClass }: { label: string, value: num
   );
 }
 
-function AboutSection({ reports, isLoading }: { reports: Report[], isLoading: boolean }) {
-  if (isLoading) {
-    return (
-      <section className="py-20 bg-background border-t border-border flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </section>
-    );
-  }
-
+function AboutSection({ reports }: { reports: Report[] }) {
   const stats = {
     underReview: reports.filter(r => r.status === 'UNDER_REVIEW').length,
     pending: reports.filter(r => r.status === 'PENDING').length,
@@ -186,27 +165,12 @@ function AboutSection({ reports, isLoading }: { reports: Report[], isLoading: bo
   );
 }
 
-function HomeContent() {
-  const [reports, setReports] = useState<Report[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    async function loadReports() {
-      try {
-        const data = await getReports();
-        setReports(data);
-      } catch (error) {
-        console.error("Erro ao carregar relatos no cliente:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadReports();
-  }, []);
-
-  const latParam = searchParams.get('lat');
-  const lngParam = searchParams.get('lng');
+export default async function Home(props: { searchParams: Promise<{ lat?: string; lng?: string }> }) {
+  const reports = await getReports();
+  const searchParams = await props.searchParams;
+  
+  const latParam = searchParams.lat;
+  const lngParam = searchParams.lng;
   const lat = latParam ? parseFloat(latParam) : null;
   const lng = lngParam ? parseFloat(lngParam) : null;
   const selectedLocation = (lat && lng) ? { lat, lng } : null;
@@ -247,14 +211,14 @@ function HomeContent() {
                     <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Resolvido</div>
                   </div>
                 </div>
-                <div className="rounded-2xl overflow-hidden shadow-inner border border-border h-[350px] md:h-[550px]">
-                  {isLoading ? (
+                <div className="rounded-2xl overflow-hidden shadow-inner border border-border h-[350px] md:h-[550px] relative">
+                  <Suspense fallback={
                     <div className="w-full h-full flex items-center justify-center bg-muted animate-pulse">
                       <Loader2 className="h-10 w-10 animate-spin text-primary" />
                     </div>
-                  ) : (
+                  }>
                     <HomeMapClient reports={publicReports} selectedLocation={selectedLocation} />
-                  )}
+                  </Suspense>
                 </div>
             </div>
           </div>
@@ -273,7 +237,17 @@ function HomeContent() {
                 </Button>
             </div>
             <Separator className="mb-12 bg-border/50" />
-            <RecentReports reports={reports} isLoading={isLoading} />
+            
+            <Suspense fallback={
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Skeleton className="h-64 rounded-xl" />
+                <Skeleton className="h-64 rounded-xl" />
+                <Skeleton className="h-64 rounded-xl" />
+              </div>
+            }>
+              <RecentReports reports={reports} />
+            </Suspense>
+
             <div className="mt-8 flex justify-center sm:hidden">
               <Button asChild variant="outline" className="w-full h-12 rounded-xl font-bold">
                 <Link href="/dashboard">Ver todos os relatos</Link>
@@ -282,16 +256,8 @@ function HomeContent() {
           </div>
         </section>
         
-        <AboutSection reports={reports} isLoading={isLoading} />
+        <AboutSection reports={reports} />
       </main>
     </div>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>}>
-      <HomeContent />
-    </Suspense>
   );
 }

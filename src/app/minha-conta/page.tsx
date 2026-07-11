@@ -1,12 +1,8 @@
-
-'use client';
-
-import { useEffect, useState, Suspense } from "react";
+import { Suspense } from "react";
 import { getReports } from "@/lib/data";
 import { MinhaContaClient } from "./client";
 import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { type Report } from "@/lib/types";
 
 function PageSkeleton() {
     return (
@@ -18,23 +14,8 @@ function PageSkeleton() {
     );
   }
 
-function MinhaContaContent() {
-    const [reports, setReports] = useState<Report[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-      async function loadReports() {
-        try {
-          const data = await getReports();
-          setReports(data);
-        } catch (error) {
-          console.error("Erro ao carregar relatos na minha conta:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-      loadReports();
-    }, []);
+async function MinhaContaContent() {
+    const reports = await getReports();
 
     return (
         <main className="flex-1 pt-10 pb-24 px-8 md:px-16">
@@ -48,11 +29,7 @@ function MinhaContaContent() {
                         Gerencie suas informações pessoais e acompanhe sua atividade na plataforma.
                     </p>
                 </div>
-                {isLoading ? (
-                    <PageSkeleton />
-                ) : (
-                    <MinhaContaClient allReports={reports} />
-                )}
+                <MinhaContaClient allReports={reports} />
             </div>
         </main>
     );

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef, memo, useState } from "react";
@@ -58,7 +57,13 @@ const LeafletMap = ({
           attribution: "© OpenStreetMap",
         }).addTo(mapInstance.current);
 
-        setIsReady(true);
+        // Previne Layout Shift forçando uma renderização inicial estável
+        setTimeout(() => {
+          if (mapInstance.current) {
+            mapInstance.current.invalidateSize();
+            setIsReady(true);
+          }
+        }, 100);
     } catch (error) {
         console.error("Leaflet initialization error:", error);
     }
@@ -181,7 +186,7 @@ const LeafletMap = ({
   }, [selectedLocation, interactive, isReady]);
 
   return (
-    <div className="w-full h-full min-h-[300px] relative">
+    <div className="w-full h-full min-h-[350px] md:min-h-[550px] relative">
       {!isReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-muted/50 z-10 rounded-xl">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />

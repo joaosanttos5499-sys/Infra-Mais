@@ -9,14 +9,13 @@ import { ReportTime } from "@/components/report-time";
 import { type Report } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { memo } from "react";
 
 /**
  * Componente cliente para renderizar um cartão de relato individual na Home.
- * Ajustado para respeitar as cores do tema (claro/escuro) e manter consistência
- * com o estilo do Painel de Problemas.
+ * Memoizado para evitar re-renderizações desnecessárias em listas.
  */
-export function RecentReportCard({ report }: { report: Report }) {
+function RecentReportCardComponent({ report }: { report: Report }) {
   const router = useRouter();
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
@@ -35,21 +34,19 @@ export function RecentReportCard({ report }: { report: Report }) {
       onClick={handleCardClick}
     >
       <Card className="overflow-hidden flex flex-col h-full border-border shadow-sm transition-all duration-300 hover:shadow-lg rounded-xl bg-card">
-        <div className="relative h-48 w-full">
+        <div className="relative h-48 w-full bg-muted">
             <Image
               src={report.photoUrl}
               alt="Foto do problema"
               fill
-              className="object-cover"
+              className="object-cover transition-opacity duration-300"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               loading="lazy"
             />
-            {/* Status no canto superior esquerdo */}
             <div className="absolute top-3 left-3 z-10">
                 <StatusBadge status={report.status} />
             </div>
 
-            {/* Ver no mapa no canto superior direito */}
             <div className="absolute top-3 right-3 z-10">
                 <Link 
                   href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`} 
@@ -73,7 +70,7 @@ export function RecentReportCard({ report }: { report: Report }) {
                 </div>
             </div>
 
-            <div className="mt-auto pt-2 flex items-center justify-between border-t border-border pt-4">
+            <div className="mt-auto pt-4 flex items-center justify-between border-t border-border">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Clock className="h-3.5 w-3.5" />
                     <ReportTime date={new Date(report.createdAt)} />
@@ -87,3 +84,5 @@ export function RecentReportCard({ report }: { report: Report }) {
     </div>
   );
 }
+
+export const RecentReportCard = memo(RecentReportCardComponent);

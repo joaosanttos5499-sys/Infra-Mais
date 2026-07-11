@@ -1,10 +1,7 @@
-'use client';
-
-import { useEffect, useState, Suspense } from "react";
+import { Suspense } from "react";
 import { DashboardClient } from "@/components/dashboard-client";
 import { getReports } from "@/lib/data";
 import { Loader2 } from "lucide-react";
-import { type Report } from "@/lib/types";
 import { Separator } from "@/components/ui/separator";
 
 function DashboardSkeleton() {
@@ -16,23 +13,8 @@ function DashboardSkeleton() {
   );
 }
 
-function DashboardContent() {
-  const [reports, setReports] = useState<Report[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadReports() {
-      try {
-        const data = await getReports();
-        setReports(data);
-      } catch (error) {
-        console.error("Erro ao carregar relatos no dashboard:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadReports();
-  }, []);
+async function DashboardContent() {
+  const reports = await getReports();
 
   return (
     <main className="flex-1 p-8 md:p-16">
@@ -47,11 +29,7 @@ function DashboardContent() {
           </p>
         </div>
         
-        {isLoading ? (
-          <DashboardSkeleton />
-        ) : (
-          <DashboardClient reports={reports} />
-        )}
+        <DashboardClient reports={reports} />
       </div>
     </main>
   );
