@@ -24,7 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle, ShieldCheck, MessageSquare, ArrowRight, Sparkles, X } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle, ShieldCheck, MessageSquare, ArrowRight, Sparkles, X, SortAsc, SortDesc } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -632,9 +632,10 @@ export function DashboardClient({
   const router = useRouter();
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
 
-  // Estados de Filtro
+  // Estados de Filtro e Ordenação
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [bairroFilter, setBairroFilter] = useState<string>("all");
+  const [sortOption, setSortOption] = useState<string>("recent");
 
   const handleUpvote = async (id: string, userId: string) => {
     try {
@@ -657,29 +658,39 @@ export function DashboardClient({
   };
 
   const filteredReports = useMemo(() => {
-    const applyFilters = (list: Report[]) => {
-      return list.filter(report => {
+    const applyFiltersAndSort = (list: Report[]) => {
+      // Filtragem
+      const filtered = list.filter(report => {
         const matchesCategory = categoryFilter === "all" || report.category === categoryFilter;
         const matchesBairro = bairroFilter === "all" || report.bairro === bairroFilter;
         return matchesCategory && matchesBairro;
       });
+
+      // Ordenação
+      return [...filtered].sort((a, b) => {
+        if (sortOption === "recent") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        if (sortOption === "oldest") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        if (sortOption === "upvotes") return b.upvotes - a.upvotes;
+        return 0;
+      });
     };
 
     return {
-      under_review: applyFilters(reports.filter(r => r.status === "UNDER_REVIEW")),
-      pending: applyFilters(reports.filter(r => r.status === "PENDING")),
-      in_progress: applyFilters(reports.filter(r => r.status === "IN_PROGRESS")),
-      resolved: applyFilters(reports.filter(r => r.status === "RESOLVED")),
-      excluded: applyFilters(reports.filter(r => r.status === "EXCLUDED")),
+      under_review: applyFiltersAndSort(reports.filter(r => r.status === "UNDER_REVIEW")),
+      pending: applyFiltersAndSort(reports.filter(r => r.status === "PENDING")),
+      in_progress: applyFiltersAndSort(reports.filter(r => r.status === "IN_PROGRESS")),
+      resolved: applyFiltersAndSort(reports.filter(r => r.status === "RESOLVED")),
+      excluded: applyFiltersAndSort(reports.filter(r => r.status === "EXCLUDED")),
     };
-  }, [reports, categoryFilter, bairroFilter]);
+  }, [reports, categoryFilter, bairroFilter, sortOption]);
 
   const clearFilters = () => {
     setCategoryFilter("all");
     setBairroFilter("all");
+    setSortOption("recent");
   };
 
-  const hasActiveFilters = categoryFilter !== "all" || bairroFilter !== "all";
+  const hasActiveFilters = categoryFilter !== "all" || bairroFilter !== "all" || sortOption !== "recent";
 
   return (
     <Tabs defaultValue="pending" className="w-full">
@@ -724,7 +735,7 @@ export function DashboardClient({
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-80 p-6 rounded-2xl border-border shadow-2xl" align="end">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-bold text-sm uppercase tracking-widest text-foreground">Ajustar Filtros</h4>
                 {hasActiveFilters && (
@@ -734,34 +745,52 @@ export function DashboardClient({
                 )}
               </div>
               
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Categoria</Label>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="h-10 rounded-xl bg-muted/20">
-                    <SelectValue placeholder="Todas as categorias" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    <SelectItem value="all">Todas as categorias</SelectItem>
-                    {categories.map((c) => (
-                      <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
+                    <SortAsc className="h-3 w-3" /> Ordenar Por
+                  </Label>
+                  <Select value={sortOption} onValueChange={setSortOption}>
+                    <SelectTrigger className="h-10 rounded-xl bg-muted/20">
+                      <SelectValue placeholder="Mais Recentes" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      <SelectItem value="recent">Mais Recentes</SelectItem>
+                      <SelectItem value="oldest">Mais Antigos</SelectItem>
+                      <SelectItem value="upvotes">Mais Apoiados</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Bairro</Label>
-                <Select value={bairroFilter} onValueChange={setBairroFilter}>
-                  <SelectTrigger className="h-10 rounded-xl bg-muted/20">
-                    <SelectValue placeholder="Todos os bairros" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    <SelectItem value="all">Todos os bairros</SelectItem>
-                    {PICUI_NEIGHBORHOODS.map((b) => (
-                      <SelectItem key={b} value={b}>{b}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Categoria</Label>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger className="h-10 rounded-xl bg-muted/20">
+                      <SelectValue placeholder="Todas as categorias" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      <SelectItem value="all">Todas as categorias</SelectItem>
+                      {categories.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Bairro</Label>
+                  <Select value={bairroFilter} onValueChange={setBairroFilter}>
+                    <SelectTrigger className="h-10 rounded-xl bg-muted/20">
+                      <SelectValue placeholder="Todos os bairros" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      <SelectItem value="all">Todos os bairros</SelectItem>
+                      {PICUI_NEIGHBORHOODS.map((b) => (
+                        <SelectItem key={b} value={b}>{b}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </PopoverContent>
