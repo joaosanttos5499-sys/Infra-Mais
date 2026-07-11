@@ -462,7 +462,7 @@ const ReportCard = memo(({
                                             <Trash2 className="h-4 w-4" /> Excluir Relato
                                         </Button>
                                       </AlertDialogTrigger>
-                                      <AlertDialogContent className="rounded-3xl bg-card border-border shadow-2xl p-8">
+                                      <AlertDialogContent className="rounded-2xl sm:rounded-3xl bg-card border-border shadow-2xl p-6 sm:p-8 max-w-[95vw] sm:max-w-xl max-h-[92vh] overflow-y-auto no-scrollbar">
                                           <AlertDialogHeader>
                                               <AlertDialogTitle className="text-2xl font-bold">Excluir Relato</AlertDialogTitle>
                                               <AlertDialogDescription className="text-base pt-2">
