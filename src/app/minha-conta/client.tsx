@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useUser, useAuth } from "@/firebase";
@@ -34,6 +35,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const LOCAL_STORAGE_ACCOUNTS_KEY = 'infra_mais_saved_accounts';
 
+const statusBorderColors: Record<string, string> = {
+  UNDER_REVIEW: "border-l-slate-400",
+  PENDING: "border-l-amber-500",
+  IN_PROGRESS: "border-l-primary",
+  RESOLVED: "border-l-emerald-500",
+  EXCLUDED: "border-l-destructive",
+};
+
 function MyReportItem({ report }: { report: Report }) {
     const { toast } = useToast();
     const router = useRouter();
@@ -62,16 +71,17 @@ function MyReportItem({ report }: { report: Report }) {
     };
 
     return (
-        <div className="flex flex-col sm:flex-row gap-4 border border-border rounded-xl p-4 bg-card group relative animate-in fade-in slide-in-from-bottom-4 min-h-[160px]">
-            <div className="absolute top-4 right-4 z-20">
-                <StatusBadge status={report.status} />
-            </div>
-            <div className="relative w-full sm:w-32 h-40 sm:h-auto rounded-lg overflow-hidden shrink-0 z-10 shadow-sm bg-muted group/photo">
+        <div className={cn(
+            "flex flex-col sm:flex-row gap-6 border border-border border-l-4 rounded-2xl p-5 bg-card relative transition-all duration-300 hover:shadow-lg hover:border-primary/20 group animate-in fade-in slide-in-from-bottom-4",
+            statusBorderColors[report.status] || "border-l-slate-400"
+        )}>
+            {/* Imagem (Aumentada em ~20% e modernizada) */}
+            <div className="relative w-full sm:w-40 h-44 sm:h-auto rounded-xl overflow-hidden shrink-0 shadow-sm bg-muted group/photo">
                 <Image
                     src={report.photoUrl}
                     alt={report.description || "Foto do problema"}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-500 group-hover/photo:scale-110"
                 />
                 <Dialog>
                     <DialogTrigger asChild>
@@ -97,59 +107,80 @@ function MyReportItem({ report }: { report: Report }) {
                     </DialogContent>
                 </Dialog>
             </div>
-            <div className="flex flex-col flex-grow min-w-0 z-10 w-full justify-between">
-                <div className="space-y-1 pr-24 sm:pr-28">
-                    <h3 className="font-bold text-lg text-foreground truncate">{problem?.label || report.problem}</h3>
-                    <div className="text-sm text-muted-foreground flex items-center gap-1.5">
-                        {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
-                        <span className="truncate">{category?.label || report.category}</span>
-                    </div>
-                    <div className="text-sm text-muted-foreground flex items-center gap-1.5">
-                        <MapPin className="h-3.5 w-3.5 text-primary" />
-                        <span className="truncate">{displayCity} - {report.bairro}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 pt-1 text-xs text-muted-foreground">
-                        <Clock className="h-3.5 w-3.5" />
-                        <ReportTime date={new Date(report.createdAt)} />
+
+            {/* Conteúdo do Card */}
+            <div className="flex flex-col flex-grow min-w-0 justify-between">
+                <div className="space-y-4">
+                    {/* Cabeçalho: Título + Status */}
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                        <div className="min-w-0">
+                            <h3 className="font-extrabold text-xl text-foreground leading-tight truncate">
+                                {problem?.label || report.problem}
+                            </h3>
+                            {/* Categoria e Localização logo abaixo */}
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                                <div className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+                                    {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
+                                    <span className="truncate">{category?.label || report.category}</span>
+                                </div>
+                                <div className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+                                    <MapPin className="h-3.5 w-3.5 text-primary" />
+                                    <span className="truncate">{displayCity} - {report.bairro}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <StatusBadge status={report.status} />
                     </div>
 
+                    {/* Resumo Inteligente (Estilo Bloco Elegante) */}
                     {report.summary && (
-                      <div className="mt-3 p-3 bg-primary/5 rounded-xl border border-primary/10 flex items-start gap-2 max-w-2xl">
-                        <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                        <p className="text-xs text-muted-foreground italic leading-relaxed">
+                      <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 space-y-2 relative overflow-hidden group/summary">
+                        <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-[0.15em]">
+                          <Sparkles className="h-3 w-3" /> Resumo Inteligente
+                        </div>
+                        <p className="text-xs text-muted-foreground italic font-medium leading-relaxed">
                           "{report.summary}"
                         </p>
                       </div>
                     )}
                 </div>
-                <div className="flex items-center justify-end gap-2 w-full mt-4 sm:mt-0">
-                    {isPublic && (
-                        <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-primary font-bold hover:bg-primary/10 transition-colors">
-                            <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
-                                <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
-                            </Link>
-                        </Button>
-                    )}
-                    {canDelete && (
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition shrink-0">
-                                    {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                                    <span className="sr-only">Excluir</span>
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
-                                    <AlertDialogDescription>Esta ação não pode ser desfeita. O relatório será removido permanentemente.</AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl font-bold">Excluir</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    )}
+
+                {/* Footer do Card: Data + Ações */}
+                <div className="flex items-center justify-between gap-2 pt-4 mt-2 border-t border-border/50">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        <Clock className="h-3.5 w-3.5" />
+                        <ReportTime date={new Date(report.createdAt)} />
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                        {isPublic && (
+                            <Button asChild variant="ghost" size="sm" className="h-8 px-3 text-primary font-bold hover:bg-primary/10 rounded-lg text-[10px] uppercase tracking-wider">
+                                <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
+                                    <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
+                                </Link>
+                            </Button>
+                        )}
+                        {canDelete && (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors border border-transparent hover:border-destructive/20">
+                                        {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                                        <span className="sr-only">Excluir</span>
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
+                                        <AlertDialogDescription>Esta ação não pode ser desfeita. O relatório será removido permanentemente.</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl font-bold">Excluir</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
@@ -159,8 +190,13 @@ function MyReportItem({ report }: { report: Report }) {
 function MyReportsList({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
         return (
-            <div className="text-center text-muted-foreground py-12 border-2 border-dashed border-border rounded-2xl bg-muted/20 mx-4 sm:mx-0">
-                <p className="text-sm">Você ainda não relatou nenhum problema.</p>
+            <div className="text-center text-muted-foreground py-16 border-2 border-dashed border-border rounded-[2rem] bg-muted/10 mx-4 sm:mx-0">
+                <div className="flex justify-center mb-4">
+                  <div className="p-4 bg-muted rounded-full">
+                    <AlertTriangle className="h-8 w-8 opacity-20" />
+                  </div>
+                </div>
+                <p className="text-sm font-medium">Você ainda não relatou nenhum problema.</p>
                 <Button asChild variant="link" className="mt-2 text-primary font-bold">
                     <Link href="/report/new">Relatar um Problema</Link>
                 </Button>
@@ -168,12 +204,10 @@ function MyReportsList({ reports }: { reports: Report[] }) {
         );
     }
     return (
-        <div className="space-y-6 px-4 sm:px-0">
-            <div className="space-y-4">
-                {reports.map((report) => (
-                    <MyReportItem key={report.id} report={report} />
-                ))}
-            </div>
+        <div className="space-y-8 px-4 sm:px-0">
+            {reports.map((report) => (
+                <MyReportItem key={report.id} report={report} />
+            ))}
         </div>
     );
 }
@@ -350,7 +384,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     return (
         <div className="space-y-8">
-             <Card className="bg-card rounded-2xl shadow-md border border-border p-6 sm:p-8 space-y-6 overflow-hidden mx-4 sm:mx-0 relative">
+             <Card className="bg-card rounded-3xl shadow-md border border-border p-6 sm:p-10 space-y-6 overflow-hidden mx-4 sm:mx-0 relative">
                 <div className="flex flex-col items-center gap-4 mb-2">
                     <Avatar className="h-24 w-24 shadow-md border-4 border-background">
                         <AvatarImage src={userProfile?.photoURL || createAvatarSvg(user.email || 'U')} />
@@ -372,15 +406,15 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               render={({ field }) => (
                                 <FormItem>
                                   <div className="flex justify-between items-center mb-1">
-                                    <FormLabel className="text-xs font-bold text-foreground uppercase tracking-widest">Nome Completo</FormLabel>
+                                    <FormLabel className="text-xs font-black text-foreground uppercase tracking-[0.2em] opacity-60">Nome Completo</FormLabel>
                                     {!isEditingName && (
-                                        <Button type="button" variant="link" className="p-0 h-auto text-sm text-primary font-bold hover:text-primary/80" onClick={handleEditClick}>
-                                            Alterar
+                                        <Button type="button" variant="link" className="p-0 h-auto text-xs text-primary font-bold hover:text-primary/80" onClick={handleEditClick}>
+                                            Alterar Nome
                                         </Button>
                                     )}
                                   </div>
                                   <FormControl>
-                                      <Input {...field} disabled={!isEditingName} className="h-12 rounded-xl bg-muted/60 focus:bg-background border-border font-medium text-foreground" />
+                                      <Input {...field} disabled={!isEditingName} className="h-12 rounded-2xl bg-muted/40 focus:bg-background border-border font-bold text-foreground transition-all" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -390,25 +424,25 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             <div className="space-y-6 pt-2">
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        <Label className="text-xs font-bold text-foreground uppercase tracking-widest">E-mail</Label>
-                                        <Mail className="h-3.5 w-3.5 text-foreground" />
+                                        <Label className="text-xs font-black text-foreground uppercase tracking-[0.2em] opacity-60">E-mail</Label>
+                                        <Mail className="h-3 w-3 text-muted-foreground" />
                                     </div>
-                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-xl bg-muted/60 text-foreground cursor-not-allowed border-border font-medium opacity-100" />
+                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-2xl bg-muted/40 text-foreground cursor-not-allowed border-border font-medium opacity-100" />
                                 </div>
 
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        <Label className="text-xs font-bold text-foreground uppercase tracking-widest">Data de Nascimento</Label>
-                                        <Calendar className="h-3.5 w-3.5 text-foreground" />
+                                        <Label className="text-xs font-black text-foreground uppercase tracking-[0.2em] opacity-60">Data de Nascimento</Label>
+                                        <Calendar className="h-3 w-3 text-muted-foreground" />
                                     </div>
-                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-xl bg-muted/60 text-foreground cursor-not-allowed border-border font-medium opacity-100" />
+                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-2xl bg-muted/40 text-foreground cursor-not-allowed border-border font-medium opacity-100" />
                                 </div>
                             </div>
 
                             {isEditingName ? (
                                 <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-border">
-                                    <Button type="button" variant="outline" onClick={() => { setIsEditingName(false); form.reset(); }} className="h-11 px-6 rounded-xl font-bold w-full sm:w-auto">Cancelar</Button>
-                                    <Button type="button" onClick={() => setIsConfirmOpen(true)} disabled={!form.formState.isDirty} className="h-11 px-6 rounded-xl font-bold shadow-md w-full sm:w-auto">
+                                    <Button type="button" variant="outline" onClick={() => { setIsEditingName(false); form.reset(); }} className="h-11 px-6 rounded-2xl font-bold w-full sm:w-auto">Cancelar</Button>
+                                    <Button type="button" onClick={() => setIsConfirmOpen(true)} disabled={!form.formState.isDirty} className="h-11 px-6 rounded-2xl font-bold shadow-md w-full sm:w-auto">
                                         <Save className="mr-2 h-4 w-4" /> Salvar Alterações
                                     </Button>
                                 </div>
@@ -416,18 +450,18 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               <div className="pt-6 border-t border-border flex justify-start items-center">
                                 <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => { setIsDeleteDialogOpen(open); if(!open) { setDeletePassword(""); setIsAwareChecked(false); setShowDeletePassword(false); } }}>
                                   <AlertDialogTrigger asChild>
-                                    <Button variant="destructive" className="h-10 px-6 rounded-xl text-xs font-bold gap-2 shadow-lg hover:scale-105 transition-all bg-destructive text-destructive-foreground uppercase tracking-widest">
-                                      <Trash2 className="h-4 w-4" /> Excluir Conta
+                                    <Button variant="ghost" className="h-10 px-6 rounded-xl text-[10px] font-black gap-2 transition-all text-destructive hover:bg-destructive/10 uppercase tracking-widest">
+                                      <Trash2 className="h-4 w-4" /> Excluir Minha Conta
                                     </Button>
                                   </AlertDialogTrigger>
-                                  <AlertDialogContent className="rounded-2xl max-w-sm">
+                                  <AlertDialogContent className="rounded-[2rem] max-w-sm">
                                     <AlertDialogHeader>
-                                      <AlertDialogTitle className="flex items-center gap-2 text-destructive"><ShieldAlert className="h-5 w-5" /> Confirmar Exclusão</AlertDialogTitle>
-                                      <AlertDialogDescription className="text-sm">Esta ação é permanente. Informe sua senha para confirmar a exclusão da sua conta.</AlertDialogDescription>
+                                      <AlertDialogTitle className="flex items-center gap-2 text-destructive"><ShieldAlert className="h-5 w-5" /> Segurança</AlertDialogTitle>
+                                      <AlertDialogDescription className="text-sm">Esta ação é irreversível. Por favor, confirme sua senha para prosseguir.</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <div className="py-4 space-y-4">
                                       <div className="space-y-2">
-                                        <Label htmlFor="del-pass" className="text-xs font-bold uppercase">Senha</Label>
+                                        <Label htmlFor="del-pass" className="text-[10px] font-black uppercase tracking-widest">Sua Senha</Label>
                                         <div className="relative">
                                           <Input id="del-pass" type={showDeletePassword ? "text" : "password"} value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} placeholder="********" className="h-11 rounded-xl pr-10" />
                                           <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent" onClick={() => setShowDeletePassword(!showDeletePassword)}>
@@ -437,17 +471,14 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                       </div>
                                       <div className="flex items-start space-x-3 p-3 bg-muted/20 rounded-xl border border-border">
                                         <Checkbox id="confirm-delete-aware" checked={isAwareChecked} onCheckedChange={(val) => setIsAwareChecked(val as boolean)} className="mt-1" />
-                                        <Label htmlFor="confirm-delete-aware" className="text-xs leading-relaxed text-muted-foreground cursor-pointer font-medium">Estou ciente de que esta ação não pode ser desfeita.</Label>
-                                      </div>
-                                      <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
-                                        <p className="text-[10px] text-destructive leading-relaxed font-bold"><AlertTriangle className="h-3 w-3 inline mr-1" />Todos os seus relatos em análise e dados pessoais serão removidos permanentemente.</p>
+                                        <Label htmlFor="confirm-delete-aware" className="text-[10px] leading-relaxed text-muted-foreground cursor-pointer font-bold">ENTENDO QUE MEUS DADOS SERÃO APAGADOS DEFINITIVAMENTE.</Label>
                                       </div>
                                     </div>
                                     <AlertDialogFooter className="gap-2">
-                                      <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Cancelar</AlertDialogCancel>
+                                      <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Voltar</AlertDialogCancel>
                                       <AlertDialogAction disabled={!deletePassword || !isAwareChecked || isDeletingProcess} onClick={(e) => { e.preventDefault(); handleAccountDeletion(); }} className="bg-destructive text-destructive-foreground rounded-xl font-bold w-full sm:w-auto">
                                         {isDeletingProcess ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                                        Confirmar Exclusão
+                                        Excluir Agora
                                       </AlertDialogAction>
                                     </AlertDialogFooter>
                                   </AlertDialogContent>
@@ -461,25 +492,28 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             </Card>
 
             <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-                <AlertDialogContent className="rounded-2xl mx-4 sm:mx-0 bg-card border-border">
+                <AlertDialogContent className="rounded-[2rem] mx-4 sm:mx-0 bg-card border-border">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Aviso de Alteração</AlertDialogTitle>
-                        <AlertDialogDescription>Alterações de nome só são permitidas uma vez a cada 7 dias. Deseja confirmar?</AlertDialogDescription>
+                        <AlertDialogTitle>Alteração de Identidade</AlertDialogTitle>
+                        <AlertDialogDescription>Você só poderá alterar seu nome novamente após 7 dias. Deseja prosseguir com a atualização?</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="mt-4 gap-2">
                         <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Voltar</AlertDialogCancel>
                         <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={!isConfirmEnabled} className="bg-primary text-primary-foreground rounded-xl font-bold w-full sm:w-auto">
-                           {isConfirmEnabled ? 'Confirmar' : `Aguarde (${countdown})`}
+                           {isConfirmEnabled ? 'Confirmar Mudança' : `Aguarde (${countdown}s)`}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
 
             {!isEmployee && (
-                <Card className="bg-card rounded-2xl shadow-md border border-border p-6 mx-4 sm:mx-0 scroll-mt-24" id="meus-relatorios" ref={reportsRef}>
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-bold text-foreground">Meus Relatórios</h2>
-                        <Button asChild variant="link" className="p-0 h-auto text-primary font-bold">
+                <Card className="bg-card rounded-[2.5rem] shadow-md border border-border p-6 sm:p-10 mx-4 sm:mx-0 scroll-mt-24" id="meus-relatorios" ref={reportsRef}>
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                          <h2 className="text-2xl font-black text-foreground tracking-tight">Meus Relatórios</h2>
+                          <p className="text-xs text-muted-foreground font-medium mt-1">Histórico de problemas relatados por você.</p>
+                        </div>
+                        <Button asChild variant="default" size="sm" className="rounded-xl h-10 px-5 font-bold shadow-lg shadow-primary/20">
                             <Link href="/report/new">Novo Relato</Link>
                         </Button>
                     </div>
