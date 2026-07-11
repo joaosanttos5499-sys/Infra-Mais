@@ -1,5 +1,4 @@
-
-'use client';
+"use client";
 
 import { useUser, useAuth } from "@/firebase";
 import { type Report, type UserProfile } from "@/lib/types";
@@ -19,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UpdateProfileSchema } from "@/lib/schemas";
 import { updateUserProfileAction, deleteReportAction, deleteAccountAction } from "@/lib/actions";
-import { getUserById } from "@/lib/data";
+import { getUserById, deleteReport as clientDeleteReport } from "@/lib/data";
 import { updateProfile, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -48,12 +47,16 @@ function MyReportItem({ report }: { report: Report }) {
 
     const handleDelete = async () => {
         startDeleteTransition(async () => {
-            const result = await deleteReportAction(report.id, report.userId, "Removido pelo usuário", report.userId);
-            if (result.success) {
-                toast({ title: "Relatório excluído", description: "O problema foi removido do sistema." });
-                router.refresh();
-            } else {
-                toast({ variant: "destructive", title: "Erro ao excluir", description: "Falha ao remover o relato." });
+            try {
+                const success = await clientDeleteReport(report.id, report.userId, "Removido pelo usuário", report.userId);
+                if (success) {
+                    toast({ title: "Relatório excluído", description: "O problema foi removido do sistema." });
+                    router.refresh();
+                } else {
+                    toast({ variant: "destructive", title: "Erro ao excluir", description: "Falha ao remover o relato." });
+                }
+            } catch (error) {
+                toast({ variant: "destructive", title: "Erro ao excluir", description: "Sem permissão para excluir este relato." });
             }
         });
     };
@@ -110,7 +113,6 @@ function MyReportItem({ report }: { report: Report }) {
                         <ReportTime date={new Date(report.createdAt)} />
                     </div>
 
-                    {/* Resumo da IA no relato pessoal */}
                     {report.summary && (
                       <div className="mt-3 p-3 bg-primary/5 rounded-xl border border-primary/10 flex items-start gap-2 max-w-2xl">
                         <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
@@ -226,7 +228,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 }
 
                 setIsProfileLoading(true);
-                // Fetch diretamente no cliente para evitar problemas de permissão SSR
                 getUserById(user.uid)
                     .then((data) => {
                         if (data) {

@@ -2,7 +2,20 @@
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
 import Image from "next/image";
-import { updateReportStatus, upvoteReportAction, downvoteReportAction, deleteReportAction, submitComplaintAction } from "@/lib/actions";
+import { 
+  updateReportStatus as dbUpdateReportStatus, 
+  upvoteReport as dbUpvoteReport, 
+  downvoteReport as dbDownvoteReport, 
+  deleteReport as dbDeleteReport, 
+  submitComplaintAction 
+} from "@/lib/actions";
+import { 
+  updateReportStatus as clientUpdateReportStatus,
+  upvoteReport as clientUpvoteReport,
+  downvoteReport as clientDownvoteReport,
+  deleteReport as clientDeleteReport,
+  addNotification
+} from "@/lib/data";
 import { type Report, type ReportStatus, type Complaint } from "@/lib/types";
 import { categories, getCategory } from "@/lib/categories";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -89,6 +102,7 @@ const ReportCard = memo(({
   const { toast } = useToast();
   const router = useRouter();
   const [isDeleting, startDeleteTransition] = useTransition();
+  const [isUpdating, startUpdateTransition] = useTransition();
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
   
@@ -116,16 +130,6 @@ const ReportCard = memo(({
   const [deleteOtherDescription, setDeleteOtherDescription] = useState("");
 
   const editProblems = useMemo(() => getCategory(editCategory)?.problems || [], [editCategory]);
-
-  const [formState, formAction, isPending] = useActionState(async (prev: any, formData: FormData) => {
-    const status = formData.get("status") as ReportStatus;
-    if (onStatusUpdate && status !== report.status) {
-        onStatusUpdate(report.id, status);
-    }
-    return updateReportStatus(prev, { reportId: report.id, formData });
-  }, undefined);
-
-  const formRef = useRef<HTMLFormElement>(null);
 
   const handleReportSubmit = async () => {
     if (!reportReason) {
@@ -166,22 +170,6 @@ const ReportCard = memo(({
   };
 
   useEffect(() => {
-    if(formState?.success === false && formState.message) {
-        toast({ title: "Erro ao Atualizar", description: formState.message, variant: "destructive" });
-    } else if (formState?.success === true && formState.message) {
-        toast({ title: "Sucesso", description: formState.message });
-        setIsStatusConfirmOpen(false);
-        
-        const timeout = setTimeout(() => {
-          if (onSuccess) onSuccess();
-          router.refresh();
-        }, 800);
-
-        return () => clearTimeout(timeout);
-    }
-  }, [formState, toast, router, onSuccess]);
-
-  useEffect(() => {
     if (isStatusConfirmOpen) {
       setIsStatusConfirmEnabled(false);
       setStatusCountdown(3);
@@ -190,6 +178,39 @@ const ReportCard = memo(({
       return () => { clearInterval(interval); clearTimeout(timeout); };
     }
   }, [isStatusConfirmOpen]);
+
+  const handleUpdateStatus = async () => {
+    startUpdateTransition(async () => {
+        try {
+            const updated = await clientUpdateReportStatus(report.id, report.userId, selectedStatus, undefined, {
+                category: editCategory,
+                problem: editProblem,
+                bairro: editBairro,
+                location: editLocation,
+                description: editDescription,
+                latitude: editLat,
+                longitude: editLng
+            });
+
+            if (updated) {
+                if (report.status === 'UNDER_REVIEW' && selectedStatus !== 'UNDER_REVIEW') {
+                    await addNotification(report.userId, report.id, 'APPROVED', 'Relato aprovado', 'Seu relato foi aprovado e agora está disponível para acompanhamento público.');
+                } else if (selectedStatus === 'RESOLVED' && report.status !== 'RESOLVED') {
+                    await addNotification(report.userId, report.id, 'RESOLVED', 'Problema resolvido', 'Seu relato foi marcado como resolvido. Agradecemos por contribuir com a cidade.');
+                }
+
+                toast({ title: "Sucesso", description: "Relato atualizado com sucesso." });
+                setIsStatusConfirmOpen(false);
+                if (onSuccess) onSuccess();
+                router.refresh();
+            } else {
+                throw new Error("Falha ao atualizar");
+            }
+        } catch (error) {
+            toast({ variant: "destructive", title: "Erro ao atualizar", description: "Ocorreu um problema ao salvar as alterações." });
+        }
+    });
+  };
 
   const handleDelete = async () => {
     if (!deleteReasonValue) {
@@ -204,13 +225,19 @@ const ReportCard = memo(({
     const finalReason = deleteReasonValue === "other" ? deleteOtherDescription : EXCLUSION_REASONS.find(r => r.value === deleteReasonValue)?.label || deleteReasonValue;
 
     startDeleteTransition(async () => {
-        const result = await deleteReportAction(report.id, report.userId, finalReason, user?.uid || "unknown");
-        if (result.success) {
-            toast({ title: "Relatório removido", description: "O registro foi movido para a Central de Moderação." });
-            setIsDeleteDialogOpen(false);
-            if (onSuccess) onSuccess();
-        } else {
-            toast({ variant: "destructive", title: "Erro ao excluir", description: result.message });
+        try {
+            const success = await clientDeleteReport(report.id, report.userId, finalReason, user?.uid || "unknown");
+            if (success) {
+                await addNotification(report.userId, report.id, 'EXCLUDED', 'Relato removido', `Seu relato foi removido. Motivo: ${finalReason}`);
+                toast({ title: "Relatório removido", description: "O registro foi movido para a Central de Moderação." });
+                setIsDeleteDialogOpen(false);
+                if (onSuccess) onSuccess();
+                router.refresh();
+            } else {
+                toast({ variant: "destructive", title: "Erro ao excluir", description: "Não foi possível remover o relato." });
+            }
+        } catch (error) {
+            toast({ variant: "destructive", title: "Erro ao excluir", description: "Ocorreu um erro de permissão ou conexão." });
         }
     });
   };
@@ -345,8 +372,6 @@ const ReportCard = memo(({
             
             {!showUpvote && (
             <AccordionContent className="bg-muted/5 border-t border-border/50">
-              <form action={formAction} ref={formRef}>
-                <input type="hidden" name="reportUserId" value={report.userId} />
                 <div className="p-6 md:p-8 space-y-6 max-w-[1400px] mx-auto">
                     {report.summary && (
                       <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-xl">
@@ -429,8 +454,8 @@ const ReportCard = memo(({
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <Button type="button" onClick={() => setIsStatusConfirmOpen(true)} disabled={isPending} className="h-11 rounded-lg font-bold bg-primary hover:bg-primary/90 shadow-md w-full">
-                                        {isPending ? <Loader2 className="animate-spin h-4 w-4" /> : <Upload className="h-4 w-4" />}
+                                    <Button type="button" onClick={() => setIsStatusConfirmOpen(true)} disabled={isUpdating} className="h-11 rounded-lg font-bold bg-primary hover:bg-primary/90 shadow-md w-full">
+                                        {isUpdating ? <Loader2 className="animate-spin h-4 w-4" /> : <Upload className="h-4 w-4" />}
                                         <span className="ml-2">Salvar Alterações</span>
                                     </Button>
                                     
@@ -442,7 +467,7 @@ const ReportCard = memo(({
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel className="rounded-lg">Voltar</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => formRef.current?.requestSubmit()} disabled={!isStatusConfirmEnabled || isPending} className="rounded-lg px-6 font-bold">
+                                                <AlertDialogAction onClick={handleUpdateStatus} disabled={!isStatusConfirmEnabled || isUpdating} className="rounded-lg px-6 font-bold">
                                                     {isStatusConfirmEnabled ? "Confirmar" : `Aguarde (${statusCountdown}s)`}
                                                 </AlertDialogAction>
                                             </AlertDialogFooter>
@@ -581,7 +606,6 @@ const ReportCard = memo(({
                         </div>
                     </div>
                 </div>
-              </form>
             </AccordionContent>
             )}
           </AccordionItem>
@@ -604,21 +628,27 @@ export function DashboardClient({
 }) {
   const { user } = useUser();
   const isEmployee = isEmailEmployee(user?.email);
+  const router = useRouter();
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
 
   const handleUpvote = async (id: string, userId: string) => {
-    if (upvotedReports.has(id)) {
-      await downvoteReportAction(id, userId);
-      setUpvotedReports(prev => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-    } else {
-      await upvoteReportAction(id, userId);
-      setUpvotedReports(prev => new Set(prev).add(id));
+    try {
+        if (upvotedReports.has(id)) {
+          await clientDownvoteReport(id, userId);
+          setUpvotedReports(prev => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        } else {
+          await clientUpvoteReport(id, userId);
+          setUpvotedReports(prev => new Set(prev).add(id));
+        }
+        if (onSuccess) onSuccess();
+        router.refresh();
+    } catch (error) {
+        console.error("Erro ao votar:", error);
     }
-    if (onSuccess) onSuccess();
   };
 
   const filteredReports = useMemo(() => ({
