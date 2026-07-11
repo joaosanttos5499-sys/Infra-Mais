@@ -541,9 +541,9 @@ const ReportCard = memo(({
                                       <Button 
                                           type="button" 
                                           variant="outline" 
-                                          className="h-11 rounded-lg border-orange-500/20 text-orange-600 hover:bg-orange-500/10 hover:border-orange-500 font-bold gap-2 w-full"
+                                          className="h-11 rounded-lg border-orange-500/20 text-orange-600 hover:bg-orange-500/10 hover:border-orange-500 font-bold gap-2 w-full flex items-center justify-center"
                                       >
-                                          <Flag className="h-4 w-4" /> 🚩 Denunciar Usuário
+                                          🚩 Denunciar Usuário
                                       </Button>
                                     </DialogTrigger>
                                     <DialogContent className="rounded-2xl sm:max-w-md">
