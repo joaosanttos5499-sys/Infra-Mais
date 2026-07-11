@@ -24,7 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle, ShieldCheck, MessageSquare, ArrowRight, Sparkles } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle, ShieldCheck, MessageSquare, ArrowRight, Sparkles, X } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -40,6 +40,7 @@ import { Separator } from "./ui/separator";
 import Link from "next/link";
 import dynamic from 'next/dynamic';
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
@@ -631,6 +632,10 @@ export function DashboardClient({
   const router = useRouter();
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
 
+  // Estados de Filtro
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [bairroFilter, setBairroFilter] = useState<string>("all");
+
   const handleUpvote = async (id: string, userId: string) => {
     try {
         if (upvotedReports.has(id)) {
@@ -651,13 +656,30 @@ export function DashboardClient({
     }
   };
 
-  const filteredReports = useMemo(() => ({
-    under_review: reports.filter(r => r.status === "UNDER_REVIEW"),
-    pending: reports.filter(r => r.status === "PENDING"),
-    in_progress: reports.filter(r => r.status === "IN_PROGRESS"),
-    resolved: reports.filter(r => r.status === "RESOLVED"),
-    excluded: reports.filter(r => r.status === "EXCLUDED"),
-  }), [reports]);
+  const filteredReports = useMemo(() => {
+    const applyFilters = (list: Report[]) => {
+      return list.filter(report => {
+        const matchesCategory = categoryFilter === "all" || report.category === categoryFilter;
+        const matchesBairro = bairroFilter === "all" || report.bairro === bairroFilter;
+        return matchesCategory && matchesBairro;
+      });
+    };
+
+    return {
+      under_review: applyFilters(reports.filter(r => r.status === "UNDER_REVIEW")),
+      pending: applyFilters(reports.filter(r => r.status === "PENDING")),
+      in_progress: applyFilters(reports.filter(r => r.status === "IN_PROGRESS")),
+      resolved: applyFilters(reports.filter(r => r.status === "RESOLVED")),
+      excluded: applyFilters(reports.filter(r => r.status === "EXCLUDED")),
+    };
+  }, [reports, categoryFilter, bairroFilter]);
+
+  const clearFilters = () => {
+    setCategoryFilter("all");
+    setBairroFilter("all");
+  };
+
+  const hasActiveFilters = categoryFilter !== "all" || bairroFilter !== "all";
 
   return (
     <Tabs defaultValue="pending" className="w-full">
@@ -675,18 +697,81 @@ export function DashboardClient({
             </TabsTrigger>
           )}
         </TabsList>
-        <div className="flex items-center gap-3 self-end sm:self-auto bg-card border border-border px-4 h-12 rounded-2xl shadow-sm">
-            <Filter className="h-4 w-4 text-primary" />
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Filtros</span>
-            <Separator orientation="vertical" className="h-4 bg-border mx-1" />
-            <button className="text-[10px] font-black uppercase text-primary hover:underline">Limpar</button>
-        </div>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className={cn(
+              "flex items-center gap-3 bg-card border px-4 h-12 rounded-2xl shadow-sm transition-all hover:bg-muted/50",
+              hasActiveFilters ? "border-primary ring-1 ring-primary/20" : "border-border"
+            )}>
+              <Filter className={cn("h-4 w-4", hasActiveFilters ? "text-primary" : "text-muted-foreground")} />
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                {hasActiveFilters ? "Filtrado" : "Filtros"}
+              </span>
+              <Separator orientation="vertical" className="h-4 bg-border mx-1" />
+              <div 
+                className="text-[10px] font-black uppercase text-primary hover:underline flex items-center gap-1"
+                onClick={(e) => {
+                  if (hasActiveFilters) {
+                    e.stopPropagation();
+                    clearFilters();
+                  }
+                }}
+              >
+                {hasActiveFilters ? <X className="h-3 w-3" /> : null}
+                {hasActiveFilters ? "Limpar" : "Abrir"}
+              </div>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-6 rounded-2xl border-border shadow-2xl" align="end">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-bold text-sm uppercase tracking-widest text-foreground">Ajustar Filtros</h4>
+                {hasActiveFilters && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 px-2 text-[10px] font-black uppercase text-primary">
+                    Limpar Tudo
+                  </Button>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Categoria</Label>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="h-10 rounded-xl bg-muted/20">
+                    <SelectValue placeholder="Todas as categorias" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="all">Todas as categorias</SelectItem>
+                    {categories.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Bairro</Label>
+                <Select value={bairroFilter} onValueChange={setBairroFilter}>
+                  <SelectTrigger className="h-10 rounded-xl bg-muted/20">
+                    <SelectValue placeholder="Todos os bairros" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="all">Todos os bairros</SelectItem>
+                    {PICUI_NEIGHBORHOODS.map((b) => (
+                      <SelectItem key={b} value={b}>{b}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {isEmployee && !showUpvote && (
         <TabsContent value="under_review" className="space-y-6">
           {filteredReports.under_review.length === 0 ? (
-            <EmptyState message="Nenhum relato em análise no momento." />
+            <EmptyState message={hasActiveFilters ? "Nenhum resultado para estes filtros." : "Nenhum relato em análise no momento."} />
           ) : (
             filteredReports.under_review.map(report => (
               <ReportCard 
@@ -704,7 +789,7 @@ export function DashboardClient({
 
       <TabsContent value="pending" className="space-y-6">
         {filteredReports.pending.length === 0 ? (
-          <EmptyState message="Nenhum relato pendente no momento." />
+          <EmptyState message={hasActiveFilters ? "Nenhum resultado para estes filtros." : "Nenhum relato pendente no momento."} />
         ) : (
           filteredReports.pending.map(report => (
             <ReportCard 
@@ -721,7 +806,7 @@ export function DashboardClient({
 
       <TabsContent value="in_progress" className="space-y-6">
         {filteredReports.in_progress.length === 0 ? (
-          <EmptyState message="Nenhum relato em andamento no momento." />
+          <EmptyState message={hasActiveFilters ? "Nenhum resultado para estes filtros." : "Nenhum relato em andamento no momento."} />
         ) : (
           filteredReports.in_progress.map(report => (
             <ReportCard 
@@ -738,7 +823,7 @@ export function DashboardClient({
 
       <TabsContent value="resolved" className="space-y-6">
         {filteredReports.resolved.length === 0 ? (
-          <EmptyState message="Nenhum relato resolvido no momento." />
+          <EmptyState message={hasActiveFilters ? "Nenhum resultado para estes filtros." : "Nenhum relato resolvido no momento."} />
         ) : (
           filteredReports.resolved.map(report => (
             <ReportCard 
@@ -776,7 +861,7 @@ export function DashboardClient({
 
               <TabsContent value="excluded" className="p-6 space-y-6">
                 {filteredReports.excluded.length === 0 ? (
-                  <EmptyState message="Nenhum relato excluído para exibir." />
+                  <EmptyState message={hasActiveFilters ? "Nenhum resultado para estes filtros." : "Nenhum relato excluído para exibir."} />
                 ) : (
                   filteredReports.excluded.map(report => (
                     <ReportCard 
