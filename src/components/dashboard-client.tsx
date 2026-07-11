@@ -734,7 +734,13 @@ export function DashboardClient({
               </div>
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 p-6 rounded-2xl border-border shadow-2xl" align="end">
+          <PopoverContent 
+            className="w-80 p-6 rounded-2xl border-border shadow-2xl" 
+            align="end" 
+            side="top" 
+            alignOffset={10} 
+            sideOffset={15}
+          >
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-bold text-sm uppercase tracking-widest text-foreground">Ajustar Filtros</h4>
