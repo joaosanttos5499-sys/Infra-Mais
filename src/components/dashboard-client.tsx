@@ -663,13 +663,13 @@ export function DashboardClient({
     <Tabs defaultValue="pending" className="w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 overflow-x-auto pb-2">
         <TabsList className="bg-muted/50 p-1 rounded-2xl h-12 flex-nowrap w-max">
-          {isEmployee && (
+          {isEmployee && !showUpvote && (
             <TabsTrigger value="under_review" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Em Análise</TabsTrigger>
           )}
           <TabsTrigger value="pending" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Pendente</TabsTrigger>
           <TabsTrigger value="in_progress" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Em Andamento</TabsTrigger>
           <TabsTrigger value="resolved" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Resolvido</TabsTrigger>
-          {isEmployee && (
+          {isEmployee && !showUpvote && (
             <TabsTrigger value="moderation" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider data-[state=active]:bg-orange-500 data-[state=active]:text-white">
               Central de Moderação
             </TabsTrigger>
@@ -683,7 +683,7 @@ export function DashboardClient({
         </div>
       </div>
 
-      {isEmployee && (
+      {isEmployee && !showUpvote && (
         <TabsContent value="under_review" className="space-y-6">
           {filteredReports.under_review.length === 0 ? (
             <EmptyState message="Nenhum relato em análise no momento." />
@@ -753,7 +753,7 @@ export function DashboardClient({
         )}
       </TabsContent>
 
-      {isEmployee && (
+      {isEmployee && !showUpvote && (
         <TabsContent value="moderation">
           <Card className="rounded-2xl border-orange-500/20 bg-card/50 overflow-hidden">
             <Tabs defaultValue="excluded" className="w-full">
