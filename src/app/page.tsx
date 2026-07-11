@@ -140,23 +140,6 @@ function AboutSection({ reports }: { reports: Report[] }) {
                         <IndicatorItem label="Resolvidos" value={stats.resolved} colorClass="bg-emerald-500" />
                     </div>
                 </div>
-
-                <div className="pt-10 border-t border-border/50 space-y-4">
-                    {total === 0 ? (
-                        <div className="bg-muted/10 border border-dashed border-border p-5 rounded-2xl flex items-start gap-4">
-                            <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                                Nenhum relato foi registrado até o momento. <br />
-                                <span className="text-xs opacity-70">Assim que novos relatos forem cadastrados, os indicadores e gráficos serão atualizados automaticamente.</span>
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-between px-2">
-                            <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Total de registros</span>
-                            <span className="text-2xl font-black text-primary">{total}</span>
-                        </div>
-                    )}
-                </div>
             </CardContent>
           </Card>
         </div>
