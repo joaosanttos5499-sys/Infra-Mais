@@ -74,7 +74,6 @@ function MyReportItem({ report }: { report: Report }) {
             "flex flex-col sm:flex-row gap-6 border border-border border-l-4 rounded-2xl p-5 bg-card relative transition-all duration-300 hover:shadow-xl hover:scale-[1.01] hover:border-primary/10 group animate-in fade-in slide-in-from-bottom-4",
             statusBorderColors[report.status] || "border-l-slate-400"
         )}>
-            {/* Imagem */}
             <div className="relative w-full sm:w-40 h-44 sm:h-auto rounded-xl overflow-hidden shrink-0 shadow-sm bg-muted group/photo">
                 <Image
                     src={report.photoUrl}
@@ -107,10 +106,8 @@ function MyReportItem({ report }: { report: Report }) {
                 </Dialog>
             </div>
 
-            {/* Conteúdo do Card */}
             <div className="flex flex-col flex-grow min-w-0 justify-between">
                 <div className="space-y-6">
-                    {/* Cabeçalho: Título + Status */}
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                         <div className="min-w-0">
                             <h3 className="font-extrabold text-xl text-foreground leading-tight truncate">
@@ -130,7 +127,6 @@ function MyReportItem({ report }: { report: Report }) {
                         <StatusBadge status={report.status} />
                     </div>
 
-                    {/* Resumo Inteligente */}
                     {report.summary && (
                       <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 space-y-2 relative overflow-hidden group/summary">
                         <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-[0.15em]">
@@ -143,7 +139,6 @@ function MyReportItem({ report }: { report: Report }) {
                     )}
                 </div>
 
-                {/* Footer do Card */}
                 <div className="flex items-center justify-between gap-2 pt-4 mt-4 border-t border-border/50">
                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                         <Clock className="h-3.5 w-3.5" />
@@ -259,7 +254,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                     const filteredReports = allReports.filter(report => {
                         if (report.userId !== user.uid) return false;
                         
-                        // Lógica de 3 dias para relatos excluídos
                         if (report.status === 'EXCLUDED') {
                             if (!report.excludedAt) return false;
                             const excludedDate = new Date(report.excludedAt);
@@ -397,7 +391,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         <div className="space-y-8">
              <Card className="bg-card rounded-2xl shadow-sm border border-border p-6 sm:p-8 space-y-6 overflow-hidden mx-4 sm:mx-0">
                 <div className="flex flex-col items-center gap-4 mb-2">
-                    <Avatar className="h-20 w-20 shadow-sm border-2 border-background">
+                    <Avatar className="h-20 w-20">
                         <AvatarImage src={userProfile?.photoURL || createAvatarSvg(user.email || 'U')} />
                         <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
                             {(user.email || 'U').charAt(0).toUpperCase()}
@@ -425,7 +419,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     )}
                                   </div>
                                   <FormControl>
-                                      <Input {...field} disabled={!isEditingName} className="h-10 bg-muted/20" />
+                                      <Input {...field} disabled={!isEditingName} className="h-10" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -435,12 +429,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             <div className="space-y-4 pt-2">
                                 <div className="space-y-1">
                                     <Label className="text-sm font-medium">E-mail</Label>
-                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-10 bg-muted/20 cursor-not-allowed opacity-100" />
+                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-10" />
                                 </div>
 
                                 <div className="space-y-1">
                                     <Label className="text-sm font-medium">Data de Nascimento</Label>
-                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-10 bg-muted/20 cursor-not-allowed opacity-100" />
+                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-10" />
                                 </div>
                             </div>
 
@@ -455,8 +449,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               <div className="pt-6 border-t border-border flex justify-start items-center">
                                 <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => { setIsDeleteDialogOpen(open); if(!open) { setDeletePassword(""); setIsAwareChecked(false); setShowDeletePassword(false); } }}>
                                   <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" className="h-9 px-4 rounded-lg text-xs font-bold gap-2 transition-all text-destructive hover:bg-destructive/10">
-                                      <Trash2 className="h-4 w-4" /> Excluir Minha Conta
+                                    <Button variant="ghost" className="text-destructive text-xs hover:bg-destructive/10">
+                                      <Trash2 className="mr-2 h-4 w-4" /> Excluir Minha Conta
                                     </Button>
                                   </AlertDialogTrigger>
                                   <AlertDialogContent className="rounded-2xl max-w-sm">
