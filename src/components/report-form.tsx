@@ -3,7 +3,7 @@
 
 import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
-import { Camera, Loader2, MapPin, ImagePlus, RotateCcw } from "lucide-react";
+import { Camera, Loader2, MapPin, ImagePlus, RotateCcw, Info, AlertTriangle, ShieldAlert, CheckCircle2 } from "lucide-react";
 import { generateReportSummaryAction } from "@/lib/actions";
 import { addReport, addNotification } from "@/lib/data";
 import { getCategory } from "@/lib/categories";
@@ -39,6 +39,7 @@ import {
   AlertDialogTitle, 
   AlertDialogTrigger 
 } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
@@ -62,6 +63,10 @@ export function ReportForm() {
   const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isAwareChecked, setIsAwareChecked] = useState(false);
+  const [pendingValues, setPendingValues] = useState<z.infer<typeof ClientReportSchema> | null>(null);
+
   const [deviceLabels, setDeviceLabels] = useState({
     photo: "Clique para anexar uma foto",
     map: "Clique no mapa para marcar o local exato do problema."
@@ -164,7 +169,7 @@ export function ReportForm() {
     toast({ title: "Formulário limpo", description: "Todas as informações foram apagadas." });
   }, [reset, user?.uid, toast]);
 
-  const onSubmit = async (values: z.infer<typeof ClientReportSchema>) => {
+  const onSubmit = (values: z.infer<typeof ClientReportSchema>) => {
     if (!user) {
         toast({ variant: 'destructive', title: 'Erro', description: 'Você precisa estar logado para enviar um relato.' });
         return;
@@ -175,57 +180,62 @@ export function ReportForm() {
       return;
     }
 
+    // Em vez de enviar, abre o diálogo de confirmação
+    setPendingValues(values);
+    setIsConfirmDialogOpen(true);
+  };
+
+  const handleFinalSubmit = async () => {
+    if (!user || !pendingValues) return;
+
+    setIsConfirmDialogOpen(false);
     setIsRedirecting(true);
 
     try {
-        // 1. Converte a foto para URI
         let photoDataUri = photoPreview;
         if (!photoDataUri) {
           const reader = new FileReader();
           photoDataUri = await new Promise((resolve, reject) => {
             reader.onloadend = () => resolve(reader.result as string);
             reader.onerror = reject;
-            reader.readAsDataURL(values.photo);
+            reader.readAsDataURL(pendingValues.photo);
           });
         }
 
-        const categoryInfo = getCategory(values.category);
-        const categoryLabel = categoryInfo?.label || values.category;
-        const problemLabel = categoryInfo?.problems.find(p => p.value === values.problem)?.label || values.problem;
-        const locationStr = values.reference ? `${values.address} (${values.reference})` : values.address;
+        const categoryInfo = getCategory(pendingValues.category);
+        const categoryLabel = categoryInfo?.label || pendingValues.category;
+        const problemLabel = categoryInfo?.problems.find(p => p.value === pendingValues.problem)?.label || pendingValues.problem;
+        const locationStr = pendingValues.reference ? `${pendingValues.address} (${pendingValues.reference})` : pendingValues.address;
 
-        // 2. Chama a IA para o resumo no servidor
         const aiResult = await generateReportSummaryAction({
           category: categoryLabel,
           problem: problemLabel,
-          city: values.city,
-          bairro: values.bairro,
+          city: pendingValues.city,
+          bairro: pendingValues.bairro,
           location: locationStr,
-          description: values.description || "Nenhuma descrição fornecida.",
+          description: pendingValues.description || "Nenhuma descrição fornecida.",
           photoUrl: photoDataUri as string,
         });
 
         const finalSummary = aiResult.success 
           ? aiResult.summary 
-          : `${problemLabel} relatado em ${values.bairro}.`;
+          : `${problemLabel} relatado em ${pendingValues.bairro}.`;
 
-        // 3. Salva no Firestore (Lado do Cliente) para evitar erros de permissão
         const createdReport = await addReport({
           userId: user.uid,
           relatorEmail: user.email || "anonimo@inframais.com",
-          category: values.category,
-          problem: values.problem,
-          city: values.city,
-          bairro: values.bairro,
+          category: pendingValues.category,
+          problem: pendingValues.problem,
+          city: pendingValues.city,
+          bairro: pendingValues.bairro,
           location: locationStr,
-          description: values.description || "",
+          description: pendingValues.description || "",
           summary: finalSummary,
           photoUrl: photoDataUri as string,
-          latitude: values.latitude,
-          longitude: values.longitude,
+          latitude: pendingValues.latitude,
+          longitude: pendingValues.longitude,
         });
 
-        // 4. Cria notificação (Lado do Cliente)
         await addNotification(
           user.uid,
           createdReport.id,
@@ -458,6 +468,83 @@ export function ReportForm() {
           </CardFooter>
         </form>
       </Form>
+
+      {/* Diálogo de Confirmação de Envio */}
+      <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+        <AlertDialogContent className="rounded-3xl max-w-lg p-0 overflow-hidden border-none shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="bg-primary p-8 text-white flex flex-col items-center text-center space-y-4">
+            <div className="bg-white/20 p-4 rounded-full backdrop-blur-md">
+              <ShieldAlert className="h-10 w-10 text-white" />
+            </div>
+            <AlertDialogHeader className="space-y-2">
+              <AlertDialogTitle className="text-2xl font-bold text-white">Confirmação de Envio</AlertDialogTitle>
+              <AlertDialogDescription className="text-white/90 text-sm leading-relaxed">
+                Leia com atenção as regras de visibilidade e transparência da nossa plataforma.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+          </div>
+          
+          <div className="p-8 space-y-6 bg-card">
+            <div className="space-y-4">
+              <div className="flex gap-4 items-start p-4 bg-muted/50 rounded-2xl border border-border">
+                <div className="mt-1 bg-amber-100 p-1.5 rounded-lg">
+                  <Info className="h-4 w-4 text-amber-600" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Regra de Exclusão</p>
+                  <p className="text-sm text-foreground leading-relaxed">
+                    Você poderá excluir este relato <strong>apenas</strong> enquanto o status for <span className="text-primary font-bold">Em Análise</span>.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 items-start p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                <div className="mt-1 bg-primary/20 p-1.5 rounded-lg">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-black uppercase tracking-widest text-primary">Transparência Urbana</p>
+                  <p className="text-sm text-foreground leading-relaxed">
+                    Assim que aprovado, o relato torna-se <strong className="text-primary">Público</strong> para acompanhamento da comunidade e não poderá mais ser removido por você.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-3 p-4 bg-muted/30 rounded-2xl border border-border group cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setIsAwareChecked(!isAwareChecked)}>
+              <Checkbox 
+                id="aware-confirmation" 
+                checked={isAwareChecked} 
+                onCheckedChange={(val) => setIsAwareChecked(val as boolean)}
+                className="mt-1 h-5 w-5 rounded-full data-[state=checked]:bg-primary"
+              />
+              <Label 
+                htmlFor="aware-confirmation" 
+                className="text-xs font-bold leading-relaxed text-muted-foreground cursor-pointer select-none"
+              >
+                ESTOU CIENTE DE QUE O RELATO SE TORNARÁ UM DADO PÚBLICO E PERMANENTE APÓS A APROVAÇÃO PELA MODERAÇÃO.
+              </Label>
+            </div>
+
+            <AlertDialogFooter className="flex flex-col sm:flex-row gap-3">
+              <Button 
+                variant="ghost" 
+                onClick={() => setIsConfirmDialogOpen(false)} 
+                className="w-full sm:w-auto h-12 rounded-xl font-bold text-muted-foreground"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleFinalSubmit} 
+                disabled={!isAwareChecked}
+                className="w-full sm:flex-1 h-12 rounded-xl font-bold shadow-lg shadow-primary/20"
+              >
+                Confirmar e Enviar Relato
+              </Button>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
