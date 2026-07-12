@@ -222,6 +222,18 @@ export async function deleteReport(id: string, userId: string, reason: string, e
   }
 }
 
+export async function deleteReportPermanently(id: string, userId: string): Promise<boolean> {
+  const firestore = getDB();
+  try {
+    const reportRef = doc(firestore, `users/${userId}/reports`, id);
+    await deleteDoc(reportRef);
+    return true;
+  } catch (error: any) {
+    console.error(`[Firestore Error] deleteReportPermanently: ${error.message}`);
+    return false;
+  }
+}
+
 export async function saveUser(user: UserProfile): Promise<UserProfile> {
   const firestore = getDB();
   const role = isEmailEmployee(user.email) ? "EMPLOYEE" : "USER";

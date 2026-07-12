@@ -1,4 +1,3 @@
-
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -11,6 +10,7 @@ import {
     saveUser, 
     getUserById, 
     deleteReport as dbDeleteReport, 
+    deleteReportPermanently as dbDeleteReportPermanently,
     deleteUser as dbDeleteUser, 
     addNotification,
     markNotificationAsRead as dbMarkAsRead,
@@ -162,6 +162,15 @@ export async function deleteReportAction(reportId: string, userId: string, reaso
     
     await addNotification(userId, reportId, 'EXCLUDED', 'Relato removido', `Seu relato foi removido. Motivo: ${reason}`);
 
+    revalidatePath("/"); revalidatePath("/dashboard"); revalidatePath("/minha-conta"); revalidatePath("/funcionarios");
+    return { success: true };
+  } catch (error) { return { success: false }; }
+}
+
+export async function deleteReportPermanentlyAction(reportId: string, userId: string) {
+  try {
+    const success = await dbDeleteReportPermanently(reportId, userId);
+    if (!success) return { success: false, message: "Falha ao remover permanentemente." };
     revalidatePath("/"); revalidatePath("/dashboard"); revalidatePath("/minha-conta"); revalidatePath("/funcionarios");
     return { success: true };
   } catch (error) { return { success: false }; }

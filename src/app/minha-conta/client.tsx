@@ -51,7 +51,7 @@ function MyReportItem({ report }: { report: Report }) {
     const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
 
     const canDelete = report.status === 'UNDER_REVIEW';
-    const isPublic = report.status !== 'UNDER_REVIEW';
+    const isPublic = report.status !== 'UNDER_REVIEW' && report.status !== 'EXCLUDED';
 
     const handleDelete = async () => {
         startDeleteTransition(async () => {
@@ -74,7 +74,7 @@ function MyReportItem({ report }: { report: Report }) {
             "flex flex-col sm:flex-row gap-6 border border-border border-l-4 rounded-2xl p-5 bg-card relative transition-all duration-300 hover:shadow-lg hover:border-primary/20 group animate-in fade-in slide-in-from-bottom-4",
             statusBorderColors[report.status] || "border-l-slate-400"
         )}>
-            {/* Imagem (Aumentada em ~20% e modernizada) */}
+            {/* Imagem */}
             <div className="relative w-full sm:w-40 h-44 sm:h-auto rounded-xl overflow-hidden shrink-0 shadow-sm bg-muted group/photo">
                 <Image
                     src={report.photoUrl}
@@ -116,7 +116,6 @@ function MyReportItem({ report }: { report: Report }) {
                             <h3 className="font-extrabold text-xl text-foreground leading-tight truncate">
                                 {problem?.label || report.problem}
                             </h3>
-                            {/* Categoria e Localização logo abaixo */}
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
                                 <div className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
                                     {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
@@ -131,7 +130,7 @@ function MyReportItem({ report }: { report: Report }) {
                         <StatusBadge status={report.status} />
                     </div>
 
-                    {/* Resumo Inteligente (Estilo Bloco Elegante) */}
+                    {/* Resumo Inteligente */}
                     {report.summary && (
                       <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 space-y-2 relative overflow-hidden group/summary">
                         <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-[0.15em]">
@@ -144,7 +143,7 @@ function MyReportItem({ report }: { report: Report }) {
                     )}
                 </div>
 
-                {/* Footer do Card: Data + Ações */}
+                {/* Footer do Card */}
                 <div className="flex items-center justify-between gap-2 pt-4 mt-2 border-t border-border/50">
                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                         <Clock className="h-3.5 w-3.5" />
@@ -256,7 +255,20 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 router.push('/report/auth');
             } else {
                 if (!isEmployee) {
-                    const filteredReports = allReports.filter(report => report.userId === user.uid);
+                    const now = new Date();
+                    const filteredReports = allReports.filter(report => {
+                        if (report.userId !== user.uid) return false;
+                        
+                        // Lógica de 3 dias para relatos excluídos
+                        if (report.status === 'EXCLUDED') {
+                            if (!report.excludedAt) return false;
+                            const excludedDate = new Date(report.excludedAt);
+                            const diffInDays = (now.getTime() - excludedDate.getTime()) / (1000 * 60 * 60 * 24);
+                            return diffInDays <= 3;
+                        }
+                        
+                        return true;
+                    });
                     setUserReports(filteredReports);
                 }
 

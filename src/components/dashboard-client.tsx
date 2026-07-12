@@ -7,6 +7,7 @@ import {
   upvoteReport as dbUpvoteReport, 
   downvoteReport as dbDownvoteReport, 
   deleteReport as dbDeleteReport, 
+  deleteReportPermanentlyAction,
   submitComplaintAction 
 } from "@/lib/actions";
 import { 
@@ -104,6 +105,7 @@ const ReportCard = memo(({
   const router = useRouter();
   const [isDeleting, startDeleteTransition] = useTransition();
   const [isUpdating, startUpdateTransition] = useTransition();
+  const [isDeletingPermanently, setIsDeletingPermanently] = useState(false);
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
   
@@ -218,11 +220,6 @@ const ReportCard = memo(({
         toast({ variant: "destructive", title: "Motivo obrigatório", description: "Selecione um motivo para a exclusão." });
         return;
     }
-    if (deleteReasonValue === "other" && !deleteOtherDescription.trim()) {
-        toast({ variant: "destructive", title: "Descrição obrigatória", description: "Informe o motivo no campo de descrição." });
-        return;
-    }
-
     const finalReason = deleteReasonValue === "other" ? deleteOtherDescription : EXCLUSION_REASONS.find(r => r.value === deleteReasonValue)?.label || deleteReasonValue;
 
     startDeleteTransition(async () => {
@@ -241,6 +238,23 @@ const ReportCard = memo(({
             toast({ variant: "destructive", title: "Erro ao excluir", description: "Ocorreu um erro de permissão ou conexão." });
         }
     });
+  };
+
+  const handlePermanentDelete = async () => {
+    setIsDeletingPermanently(true);
+    try {
+      const result = await deleteReportPermanentlyAction(report.id, report.userId);
+      if (result.success) {
+        toast({ title: "Remoção Definitiva", description: "O relato foi apagado permanentemente." });
+        if (onSuccess) onSuccess();
+      } else {
+        toast({ variant: "destructive", title: "Erro", description: "Falha na remoção definitiva." });
+      }
+    } catch (error) {
+      toast({ variant: "destructive", title: "Erro", description: "Erro de conexão." });
+    } finally {
+      setIsDeletingPermanently(false);
+    }
   };
 
   const isEmployee = isEmailEmployee(user?.email);
@@ -477,7 +491,7 @@ const ReportCard = memo(({
                                 </div>
 
                                 <div className="grid grid-cols-1 gap-2 pt-2 border-t border-border mt-2">
-                                  {report.status !== 'EXCLUDED' && (
+                                  {report.status !== 'EXCLUDED' ? (
                                     <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                                       <AlertDialogTrigger asChild>
                                         <Button 
@@ -488,120 +502,62 @@ const ReportCard = memo(({
                                             <Trash2 className="h-4 w-4" /> Excluir Relato
                                         </Button>
                                       </AlertDialogTrigger>
-                                      <AlertDialogContent className="rounded-2xl sm:rounded-3xl bg-card border-border shadow-2xl p-6 sm:p-8 max-w-[95vw] sm:max-w-xl max-h-[80vh] overflow-y-auto no-scrollbar">
+                                      <AlertDialogContent className="rounded-2xl">
                                           <AlertDialogHeader>
                                               <AlertDialogTitle className="text-2xl font-bold">Excluir Relato</AlertDialogTitle>
                                               <AlertDialogDescription className="text-base pt-2">
                                                 Selecione o motivo da exclusão deste relato.
                                               </AlertDialogDescription>
                                           </AlertDialogHeader>
-                                          
                                           <div className="py-4 space-y-4">
-                                              <div className="space-y-3">
-                                                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Motivo da exclusão</Label>
-                                                  <RadioGroup value={deleteReasonValue} onValueChange={setDeleteReasonValue} className="grid gap-2">
-                                                      {EXCLUSION_REASONS.map((reason) => (
-                                                          <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setDeleteReasonValue(reason.value)}>
-                                                              <RadioGroupItem value={reason.value} id={`del-reason-${reason.value}`} />
-                                                              <Label htmlFor={`del-reason-${reason.value}`} className="flex-grow cursor-pointer font-medium">{reason.label}</Label>
-                                                          </div>
-                                                      ))}
-                                                  </RadioGroup>
-                                              </div>
-
-                                              {deleteReasonValue === "other" && (
-                                                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                                      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Descrição do motivo</Label>
-                                                      <Textarea 
-                                                          placeholder="Descreva o motivo detalhadamente..." 
-                                                          value={deleteOtherDescription}
-                                                          onChange={(e) => setDeleteOtherDescription(e.target.value)}
-                                                          className="min-h-[100px] rounded-xl bg-muted/20 border-border resize-none"
-                                                      />
-                                                  </div>
-                                              )}
+                                              <RadioGroup value={deleteReasonValue} onValueChange={setDeleteReasonValue}>
+                                                  {EXCLUSION_REASONS.map((reason) => (
+                                                      <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border">
+                                                          <RadioGroupItem value={reason.value} id={`del-reason-${reason.value}`} />
+                                                          <Label htmlFor={`del-reason-${reason.value}`}>{reason.label}</Label>
+                                                      </div>
+                                                  ))}
+                                              </RadioGroup>
                                           </div>
-
-                                          <AlertDialogFooter className="mt-6 gap-3">
-                                              <AlertDialogCancel className="rounded-xl h-12 px-6">Cancelar</AlertDialogCancel>
-                                              <AlertDialogAction 
-                                                  onClick={(e) => { e.preventDefault(); handleDelete(); }} 
-                                                  className="bg-destructive text-destructive-foreground rounded-xl h-12 px-8 font-bold shadow-lg"
-                                                  disabled={isDeleting || !deleteReasonValue || (deleteReasonValue === 'other' && !deleteOtherDescription.trim())}
-                                              >
-                                                  {isDeleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                          <AlertDialogFooter>
+                                              <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl px-8 font-bold" disabled={isDeleting || !deleteReasonValue}>
                                                   Confirmar Exclusão
                                               </AlertDialogAction>
                                           </AlertDialogFooter>
                                       </AlertDialogContent>
                                     </AlertDialog>
+                                  ) : (
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button 
+                                                type="button" 
+                                                variant="destructive" 
+                                                className="h-11 rounded-lg font-bold gap-2 w-full"
+                                            >
+                                                <Trash2 className="h-4 w-4" /> Excluir Definitivamente
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent className="rounded-2xl">
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Exclusão Definitiva</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Este relato já está excluído. Deseja removê-lo permanentemente do banco de dados? Esta ação não pode ser desfeita.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel className="rounded-lg">Cancelar</AlertDialogCancel>
+                                                <AlertDialogAction 
+                                                    onClick={handlePermanentDelete} 
+                                                    className="bg-destructive text-destructive-foreground rounded-lg px-6 font-bold"
+                                                >
+                                                    {isDeletingPermanently ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                                    Confirmar
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                   )}
-
-                                  <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-                                    <DialogTrigger asChild>
-                                      <Button 
-                                          type="button" 
-                                          variant="outline" 
-                                          className="h-11 rounded-lg border-orange-500/20 text-orange-600 hover:bg-orange-500/10 hover:border-orange-500 font-bold gap-2 w-full flex items-center justify-center"
-                                      >
-                                          Denunciar Usuário <Flag className="h-4 w-4 ml-2" />
-                                      </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="rounded-2xl sm:max-w-md">
-                                      <DialogHeader>
-                                        <DialogTitle className="flex items-center gap-2 text-orange-600">
-                                          <ShieldAlert className="h-5 w-5" /> Denunciar Usuário
-                                        </DialogTitle>
-                                        <DialogDescription>
-                                          Utilize esta opção somente em casos de uso indevido da plataforma ou violação das normas.
-                                        </DialogDescription>
-                                      </DialogHeader>
-                                      
-                                      <div className="py-4 space-y-4">
-                                        <div className="space-y-3">
-                                          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Motivo da denúncia</Label>
-                                          <RadioGroup value={reportReason} onValueChange={setReportReason} className="grid gap-2">
-                                            {REPORT_REASONS.map((reason) => (
-                                              <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setReportReason(reason.value)}>
-                                                <RadioGroupItem value={reason.value} id={`reason-${reason.value}`} />
-                                                <Label htmlFor={`reason-${reason.value}`} className="flex-grow cursor-pointer font-medium">{reason.label}</Label>
-                                              </div>
-                                            ))}
-                                          </RadioGroup>
-                                        </div>
-
-                                        {reportReason === "other" && (
-                                          <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Descrição obrigatória</Label>
-                                            <Textarea 
-                                              placeholder="Descreva o problema de forma detalhada..." 
-                                              value={reportDetails}
-                                              onChange={(e) => setReportDetails(e.target.value)}
-                                              className="min-h-[80px] rounded-xl bg-muted/20 border-border resize-none"
-                                            />
-                                          </div>
-                                        )}
-
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Observações do funcionário (opcional)</Label>
-                                            <Textarea 
-                                              placeholder="Informações adicionais para a análise superior..." 
-                                              value={reportObservations}
-                                              onChange={(e) => setReportObservations(e.target.value)}
-                                              className="min-h-[80px] rounded-xl bg-muted/20 border-border resize-none"
-                                            />
-                                        </div>
-                                      </div>
-
-                                      <DialogFooter className="gap-2 sm:gap-0">
-                                        <Button variant="ghost" onClick={() => setIsReportDialogOpen(false)} className="rounded-xl font-bold">Cancelar</Button>
-                                        <Button onClick={handleReportSubmit} disabled={isReporting || !reportReason || (reportReason === 'other' && !reportDetails.trim())} className="rounded-xl font-bold bg-orange-600 hover:bg-orange-700">
-                                          {isReporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Flag className="h-4 w-4 mr-2" />}
-                                          Enviar Denúncia
-                                        </Button>
-                                      </DialogFooter>
-                                    </DialogContent>
-                                  </Dialog>
                                 </div>
                             </Card>
                         </div>
@@ -628,11 +584,8 @@ export function DashboardClient({
     onSuccess?: () => void 
 }) {
   const { user } = useUser();
-  const isEmployee = isEmailEmployee(user?.email);
   const router = useRouter();
   const [upvotedReports, setUpvotedReports] = useState<Set<string>>(new Set());
-
-  // Estados de Filtro e Ordenação
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [bairroFilter, setBairroFilter] = useState<string>("all");
   const [sortOption, setSortOption] = useState<string>("recent");
@@ -659,14 +612,12 @@ export function DashboardClient({
 
   const filteredReports = useMemo(() => {
     const applyFiltersAndSort = (list: Report[]) => {
-      // Filtragem
       const filtered = list.filter(report => {
         const matchesCategory = categoryFilter === "all" || report.category === categoryFilter;
         const matchesBairro = bairroFilter === "all" || report.bairro === bairroFilter;
         return matchesCategory && matchesBairro;
       });
 
-      // Ordenação
       return [...filtered].sort((a, b) => {
         if (sortOption === "recent") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         if (sortOption === "oldest") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -696,13 +647,13 @@ export function DashboardClient({
     <Tabs defaultValue="pending" className="w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 overflow-x-auto pb-2">
         <TabsList className="bg-muted/50 p-1 rounded-2xl h-12 flex-nowrap w-max">
-          {isEmployee && !showUpvote && (
+          {!showUpvote && (
             <TabsTrigger value="under_review" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Em Análise</TabsTrigger>
           )}
           <TabsTrigger value="pending" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Pendente</TabsTrigger>
           <TabsTrigger value="in_progress" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Em Andamento</TabsTrigger>
           <TabsTrigger value="resolved" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Resolvido</TabsTrigger>
-          {isEmployee && !showUpvote && (
+          {!showUpvote && (
             <TabsTrigger value="moderation" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider data-[state=active]:bg-orange-500 data-[state=active]:text-white">
               Central de Moderação
             </TabsTrigger>
@@ -716,271 +667,119 @@ export function DashboardClient({
               hasActiveFilters ? "border-primary ring-1 ring-primary/20" : "border-border"
             )}>
               <Filter className={cn("h-4 w-4", hasActiveFilters ? "text-primary" : "text-muted-foreground")} />
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                {hasActiveFilters ? "Filtrado" : "Filtros"}
-              </span>
-              <Separator orientation="vertical" className="h-4 bg-border mx-1" />
-              <div 
-                className="text-[10px] font-black uppercase text-primary hover:underline flex items-center gap-1"
-                onClick={(e) => {
-                  if (hasActiveFilters) {
-                    e.stopPropagation();
-                    clearFilters();
-                  }
-                }}
-              >
-                {hasActiveFilters ? <X className="h-3 w-3" /> : null}
-                {hasActiveFilters ? "Limpar" : "Abrir"}
-              </div>
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Filtros</span>
             </button>
           </PopoverTrigger>
-          <PopoverContent 
-            className="w-80 p-6 rounded-2xl border-border shadow-2xl" 
-            align="end" 
-            side="top" 
-            alignOffset={10} 
-            sideOffset={15}
-          >
+          <PopoverContent className="w-80 p-6 rounded-2xl border-border shadow-2xl" align="end" side="top">
             <div className="space-y-6">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-bold text-sm uppercase tracking-widest text-foreground">Ajustar Filtros</h4>
-                {hasActiveFilters && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 px-2 text-[10px] font-black uppercase text-primary">
-                    Limpar Tudo
-                  </Button>
-                )}
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Ordenar Por</Label>
+                <Select value={sortOption} onValueChange={setSortOption}>
+                  <SelectTrigger className="h-10 rounded-xl bg-muted/20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="recent">Mais Recentes</SelectItem>
+                    <SelectItem value="oldest">Mais Antigos</SelectItem>
+                    <SelectItem value="upvotes">Mais Apoiados</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
-                    <SortAsc className="h-3 w-3" /> Ordenar Por
-                  </Label>
-                  <Select value={sortOption} onValueChange={setSortOption}>
-                    <SelectTrigger className="h-10 rounded-xl bg-muted/20">
-                      <SelectValue placeholder="Mais Recentes" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="recent">Mais Recentes</SelectItem>
-                      <SelectItem value="oldest">Mais Antigos</SelectItem>
-                      <SelectItem value="upvotes">Mais Apoiados</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Categoria</Label>
-                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className="h-10 rounded-xl bg-muted/20">
-                      <SelectValue placeholder="Todas as categorias" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="all">Todas as categorias</SelectItem>
-                      {categories.map((c) => (
-                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Bairro</Label>
-                  <Select value={bairroFilter} onValueChange={setBairroFilter}>
-                    <SelectTrigger className="h-10 rounded-xl bg-muted/20">
-                      <SelectValue placeholder="Todos os bairros" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="all">Todos os bairros</SelectItem>
-                      {PICUI_NEIGHBORHOODS.map((b) => (
-                        <SelectItem key={b} value={b}>{b}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Categoria</Label>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="h-10 rounded-xl bg-muted/20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="all">Todas</SelectItem>
+                    {categories.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Bairro</Label>
+                <Select value={bairroFilter} onValueChange={setBairroFilter}>
+                  <SelectTrigger className="h-10 rounded-xl bg-muted/20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="all">Todos</SelectItem>
+                    {PICUI_NEIGHBORHOODS.map((b) => (
+                      <SelectItem key={b} value={b}>{b}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {hasActiveFilters && (
+                <Button variant="outline" className="w-full rounded-xl h-10 text-[10px] font-black uppercase tracking-widest" onClick={clearFilters}>
+                  Limpar Filtros
+                </Button>
+              )}
             </div>
           </PopoverContent>
         </Popover>
       </div>
 
-      {isEmployee && !showUpvote && (
+      {!showUpvote && (
         <TabsContent value="under_review" className="space-y-6">
-          {filteredReports.under_review.length === 0 ? (
-            <EmptyState message={hasActiveFilters ? "Nenhum resultado para estes filtros." : "Nenhum relato em análise no momento."} />
-          ) : (
-            filteredReports.under_review.map(report => (
-              <ReportCard 
-                key={report.id} 
-                report={report} 
-                onUpvote={handleUpvote} 
-                isUpvoted={upvotedReports.has(report.id)} 
-                showUpvote={showUpvote} 
-                onSuccess={onSuccess}
-              />
-            ))
-          )}
+          {filteredReports.under_review.map(report => (
+            <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+          ))}
         </TabsContent>
       )}
 
       <TabsContent value="pending" className="space-y-6">
-        {filteredReports.pending.length === 0 ? (
-          <EmptyState message={hasActiveFilters ? "Nenhum resultado para estes filtros." : "Nenhum relato pendente no momento."} />
-        ) : (
-          filteredReports.pending.map(report => (
-            <ReportCard 
-              key={report.id} 
-              report={report} 
-              onUpvote={handleUpvote} 
-              isUpvoted={upvotedReports.has(report.id)} 
-              showUpvote={showUpvote} 
-              onSuccess={onSuccess}
-            />
-          ))
-        )}
+        {filteredReports.pending.map(report => (
+          <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+        ))}
       </TabsContent>
 
       <TabsContent value="in_progress" className="space-y-6">
-        {filteredReports.in_progress.length === 0 ? (
-          <EmptyState message={hasActiveFilters ? "Nenhum resultado para estes filtros." : "Nenhum relato em andamento no momento."} />
-        ) : (
-          filteredReports.in_progress.map(report => (
-            <ReportCard 
-              key={report.id} 
-              report={report} 
-              onUpvote={handleUpvote} 
-              isUpvoted={upvotedReports.has(report.id)} 
-              showUpvote={showUpvote} 
-              onSuccess={onSuccess}
-            />
-          ))
-        )}
+        {filteredReports.in_progress.map(report => (
+          <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+        ))}
       </TabsContent>
 
       <TabsContent value="resolved" className="space-y-6">
-        {filteredReports.resolved.length === 0 ? (
-          <EmptyState message={hasActiveFilters ? "Nenhum resultado para estes filtros." : "Nenhum relato resolvido no momento."} />
-        ) : (
-          filteredReports.resolved.map(report => (
-            <ReportCard 
-              key={report.id} 
-              report={report} 
-              onUpvote={handleUpvote} 
-              isUpvoted={upvotedReports.has(report.id)} 
-              showUpvote={showUpvote} 
-              onSuccess={onSuccess}
-            />
-          ))
-        )}
+        {filteredReports.resolved.map(report => (
+          <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+        ))}
       </TabsContent>
 
-      {isEmployee && !showUpvote && (
+      {!showUpvote && (
         <TabsContent value="moderation">
-          <Card className="rounded-2xl border-orange-500/20 bg-card/50 overflow-hidden">
-            <Tabs defaultValue="excluded" className="w-full">
-              <div className="bg-muted/10 p-4 border-b border-border">
-                <TabsList className="bg-transparent h-auto p-0 gap-8">
-                  <TabsTrigger 
-                    value="excluded" 
-                    className="data-[state=active]:text-red-600 data-[state=active]:border-b-2 data-[state=active]:border-red-600 rounded-none bg-transparent px-0 pb-2 h-auto text-sm font-bold uppercase tracking-widest border-b-2 border-transparent transition-all"
-                  >
-                    Relatos Excluídos
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="complaints" 
-                    className="data-[state=active]:text-orange-500 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none bg-transparent px-0 pb-2 h-auto text-sm font-bold uppercase tracking-widest border-b-2 border-transparent transition-all"
-                  >
-                    Relatos Denunciados
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-
-              <TabsContent value="excluded" className="p-6 space-y-6">
-                {filteredReports.excluded.length === 0 ? (
-                  <EmptyState message={hasActiveFilters ? "Nenhum resultado para estes filtros." : "Nenhum relato excluído para exibir."} />
-                ) : (
-                  filteredReports.excluded.map(report => (
-                    <ReportCard 
-                      key={report.id} 
-                      report={report} 
-                      onUpvote={handleUpvote} 
-                      isUpvoted={upvotedReports.has(report.id)} 
-                      showUpvote={showUpvote} 
-                      onSuccess={onSuccess}
-                    />
-                  ))
-                )}
-              </TabsContent>
-
-              <TabsContent value="complaints" className="p-6 space-y-6">
-                {complaints.length === 0 ? (
-                  <EmptyState message="Nenhuma denúncia registrada no momento." />
-                ) : (
-                  complaints.map(complaint => (
-                    <Card key={complaint.id} className="p-6 border-orange-500/20 bg-card rounded-2xl shadow-sm">
-                      <div className="flex flex-col md:flex-row gap-6">
-                        <div className="bg-orange-500/10 p-4 rounded-xl flex items-center justify-center shrink-0">
-                          <Flag className="h-8 w-8 text-orange-600" />
+          <Tabs defaultValue="excluded">
+            <TabsList className="bg-muted/10 p-4 border-b border-border">
+              <TabsTrigger value="excluded">Relatos Excluídos</TabsTrigger>
+              <TabsTrigger value="complaints">Relatos Denunciados</TabsTrigger>
+            </TabsList>
+            <TabsContent value="excluded" className="p-6 space-y-6">
+              {filteredReports.excluded.map(report => (
+                <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+              ))}
+            </TabsContent>
+            <TabsContent value="complaints" className="p-6 space-y-6">
+              {complaints.map(complaint => (
+                <Card key={complaint.id} className="p-6 border-orange-500/20 bg-card rounded-2xl">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h3 className="text-lg font-bold">Denúncia: {complaint.reason}</h3>
+                            <p className="text-sm text-muted-foreground">Usuário: {complaint.denouncedUserEmail}</p>
+                            {complaint.details && <p className="text-sm italic mt-2">"{complaint.details}"</p>}
                         </div>
-                        <div className="flex-grow space-y-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="text-lg font-bold text-foreground">Denúncia: {complaint.reason}</h3>
-                              <p className="text-sm text-muted-foreground font-medium">Usuário Denunciado: {complaint.denouncedUserEmail}</p>
-                            </div>
-                            <span className="text-xs font-bold text-muted-foreground uppercase bg-muted px-3 py-1 rounded-full">
-                                {complaint.status === 'PENDING' ? 'Pendente de análise' : 'Resolvida'}
-                            </span>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-bold text-muted-foreground uppercase tracking-widest bg-muted/30 p-4 rounded-xl border border-border">
-                            <div className="flex items-center gap-2">
-                                <User className="h-3.5 w-3.5" /> Registrado por: {complaint.reporterUserId === user?.uid ? 'Você' : 'Funcionário'}
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Clock className="h-3.5 w-3.5" /> <ReportTime date={new Date(complaint.createdAt)} />
-                            </div>
-                          </div>
-
-                          {complaint.details && (
-                            <div className="space-y-2">
-                              <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Descrição do motivo:</p>
-                              <div className="p-4 bg-muted/20 border border-border rounded-xl text-sm italic">
-                                "{complaint.details}"
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="flex justify-end gap-3 pt-2">
-                            <Button asChild variant="outline" size="sm" className="rounded-lg font-bold">
-                                <Link href={`/dashboard#report-${complaint.reportId}`}>
-                                    <MessageSquare className="h-4 w-4 mr-2" /> Abrir Relato Relacionado
-                                </Link>
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  ))
-                )}
-              </TabsContent>
-            </Tabs>
-          </Card>
+                        <Button asChild variant="outline" size="sm">
+                            <Link href={`/dashboard#report-${complaint.reportId}`}>Ver Relato</Link>
+                        </Button>
+                    </div>
+                </Card>
+              ))}
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       )}
     </Tabs>
-  );
-}
-
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-card/50 rounded-3xl border border-dashed border-border shadow-inner animate-in fade-in zoom-in duration-500">
-      <div className="bg-muted p-6 rounded-full mb-6">
-        <Filter className="h-10 w-10 text-muted-foreground/30" />
-      </div>
-      <p className="text-lg font-bold text-foreground">{message}</p>
-      <p className="text-sm text-muted-foreground mt-2 max-w-md">
-        Continue acompanhando as atualizações da comunidade. Novas ocorrências aparecerão aqui assim que forem registradas.
-      </p>
-    </div>
   );
 }
