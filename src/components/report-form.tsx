@@ -480,23 +480,10 @@ export function ReportForm() {
           
           <div className="p-6 space-y-5 bg-card">
             <div className="space-y-4">
-              <div className="flex gap-3 items-start">
-                <div className="mt-1 bg-primary/10 p-1.5 rounded-lg shrink-0">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                </div>
-                <p className="text-sm text-foreground leading-relaxed font-medium">
-                  Após a aprovação, o relato se tornará <strong>público</strong> e não poderá mais ser removido por você.
-                </p>
-              </div>
-
-              <div className="flex gap-3 items-start">
-                <div className="mt-1 bg-amber-100 p-1.5 rounded-lg shrink-0">
-                  <Info className="h-4 w-4 text-amber-600" />
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed font-semibold">
-                  A exclusão só é permitida enquanto o status estiver <strong>Em Análise</strong>.
-                </p>
-              </div>
+              <p className="text-sm text-foreground leading-relaxed font-medium">
+                Após a aprovação, o relato se tornará <strong>público</strong> e não poderá mais ser removido por você. 
+                A exclusão só é permitida enquanto o status estiver <strong>Em Análise</strong>.
+              </p>
             </div>
 
             <div 
