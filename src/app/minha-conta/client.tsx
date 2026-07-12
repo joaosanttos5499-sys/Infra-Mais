@@ -5,7 +5,7 @@ import { type Report, type UserProfile } from "@/lib/types";
 import { useEffect, useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Save, Trash2, MapPin, Clock, Mail, Calendar, ShieldAlert, AlertTriangle, Eye, EyeOff, Maximize2, Sparkles } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getCategory } from "@/lib/categories";
 import Image from "next/image";
@@ -395,11 +395,11 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
     return (
         <div className="space-y-8">
-             <Card className="bg-card rounded-3xl shadow-md border border-border p-6 sm:p-10 space-y-6 overflow-hidden mx-4 sm:mx-0 relative">
+             <Card className="bg-card rounded-2xl shadow-sm border border-border p-6 sm:p-8 space-y-6 overflow-hidden mx-4 sm:mx-0">
                 <div className="flex flex-col items-center gap-4 mb-2">
-                    <Avatar className="h-24 w-24 shadow-md border-4 border-background">
+                    <Avatar className="h-20 w-20 shadow-sm border-2 border-background">
                         <AvatarImage src={userProfile?.photoURL || createAvatarSvg(user.email || 'U')} />
-                        <AvatarFallback className="text-3xl font-bold bg-primary/10 text-primary">
+                        <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
                             {(user.email || 'U').charAt(0).toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
@@ -410,50 +410,44 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                         <UserDataSkeleton />
                     ) : (
                         <Form {...form}>
-                          <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+                          <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
                             <FormField
                               control={form.control}
                               name="name"
                               render={({ field }) => (
                                 <FormItem>
-                                  <div className="flex justify-between items-center mb-1">
-                                    <FormLabel className="text-xs font-black text-foreground uppercase tracking-[0.2em] opacity-60">Nome Completo</FormLabel>
+                                  <div className="flex justify-between items-center">
+                                    <FormLabel>Nome Completo</FormLabel>
                                     {!isEditingName && (
-                                        <Button type="button" variant="link" className="p-0 h-auto text-xs text-primary font-bold hover:text-primary/80" onClick={handleEditClick}>
+                                        <Button type="button" variant="link" className="p-0 h-auto text-xs text-primary font-bold" onClick={handleEditClick}>
                                             Alterar Nome
                                         </Button>
                                     )}
                                   </div>
                                   <FormControl>
-                                      <Input {...field} disabled={!isEditingName} className="h-12 rounded-2xl bg-muted/40 focus:bg-background border-border font-bold text-foreground transition-all" />
+                                      <Input {...field} disabled={!isEditingName} className="h-10 bg-muted/20" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
                               )}
                             />
 
-                            <div className="space-y-6 pt-2">
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <Label className="text-xs font-black text-foreground uppercase tracking-[0.2em] opacity-60">E-mail</Label>
-                                        <Mail className="h-3 w-3 text-muted-foreground" />
-                                    </div>
-                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-12 rounded-2xl bg-muted/40 text-foreground cursor-not-allowed border-border font-medium opacity-100" />
+                            <div className="space-y-4 pt-2">
+                                <div className="space-y-1">
+                                    <Label className="text-sm font-medium">E-mail</Label>
+                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-10 bg-muted/20 cursor-not-allowed opacity-100" />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <Label className="text-xs font-black text-foreground uppercase tracking-[0.2em] opacity-60">Data de Nascimento</Label>
-                                        <Calendar className="h-3 w-3 text-muted-foreground" />
-                                    </div>
-                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-12 rounded-2xl bg-muted/40 text-foreground cursor-not-allowed border-border font-medium opacity-100" />
+                                <div className="space-y-1">
+                                    <Label className="text-sm font-medium">Data de Nascimento</Label>
+                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-10 bg-muted/20 cursor-not-allowed opacity-100" />
                                 </div>
                             </div>
 
                             {isEditingName ? (
                                 <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-border">
-                                    <Button type="button" variant="outline" onClick={() => { setIsEditingName(false); form.reset(); }} className="h-11 px-6 rounded-2xl font-bold w-full sm:w-auto">Cancelar</Button>
-                                    <Button type="button" onClick={() => setIsConfirmOpen(true)} disabled={!form.formState.isDirty} className="h-11 px-6 rounded-2xl font-bold shadow-md w-full sm:w-auto">
+                                    <Button type="button" variant="outline" onClick={() => { setIsEditingName(false); form.reset(); }} className="h-10 px-6 rounded-xl font-bold w-full sm:w-auto">Cancelar</Button>
+                                    <Button type="button" onClick={() => setIsConfirmOpen(true)} disabled={!form.formState.isDirty} className="h-10 px-6 rounded-xl font-bold w-full sm:w-auto">
                                         <Save className="mr-2 h-4 w-4" /> Salvar Alterações
                                     </Button>
                                 </div>
@@ -461,18 +455,18 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               <div className="pt-6 border-t border-border flex justify-start items-center">
                                 <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => { setIsDeleteDialogOpen(open); if(!open) { setDeletePassword(""); setIsAwareChecked(false); setShowDeletePassword(false); } }}>
                                   <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" className="h-10 px-6 rounded-xl text-[10px] font-black gap-2 transition-all text-destructive hover:bg-destructive/10 uppercase tracking-widest">
+                                    <Button variant="ghost" className="h-9 px-4 rounded-lg text-xs font-bold gap-2 transition-all text-destructive hover:bg-destructive/10">
                                       <Trash2 className="h-4 w-4" /> Excluir Minha Conta
                                     </Button>
                                   </AlertDialogTrigger>
-                                  <AlertDialogContent className="rounded-[2rem] max-w-sm">
+                                  <AlertDialogContent className="rounded-2xl max-w-sm">
                                     <AlertDialogHeader>
                                       <AlertDialogTitle className="flex items-center gap-2 text-destructive"><ShieldAlert className="h-5 w-5" /> Segurança</AlertDialogTitle>
                                       <AlertDialogDescription className="text-sm">Esta ação é irreversível. Por favor, confirme sua senha para prosseguir.</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <div className="py-4 space-y-4">
                                       <div className="space-y-2">
-                                        <Label htmlFor="del-pass" className="text-[10px] font-black uppercase tracking-widest">Sua Senha</Label>
+                                        <Label htmlFor="del-pass" className="text-xs font-bold uppercase tracking-widest">Sua Senha</Label>
                                         <div className="relative">
                                           <Input id="del-pass" type={showDeletePassword ? "text" : "password"} value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} placeholder="********" className="h-11 rounded-xl pr-10" />
                                           <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent" onClick={() => setShowDeletePassword(!showDeletePassword)}>
@@ -482,7 +476,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                       </div>
                                       <div className="flex items-start space-x-3 p-3 bg-muted/20 rounded-xl border border-border">
                                         <Checkbox id="confirm-delete-aware" checked={isAwareChecked} onCheckedChange={(val) => setIsAwareChecked(val as boolean)} className="mt-1" />
-                                        <Label htmlFor="confirm-delete-aware" className="text-[10px] leading-relaxed text-muted-foreground cursor-pointer font-bold">ENTENDO QUE MEUS DADOS SERÃO APAGADOS DEFINITIVAMENTE.</Label>
+                                        <Label htmlFor="confirm-delete-aware" className="text-xs leading-relaxed text-muted-foreground cursor-pointer font-bold">ENTENDO QUE MEUS DADOS SERÃO APAGADOS DEFINITIVAMENTE.</Label>
                                       </div>
                                     </div>
                                     <AlertDialogFooter className="gap-2">
@@ -503,7 +497,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             </Card>
 
             <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-                <AlertDialogContent className="rounded-[2rem] mx-4 sm:mx-0 bg-card border-border">
+                <AlertDialogContent className="rounded-2xl mx-4 sm:mx-0 bg-card border-border">
                     <AlertDialogHeader>
                         <AlertDialogTitle>Alteração de Identidade</AlertDialogTitle>
                         <AlertDialogDescription>Você só poderá alterar seu nome novamente após 7 dias. Deseja prosseguir com a atualização?</AlertDialogDescription>
