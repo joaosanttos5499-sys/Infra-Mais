@@ -418,7 +418,7 @@ const ReportCard = memo(({
                                   name="description" 
                                   value={editDescription} 
                                   onChange={(e) => setEditDescription(e.target.value)} 
-                                  className="h-32 rounded-lg bg-card border-border resize-none p-3 text-sm" 
+                                  className="h-24 rounded-lg bg-card border-border resize-none p-3 text-sm" 
                                 />
                             </div>
 
@@ -481,52 +481,107 @@ const ReportCard = memo(({
                                     </AlertDialog>
                                 </div>
 
-                                <div className="grid grid-cols-1 gap-2 pt-2 border-t border-border mt-2">
+                                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border mt-2">
                                   {report.status !== 'EXCLUDED' ? (
-                                    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                                      <AlertDialogTrigger asChild>
-                                        <Button 
-                                          type="button" 
-                                          variant="outline" 
-                                          className="h-11 rounded-lg border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive font-bold gap-2 w-full"
-                                        >
-                                            <Trash2 className="h-4 w-4" /> Excluir Relato
-                                        </Button>
-                                      </AlertDialogTrigger>
-                                      <AlertDialogContent className="rounded-2xl">
-                                          <AlertDialogHeader>
-                                              <AlertDialogTitle className="text-2xl font-bold">Excluir Relato</AlertDialogTitle>
-                                              <AlertDialogDescription className="text-base pt-2">
-                                                Selecione o motivo da exclusão deste relato.
-                                              </AlertDialogDescription>
-                                          </AlertDialogHeader>
+                                    <>
+                                      <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+                                        <DialogTrigger asChild>
+                                          <Button 
+                                            type="button" 
+                                            variant="outline" 
+                                            className="h-11 rounded-lg border-orange-500/20 text-orange-600 hover:bg-orange-50 font-bold w-full"
+                                          >
+                                            Denunciar
+                                          </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="rounded-2xl">
+                                          <DialogHeader>
+                                            <DialogTitle className="text-2xl font-bold">Denunciar Relato</DialogTitle>
+                                            <DialogDescription className="text-base pt-2">
+                                              Escolha o motivo para denunciar este relato.
+                                            </DialogDescription>
+                                          </DialogHeader>
                                           <div className="py-4 space-y-4">
-                                              <RadioGroup value={deleteReasonValue} onValueChange={setDeleteReasonValue}>
-                                                  {EXCLUSION_REASONS.map((reason) => (
-                                                      <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border">
-                                                          <RadioGroupItem value={reason.value} id={`del-reason-${reason.value}`} />
-                                                          <Label htmlFor={`del-reason-${reason.value}`}>{reason.label}</Label>
-                                                      </div>
-                                                  ))}
-                                              </RadioGroup>
+                                            <RadioGroup value={reportReason} onValueChange={setReportReason}>
+                                              {REPORT_REASONS.map((reason) => (
+                                                <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border">
+                                                  <RadioGroupItem value={reason.value} id={`rep-reason-${reason.value}`} />
+                                                  <Label htmlFor={`rep-reason-${reason.value}`}>{reason.label}</Label>
+                                                </div>
+                                              ))}
+                                            </RadioGroup>
+                                            {reportReason === "other" && (
+                                              <div className="space-y-2">
+                                                <Label>Descreva o motivo</Label>
+                                                <Textarea value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} placeholder="Detalhes da denúncia..." className="h-20" />
+                                              </div>
+                                            )}
+                                            <div className="space-y-2">
+                                              <Label>Observações Adicionais (Opcional)</Label>
+                                              <Textarea value={reportObservations} onChange={(e) => setReportObservations(e.target.value)} placeholder="Mais informações para a moderação..." className="h-20" />
+                                            </div>
                                           </div>
-                                          <AlertDialogFooter>
-                                              <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                                              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl px-8 font-bold" disabled={isDeleting || !deleteReasonValue}>
-                                                  Confirmar Exclusão
-                                              </AlertDialogAction>
-                                          </AlertDialogFooter>
-                                      </AlertDialogContent>
-                                    </AlertDialog>
+                                          <DialogFooter>
+                                            <Button variant="ghost" onClick={() => setIsReportDialogOpen(false)}>Cancelar</Button>
+                                            <Button onClick={handleReportSubmit} disabled={isReporting || !reportReason} className="bg-orange-500 hover:bg-orange-600 text-white font-bold">
+                                              {isReporting ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
+                                              Enviar Denúncia
+                                            </Button>
+                                          </DialogFooter>
+                                        </DialogContent>
+                                      </Dialog>
+
+                                      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                                        <AlertDialogTrigger asChild>
+                                          <Button 
+                                            type="button" 
+                                            variant="outline" 
+                                            className="h-11 rounded-lg border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive font-bold w-full"
+                                          >
+                                            Excluir
+                                          </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent className="rounded-2xl">
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle className="text-2xl font-bold">Excluir Relato</AlertDialogTitle>
+                                                <AlertDialogDescription className="text-base pt-2">
+                                                  Selecione o motivo da exclusão deste relato.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <div className="py-4 space-y-4">
+                                                <RadioGroup value={deleteReasonValue} onValueChange={setDeleteReasonValue}>
+                                                    {EXCLUSION_REASONS.map((reason) => (
+                                                        <div key={reason.value} className="flex items-center space-x-3 p-3 rounded-xl border border-border">
+                                                            <RadioGroupItem value={reason.value} id={`del-reason-${reason.value}`} />
+                                                            <Label htmlFor={`del-reason-${reason.value}`}>{reason.label}</Label>
+                                                        </div>
+                                                    ))}
+                                                </RadioGroup>
+                                                {deleteReasonValue === "other" && (
+                                                  <div className="space-y-2">
+                                                    <Label>Descreva o motivo</Label>
+                                                    <Textarea value={deleteOtherDescription} onChange={(e) => setDeleteOtherDescription(e.target.value)} placeholder="Detalhes da exclusão..." className="h-20" />
+                                                  </div>
+                                                )}
+                                            </div>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl px-8 font-bold" disabled={isDeleting || !deleteReasonValue || (deleteReasonValue === "other" && !deleteOtherDescription)}>
+                                                    Confirmar Exclusão
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                      </AlertDialog>
+                                    </>
                                   ) : (
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <Button 
                                                 type="button" 
                                                 variant="destructive" 
-                                                className="h-11 rounded-lg font-bold gap-2 w-full"
+                                                className="h-11 rounded-lg font-bold w-full col-span-2"
                                             >
-                                                <Trash2 className="h-4 w-4" /> Excluir Definitivamente
+                                                Excluir Definitivamente
                                             </Button>
                                         </AlertDialogTrigger>
                                         <AlertDialogContent className="rounded-2xl">
