@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, memo, useCallback, useMemo, useRef } from "react";
@@ -180,7 +179,6 @@ export function ReportForm() {
       return;
     }
 
-    // Em vez de enviar, abre o diálogo de confirmação
     setPendingValues(values);
     setIsConfirmDialogOpen(true);
   };
@@ -469,77 +467,70 @@ export function ReportForm() {
         </form>
       </Form>
 
-      {/* Diálogo de Confirmação de Envio */}
       <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-        <AlertDialogContent className="rounded-3xl max-w-lg p-0 overflow-hidden border-none shadow-2xl animate-in zoom-in-95 duration-300">
-          <div className="bg-primary p-8 text-white flex flex-col items-center text-center space-y-4">
-            <div className="bg-white/20 p-4 rounded-full backdrop-blur-md">
-              <ShieldAlert className="h-10 w-10 text-white" />
+        <AlertDialogContent className="rounded-2xl max-w-[400px] p-0 overflow-hidden border-none shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="bg-primary px-6 py-4 text-white flex items-center gap-3">
+            <div className="bg-white/20 p-2 rounded-lg">
+              <ShieldAlert className="h-5 w-5 text-white" />
             </div>
-            <AlertDialogHeader className="space-y-2">
-              <AlertDialogTitle className="text-2xl font-bold text-white">Confirmação de Envio</AlertDialogTitle>
-              <AlertDialogDescription className="text-white/90 text-sm leading-relaxed">
-                Leia com atenção as regras de visibilidade e transparência da nossa plataforma.
-              </AlertDialogDescription>
+            <AlertDialogHeader className="space-y-0 text-left">
+              <AlertDialogTitle className="text-lg font-bold text-white leading-tight">Confirmar envio</AlertDialogTitle>
             </AlertDialogHeader>
           </div>
           
-          <div className="p-8 space-y-6 bg-card">
+          <div className="p-6 space-y-5 bg-card">
             <div className="space-y-4">
-              <div className="flex gap-4 items-start p-4 bg-muted/50 rounded-2xl border border-border">
-                <div className="mt-1 bg-amber-100 p-1.5 rounded-lg">
-                  <Info className="h-4 w-4 text-amber-600" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Regra de Exclusão</p>
-                  <p className="text-sm text-foreground leading-relaxed">
-                    Você poderá excluir este relato <strong>apenas</strong> enquanto o status for <span className="text-primary font-bold">Em Análise</span>.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4 items-start p-4 bg-primary/5 rounded-2xl border border-primary/10">
-                <div className="mt-1 bg-primary/20 p-1.5 rounded-lg">
+              <div className="flex gap-3 items-start">
+                <div className="mt-1 bg-primary/10 p-1.5 rounded-lg shrink-0">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
                 </div>
-                <div className="space-y-1">
-                  <p className="text-xs font-black uppercase tracking-widest text-primary">Transparência Urbana</p>
-                  <p className="text-sm text-foreground leading-relaxed">
-                    Assim que aprovado, o relato torna-se <strong className="text-primary">Público</strong> para acompanhamento da comunidade e não poderá mais ser removido por você.
-                  </p>
+                <p className="text-sm text-foreground leading-relaxed font-medium">
+                  Após a aprovação, o relato se tornará <strong>público</strong> e não poderá mais ser removido por você.
+                </p>
+              </div>
+
+              <div className="flex gap-3 items-start">
+                <div className="mt-1 bg-amber-100 p-1.5 rounded-lg shrink-0">
+                  <Info className="h-4 w-4 text-amber-600" />
                 </div>
+                <p className="text-xs text-muted-foreground leading-relaxed font-semibold">
+                  A exclusão só é permitida enquanto o status estiver <strong>Em Análise</strong>.
+                </p>
               </div>
             </div>
 
-            <div className="flex items-start space-x-3 p-4 bg-muted/30 rounded-2xl border border-border group cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setIsAwareChecked(!isAwareChecked)}>
+            <div 
+              className="flex items-start space-x-3 p-3 bg-muted/30 rounded-xl border border-border hover:bg-muted/50 transition-colors cursor-pointer group"
+              onClick={() => setIsAwareChecked(!isAwareChecked)}
+            >
               <Checkbox 
                 id="aware-confirmation" 
                 checked={isAwareChecked} 
                 onCheckedChange={(val) => setIsAwareChecked(val as boolean)}
-                className="mt-1 h-5 w-5 rounded-full data-[state=checked]:bg-primary"
+                className="mt-0.5 h-4 w-4 rounded-sm"
               />
               <Label 
                 htmlFor="aware-confirmation" 
-                className="text-xs font-bold leading-relaxed text-muted-foreground cursor-pointer select-none"
+                className="text-xs font-bold leading-tight text-muted-foreground cursor-pointer select-none"
               >
-                ESTOU CIENTE DE QUE O RELATO SE TORNARÁ UM DADO PÚBLICO E PERMANENTE APÓS A APROVAÇÃO PELA MODERAÇÃO.
+                Estou ciente de que o relato poderá se tornar público após a aprovação da moderação.
               </Label>
             </div>
 
-            <AlertDialogFooter className="flex flex-col sm:flex-row gap-3">
+            <AlertDialogFooter className="flex flex-row items-center gap-2 pt-2">
               <Button 
                 variant="ghost" 
                 onClick={() => setIsConfirmDialogOpen(false)} 
-                className="w-full sm:w-auto h-12 rounded-xl font-bold text-muted-foreground"
+                className="flex-1 h-10 rounded-xl font-bold text-muted-foreground text-xs"
               >
                 Cancelar
               </Button>
               <Button 
                 onClick={handleFinalSubmit} 
                 disabled={!isAwareChecked}
-                className="w-full sm:flex-1 h-12 rounded-xl font-bold shadow-lg shadow-primary/20"
+                className="flex-[2] h-10 rounded-xl font-bold shadow-lg shadow-primary/20 text-xs"
               >
-                Confirmar e Enviar Relato
+                Confirmar envio
               </Button>
             </AlertDialogFooter>
           </div>
