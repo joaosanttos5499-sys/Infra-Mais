@@ -379,18 +379,6 @@ const ReportCard = memo(({
             {!showUpvote && (
             <AccordionContent className="bg-muted/5 border-t border-border/50">
                 <div className="p-6 md:p-8 space-y-6 max-w-[1400px] mx-auto">
-                    {report.summary && (
-                      <div className="mb-8 p-5 bg-primary/5 border border-primary/20 rounded-2xl shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Sparkles className="h-4 w-4 text-primary" />
-                          <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Resumo Inteligente (IA)</span>
-                        </div>
-                        <p className="text-sm text-foreground leading-relaxed italic font-medium">
-                          "{report.summary}"
-                        </p>
-                      </div>
-                    )}
-
                     <div className="grid lg:grid-cols-12 gap-6 items-stretch">
                         <div className="lg:col-span-8 flex flex-col gap-4">
                             <div className="grid grid-cols-2 gap-4">
@@ -430,9 +418,21 @@ const ReportCard = memo(({
                                   name="description" 
                                   value={editDescription} 
                                   onChange={(e) => setEditDescription(e.target.value)} 
-                                  className="flex-grow min-h-[300px] rounded-lg bg-card border-border resize-none p-3 text-sm" 
+                                  className="h-32 rounded-lg bg-card border-border resize-none p-3 text-sm" 
                                 />
                             </div>
+
+                            {report.summary && (
+                              <div className="p-5 bg-primary/5 border border-primary/20 rounded-2xl shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <Sparkles className="h-4 w-4 text-primary" />
+                                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Resumo Inteligente (IA)</span>
+                                </div>
+                                <p className="text-sm text-foreground leading-relaxed italic font-medium">
+                                  "{report.summary}"
+                                </p>
+                              </div>
+                            )}
                         </div>
 
                         <div className="lg:col-span-4 flex flex-col gap-4">
