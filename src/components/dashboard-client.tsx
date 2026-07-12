@@ -412,16 +412,6 @@ const ReportCard = memo(({
                                 </div>
                             </div>
 
-                            <div className="flex-grow flex flex-col space-y-1.5">
-                                <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Descrição</Label>
-                                <Textarea 
-                                  name="description" 
-                                  value={editDescription} 
-                                  onChange={(e) => setEditDescription(e.target.value)} 
-                                  className="h-24 rounded-lg bg-card border-border resize-none p-3 text-sm" 
-                                />
-                            </div>
-
                             {report.summary && (
                               <div className="p-5 bg-primary/5 border border-primary/20 rounded-2xl shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
                                 <div className="flex items-center gap-2 mb-3">
@@ -433,6 +423,16 @@ const ReportCard = memo(({
                                 </p>
                               </div>
                             )}
+
+                            <div className="flex-grow flex flex-col space-y-1.5">
+                                <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Descrição</Label>
+                                <Textarea 
+                                  name="description" 
+                                  value={editDescription} 
+                                  onChange={(e) => setEditDescription(e.target.value)} 
+                                  className="h-24 rounded-lg bg-card border-border resize-none p-3 text-sm" 
+                                />
+                            </div>
                         </div>
 
                         <div className="lg:col-span-4 flex flex-col gap-4">
