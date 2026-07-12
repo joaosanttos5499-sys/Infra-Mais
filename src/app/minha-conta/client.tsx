@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useUser, useAuth } from "@/firebase";
@@ -511,7 +510,6 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                     <div className="flex items-center justify-between mb-8">
                         <div>
                           <h2 className="text-2xl font-black text-foreground tracking-tight">Meus Relatórios</h2>
-                          <p className="text-xs text-muted-foreground font-medium mt-1">Histórico de problemas relatados por você.</p>
                         </div>
                         <Button asChild variant="default" size="sm" className="rounded-xl h-10 px-5 font-bold shadow-lg shadow-primary/20">
                             <Link href="/report/new">Novo Relato</Link>
