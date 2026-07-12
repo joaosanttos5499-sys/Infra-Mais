@@ -336,15 +336,6 @@ const ReportCard = memo(({
                         )}
                     </div>
 
-                    {isEmployee && report.summary && (
-                      <div className="mt-4 p-3 bg-primary/5 rounded-xl border border-primary/10 flex items-start gap-3">
-                        <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed italic">
-                          "{report.summary}"
-                        </p>
-                      </div>
-                    )}
-
                     <div className="mt-auto pt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
                         <div className="flex items-center gap-5">
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold uppercase tracking-tight">
@@ -389,12 +380,12 @@ const ReportCard = memo(({
             <AccordionContent className="bg-muted/5 border-t border-border/50">
                 <div className="p-6 md:p-8 space-y-6 max-w-[1400px] mx-auto">
                     {report.summary && (
-                      <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-xl">
-                        <div className="flex items-center gap-2 mb-2">
+                      <div className="mb-8 p-5 bg-primary/5 border border-primary/20 rounded-2xl shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div className="flex items-center gap-2 mb-3">
                           <Sparkles className="h-4 w-4 text-primary" />
-                          <span className="text-xs font-bold text-primary uppercase tracking-widest">Resumo Inteligente (IA)</span>
+                          <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Resumo Inteligente (IA)</span>
                         </div>
-                        <p className="text-sm text-foreground leading-relaxed italic">
+                        <p className="text-sm text-foreground leading-relaxed italic font-medium">
                           "{report.summary}"
                         </p>
                       </div>
