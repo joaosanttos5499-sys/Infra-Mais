@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useUser, useAuth } from "@/firebase";
@@ -50,13 +51,13 @@ function MyReportItem({ report }: { report: Report }) {
     const problem = category?.problems.find(p => p.value === report.problem);
     const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
 
-    const canDelete = report.status === 'UNDER_REVIEW';
+    // O usuário pode excluir permanentemente se estiver em análise ou se já estiver excluído (para limpar a lista)
+    const canDelete = report.status === 'UNDER_REVIEW' || report.status === 'EXCLUDED';
     const isPublic = report.status !== 'UNDER_REVIEW' && report.status !== 'EXCLUDED';
 
     const handleDelete = async () => {
         startDeleteTransition(async () => {
             try {
-                // Para o usuário, a exclusão de relatos "Em Análise" agora é permanente
                 const success = await clientDeleteReportPermanently(report.id, report.userId);
                 if (success) {
                     toast({ title: "Relatório removido", description: "O relato foi excluído permanentemente do sistema." });
@@ -164,8 +165,8 @@ function MyReportItem({ report }: { report: Report }) {
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
-                                        <AlertDialogDescription>Esta ação não pode ser desfeita. Como o relato ainda está em análise, ele será removido permanentemente do sistema.</AlertDialogDescription>
+                                        <AlertDialogTitle>Excluir Relatório Permanentemente?</AlertDialogTitle>
+                                        <AlertDialogDescription>Esta ação não pode ser desfeita. O relato será removido permanentemente de nossos registros.</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                         <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
