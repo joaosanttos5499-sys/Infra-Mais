@@ -17,7 +17,8 @@ import {
   addDoc,
   DocumentSnapshot,
   QueryDocumentSnapshot,
-  Firestore
+  Firestore,
+  writeBatch
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { initializeFirebase } from "@/firebase";
@@ -339,10 +340,21 @@ export async function markNotificationAsRead(id: string): Promise<boolean> {
 export async function markAllNotificationsAsRead(userId: string): Promise<void> {
   const firestore = getDB();
   try {
-    const q = query(collection(firestore, "notifications"), where("userId", "==", userId), where("isRead", "==", false));
+    const q = query(
+      collection(firestore, "notifications"), 
+      where("userId", "==", userId), 
+      where("isRead", "==", false)
+    );
     const snapshot = await getDocs(q);
-    const promises = snapshot.docs.map(d => updateDoc(d.ref, { isRead: true }));
-    await Promise.all(promises);
+    
+    if (snapshot.empty) return;
+
+    const batch = writeBatch(firestore);
+    snapshot.docs.forEach((d) => {
+      batch.update(d.ref, { isRead: true });
+    });
+    
+    await batch.commit();
   } catch (error: any) {
     console.error(`[Firestore Error] markAllNotificationsAsRead: ${error.message}`);
   }

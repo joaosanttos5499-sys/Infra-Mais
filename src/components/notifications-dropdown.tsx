@@ -36,7 +36,9 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
     );
   }, [notificationsRaw]);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = useMemo(() => 
+    notifications.filter(n => !n.isRead).length
+  , [notifications]);
 
   const handleMarkAsRead = (id: string) => {
     startTransition(async () => {
@@ -53,7 +55,7 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
 
   const handleOpenChange = (open: boolean) => {
     // Quando o usuário fecha o menu, marcamos todas como lidas automaticamente
-    // para limpar a sinalização visual após a visualização.
+    // para limpar a sinalização visual de forma definitiva.
     if (!open && unreadCount > 0 && user) {
       handleMarkAllAsRead();
     }
@@ -87,17 +89,6 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
             </div>
             <h3 className="font-black text-xs text-foreground tracking-widest uppercase">Central de Avisos</h3>
           </div>
-          {unreadCount > 0 && (
-            <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-auto p-0 text-[10px] font-bold text-primary hover:bg-transparent hover:underline uppercase tracking-widest"
-                onClick={handleMarkAllAsRead}
-                disabled={isPending}
-            >
-                {isPending ? "Processando..." : "Marcar tudo como lido"}
-            </Button>
-          )}
         </div>
 
         <ScrollArea className="max-h-[min(400px,60vh)] overflow-y-auto">
