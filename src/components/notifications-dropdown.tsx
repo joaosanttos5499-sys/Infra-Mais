@@ -1,66 +1,61 @@
 "use client";
 
-import { useEffect, useState, useTransition, useCallback } from "react";
-import { Bell, Info, Check, ArrowRight, MessageSquare, Clock, FileText, CheckCircle2, TrafficCone, Wrench, Edit, Trash2, Flag, Loader2 } from "lucide-react";
-import { useUser } from "@/firebase";
+import { useTransition, useMemo } from "react";
+import { Bell, Clock, MessageSquare, ArrowRight, Loader2 } from "lucide-react";
+import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { query, collection, where } from "firebase/firestore";
 import { markAsReadAction, markAllAsReadAction } from "@/lib/actions";
-import { getNotifications } from "@/lib/data";
 import { type Notification } from "@/lib/types";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import { ReportTime } from "./report-time";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean }) {
   const { user } = useUser();
-  const pathname = usePathname();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const firestore = useFirestore();
   const [isPending, startTransition] = useTransition();
 
   const dynamicOffset = scrolled ? 22 : 30;
 
-  const fetchNotificationsData = useCallback(async () => {
-    if (user) {
-      setIsLoading(true);
-      try {
-        const data = await getNotifications(user.uid);
-        setNotifications(data);
-      } catch (error) {
-        console.error("Erro ao carregar notificações no cliente:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  }, [user]);
+  // Consulta em tempo real para notificações do usuário
+  const notificationsQuery = useMemoFirebase(
+    () => (user ? query(collection(firestore, "notifications"), where("userId", "==", user.uid)) : null),
+    [user, firestore]
+  );
 
-  useEffect(() => {
-    fetchNotificationsData();
-  }, [fetchNotificationsData, pathname]);
+  const { data: notificationsRaw, isLoading } = useCollection<Notification>(notificationsQuery);
+
+  // Ordenação descendente por data de criação
+  const notifications = useMemo(() => {
+    if (!notificationsRaw) return [];
+    return [...notificationsRaw].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [notificationsRaw]);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const handleMarkAsRead = (id: string) => {
     startTransition(async () => {
         await markAsReadAction(id);
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
     });
   };
 
   const handleMarkAllAsRead = () => {
-    if (!user) return;
+    if (!user || unreadCount === 0) return;
     startTransition(async () => {
         await markAllAsReadAction(user.uid);
-        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     });
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (open) {
-      fetchNotificationsData();
+    // Quando o usuário fecha o menu, marcamos todas como lidas automaticamente
+    // para limpar a sinalização visual após a visualização.
+    if (!open && unreadCount > 0 && user) {
+      handleMarkAllAsRead();
     }
   };
 
@@ -98,8 +93,9 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
                 size="sm" 
                 className="h-auto p-0 text-[10px] font-bold text-primary hover:bg-transparent hover:underline uppercase tracking-widest"
                 onClick={handleMarkAllAsRead}
+                disabled={isPending}
             >
-                Marcar tudo como lido
+                {isPending ? "Processando..." : "Marcar tudo como lido"}
             </Button>
           )}
         </div>
@@ -121,71 +117,63 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
                 </p>
               </div>
             ) : (
-              notifications.map((notification) => {
-                return (
-                  <DropdownMenuItem 
-                    key={notification.id} 
-                    className={cn(
-                        "flex flex-col items-start gap-0 p-0 cursor-pointer focus:bg-transparent bg-transparent transition-all group/item outline-none select-none",
-                    )}
-                    onSelect={(e) => {
-                        if ((e.target as HTMLElement).closest('a')) return;
-                        handleMarkAsRead(notification.id);
-                    }}
-                  >
-                    <div className={cn(
-                        "w-full rounded-2xl border transition-all duration-300 p-4 relative overflow-hidden",
-                        notification.isRead 
-                            ? "bg-card border-border hover:border-primary/30" 
-                            : "bg-primary/5 border-primary/20 shadow-md"
-                    )}>
-                      <div className={cn(
-                          "absolute left-0 top-0 bottom-0 w-1.5",
-                          notification.isRead ? "bg-transparent" : "bg-primary"
-                      )} />
+              notifications.map((notification) => (
+                <div 
+                  key={notification.id} 
+                  className={cn(
+                      "w-full rounded-2xl border transition-all duration-300 p-4 relative overflow-hidden group/item cursor-pointer",
+                      notification.isRead 
+                          ? "bg-card border-border hover:border-primary/30" 
+                          : "bg-primary/5 border-primary/20 shadow-md"
+                  )}
+                  onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
+                >
+                  <div className={cn(
+                      "absolute left-0 top-0 bottom-0 w-1.5",
+                      notification.isRead ? "bg-transparent" : "bg-primary"
+                  )} />
 
-                      <div className="flex flex-col gap-2 min-w-0 flex-grow">
-                          <div className="flex justify-between items-start gap-2">
-                              <h4 className={cn(
-                                  "text-sm font-bold leading-tight",
-                                  !notification.isRead ? "text-foreground" : "text-muted-foreground"
-                              )}>
-                                  {notification.title}
-                              </h4>
-                              {!notification.isRead && (
-                                  <div className="h-2.5 w-2.5 rounded-full bg-primary animate-pulse shrink-0 mt-1" />
-                              )}
-                          </div>
-                          
-                          <p className={cn(
-                              "text-xs leading-relaxed font-medium whitespace-pre-wrap", 
+                  <div className="flex flex-col gap-2 min-w-0 flex-grow">
+                      <div className="flex justify-between items-start gap-2">
+                          <h4 className={cn(
+                              "text-sm font-bold leading-tight",
                               !notification.isRead ? "text-foreground" : "text-muted-foreground"
                           )}>
-                              {notification.message}
-                          </p>
-                          
-                          <div className="flex items-center justify-between gap-2 mt-4 pt-2 border-t border-border/40">
-                              <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                                  <Clock className="h-3.5 w-3.5" />
-                                  <ReportTime date={new Date(notification.createdAt)} />
-                              </div>
-                              
-                              <Link 
-                                  href="/minha-conta#meus-relatorios"
-                                  className="text-[10px] font-black text-primary hover:text-primary/80 flex items-center gap-1.5 group/link transition-colors bg-primary/10 px-3 py-1.5 rounded-lg uppercase tracking-tighter"
-                                  onClick={() => {
-                                      handleMarkAsRead(notification.id);
-                                  }}
-                              >
-                                  Relato Relacionado
-                                  <ArrowRight className="h-3 w-3 group-hover/link:translate-x-1 transition-transform" />
-                              </Link>
-                          </div>
+                              {notification.title}
+                          </h4>
+                          {!notification.isRead && (
+                              <div className="h-2.5 w-2.5 rounded-full bg-primary animate-pulse shrink-0 mt-1" />
+                          )}
                       </div>
-                    </div>
-                  </DropdownMenuItem>
-                );
-              })
+                      
+                      <p className={cn(
+                          "text-xs leading-relaxed font-medium whitespace-pre-wrap", 
+                          !notification.isRead ? "text-foreground" : "text-muted-foreground"
+                      )}>
+                          {notification.message}
+                      </p>
+                      
+                      <div className="flex items-center justify-between gap-2 mt-4 pt-2 border-t border-border/40">
+                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                              <Clock className="h-3.5 w-3.5" />
+                              <ReportTime date={new Date(notification.createdAt)} />
+                          </div>
+                          
+                          <Link 
+                              href="/minha-conta#meus-relatorios"
+                              className="text-[10px] font-black text-primary hover:text-primary/80 flex items-center gap-1.5 group/link transition-colors bg-primary/10 px-3 py-1.5 rounded-lg uppercase tracking-tighter"
+                              onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!notification.isRead) handleMarkAsRead(notification.id);
+                              }}
+                          >
+                              Relato Relacionado
+                              <ArrowRight className="h-3 w-3 group-hover/link:translate-x-1 transition-transform" />
+                          </Link>
+                      </div>
+                  </div>
+                </div>
+              ))
             )}
           </div>
         </ScrollArea>
