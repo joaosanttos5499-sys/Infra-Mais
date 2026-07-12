@@ -368,8 +368,17 @@ const ReportCard = memo(({
                                 <Button 
                                   variant={isUpvoted ? "default" : "outline"} 
                                   size="sm" 
-                                  onClick={(e) => { e.stopPropagation(); onUpvote(report.id, report.userId); }}
-                                  className={cn("rounded-xl font-bold h-10 px-6 text-xs transition-all shadow-sm active:scale-95", isUpvoted ? "bg-primary hover:bg-primary/90" : "bg-muted/30 border-border hover:bg-muted")}
+                                  onClick={(e) => { 
+                                    if (isEmployee) return; // Funcionários não podem apoiar
+                                    e.stopPropagation(); 
+                                    onUpvote(report.id, report.userId); 
+                                  }}
+                                  className={cn(
+                                    "rounded-xl font-bold h-10 px-6 text-xs transition-all shadow-sm active:scale-95", 
+                                    isUpvoted ? "bg-primary hover:bg-primary/90" : "bg-muted/30 border-border hover:bg-muted",
+                                    isEmployee && "opacity-50 pointer-events-none cursor-default" // Estilo para funcionário
+                                  )}
+                                  aria-disabled={isEmployee}
                                 >
                                     <ThumbsUp className={cn("h-4 w-4 mr-2", isUpvoted && "fill-current")} />
                                     Apoiar ({report.upvotes})
