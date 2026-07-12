@@ -116,25 +116,27 @@ function MyReportItem({ report }: { report: Report }) {
                                 {problem?.label || report.problem}
                             </h3>
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-6">
-                                <div className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+                                <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
                                     {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
                                     <span className="truncate">{category?.label || report.category}</span>
                                 </div>
-                                <div className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+                                <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
                                     <MapPin className="h-3.5 w-3.5 text-primary" />
                                     <span className="truncate">{displayCity} - {report.bairro}</span>
                                 </div>
                             </div>
                         </div>
-                        <StatusBadge status={report.status} />
+                        <div className="scale-90 origin-top-right">
+                          <StatusBadge status={report.status} />
+                        </div>
                     </div>
 
                     {report.summary && (
-                      <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 space-y-2 relative overflow-hidden group/summary">
+                      <div className="p-4 bg-primary/10 dark:bg-primary/5 rounded-2xl border border-primary/20 dark:border-primary/10 space-y-2 relative overflow-hidden group/summary">
                         <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-[0.15em]">
                           <Sparkles className="h-3 w-3" /> Resumo Inteligente
                         </div>
-                        <p className="text-xs text-muted-foreground italic font-medium leading-relaxed">
+                        <p className="text-xs text-foreground/85 dark:text-muted-foreground italic font-medium leading-relaxed">
                           "{report.summary}"
                         </p>
                       </div>
@@ -142,7 +144,7 @@ function MyReportItem({ report }: { report: Report }) {
                 </div>
 
                 <div className="flex items-center justify-between gap-2 pt-4 mt-4 border-t border-border/50">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                    <div className="flex items-center gap-1.5 text-[10px] font-black text-foreground/60 dark:text-muted-foreground uppercase tracking-wider">
                         <Clock className="h-3.5 w-3.5" />
                         <ReportTime date={new Date(report.createdAt)} />
                     </div>
@@ -158,7 +160,7 @@ function MyReportItem({ report }: { report: Report }) {
                         {canDelete && (
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors border border-transparent hover:border-destructive/20">
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-foreground/60 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors border border-transparent hover:border-destructive/20">
                                         {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                                         <span className="sr-only">Excluir</span>
                                     </Button>
