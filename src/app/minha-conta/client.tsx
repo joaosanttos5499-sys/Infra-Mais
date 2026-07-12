@@ -71,7 +71,7 @@ function MyReportItem({ report }: { report: Report }) {
 
     return (
         <div className={cn(
-            "flex flex-col sm:flex-row gap-6 border border-border border-l-4 rounded-2xl p-5 bg-card relative transition-all duration-300 hover:shadow-lg hover:border-primary/20 group animate-in fade-in slide-in-from-bottom-4",
+            "flex flex-col sm:flex-row gap-6 border border-border border-l-4 rounded-2xl p-5 bg-card relative transition-all duration-300 hover:shadow-xl hover:scale-[1.01] hover:border-primary/10 group animate-in fade-in slide-in-from-bottom-4",
             statusBorderColors[report.status] || "border-l-slate-400"
         )}>
             {/* Imagem */}
