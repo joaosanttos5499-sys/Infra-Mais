@@ -328,7 +328,7 @@ const ReportCard = memo(({
                             <MapPin className="h-4 w-4 text-primary shrink-0" />
                             <span>{displayCity} - {report.bairro}</span>
                         </div>
-                        {isEmployee && (
+                        {!showUpvote && isEmployee && (
                           <div className="flex items-center gap-2.5 text-xs text-muted-foreground pt-0.5">
                               <User className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
                               <span className="font-medium">{report.relatorEmail}</span>
