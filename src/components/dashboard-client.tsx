@@ -572,6 +572,22 @@ const ReportCard = memo(({
   );
 });
 
+const EmptyState = ({ hasFilters }: { hasFilters: boolean }) => (
+  <div className="flex flex-col items-center justify-center p-12 text-center bg-card rounded-2xl border border-dashed border-border shadow-sm animate-in fade-in">
+    <div className="bg-muted p-4 rounded-full mb-4">
+      <Info className="h-8 w-8 text-muted-foreground opacity-50" />
+    </div>
+    <h3 className="text-lg font-bold text-foreground">
+      {hasFilters ? "Nenhum relato encontrado" : "Nada por aqui"}
+    </h3>
+    <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
+      {hasFilters 
+        ? "Com os filtros selecionados, não há relatos no momento."
+        : "Não há relatos no momento."}
+    </p>
+  </div>
+);
+
 export function DashboardClient({ 
     reports, 
     complaints = [], 
@@ -725,57 +741,89 @@ export function DashboardClient({
 
       {!showUpvote && (
         <TabsContent value="under_review" className="space-y-6">
-          {filteredReports.under_review.map(report => (
-            <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
-          ))}
+          {filteredReports.under_review.length === 0 ? (
+            <EmptyState hasFilters={hasActiveFilters} />
+          ) : (
+            filteredReports.under_review.map(report => (
+              <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+            ))
+          )}
         </TabsContent>
       )}
 
       <TabsContent value="pending" className="space-y-6">
-        {filteredReports.pending.map(report => (
-          <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
-        ))}
+        {filteredReports.pending.length === 0 ? (
+          <EmptyState hasFilters={hasActiveFilters} />
+        ) : (
+          filteredReports.pending.map(report => (
+            <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+          ))
+        )}
       </TabsContent>
 
       <TabsContent value="in_progress" className="space-y-6">
-        {filteredReports.in_progress.map(report => (
-          <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
-        ))}
+        {filteredReports.in_progress.length === 0 ? (
+          <EmptyState hasFilters={hasActiveFilters} />
+        ) : (
+          filteredReports.in_progress.map(report => (
+            <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+          ))
+        )}
       </TabsContent>
 
       <TabsContent value="resolved" className="space-y-6">
-        {filteredReports.resolved.map(report => (
-          <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
-        ))}
+        {filteredReports.resolved.length === 0 ? (
+          <EmptyState hasFilters={hasActiveFilters} />
+        ) : (
+          filteredReports.resolved.map(report => (
+            <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+          ))
+        )}
       </TabsContent>
 
       {!showUpvote && (
         <TabsContent value="moderation">
           <Tabs defaultValue="excluded">
-            <TabsList className="bg-muted/10 p-4 border-b border-border">
-              <TabsTrigger value="excluded">Relatos Excluídos</TabsTrigger>
-              <TabsTrigger value="complaints">Relatos Denunciados</TabsTrigger>
+            <TabsList className="bg-muted/10 p-4 border-b border-border w-full flex justify-start">
+              <TabsTrigger value="excluded" className="text-xs uppercase tracking-widest font-bold">Relatos Excluídos</TabsTrigger>
+              <TabsTrigger value="complaints" className="text-xs uppercase tracking-widest font-bold">Relatos Denunciados</TabsTrigger>
             </TabsList>
             <TabsContent value="excluded" className="p-6 space-y-6">
-              {filteredReports.excluded.map(report => (
-                <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
-              ))}
+              {filteredReports.excluded.length === 0 ? (
+                <EmptyState hasFilters={hasActiveFilters} />
+              ) : (
+                filteredReports.excluded.map(report => (
+                  <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+                ))
+              )}
             </TabsContent>
             <TabsContent value="complaints" className="p-6 space-y-6">
-              {complaints.map(complaint => (
-                <Card key={complaint.id} className="p-6 border-orange-500/20 bg-card rounded-2xl">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <h3 className="text-lg font-bold">Denúncia: {complaint.reason}</h3>
-                            <p className="text-sm text-muted-foreground">Usuário: {complaint.denouncedUserEmail}</p>
-                            {complaint.details && <p className="text-sm italic mt-2">"{complaint.details}"</p>}
-                        </div>
-                        <Button asChild variant="outline" size="sm">
-                            <Link href={`/dashboard#report-${complaint.reportId}`}>Ver Relato</Link>
-                        </Button>
-                    </div>
-                </Card>
-              ))}
+              {complaints.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-12 text-center bg-card rounded-2xl border border-dashed border-border shadow-sm animate-in fade-in">
+                  <div className="bg-muted p-4 rounded-full mb-4">
+                    <ShieldCheck className="h-8 w-8 text-muted-foreground opacity-50" />
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground">Nenhuma denúncia</h3>
+                  <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
+                    Não há denúncias registradas no momento.
+                  </p>
+                </div>
+              ) : (
+                complaints.map(complaint => (
+                  <Card key={complaint.id} className="p-6 border-orange-500/20 bg-card rounded-2xl">
+                      <div className="flex justify-between items-start">
+                          <div>
+                              <h3 className="text-lg font-bold">Denúncia: {complaint.reason}</h3>
+                              <p className="text-sm text-muted-foreground">Usuário: {complaint.denouncedUserEmail}</p>
+                              {complaint.details && <p className="text-sm italic mt-2">"{complaint.details}"</p>}
+                          </div>
+                          <Button asChild variant="outline" size="sm" className="rounded-lg h-9 font-bold border-primary/20 text-primary hover:bg-primary/5">
+                              <Link href={`/dashboard#report-${complaint.reportId}`}>Ver Relato</Link>
+                          </Button>
+                      </div>
+                  </Card>
+                ))
+              )}
             </TabsContent>
           </Tabs>
         </TabsContent>
