@@ -311,7 +311,7 @@ const ReportCard = memo(({
                 </div>
 
                 <div className="p-6 md:p-8 flex flex-col flex-grow min-w-0">
-                    <div className="flex justify-between items-start gap-4 mb-3">
+                    <div className="flex justify-between items-start gap-4 mb-6">
                         <div className="space-y-1.5 min-w-0">
                             <h3 className="font-bold text-xl text-foreground leading-tight tracking-tight truncate">
                                 {problem?.label || report.problem}
