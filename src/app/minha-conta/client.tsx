@@ -18,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UpdateProfileSchema } from "@/lib/schemas";
 import { updateUserProfileAction, deleteReportAction, deleteAccountAction } from "@/lib/actions";
-import { getUserById, deleteReport as clientDeleteReport } from "@/lib/data";
+import { getUserById, deleteReportPermanently as clientDeleteReportPermanently } from "@/lib/data";
 import { updateProfile, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -56,9 +56,10 @@ function MyReportItem({ report }: { report: Report }) {
     const handleDelete = async () => {
         startDeleteTransition(async () => {
             try {
-                const success = await clientDeleteReport(report.id, report.userId, "Removido pelo usuário", report.userId);
+                // Para o usuário, a exclusão de relatos "Em Análise" agora é permanente
+                const success = await clientDeleteReportPermanently(report.id, report.userId);
                 if (success) {
-                    toast({ title: "Relatório excluído", description: "O problema foi removido do sistema." });
+                    toast({ title: "Relatório removido", description: "O relato foi excluído permanentemente do sistema." });
                     router.refresh();
                 } else {
                     toast({ variant: "destructive", title: "Erro ao excluir", description: "Falha ao remover o relato." });
@@ -113,7 +114,7 @@ function MyReportItem({ report }: { report: Report }) {
                             <h3 className="font-extrabold text-xl text-foreground leading-tight truncate">
                                 {problem?.label || report.problem}
                             </h3>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-6">
                                 <div className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
                                     {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
                                     <span className="truncate">{category?.label || report.category}</span>
@@ -164,11 +165,11 @@ function MyReportItem({ report }: { report: Report }) {
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>Excluir Relatório?</AlertDialogTitle>
-                                        <AlertDialogDescription>Esta ação não pode ser desfeita. O relatório será removido permanentemente.</AlertDialogDescription>
+                                        <AlertDialogDescription>Esta ação não pode ser desfeita. Como o relato ainda está em análise, ele será removido permanentemente do sistema.</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                         <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl font-bold">Excluir</AlertDialogAction>
+                                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground rounded-xl font-bold">Excluir Permanente</AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
