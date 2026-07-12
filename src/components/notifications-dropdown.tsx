@@ -5,7 +5,7 @@ import { Bell, Info, Check, ArrowRight, MessageSquare, Clock, FileText, CheckCir
 import { useUser } from "@/firebase";
 import { markAsReadAction, markAllAsReadAction } from "@/lib/actions";
 import { getNotifications } from "@/lib/data";
-import { type Notification, type NotificationType } from "@/lib/types";
+import { type Notification } from "@/lib/types";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
@@ -13,28 +13,6 @@ import { ReportTime } from "./report-time";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const notificationIcons: Record<NotificationType, any> = {
-    SENT: FileText,
-    APPROVED: CheckCircle2,
-    PENDING: TrafficCone,
-    IN_PROGRESS: Wrench,
-    RESOLVED: Check,
-    EDITED: Edit,
-    EXCLUDED: Trash2,
-    COMPLAINT: Flag,
-};
-
-const notificationColors: Record<NotificationType, string> = {
-    SENT: "text-blue-500 bg-blue-50 border-blue-200",
-    APPROVED: "text-emerald-500 bg-emerald-50 border-emerald-200",
-    PENDING: "text-amber-500 bg-amber-50 border-amber-200",
-    IN_PROGRESS: "text-primary bg-primary/10 border-primary/20",
-    RESOLVED: "text-emerald-600 bg-emerald-100 border-emerald-300",
-    EDITED: "text-indigo-500 bg-indigo-50 border-indigo-200",
-    EXCLUDED: "text-destructive bg-destructive/10 border-destructive/20",
-    COMPLAINT: "text-orange-600 bg-orange-50 border-orange-200",
-};
 
 export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean }) {
   const { user } = useUser();
@@ -144,9 +122,6 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
               </div>
             ) : (
               notifications.map((notification) => {
-                const Icon = notificationIcons[notification.type] || Info;
-                const colorClass = notificationColors[notification.type] || "text-muted-foreground bg-muted border-muted";
-
                 return (
                   <DropdownMenuItem 
                     key={notification.id} 
@@ -169,52 +144,43 @@ export function NotificationsDropdown({ scrolled = false }: { scrolled?: boolean
                           notification.isRead ? "bg-transparent" : "bg-primary"
                       )} />
 
-                      <div className="flex gap-4">
-                        <div className={cn(
-                          "h-12 w-12 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover/item:scale-105",
-                          colorClass
-                        )}>
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        
-                        <div className="flex flex-col gap-2 min-w-0 flex-grow">
-                            <div className="flex justify-between items-start gap-2">
-                                <h4 className={cn(
-                                    "text-sm font-bold leading-tight",
-                                    !notification.isRead ? "text-foreground" : "text-muted-foreground"
-                                )}>
-                                    {notification.title}
-                                </h4>
-                                {!notification.isRead && (
-                                    <div className="h-2.5 w-2.5 rounded-full bg-primary animate-pulse shrink-0 mt-1" />
-                                )}
-                            </div>
-                            
-                            <p className={cn(
-                                "text-xs leading-relaxed font-medium whitespace-pre-wrap", 
-                                !notification.isRead ? "text-foreground" : "text-muted-foreground"
-                            )}>
-                                {notification.message}
-                            </p>
-                            
-                            <div className="flex items-center justify-between gap-2 mt-4 pt-2 border-t border-border/40">
-                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                                    <Clock className="h-3.5 w-3.5" />
-                                    <ReportTime date={new Date(notification.createdAt)} />
-                                </div>
-                                
-                                <Link 
-                                    href="/minha-conta#meus-relatorios"
-                                    className="text-[10px] font-black text-primary hover:text-primary/80 flex items-center gap-1.5 group/link transition-colors bg-primary/10 px-3 py-1.5 rounded-lg uppercase tracking-tighter"
-                                    onClick={() => {
-                                        handleMarkAsRead(notification.id);
-                                    }}
-                                >
-                                    Relato Relacionado
-                                    <ArrowRight className="h-3 w-3 group-hover/link:translate-x-1 transition-transform" />
-                                </Link>
-                            </div>
-                        </div>
+                      <div className="flex flex-col gap-2 min-w-0 flex-grow">
+                          <div className="flex justify-between items-start gap-2">
+                              <h4 className={cn(
+                                  "text-sm font-bold leading-tight",
+                                  !notification.isRead ? "text-foreground" : "text-muted-foreground"
+                              )}>
+                                  {notification.title}
+                              </h4>
+                              {!notification.isRead && (
+                                  <div className="h-2.5 w-2.5 rounded-full bg-primary animate-pulse shrink-0 mt-1" />
+                              )}
+                          </div>
+                          
+                          <p className={cn(
+                              "text-xs leading-relaxed font-medium whitespace-pre-wrap", 
+                              !notification.isRead ? "text-foreground" : "text-muted-foreground"
+                          )}>
+                              {notification.message}
+                          </p>
+                          
+                          <div className="flex items-center justify-between gap-2 mt-4 pt-2 border-t border-border/40">
+                              <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                  <Clock className="h-3.5 w-3.5" />
+                                  <ReportTime date={new Date(notification.createdAt)} />
+                              </div>
+                              
+                              <Link 
+                                  href="/minha-conta#meus-relatorios"
+                                  className="text-[10px] font-black text-primary hover:text-primary/80 flex items-center gap-1.5 group/link transition-colors bg-primary/10 px-3 py-1.5 rounded-lg uppercase tracking-tighter"
+                                  onClick={() => {
+                                      handleMarkAsRead(notification.id);
+                                  }}
+                              >
+                                  Relato Relacionado
+                                  <ArrowRight className="h-3 w-3 group-hover/link:translate-x-1 transition-transform" />
+                              </Link>
+                          </div>
                       </div>
                     </div>
                   </DropdownMenuItem>
