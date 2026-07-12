@@ -281,10 +281,7 @@ const ReportCard = memo(({
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, 300px"
                     />
-                    <div className="absolute top-4 left-4 z-10">
-                        <StatusBadge status={report.status} />
-                    </div>
-
+                    
                     <Dialog>
                         <DialogTrigger asChild>
                             <button 
@@ -320,6 +317,9 @@ const ReportCard = memo(({
                                 {category?.icon && <category.icon className="h-4 w-4" style={{ color: category?.color }} />}
                                 <span className="uppercase tracking-wider text-[11px] opacity-80">{category?.label || report.category}</span>
                             </div>
+                        </div>
+                        <div className="shrink-0 pt-0.5">
+                            <StatusBadge status={report.status} />
                         </div>
                     </div>
 
@@ -413,6 +413,17 @@ const ReportCard = memo(({
                             </div>
 
                             <div className="space-y-5">
+                                <div className="space-y-1.5">
+                                    <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Descrição do Cidadão</Label>
+                                    <Textarea 
+                                        name="description" 
+                                        value={editDescription} 
+                                        onChange={(e) => setEditDescription(e.target.value)} 
+                                        className="h-20 rounded-lg bg-card border-border resize-none p-3 text-sm" 
+                                        placeholder="Nenhuma descrição adicional fornecida."
+                                    />
+                                </div>
+                                
                                 {report.summary && (
                                     <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
                                         <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1 flex items-center gap-1.5">
@@ -423,17 +434,6 @@ const ReportCard = memo(({
                                         </div>
                                     </div>
                                 )}
-
-                                <div className="space-y-1.5">
-                                    <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Descrição do Cidadão</Label>
-                                    <Textarea 
-                                        name="description" 
-                                        value={editDescription} 
-                                        onChange={(e) => setEditDescription(e.target.value)} 
-                                        className="h-24 rounded-lg bg-card border-border resize-none p-3 text-sm" 
-                                        placeholder="Nenhuma descrição adicional fornecida."
-                                    />
-                                </div>
                             </div>
                         </div>
 
