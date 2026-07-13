@@ -307,24 +307,24 @@ const ReportCard = memo(({
                     </Dialog>
                 </div>
 
-                <div className="pt-4 md:pt-5 pb-6 md:pb-8 px-6 md:px-8 flex flex-col flex-grow min-w-0">
+                <div className="pt-4 pb-6 md:pb-8 px-6 md:px-8 flex flex-col flex-grow min-w-0">
                     <div className="flex justify-between items-start gap-4 mb-2">
                         <div className="space-y-1.5 min-w-0">
                             <h3 className="font-bold text-xl text-foreground leading-tight tracking-tight truncate">
                                 {problem?.label || report.problem}
                             </h3>
-                            <div className="flex flex-col gap-1.5">
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground font-semibold">
-                                    {category?.icon && <category.icon className="h-4 w-4" style={{ color: category?.color }} />}
+                            <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
+                                    {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
                                     <span className="uppercase tracking-wider text-[11px] opacity-80">{category?.label || report.category}</span>
                                 </div>
-                                <div className="flex items-center gap-2.5 text-sm font-bold text-foreground/90">
-                                    <MapPin className="h-4 w-4 text-primary shrink-0" />
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
+                                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
                                     <span>{displayCity} - {report.bairro}</span>
                                 </div>
                             </div>
                         </div>
-                        <div className="shrink-0 pt-0.5">
+                        <div className="shrink-0 -mt-1 -mr-1">
                             <StatusBadge status={report.status} />
                         </div>
                     </div>
@@ -433,17 +433,6 @@ const ReportCard = memo(({
                             </div>
 
                             <div className="space-y-5">
-                                <div className="space-y-1.5">
-                                    <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Descrição do Cidadão</Label>
-                                    <Textarea 
-                                        name="description" 
-                                        value={editDescription} 
-                                        onChange={(e) => setEditDescription(e.target.value)} 
-                                        className="h-20 rounded-lg bg-card border-border resize-none p-3 text-sm" 
-                                        placeholder="Nenhuma descrição adicional fornecida."
-                                    />
-                                </div>
-                                
                                 {report.summary && (
                                     <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
                                         <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1 flex items-center gap-1.5">
@@ -454,6 +443,17 @@ const ReportCard = memo(({
                                         </div>
                                     </div>
                                 )}
+
+                                <div className="space-y-1.5">
+                                    <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Descrição do Cidadão</Label>
+                                    <Textarea 
+                                        name="description" 
+                                        value={editDescription} 
+                                        onChange={(e) => setEditDescription(e.target.value)} 
+                                        className="h-20 rounded-lg bg-card border-border resize-none p-3 text-sm" 
+                                        placeholder="Nenhuma descrição adicional fornecida."
+                                    />
+                                </div>
                             </div>
                         </div>
 
