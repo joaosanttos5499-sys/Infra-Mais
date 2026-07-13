@@ -51,7 +51,6 @@ function MyReportItem({ report }: { report: Report }) {
     const problem = category?.problems.find(p => p.value === report.problem);
     const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
 
-    // O usuário pode excluir permanentemente se estiver em análise ou se já estiver excluído (para limpar a lista)
     const canDelete = report.status === 'UNDER_REVIEW' || report.status === 'EXCLUDED';
     const isPublic = report.status !== 'UNDER_REVIEW' && report.status !== 'EXCLUDED';
 
@@ -455,7 +454,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                   <AlertDialogTrigger asChild>
                                     <Button 
                                       variant="ghost" 
-                                      className="text-destructive text-xs hover:bg-destructive/10 border border-transparent hover:border-destructive hover:scale-105 transition-all duration-200"
+                                      className="text-destructive text-xs hover:bg-destructive/10 border border-transparent hover:border-destructive hover:scale-[1.02] transition-all duration-200"
                                     >
                                       <Trash2 className="mr-2 h-4 w-4" /> Excluir Conta
                                     </Button>
