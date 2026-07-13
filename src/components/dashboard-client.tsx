@@ -308,7 +308,7 @@ const ReportCard = memo(({
                     </Dialog>
                 </div>
 
-                <div className="pt-2 pb-6 md:pb-8 px-6 md:px-8 flex flex-col flex-grow min-w-0 relative">
+                <div className="pt-1 pb-6 md:pb-8 px-6 md:px-8 flex flex-col flex-grow min-w-0 relative">
                     <div className="absolute top-4 right-4 z-10">
                         <StatusBadge status={report.status} />
                     </div>
@@ -319,8 +319,8 @@ const ReportCard = memo(({
                                 {problem?.label || report.problem}
                             </h3>
                             <div className={cn(
-                                "flex gap-y-1.5",
-                                showUpvote ? "flex-row flex-wrap items-center gap-x-5 mt-7" : "flex-col items-start mt-2"
+                                "flex flex-col items-start mt-2",
+                                showUpvote && "hidden"
                             )}>
                                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
                                     {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
@@ -331,19 +331,34 @@ const ReportCard = memo(({
                                     <span>{displayCity} - {report.bairro}</span>
                                 </div>
                             </div>
+                            
+                            {showUpvote && (
+                              <>
+                                <div className="flex flex-wrap items-center gap-x-5 mt-9">
+                                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
+                                      {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
+                                      <span className="uppercase tracking-wider text-[11px] opacity-80">{category?.label || report.category}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
+                                      <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                                      <span>{displayCity} - {report.bairro}</span>
+                                  </div>
+                                </div>
+
+                                {report.summary && (
+                                  <div className="mt-4 p-4 bg-primary/5 rounded-2xl border border-primary/20 space-y-2 relative overflow-hidden group/summary animate-in fade-in slide-in-from-top-2">
+                                    <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-[0.15em]">
+                                      <Sparkles className="h-3 w-3" /> Resumo Inteligente
+                                    </div>
+                                    <p className="text-xs text-foreground/85 italic font-medium leading-relaxed">
+                                      "{report.summary}"
+                                    </p>
+                                  </div>
+                                )}
+                              </>
+                            )}
                         </div>
                     </div>
-
-                    {showUpvote && report.summary && (
-                      <div className="mt-4 p-4 bg-primary/5 rounded-2xl border border-primary/20 space-y-2 relative overflow-hidden group/summary animate-in fade-in slide-in-from-top-2">
-                        <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-[0.15em]">
-                          <Sparkles className="h-3 w-3" /> Resumo Inteligente
-                        </div>
-                        <p className="text-xs text-foreground/85 italic font-medium leading-relaxed">
-                          "{report.summary}"
-                        </p>
-                      </div>
-                    )}
 
                     {!showUpvote && isEmployee && (
                         <div className="flex items-center gap-2.5 text-xs text-muted-foreground pt-4 mt-2 border-t border-border/50">
@@ -743,7 +758,7 @@ export function DashboardClient({
           <TabsTrigger value="in_progress" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider border border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary data-[state=active]:text-primary">Em Andamento</TabsTrigger>
           <TabsTrigger value="resolved" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider border border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-600">Resolvido</TabsTrigger>
           {!showUpvote && (
-            <TabsTrigger value="moderation" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider border border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-destructive data-[state=active]:text-destructive">
+            <TabsTrigger value="moderation" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider border border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-500 data-[state=active]:text-orange-500">
               Central de Moderação
             </TabsTrigger>
           )}
