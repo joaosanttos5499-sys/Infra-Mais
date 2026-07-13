@@ -312,7 +312,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             setIsConfirmEnabled(false);
             setCountdown(5);
             const interval = setInterval(() => setCountdown(p => p > 0 ? p - 1 : 0), 1000);
-            const timeout = setTimeout(() => setIsConfirmEnabled(true), 5000);
+            const timeout = setTimeout(() => setIsStatusConfirmEnabled(true), 5000);
             return () => { clearInterval(interval); clearTimeout(timeout); };
         }
     }, [isConfirmOpen]);
@@ -385,7 +385,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         }
     };
 
-    const infoInputClasses = "h-10 disabled:opacity-100 disabled:bg-muted/10 dark:disabled:bg-white/[0.03] disabled:text-foreground/70 dark:disabled:text-slate-200";
+    const infoInputClasses = "h-10 disabled:opacity-100 disabled:bg-muted/5 dark:disabled:bg-white/[0.01] disabled:text-foreground/70 dark:disabled:text-slate-200/80";
 
     if (isUserLoading || !user) {
         return <div className="flex items-center justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
