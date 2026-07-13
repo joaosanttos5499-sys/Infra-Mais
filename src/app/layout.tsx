@@ -12,11 +12,26 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "700"],
   variable: "--font-poppins",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Infra Mais - Zeladoria Urbana",
-  description: "Relate e acompanhe problemas de infraestrutura na sua cidade.",
+  description: "Plataforma independente para relatos e acompanhamento de problemas de infraestrutura urbana em Picuí-PB.",
+  keywords: ["infraestrutura", "zeladoria", "cidadania", "Picuí", "relatos urbanos", "manutenção urbana"],
+  authors: [{ name: "Infra Mais" }],
+  openGraph: {
+    title: "Infra Mais - Zeladoria Urbana",
+    description: "Relate e acompanhe problemas de infraestrutura na sua cidade.",
+    url: "https://inframais.com.br",
+    siteName: "Infra Mais",
+    locale: "pt_BR",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export const viewport: Viewport = {
@@ -24,6 +39,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#3b82f6" },
+    { media: "(prefers-color-scheme: dark)", color: "#1e293b" },
+  ],
 };
 
 export default function RootLayout({

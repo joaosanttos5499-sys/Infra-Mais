@@ -9,7 +9,7 @@ import { ReportTime } from "@/components/report-time";
 import { type Report } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
 import { useRouter } from "next/navigation";
-import { memo } from "react";
+import { memo, useCallback } from "react";
 
 /**
  * Componente cliente para renderizar um cartão de relato individual na Home.
@@ -21,13 +21,13 @@ function RecentReportCardComponent({ report }: { report: Report }) {
   const problem = category?.problems.find(p => p.value === report.problem);
   const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
   
-  const handleCardClick = () => {
+  const handleCardClick = useCallback(() => {
     router.push(`/dashboard#report-${report.id}`);
-  };
+  }, [router, report.id]);
 
-  const handleMapClick = (e: React.MouseEvent) => {
+  const handleMapClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-  };
+  }, []);
 
   return (
     <div 
@@ -38,10 +38,10 @@ function RecentReportCardComponent({ report }: { report: Report }) {
         <div className="relative h-48 w-full bg-muted">
             <Image
               src={report.photoUrl}
-              alt="Foto do problema"
+              alt={problem?.label || "Foto do problema de infraestrutura"}
               fill
               className="object-cover transition-opacity duration-300"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               loading="lazy"
             />
             <div className="absolute top-3 left-3 z-10">

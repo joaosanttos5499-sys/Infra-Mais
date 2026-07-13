@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
@@ -90,14 +89,12 @@ const EXCLUSION_REASONS = [
 const ReportCard = memo(({ 
     report,
     onUpvote,
-    onStatusUpdate,
     onSuccess,
     isUpvoted,
     showUpvote,
 }: { 
     report: Report,
     onUpvote: (id: string, userId: string) => void,
-    onStatusUpdate?: (id: string, newStatus: ReportStatus) => void,
     onSuccess?: () => void,
     isUpvoted: boolean,
     showUpvote: boolean
@@ -753,7 +750,7 @@ export function DashboardClient({
   const [bairroFilter, setBairroFilter] = useState<string>("all");
   const [sortOption, setSortOption] = useState<string>("recent");
 
-  const handleUpvote = async (id: string, userId: string) => {
+  const handleUpvote = useCallback(async (id: string, userId: string) => {
     try {
         if (upvotedReports.has(id)) {
           await clientDownvoteReport(id, userId);
@@ -771,7 +768,7 @@ export function DashboardClient({
     } catch (error) {
         console.error("Erro ao votar:", error);
     }
-  };
+  }, [upvotedReports, onSuccess, router]);
 
   const filteredReports = useMemo(() => {
     const applyFiltersAndSort = (list: Report[]) => {
@@ -798,11 +795,11 @@ export function DashboardClient({
     };
   }, [reports, categoryFilter, bairroFilter, sortOption]);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setCategoryFilter("all");
     setBairroFilter("all");
     setSortOption("recent");
-  };
+  }, []);
 
   const hasActiveFilters = categoryFilter !== "all" || bairroFilter !== "all" || sortOption !== "recent";
 
