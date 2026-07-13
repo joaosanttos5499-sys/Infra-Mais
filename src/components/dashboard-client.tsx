@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
@@ -229,14 +228,15 @@ const ReportCard = memo(({
   const handleUpdateStatus = async () => {
     startUpdateTransition(async () => {
         try {
-            const updated = await clientUpdateReportStatus(report.id, report.userId, selectedStatus, pendingPhotoUpdate || undefined, {
+            const updated = await clientUpdateReportStatus(report.id, report.userId, selectedStatus, undefined, {
                 category: editCategory,
                 problem: editProblem,
                 bairro: editBairro,
                 location: editLocation,
                 description: editDescription,
                 latitude: editLat,
-                longitude: editLng
+                longitude: editLng,
+                photoUrl: pendingPhotoUpdate || undefined
             });
 
             if (updated) {

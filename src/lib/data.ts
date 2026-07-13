@@ -141,7 +141,7 @@ export async function updateReportStatus(
   userId: string,
   status: ReportStatus,
   photoAfterUrl?: string,
-  extraData?: Partial<Pick<Report, 'category' | 'problem' | 'bairro' | 'location' | 'description' | 'latitude' | 'longitude'>>
+  extraData?: Partial<Pick<Report, 'category' | 'problem' | 'bairro' | 'location' | 'description' | 'latitude' | 'longitude' | 'photoUrl'>>
 ): Promise<Report | undefined> {
   const firestore = getDB();
   try {
