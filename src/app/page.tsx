@@ -108,7 +108,7 @@ function AboutSection({ reports }: { reports: Report[] }) {
               />
               <BenefitCard 
                 icon={Camera} 
-                title="Evidências" 
+                title="Evidência" 
                 description="Envio de imagens para análise." 
               />
             </div>

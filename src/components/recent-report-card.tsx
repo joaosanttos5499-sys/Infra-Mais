@@ -53,7 +53,7 @@ function RecentReportCardComponent({ report }: { report: Report }) {
                   href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`} 
                   className="bg-background/80 backdrop-blur-sm text-primary p-2 rounded-full shadow-lg hover:bg-background transition-all hover:scale-110 flex items-center justify-center border border-border/50"
                   onClick={handleMapClick}
-                  title="Ver no mapa"
+                  title="Ver no Mapa"
                 >
                     <MapPin className="h-4 w-4" />
                 </Link>

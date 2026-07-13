@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useUser, useAuth } from "@/firebase";
@@ -152,7 +151,7 @@ function MyReportItem({ report }: { report: Report }) {
                         {isPublic && (
                             <Button asChild variant="ghost" size="sm" className="h-8 px-3 text-primary font-bold hover:bg-primary/10 rounded-lg text-[10px] uppercase tracking-wider">
                                 <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
-                                    <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no mapa
+                                    <MapPin className="h-3.5 w-3.5 mr-1.5" /> Ver no Mapa
                                 </Link>
                             </Button>
                         )}
