@@ -274,13 +274,13 @@ const ReportCard = memo(({
         <Accordion type="single" collapsible disabled={showUpvote}>
           <AccordionItem value={report.id} className="border-b-0">
             <div className="flex flex-col md:flex-row h-full">
-                <div className="relative w-full md:w-64 lg:w-72 h-56 md:h-auto overflow-hidden bg-muted shrink-0 group/photo">
+                <div className="relative w-full md:w-72 lg:w-80 h-64 md:h-auto overflow-hidden bg-muted shrink-0 group/photo">
                     <Image
                         src={report.photoUrl}
                         alt="Foto do problema"
                         fill
                         className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 300px"
+                        sizes="(max-width: 768px) 100vw, 400px"
                     />
                     
                     <Dialog>
@@ -308,36 +308,36 @@ const ReportCard = memo(({
                     </Dialog>
                 </div>
 
-                <div className="pt-0 pb-6 md:pb-8 px-6 md:px-8 flex flex-col flex-grow min-w-0 relative">
-                    <div className="absolute top-2 right-4 z-10">
+                <div className="pt-0 pb-6 md:pb-8 px-6 md:px-10 flex flex-col flex-grow min-w-0 relative">
+                    <div className="absolute top-4 right-6 z-10">
                         <StatusBadge status={report.status} />
                     </div>
 
                     <div className="flex justify-between items-start gap-4 mb-2">
-                        <div className="space-y-2 min-w-0 pt-2">
-                            <h3 className="font-bold text-xl text-foreground leading-tight tracking-tight truncate pr-24">
+                        <div className="space-y-4 min-w-0 pt-6">
+                            <h3 className="font-bold text-2xl text-foreground leading-tight tracking-tight truncate pr-24">
                                 {problem?.label || report.problem}
                             </h3>
                             
                             {showUpvote ? (
-                              <div className="mt-8 flex flex-col gap-3">
-                                <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
-                                      {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
-                                      <span className="uppercase tracking-wider text-[11px] opacity-80">{category?.label || report.category}</span>
+                              <div className="flex flex-col gap-6">
+                                <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+                                  <div className="flex items-center gap-2 text-sm text-muted-foreground font-bold">
+                                      {category?.icon && <category.icon className="h-4 w-4" style={{ color: category?.color }} />}
+                                      <span className="uppercase tracking-widest text-[11px] opacity-90">{category?.label || report.category}</span>
                                   </div>
-                                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
-                                      <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-                                      <span>{displayCity} - {report.bairro}</span>
+                                  <div className="flex items-center gap-2 text-sm text-muted-foreground font-bold">
+                                      <MapPin className="h-4 w-4 text-primary shrink-0" />
+                                      <span className="tracking-tight">{displayCity} - {report.bairro}</span>
                                   </div>
                                 </div>
 
                                 {report.summary && (
-                                  <div className="p-4 mt-2 bg-primary/5 rounded-2xl border border-primary/20 space-y-2 relative overflow-hidden group/summary animate-in fade-in slide-in-from-top-2">
-                                    <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-[0.15em]">
-                                      <span className="shrink-0"><Sparkles className="h-3 w-3" /></span> Resumo Inteligente
+                                  <div className="p-5 bg-primary/5 rounded-2xl border border-primary/10 space-y-3 relative overflow-hidden group/summary animate-in fade-in slide-in-from-top-2 shadow-inner">
+                                    <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em]">
+                                      <span className="shrink-0"><Sparkles className="h-3.5 w-3.5" /></span> Resumo Inteligente
                                     </div>
-                                    <p className="text-xs text-foreground/85 italic font-medium leading-relaxed">
+                                    <p className="text-[13px] text-foreground/90 italic font-medium leading-relaxed">
                                       "{report.summary}"
                                     </p>
                                   </div>
@@ -348,37 +348,37 @@ const ReportCard = memo(({
                     </div>
 
                     {!showUpvote && (
-                      <div className="flex-1 flex flex-col justify-center">
-                        <div className="w-full space-y-4 py-4 border-y border-border/50">
-                          <div className="flex flex-col gap-3">
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
-                                {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
-                                <span className="uppercase tracking-wider text-[11px] opacity-80">{category?.label || report.category}</span>
+                      <div className="flex-1 flex flex-col justify-center mt-4">
+                        <div className="w-full space-y-4 py-6 border-y border-border/60">
+                          <div className="flex flex-col gap-4">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-bold">
+                                {category?.icon && <category.icon className="h-4 w-4" style={{ color: category?.color }} />}
+                                <span className="uppercase tracking-widest text-[11px] opacity-80">{category?.label || report.category}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
-                                <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-bold">
+                                <MapPin className="h-4 w-4 text-primary shrink-0" />
                                 <span>{displayCity} - {report.bairro}</span>
                             </div>
-                            <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-                                <User className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
-                                <span className="font-medium truncate">{report.relatorEmail}</span>
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                <User className="h-4 w-4 text-muted-foreground/60 shrink-0" />
+                                <span className="font-semibold truncate">{report.relatorEmail}</span>
                             </div>
                           </div>
                         </div>
                       </div>
                     )}
 
-                    <div className="mt-auto pt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-                        <div className="flex items-center gap-5">
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold uppercase tracking-tight">
-                                <Clock className="h-3.5 w-3.5" />
+                    <div className="mt-auto pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                        <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground font-bold uppercase tracking-widest">
+                                <Clock className="h-4 w-4 opacity-70" />
                                 <ReportTime date={new Date(report.createdAt)} />
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                        <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
                             {isPublic && (
-                                <Button asChild variant="ghost" size="sm" className="h-10 px-4 text-primary font-bold hover:bg-primary/10 rounded-xl transition-all">
+                                <Button asChild variant="ghost" size="sm" className="h-11 px-5 text-primary font-bold hover:bg-primary/10 rounded-xl transition-all border border-transparent hover:border-primary/10">
                                     <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
                                         <MapPin className="h-4 w-4 mr-2" /> Ver no Mapa
                                     </Link>
@@ -395,7 +395,7 @@ const ReportCard = memo(({
                                     onUpvote(report.id, report.userId); 
                                   }}
                                   className={cn(
-                                    "rounded-xl font-bold h-10 px-6 text-xs transition-all shadow-sm active:scale-95", 
+                                    "rounded-xl font-black h-11 px-8 text-xs transition-all shadow-sm active:scale-95 uppercase tracking-widest", 
                                     isUpvoted ? "bg-primary hover:bg-primary/90" : "bg-muted/30 border-border hover:bg-muted",
                                     isEmployee && "opacity-50 pointer-events-none cursor-default" 
                                   )}
@@ -406,7 +406,7 @@ const ReportCard = memo(({
                                 </Button>
                             ) : (
                                 <AccordionTrigger className={cn(
-                                  "py-0 px-6 h-10 rounded-xl font-bold hover:no-underline flex items-center gap-2 text-xs transition-all active:scale-95",
+                                  "py-0 px-6 h-11 rounded-xl font-bold hover:no-underline flex items-center gap-2 text-xs transition-all active:scale-95",
                                   report.status === 'EXCLUDED' ? "bg-orange-100 text-orange-600 hover:bg-orange-200" : "bg-primary/10 text-primary hover:bg-primary/20"
                                 )}>
                                     <Settings2 className="h-4 w-4" /> Gerenciar Relato
