@@ -113,6 +113,7 @@ const ReportCard = memo(({
   const [isUpdating, startUpdateTransition] = useTransition();
   const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
   const [isDeletingPermanently, setIsDeletingPermanently] = useState(false);
+  const [pendingPhotoUpdate, setPendingPhotoUpdate] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const category = getCategory(report.category);
@@ -165,23 +166,14 @@ const ReportCard = memo(({
       const compressedFile = await imageCompression(file, options);
       const reader = new FileReader();
       
-      reader.onloadend = async () => {
-        const dataUri = reader.result as string;
-        try {
-          const success = await clientUpdateReportStatus(report.id, report.userId, report.status, dataUri);
-          if (success) {
-            toast({ title: "Foto atualizada", description: "A imagem do relato foi alterada automaticamente." });
-            if (onSuccess) onSuccess();
-            router.refresh();
-          }
-        } catch (dbErr) {
-          toast({ variant: "destructive", title: "Erro", description: "Não foi possível salvar a nova imagem." });
-        }
+      reader.onloadend = () => {
+        setPendingPhotoUpdate(reader.result as string);
+        setIsUpdatingPhoto(false);
+        toast({ title: "Foto selecionada", description: "A nova foto será salva ao clicar em 'Salvar Alterações'." });
       };
       reader.readAsDataURL(compressedFile);
     } catch (error) {
       toast({ variant: "destructive", title: "Erro", description: "Falha ao processar a imagem." });
-    } finally {
       setIsUpdatingPhoto(false);
     }
   };
@@ -237,7 +229,7 @@ const ReportCard = memo(({
   const handleUpdateStatus = async () => {
     startUpdateTransition(async () => {
         try {
-            const updated = await clientUpdateReportStatus(report.id, report.userId, selectedStatus, undefined, {
+            const updated = await clientUpdateReportStatus(report.id, report.userId, selectedStatus, pendingPhotoUpdate || undefined, {
                 category: editCategory,
                 problem: editProblem,
                 bairro: editBairro,
@@ -256,6 +248,7 @@ const ReportCard = memo(({
 
                 toast({ title: "Sucesso", description: "Relato atualizado com sucesso." });
                 setIsStatusConfirmOpen(false);
+                setPendingPhotoUpdate(null);
                 onToggleExpansion(); // Fecha o painel após salvar
                 if (onSuccess) onSuccess();
                 router.refresh();
@@ -311,6 +304,14 @@ const ReportCard = memo(({
     }
   };
 
+  const handleToggle = () => {
+    if (isExpanded) {
+        // Se estiver fechando, reverte a foto pendente
+        setPendingPhotoUpdate(null);
+    }
+    onToggleExpansion();
+  };
+
   const isEmployee = isEmailEmployee(user?.email);
   const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
   const nextAllowedStatus = STATUS_PROGRESSION[report.status];
@@ -335,7 +336,7 @@ const ReportCard = memo(({
                   onClick={handlePhotoClick}
                 >
                     <Image
-                        src={report.photoUrl}
+                        src={pendingPhotoUpdate || report.photoUrl}
                         alt="Foto do problema"
                         fill
                         className={cn(
@@ -355,7 +356,14 @@ const ReportCard = memo(({
                             <ImagePlus className="h-8 w-8 text-white" />
                           )}
                         </div>
-                        <p className="text-white text-[10px] font-black uppercase tracking-[0.2em] mt-4 drop-shadow-md">Alterar Foto</p>
+                        <p className="text-white text-[10px] font-black uppercase tracking-[0.2em] mt-4 drop-shadow-md">
+                          {pendingPhotoUpdate ? "Trocar Seleção" : "Alterar Foto"}
+                        </p>
+                        {pendingPhotoUpdate && (
+                            <div className="mt-2 px-2 py-0.5 bg-primary text-white text-[8px] font-black uppercase tracking-widest rounded-full">
+                                Alteração Pendente
+                            </div>
+                        )}
                       </div>
                     )}
                     
@@ -385,7 +393,7 @@ const ReportCard = memo(({
                               </DialogHeader>
                               <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
                                   <img 
-                                      src={report.photoUrl} 
+                                      src={pendingPhotoUpdate || report.photoUrl} 
                                       alt="Foto em tamanho real" 
                                       className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in duration-300" 
                                   />
@@ -493,7 +501,7 @@ const ReportCard = memo(({
                                 </Button>
                             ) : (
                                 <AccordionTrigger 
-                                  onClick={onToggleExpansion}
+                                  onClick={handleToggle}
                                   className={cn(
                                     "py-0 px-6 h-11 rounded-xl font-bold hover:no-underline flex items-center gap-2 text-xs transition-all active:scale-95",
                                     report.status === 'EXCLUDED' ? "bg-orange-100 text-orange-600 hover:bg-orange-200" : "bg-primary/10 text-primary hover:bg-primary/20"
