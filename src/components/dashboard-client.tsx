@@ -443,7 +443,6 @@ const ReportCard = memo(({
                     {!showUpvote && (
                       <div className="flex-1 flex flex-col justify-center mt-4">
                         <div className="w-full space-y-3 py-6 border-y border-border/60">
-                          {/* Layout Vertical para Gestão com espaçamento e alinhamento padronizados */}
                           <div className="text-xs text-foreground/75 flex items-center gap-2 font-bold">
                               {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
                               <span className="truncate">{category?.label || report.category}</span>
@@ -852,7 +851,7 @@ export function DashboardClient({
   const isEmployee = isEmailEmployee(user?.email);
 
   return (
-    <Tabs defaultValue="pending" className="w-full">
+    <Tabs defaultValue={showUpvote ? "pending" : "under_review"} className="w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 overflow-x-auto pb-2">
         <TabsList className="bg-muted/50 p-1 rounded-2xl h-12 flex-nowrap w-max">
           {!showUpvote && (
