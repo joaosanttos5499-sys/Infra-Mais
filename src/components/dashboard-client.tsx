@@ -416,14 +416,14 @@ const ReportCard = memo(({
                             
                             {showUpvote ? (
                               <div className="flex flex-col gap-6">
-                                <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
-                                  <div className="flex items-center gap-2 text-sm text-muted-foreground font-bold">
-                                      {category?.icon && <category.icon className="h-4 w-4" style={{ color: category?.color }} />}
-                                      <span className="uppercase tracking-widest text-[11px] opacity-90">{category?.label || report.category}</span>
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-6">
+                                  <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
+                                      {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
+                                      <span className="truncate">{category?.label || report.category}</span>
                                   </div>
-                                  <div className="flex items-center gap-2 text-sm text-muted-foreground font-bold">
-                                      <MapPin className="h-4 w-4 text-primary shrink-0" />
-                                      <span className="tracking-tight">{displayCity} - {report.bairro}</span>
+                                  <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
+                                      <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                                      <span className="truncate">{displayCity} - {report.bairro}</span>
                                   </div>
                                 </div>
 
@@ -445,16 +445,16 @@ const ReportCard = memo(({
                     {!showUpvote && (
                       <div className="flex-1 flex flex-col justify-center mt-4">
                         <div className="w-full space-y-4 py-6 border-y border-border/60">
-                          <div className="flex flex-col gap-4">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-bold">
-                                {category?.icon && <category.icon className="h-4 w-4" style={{ color: category?.color }} />}
-                                <span className="uppercase tracking-widest text-[11px] opacity-80">{category?.label || report.category}</span>
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-6">
+                            <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
+                                {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
+                                <span className="truncate">{category?.label || report.category}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground font-bold">
-                                <MapPin className="h-4 w-4 text-primary shrink-0" />
-                                <span>{displayCity} - {report.bairro}</span>
+                            <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
+                                <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                                <span className="truncate">{displayCity} - {report.bairro}</span>
                             </div>
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-2 w-full">
                                 <User className="h-4 w-4 text-muted-foreground/60 shrink-0" />
                                 <span className="font-semibold truncate">{report.relatorEmail}</span>
                             </div>
