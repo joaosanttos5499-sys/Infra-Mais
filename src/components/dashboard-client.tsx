@@ -320,8 +320,8 @@ const ReportCard = memo(({
                             </h3>
                             
                             {showUpvote ? (
-                              <>
-                                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-7">
+                              <div className="mt-5 space-y-4">
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
                                       {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
                                       <span className="uppercase tracking-wider text-[11px] opacity-80">{category?.label || report.category}</span>
@@ -333,7 +333,7 @@ const ReportCard = memo(({
                                 </div>
 
                                 {report.summary && (
-                                  <div className="mt-4 p-4 bg-primary/5 rounded-2xl border border-primary/20 space-y-2 relative overflow-hidden group/summary animate-in fade-in slide-in-from-top-2">
+                                  <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20 space-y-2 relative overflow-hidden group/summary animate-in fade-in slide-in-from-top-2">
                                     <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-[0.15em]">
                                       <span className="shrink-0"><Sparkles className="h-3 w-3" /></span> Resumo Inteligente
                                     </div>
@@ -342,24 +342,28 @@ const ReportCard = memo(({
                                     </p>
                                   </div>
                                 )}
-                              </>
+                              </div>
                             ) : null}
                         </div>
                     </div>
 
                     {!showUpvote && (
-                      <div className="py-6 border-y border-border/50 space-y-4 my-auto w-full">
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
-                            {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
-                            <span className="uppercase tracking-wider text-[11px] opacity-80">{category?.label || report.category}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
-                            <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-                            <span>{displayCity} - {report.bairro}</span>
-                        </div>
-                        <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-                            <User className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
-                            <span className="font-medium">{report.relatorEmail}</span>
+                      <div className="flex-1 flex flex-col justify-center">
+                        <div className="w-full space-y-4 py-4 border-y border-border/50">
+                          <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
+                                {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
+                                <span className="uppercase tracking-wider text-[11px] opacity-80">{category?.label || report.category}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
+                                <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                                <span>{displayCity} - {report.bairro}</span>
+                            </div>
+                            <div className="flex items-center gap-2.5 text-xs text-muted-foreground pt-1 border-t border-border/30">
+                                <User className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
+                                <span className="font-medium truncate">{report.relatorEmail}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -376,7 +380,7 @@ const ReportCard = memo(({
                             {isPublic && (
                                 <Button asChild variant="ghost" size="sm" className="h-10 px-4 text-primary font-bold hover:bg-primary/10 rounded-xl transition-all">
                                     <Link href={`/?lat=${report.latitude}&lng=${report.longitude}#map-section`}>
-                                        <MapPin className="h-4 w-4 mr-2" /> No mapa
+                                        <MapPin className="h-4 w-4 mr-2" /> Ver no Mapa
                                     </Link>
                                 </Button>
                             )}
