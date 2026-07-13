@@ -23,5 +23,9 @@ export function ReportTime({ date }: { date: Date }) {
     return <span className="opacity-0">...</span>;
   }
 
-  return <>{formatDistanceToNow(date, { addSuffix: true, locale: ptBR })}</>;
+  const timeString = formatDistanceToNow(date, { addSuffix: true, locale: ptBR });
+  // Remove "cerca de " para tornar a exibição do tempo mais direta conforme solicitado.
+  const optimizedTime = timeString.replace(/cerca de /g, "");
+
+  return <>{optimizedTime}</>;
 }
