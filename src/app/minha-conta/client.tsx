@@ -192,9 +192,6 @@ function MyReportsList({ reports }: { reports: Report[] }) {
                   </div>
                 </div>
                 <p className="text-sm font-medium">Você ainda não relatou nenhum problema.</p>
-                <Button asChild variant="link" className="mt-2 text-primary font-bold">
-                    <Link href="/report/new">Relatar um Problema</Link>
-                </Button>
             </div>
         );
     }
@@ -295,7 +292,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     }, [user, isUserLoading, allReports, router, isEmployee, form]);
     
     useEffect(() => {
-        if (typeof window !== 'undefined' && window.location.hash === '#meus-relatorios' && reportsRef.current && !isProfileLoading) {
+        if (typeof window !== 'undefined' && window.location.hash === '#meus-relatos' && reportsRef.current && !isProfileLoading) {
             setTimeout(() => {
                 const element = reportsRef.current;
                 if (element) {
@@ -385,7 +382,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         }
     };
 
-    const infoInputClasses = "h-10 disabled:opacity-100 disabled:bg-muted/5 dark:disabled:bg-white/[0.01] disabled:text-foreground/70 dark:disabled:text-slate-200/80";
+    const infoInputClasses = "h-10 disabled:opacity-100 disabled:bg-muted/5 dark:disabled:bg-white/[0.01] disabled:text-foreground/70 dark:disabled:text-slate-200";
 
     if (isUserLoading || !user) {
         return <div className="flex items-center justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -460,33 +457,81 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                       <Trash2 className="mr-2 h-4 w-4" /> Excluir Conta
                                     </Button>
                                   </AlertDialogTrigger>
-                                  <AlertDialogContent className="rounded-2xl max-w-sm">
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle className="flex items-center gap-2 text-destructive"><ShieldAlert className="h-5 w-5" /> Segurança</AlertDialogTitle>
-                                      <AlertDialogDescription className="text-sm">Esta ação é irreversível. Por favor, confirme sua senha para prosseguir.</AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <div className="py-4 space-y-4">
-                                      <div className="space-y-2">
-                                        <Label htmlFor="del-pass" className="text-xs font-bold uppercase tracking-widest">Sua Senha</Label>
-                                        <div className="relative">
-                                          <Input id="del-pass" type={showDeletePassword ? "text" : "password"} value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} placeholder="********" className="h-11 rounded-xl pr-10" />
-                                          <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent" onClick={() => setShowDeletePassword(!showDeletePassword)}>
-                                            {showDeletePassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-                                          </Button>
+                                  <AlertDialogContent className="rounded-3xl max-w-md border-border shadow-2xl overflow-hidden p-0 bg-card">
+                                    <div className="bg-destructive/5 p-8 border-b border-destructive/10">
+                                      <AlertDialogHeader className="space-y-3">
+                                        <div className="flex items-center gap-3">
+                                          <div className="p-2.5 bg-destructive/10 rounded-xl">
+                                            <ShieldAlert className="h-6 w-6 text-destructive" />
+                                          </div>
+                                          <AlertDialogTitle className="text-2xl font-bold text-foreground">Excluir Conta</AlertDialogTitle>
+                                        </div>
+                                        <AlertDialogDescription className="text-sm font-medium leading-relaxed">
+                                          Esta é uma ação <span className="text-destructive font-bold">permanente e irreversível</span>. Todos os seus dados serão apagados definitivamente.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                    </div>
+
+                                    <div className="p-8 space-y-8">
+                                      {/* Área de Confirmação */}
+                                      <div className="space-y-6">
+                                        <div className="space-y-3">
+                                          <Label htmlFor="del-pass" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Sua Senha</Label>
+                                          <div className="relative">
+                                            <Input 
+                                              id="del-pass" 
+                                              type={showDeletePassword ? "text" : "password"} 
+                                              value={deletePassword} 
+                                              onChange={(e) => setDeletePassword(e.target.value)} 
+                                              placeholder="Digite sua senha para confirmar" 
+                                              className="h-12 rounded-xl pr-12 bg-muted/20 border-border focus:ring-primary/20" 
+                                            />
+                                            <Button 
+                                              type="button" 
+                                              variant="ghost" 
+                                              size="icon" 
+                                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-muted-foreground" 
+                                              onClick={() => setShowDeletePassword(!showDeletePassword)}
+                                            >
+                                              {showDeletePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            </Button>
+                                          </div>
+                                        </div>
+
+                                        <div 
+                                          className="p-4 rounded-2xl bg-muted/10 border border-border/50 flex items-start gap-4 group cursor-pointer transition-colors hover:bg-muted/20" 
+                                          onClick={() => setIsAwareChecked(!isAwareChecked)}
+                                        >
+                                          <Checkbox 
+                                            id="confirm-delete-aware" 
+                                            checked={isAwareChecked} 
+                                            onCheckedChange={(val) => setIsAwareChecked(val as boolean)} 
+                                            className="mt-1" 
+                                          />
+                                          <Label 
+                                            htmlFor="confirm-delete-aware" 
+                                            className="text-xs font-medium leading-relaxed text-muted-foreground cursor-pointer select-none"
+                                          >
+                                            Confirmo que compreendo que todos os meus dados serão excluídos permanentemente e que esta ação não poderá ser desfeita.
+                                          </Label>
                                         </div>
                                       </div>
-                                      <div className="flex items-start space-x-3 p-3 bg-muted/20 rounded-xl border border-border">
-                                        <Checkbox id="confirm-delete-aware" checked={isAwareChecked} onCheckedChange={(val) => setIsAwareChecked(val as boolean)} className="mt-1" />
-                                        <Label htmlFor="confirm-delete-aware" className="text-xs leading-relaxed text-muted-foreground cursor-pointer font-bold">ENTENDO QUE MEUS DADOS SERÃO APAGADOS DEFINITIVAMENTE.</Label>
-                                      </div>
+
+                                      {/* Área de Botões */}
+                                      <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 sm:space-x-0">
+                                        <AlertDialogCancel className="h-12 flex-1 rounded-xl font-bold border-border hover:bg-muted">
+                                          Voltar
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction 
+                                          disabled={!deletePassword || !isAwareChecked || isDeletingProcess} 
+                                          onClick={(e) => { e.preventDefault(); handleAccountDeletion(); }} 
+                                          className="h-12 flex-[1.5] bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl font-bold shadow-lg shadow-destructive/20"
+                                        >
+                                          {isDeletingProcess ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                                          Excluir Conta
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
                                     </div>
-                                    <AlertDialogFooter className="gap-2">
-                                      <AlertDialogCancel className="rounded-xl w-full sm:w-auto">Voltar</AlertDialogCancel>
-                                      <AlertDialogAction disabled={!deletePassword || !isAwareChecked || isDeletingProcess} onClick={(e) => { e.preventDefault(); handleAccountDeletion(); }} className="bg-destructive text-destructive-foreground rounded-xl font-bold w-full sm:w-auto">
-                                        {isDeletingProcess ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                                        Excluir Agora
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>
                               </div>
