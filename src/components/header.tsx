@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -5,7 +6,7 @@ import Image from "next/image";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
 import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Briefcase, Users, Trash2, Palette, Sun, Moon, CheckCircle2, UserPlus } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
 import { useUser, useAuth } from "@/firebase";
@@ -173,7 +174,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
 
               {!isEmployee && (
                 <DropdownMenuItem asChild className="h-11 rounded-xl cursor-pointer px-3 group">
-                  <Link href="/minha-conta#meus-relatorios" className="flex items-center w-full">
+                  <Link href="/minha-conta#meus-relatos" className="flex items-center w-full">
                     <Briefcase className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-primary" />
                     <span className="font-semibold text-sm">Meus Relatos</span>
                   </Link>
@@ -311,7 +312,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
   );
 }
 
-export function Header() {
+export const Header = memo(() => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -320,7 +321,8 @@ export function Header() {
   const router = useRouter();
 
   const handleScroll = useCallback(() => {
-    setScrolled(window.scrollY > 10);
+    const isScrolled = window.scrollY > 10;
+    setScrolled(prev => prev !== isScrolled ? isScrolled : prev);
   }, []);
 
   useEffect(() => {
@@ -449,4 +451,5 @@ export function Header() {
       </Dialog>
     </header>
   );
-}
+});
+Header.displayName = "Header";

@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useRef, memo, useState } from "react";
+import { useEffect, useRef, memo, useState, useCallback, useMemo } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { type Report } from "@/lib/types";
@@ -18,11 +19,14 @@ interface LeafletMapProps {
 }
 
 const statusColorMap: Record<string, string> = {
-  PENDING: '#f59e0b',    // Amarelo (Amber-500)
-  IN_PROGRESS: '#3c83f6', // Azul customizado (#3c83f6)
-  RESOLVED: '#10b981',    // Verde (Emerald-500)
-  UNDER_REVIEW: '#94a3b8' // Cinza (Slate-400)
+  PENDING: '#f59e0b',    
+  IN_PROGRESS: '#3c83f6', 
+  RESOLVED: '#10b981',    
+  UNDER_REVIEW: '#94a3b8' 
 };
+
+// Cache para HTML dos ícones para evitar chamadas pesadas ao renderToString em loops
+const iconHtmlCache = new Map<string, string>();
 
 const LeafletMap = ({
   reports = [],
@@ -37,7 +41,20 @@ const LeafletMap = ({
   const { theme } = useTheme();
   const [isReady, setIsReady] = useState(false);
 
-  const defaultCenter: [number, number] = [-6.515, -36.35];
+  const defaultCenter = useMemo((): [number, number] => [-6.515, -36.35], []);
+
+  const getCachedIconHtml = useCallback((categoryValue: string) => {
+    if (iconHtmlCache.has(categoryValue)) {
+      return iconHtmlCache.get(categoryValue)!;
+    }
+    const category = getCategory(categoryValue);
+    const IconComponent = category?.icon;
+    const html = IconComponent 
+      ? renderToString(<IconComponent className="h-5 w-5" style={{ color: '#ffffff' }} />)
+      : '';
+    iconHtmlCache.set(categoryValue, html);
+    return html;
+  }, []);
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -57,13 +74,13 @@ const LeafletMap = ({
           attribution: "© OpenStreetMap",
         }).addTo(mapInstance.current);
 
-        // Previne Layout Shift forçando uma renderização inicial estável
-        setTimeout(() => {
+        // Uso de requestAnimationFrame para garantir que a inicialização não bloqueie o frame
+        requestAnimationFrame(() => {
           if (mapInstance.current) {
             mapInstance.current.invalidateSize();
             setIsReady(true);
           }
-        }, 50);
+        });
     } catch (error) {
         console.error("Leaflet initialization error:", error);
     }
@@ -75,7 +92,7 @@ const LeafletMap = ({
         setIsReady(false);
       }
     };
-  }, []);
+  }, [defaultCenter]);
 
   useEffect(() => {
     const map = mapInstance.current;
@@ -103,15 +120,11 @@ const LeafletMap = ({
 
     reports.forEach(report => {
       const category = getCategory(report.category);
-      const IconComponent = category?.icon;
       const problemLabel = category?.problems.find(p => p.value === report.problem)?.label || report.problem;
       const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
       
       const markerColor = statusColorMap[report.status] || statusColorMap.UNDER_REVIEW;
-
-      const iconHtml = IconComponent 
-        ? renderToString(<IconComponent className="h-5 w-5" style={{ color: '#ffffff' }} />)
-        : '';
+      const iconHtml = getCachedIconHtml(report.category);
 
       const customIcon = L.divIcon({
         html: `<div style="background-color: ${markerColor};" class="w-8 h-8 rounded-full shadow-md flex items-center justify-center border-2 border-white">${iconHtml}</div>`,
@@ -152,7 +165,7 @@ const LeafletMap = ({
       const key = `${report.latitude.toFixed(6)},${report.longitude.toFixed(6)}`;
       reportMarkers.current.set(key, marker);
     });
-  }, [reports, interactive, isReady]);
+  }, [reports, interactive, isReady, getCachedIconHtml]);
 
   useEffect(() => {
     const map = mapInstance.current;

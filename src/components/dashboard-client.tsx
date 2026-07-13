@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
+import React from "react";
 import Image from "next/image";
 import imageCompression from 'browser-image-compression';
 import { 
@@ -101,7 +103,7 @@ const ReportCard = memo(({
     isUpvoted: boolean,
     showUpvote: boolean,
     isExpanded: boolean,
-    onToggleExpansion: () => void
+    onToggleExpansion: (id: string) => void
 }) => {
   const { user } = useUser();
   const { toast } = useToast();
@@ -247,7 +249,7 @@ const ReportCard = memo(({
                 toast({ title: "Sucesso", description: "Relato atualizado com sucesso." });
                 setIsStatusConfirmOpen(false);
                 setPendingPhotoUpdate(null);
-                onToggleExpansion(); // Fecha o painel após salvar
+                onToggleExpansion(report.id); // Fecha o painel após salvar
                 if (onSuccess) onSuccess();
                 router.refresh();
             } else {
@@ -273,7 +275,7 @@ const ReportCard = memo(({
                 await addNotification(report.userId, report.id, 'EXCLUDED', 'Relato removido', `Seu relato foi removido. Motivo: ${finalReason}`);
                 toast({ title: "Relatório removido", description: "O registro foi movido para a Central de Moderação." });
                 setIsDeleteDialogOpen(false);
-                onToggleExpansion(); // Fecha o painel após excluir
+                onToggleExpansion(report.id); // Fecha o painel após excluir
                 if (onSuccess) onSuccess();
                 router.refresh();
             } else {
@@ -302,13 +304,12 @@ const ReportCard = memo(({
     }
   };
 
-  const handleToggle = () => {
+  const handleToggle = useCallback(() => {
     if (isExpanded) {
-        // Se estiver fechando (cancelando), reverte a foto pendente
         setPendingPhotoUpdate(null);
     }
-    onToggleExpansion();
-  };
+    onToggleExpansion(report.id);
+  }, [isExpanded, onToggleExpansion, report.id]);
 
   const isEmployee = isEmailEmployee(user?.email);
   const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
@@ -344,7 +345,6 @@ const ReportCard = memo(({
                         sizes="(max-width: 768px) 100vw, 400px"
                     />
 
-                    {/* Overlay de Edição para Funcionários */}
                     {!showUpvote && isExpanded && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center z-10 animate-in fade-in zoom-in duration-300">
                         <div className="bg-white/20 backdrop-blur-md p-4 rounded-full border border-white/30 shadow-2xl scale-110 group-hover/photo:scale-125 transition-transform">
@@ -760,7 +760,7 @@ const ReportCard = memo(({
   );
 });
 
-const EmptyState = ({ hasFilters }: { hasFilters: boolean }) => (
+const EmptyState = memo(({ hasFilters }: { hasFilters: boolean }) => (
   <div className="flex flex-col items-center justify-center p-12 text-center bg-card rounded-2xl border border-dashed border-border shadow-sm animate-in fade-in">
     <div className="bg-muted p-4 rounded-full mb-4">
       <Info className="h-8 w-8 text-muted-foreground opacity-50" />
@@ -774,7 +774,8 @@ const EmptyState = ({ hasFilters }: { hasFilters: boolean }) => (
         : "Não há relatos no momento."}
     </p>
   </div>
-);
+));
+EmptyState.displayName = "EmptyState";
 
 export function DashboardClient({ 
     reports, 
@@ -814,6 +815,10 @@ export function DashboardClient({
         console.error("Erro ao votar:", error);
     }
   }, [upvotedReports, onSuccess, router]);
+
+  const handleToggleExpansion = useCallback((id: string) => {
+    setOpenReportId(prev => prev === id ? null : id);
+  }, []);
 
   const filteredReports = useMemo(() => {
     const applyFiltersAndSort = (list: Report[]) => {
@@ -944,7 +949,7 @@ export function DashboardClient({
                 showUpvote={showUpvote} 
                 onSuccess={onSuccess}
                 isExpanded={openReportId === report.id}
-                onToggleExpansion={() => setOpenReportId(openReportId === report.id ? null : report.id)}
+                onToggleExpansion={handleToggleExpansion}
               />
             ))
           )}
@@ -964,7 +969,7 @@ export function DashboardClient({
               showUpvote={showUpvote} 
               onSuccess={onSuccess}
               isExpanded={openReportId === report.id}
-              onToggleExpansion={() => setOpenReportId(openReportId === report.id ? null : report.id)}
+              onToggleExpansion={handleToggleExpansion}
             />
           ))
         )}
@@ -983,7 +988,7 @@ export function DashboardClient({
               showUpvote={showUpvote} 
               onSuccess={onSuccess}
               isExpanded={openReportId === report.id}
-              onToggleExpansion={() => setOpenReportId(openReportId === report.id ? null : report.id)}
+              onToggleExpansion={handleToggleExpansion}
             />
           ))
         )}
@@ -1002,7 +1007,7 @@ export function DashboardClient({
               showUpvote={showUpvote} 
               onSuccess={onSuccess}
               isExpanded={openReportId === report.id}
-              onToggleExpansion={() => setOpenReportId(openReportId === report.id ? null : report.id)}
+              onToggleExpansion={handleToggleExpansion}
             />
           ))
         )}
@@ -1028,7 +1033,7 @@ export function DashboardClient({
                     showUpvote={showUpvote} 
                     onSuccess={onSuccess}
                     isExpanded={openReportId === report.id}
-                    onToggleExpansion={() => setOpenReportId(openReportId === report.id ? null : report.id)}
+                    onToggleExpansion={handleToggleExpansion}
                   />
                 ))
               )}

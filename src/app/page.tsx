@@ -1,4 +1,6 @@
-import { Suspense } from "react";
+
+import { Suspense, memo } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, MapPin, BarChart3, Clock, Camera, Info, Loader2 } from "lucide-react";
@@ -37,7 +39,7 @@ async function RecentReports({ reports }: { reports: Report[] }) {
   );
 }
 
-function BenefitCard({ icon: Icon, title, description }: { icon: any, title: string, description: string }) {
+const BenefitCard = memo(({ icon: Icon, title, description }: { icon: any, title: string, description: string }) => {
   return (
     <div className="p-6 rounded-2xl bg-card border border-border shadow-md hover:border-primary/30 hover:shadow-lg transition-all duration-300 group flex flex-col h-full overflow-hidden">
       <div className="flex flex-col items-center md:items-start text-center md:text-left gap-y-3">
@@ -51,9 +53,10 @@ function BenefitCard({ icon: Icon, title, description }: { icon: any, title: str
       </div>
     </div>
   );
-}
+});
+BenefitCard.displayName = "BenefitCard";
 
-function IndicatorItem({ label, value, colorClass }: { label: string, value: number, colorClass: string }) {
+const IndicatorItem = memo(({ label, value, colorClass }: { label: string, value: number, colorClass: string }) => {
   return (
     <div className="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border/50 hover:bg-muted/40 transition-colors">
       <div className="flex items-center gap-3">
@@ -63,7 +66,8 @@ function IndicatorItem({ label, value, colorClass }: { label: string, value: num
       <span className="text-sm font-black text-foreground">{value}</span>
     </div>
   );
-}
+});
+IndicatorItem.displayName = "IndicatorItem";
 
 function AboutSection({ reports }: { reports: Report[] }) {
   const stats = {
