@@ -443,7 +443,8 @@ const ReportCard = memo(({
                     {!showUpvote && (
                       <div className="flex-1 flex flex-col justify-center mt-4">
                         <div className="w-full space-y-4 py-6 border-y border-border/60">
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-6">
+                          {/* Layout Vertical para Gestão (como era antes) */}
+                          <div className="flex flex-col gap-2 mt-6">
                               <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
                                   {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
                                   <span className="truncate">{category?.label || report.category}</span>
