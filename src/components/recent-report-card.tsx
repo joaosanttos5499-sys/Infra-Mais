@@ -19,6 +19,7 @@ function RecentReportCardComponent({ report }: { report: Report }) {
   const router = useRouter();
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
+  const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
   
   const handleCardClick = () => {
     router.push(`/dashboard#report-${report.id}`);
@@ -60,13 +61,19 @@ function RecentReportCardComponent({ report }: { report: Report }) {
         </div>
 
         <div className="p-5 flex flex-col flex-grow space-y-4">
-            <div className="space-y-1">
-                <h3 className="text-lg font-bold text-foreground line-clamp-2">
+            <div className="space-y-3">
+                <h3 className="text-lg font-bold text-foreground line-clamp-2 leading-tight">
                     {problem?.label || report.problem}
                 </h3>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    {category?.icon && <category.icon className="h-4 w-4" style={{ color: category.color }} />}
-                    <span>{category?.label || report.category}</span>
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+                        {category?.icon && <category.icon className="h-4 w-4 shrink-0" style={{ color: category.color }} />}
+                        <span className="truncate">{category?.label || report.category}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+                        <MapPin className="h-4 w-4 shrink-0 text-primary" />
+                        <span className="truncate">{displayCity} - {report.bairro}</span>
+                    </div>
                 </div>
             </div>
 
