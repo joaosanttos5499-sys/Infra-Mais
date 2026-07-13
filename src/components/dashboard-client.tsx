@@ -316,7 +316,7 @@ const ReportCard = memo(({
                             </h3>
                             <div className={cn(
                                 "flex gap-y-1.5",
-                                showUpvote ? "flex-row flex-wrap items-center gap-x-5" : "flex-col items-start"
+                                showUpvote ? "flex-row flex-wrap items-center gap-x-5 mt-2" : "flex-col items-start"
                             )}>
                                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
                                     {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
