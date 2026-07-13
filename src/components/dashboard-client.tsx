@@ -415,14 +415,14 @@ const ReportCard = memo(({
                             {showUpvote ? (
                               <div className="flex flex-col gap-6">
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-6">
-                                  <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
-                                      {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
-                                      <span className="truncate">{category?.label || report.category}</span>
-                                  </div>
-                                  <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
-                                      <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                                      <span className="truncate">{displayCity} - {report.bairro}</span>
-                                  </div>
+                                    <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
+                                        {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
+                                        <span className="truncate">{category?.label || report.category}</span>
+                                    </div>
+                                    <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
+                                        <MapPin className="h-3.5 w-3.5 text-primary" />
+                                        <span className="truncate">{displayCity} - {report.bairro}</span>
+                                    </div>
                                 </div>
 
                                 {report.summary && (
@@ -444,18 +444,18 @@ const ReportCard = memo(({
                       <div className="flex-1 flex flex-col justify-center mt-4">
                         <div className="w-full space-y-4 py-6 border-y border-border/60">
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-6">
-                            <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
-                                {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
-                                <span className="truncate">{category?.label || report.category}</span>
-                            </div>
-                            <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
-                                <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                                <span className="truncate">{displayCity} - {report.bairro}</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-2 w-full">
-                                <User className="h-4 w-4 text-muted-foreground/60 shrink-0" />
-                                <span className="font-semibold truncate">{report.relatorEmail}</span>
-                            </div>
+                              <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
+                                  {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category.color }} />}
+                                  <span className="truncate">{category?.label || report.category}</span>
+                              </div>
+                              <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
+                                  <MapPin className="h-3.5 w-3.5 text-primary" />
+                                  <span className="truncate">{displayCity} - {report.bairro}</span>
+                              </div>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground mt-2 w-full">
+                              <User className="h-4 w-4 text-muted-foreground/60 shrink-0" />
+                              <span className="font-semibold truncate">{report.relatorEmail}</span>
                           </div>
                         </div>
                       </div>
