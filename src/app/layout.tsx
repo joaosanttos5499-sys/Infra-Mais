@@ -15,8 +15,12 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Infra Mais - Zeladoria Urbana",
+  title: "Infra Mais",
   description: "Relate e acompanhe problemas de infraestrutura na sua cidade.",
+  icons: {
+    icon: "/img/logo1.png",
+    apple: "/img/logo1.png",
+  },
 };
 
 export const viewport: Viewport = {
