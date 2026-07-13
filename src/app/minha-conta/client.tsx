@@ -514,13 +514,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
             {!isEmployee && (
                 <Card className="bg-card rounded-[2.5rem] shadow-md border border-border p-6 sm:p-10 mx-4 sm:mx-0 scroll-mt-24" id="meus-relatos" ref={reportsRef}>
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                          <h2 className="text-2xl font-black text-foreground tracking-tight">Meus Relatos</h2>
-                        </div>
-                        <Button asChild variant="default" size="sm" className="rounded-xl h-10 px-5 font-bold shadow-lg shadow-primary/20">
-                            <Link href="/report/new">Novo Relato</Link>
-                        </Button>
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-black text-foreground tracking-tight">Meus Relatos</h2>
                     </div>
                     <CardContent className="p-0">
                         <MyReportsList reports={userReports} />
