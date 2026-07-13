@@ -308,20 +308,20 @@ const ReportCard = memo(({
                     </Dialog>
                 </div>
 
-                <div className="pt-1 pb-6 md:pb-8 px-6 md:px-8 flex flex-col flex-grow min-w-0 relative">
+                <div className="pt-0 pb-6 md:pb-8 px-6 md:px-8 flex flex-col flex-grow min-w-0 relative">
                     <div className="absolute top-3 right-4 z-10">
                         <StatusBadge status={report.status} />
                     </div>
 
                     <div className="flex justify-between items-start gap-4 mb-2">
-                        <div className="space-y-2 min-w-0 pt-1">
+                        <div className="space-y-2 min-w-0 pt-3">
                             <h3 className="font-bold text-xl text-foreground leading-tight tracking-tight truncate pr-24">
                                 {problem?.label || report.problem}
                             </h3>
                             
                             {showUpvote ? (
                               <>
-                                <div className="flex flex-wrap items-center gap-x-5 mt-11">
+                                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-7">
                                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
                                       {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
                                       <span className="uppercase tracking-wider text-[11px] opacity-80">{category?.label || report.category}</span>
@@ -335,7 +335,7 @@ const ReportCard = memo(({
                                 {report.summary && (
                                   <div className="mt-4 p-4 bg-primary/5 rounded-2xl border border-primary/20 space-y-2 relative overflow-hidden group/summary animate-in fade-in slide-in-from-top-2">
                                     <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-[0.15em]">
-                                      <Sparkles className="h-3 w-3" /> Resumo Inteligente
+                                      <span className="shrink-0"><Sparkles className="h-3 w-3" /></span> Resumo Inteligente
                                     </div>
                                     <p className="text-xs text-foreground/85 italic font-medium leading-relaxed">
                                       "{report.summary}"
@@ -343,26 +343,26 @@ const ReportCard = memo(({
                                   </div>
                                 )}
                               </>
-                            ) : (
-                              <div className="py-5 mt-5 border-y border-border/50 space-y-3">
-                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
-                                    {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
-                                    <span className="uppercase tracking-wider text-[11px] opacity-80">{category?.label || report.category}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
-                                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-                                    <span>{displayCity} - {report.bairro}</span>
-                                </div>
-                                {isEmployee && (
-                                    <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-                                        <User className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
-                                        <span className="font-medium">{report.relatorEmail}</span>
-                                    </div>
-                                )}
-                              </div>
-                            )}
+                            ) : null}
                         </div>
                     </div>
+
+                    {!showUpvote && (
+                      <div className="py-6 border-y border-border/50 space-y-4 my-auto w-full">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
+                            {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
+                            <span className="uppercase tracking-wider text-[11px] opacity-80">{category?.label || report.category}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
+                            <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                            <span>{displayCity} - {report.bairro}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+                            <User className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
+                            <span className="font-medium">{report.relatorEmail}</span>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="mt-auto pt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
                         <div className="flex items-center gap-5">
@@ -743,6 +743,8 @@ export function DashboardClient({
   };
 
   const hasActiveFilters = categoryFilter !== "all" || bairroFilter !== "all" || sortOption !== "recent";
+
+  const isEmployee = isEmailEmployee(user?.email);
 
   return (
     <Tabs defaultValue="pending" className="w-full">
