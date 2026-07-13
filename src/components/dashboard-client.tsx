@@ -602,7 +602,7 @@ const ReportCard = memo(({
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <Button type="button" onClick={() => setIsStatusConfirmOpen(true)} disabled={isUpdating} className="h-12 rounded-lg font-bold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 w-full transition-all active:scale-95">
+                                    <Button type="button" onClick={() => setIsStatusConfirmOpen(true)} disabled={isUpdating} className="h-12 rounded-lg font-bold bg-primary hover:bg-primary/90 w-full transition-all active:scale-95">
                                         {isUpdating ? <Loader2 className="animate-spin h-5 w-5" /> : <Upload className="h-5 w-5" />}
                                         <span className="ml-2">Salvar Alterações</span>
                                     </Button>
