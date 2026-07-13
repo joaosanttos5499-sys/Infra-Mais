@@ -11,11 +11,16 @@ import { getCategory } from "@/lib/categories";
 import { useRouter } from "next/navigation";
 import { memo } from "react";
 
+interface RecentReportCardProps {
+  report: Report;
+  priority?: boolean;
+}
+
 /**
  * Componente cliente para renderizar um cartão de relato individual na Home.
  * Memoizado para evitar re-renderizações desnecessárias em listas.
  */
-function RecentReportCardComponent({ report }: { report: Report }) {
+function RecentReportCardComponent({ report, priority = false }: RecentReportCardProps) {
   const router = useRouter();
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
@@ -42,7 +47,8 @@ function RecentReportCardComponent({ report }: { report: Report }) {
               fill
               className="object-cover transition-opacity duration-300"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              loading="lazy"
+              loading={priority ? "eager" : "lazy"}
+              priority={priority}
             />
             <div className="absolute top-3 left-3 z-10">
                 <StatusBadge status={report.status} />

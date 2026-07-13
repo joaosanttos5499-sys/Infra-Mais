@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef, memo, useState } from "react";
@@ -64,7 +63,7 @@ const LeafletMap = ({
             mapInstance.current.invalidateSize();
             setIsReady(true);
           }
-        }, 100);
+        }, 50);
     } catch (error) {
         console.error("Leaflet initialization error:", error);
     }
@@ -190,7 +189,7 @@ const LeafletMap = ({
   }, [selectedLocation, interactive, isReady]);
 
   return (
-    <div className="w-full h-full min-h-[350px] md:min-h-[550px] relative">
+    <div className="w-full h-full min-h-[350px] md:min-h-[550px] relative bg-muted/20 rounded-xl overflow-hidden">
       {!isReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-muted/50 z-10 rounded-xl">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -199,7 +198,7 @@ const LeafletMap = ({
       <div
         ref={mapRef}
         className={cn('w-full h-full relative z-0', interactive ? 'cursor-crosshair' : '')}
-        style={{ touchAction: 'pan-y', isolation: 'isolate' }}
+        style={{ touchAction: 'pan-y', isolation: 'isolate', minHeight: 'inherit' }}
       />
     </div>
   );

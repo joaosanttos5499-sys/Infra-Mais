@@ -28,8 +28,8 @@ async function RecentReports({ reports }: { reports: Report[] }) {
   return (
     <div className="space-y-12">
       <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {recentReports.map((report) => (
-          <RecentReportCard key={report.id} report={report} />
+        {recentReports.map((report, index) => (
+          <RecentReportCard key={report.id} report={report} priority={index === 0} />
         ))}
       </div>
     </div>
@@ -194,7 +194,7 @@ export default async function Home(props: { searchParams: Promise<{ lat?: string
                     <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Resolvido</div>
                   </div>
                 </div>
-                <div className="rounded-2xl overflow-hidden shadow-inner border border-border h-[350px] md:h-[550px] relative">
+                <div className="rounded-2xl overflow-hidden shadow-inner border border-border h-[350px] md:h-[550px] min-h-[350px] md:min-h-[550px] relative">
                   <Suspense fallback={
                     <div className="w-full h-full flex items-center justify-center bg-muted animate-pulse">
                       <Loader2 className="h-10 w-10 animate-spin text-primary" />
