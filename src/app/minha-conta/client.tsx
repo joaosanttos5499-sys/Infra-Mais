@@ -385,6 +385,8 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
         }
     };
 
+    const infoInputClasses = "h-10 disabled:opacity-100 disabled:bg-muted/10 dark:disabled:bg-white/[0.03] disabled:text-foreground/70 dark:disabled:text-slate-200";
+
     if (isUserLoading || !user) {
         return <div className="flex items-center justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
     }
@@ -421,7 +423,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     )}
                                   </div>
                                   <FormControl>
-                                      <Input {...field} disabled={!isEditingName} className="h-10" />
+                                      <Input {...field} disabled={!isEditingName} className={cn(infoInputClasses)} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -431,12 +433,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             <div className="space-y-4 pt-2">
                                 <div className="space-y-1">
                                     <Label className="text-sm font-medium">E-mail</Label>
-                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-10" />
+                                    <Input value={userProfile?.email || user.email || ''} disabled className={cn(infoInputClasses)} />
                                 </div>
 
                                 <div className="space-y-1">
                                     <Label className="text-sm font-medium">Data de Nascimento</Label>
-                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-10" />
+                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className={cn(infoInputClasses)} />
                                 </div>
                             </div>
 
