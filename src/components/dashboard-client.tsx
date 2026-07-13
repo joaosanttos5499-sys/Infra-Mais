@@ -157,7 +157,7 @@ const ReportCard = memo(({
       details: reportObservations
     });
 
-    setIsReporting(true);
+    setIsReporting(false);
     if (result.success) {
       setIsReportDialogOpen(false);
       setReportReason("");
@@ -308,15 +308,19 @@ const ReportCard = memo(({
                     </Dialog>
                 </div>
 
-                <div className="pt-2 pb-6 md:pb-8 px-6 md:px-8 flex flex-col flex-grow min-w-0">
+                <div className="pt-2 pb-6 md:pb-8 px-6 md:px-8 flex flex-col flex-grow min-w-0 relative">
+                    <div className="absolute top-4 right-4 z-10">
+                        <StatusBadge status={report.status} />
+                    </div>
+
                     <div className="flex justify-between items-start gap-4 mb-2">
-                        <div className="space-y-2 min-w-0 pt-2">
-                            <h3 className="font-bold text-xl text-foreground leading-tight tracking-tight truncate">
+                        <div className="space-y-2 min-w-0 pt-1">
+                            <h3 className="font-bold text-xl text-foreground leading-tight tracking-tight truncate pr-24">
                                 {problem?.label || report.problem}
                             </h3>
                             <div className={cn(
                                 "flex gap-y-1.5",
-                                showUpvote ? "flex-row flex-wrap items-center gap-x-5 mt-2" : "flex-col items-start"
+                                showUpvote ? "flex-row flex-wrap items-center gap-x-5 mt-5" : "flex-col items-start mt-2"
                             )}>
                                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
                                     {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
@@ -327,9 +331,6 @@ const ReportCard = memo(({
                                     <span>{displayCity} - {report.bairro}</span>
                                 </div>
                             </div>
-                        </div>
-                        <div className="shrink-0 pt-2 -mr-1">
-                            <StatusBadge status={report.status} />
                         </div>
                     </div>
 
