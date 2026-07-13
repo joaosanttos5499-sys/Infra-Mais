@@ -309,7 +309,7 @@ const ReportCard = memo(({
                 </div>
 
                 <div className="pt-1 pb-6 md:pb-8 px-6 md:px-8 flex flex-col flex-grow min-w-0 relative">
-                    <div className="absolute top-4 right-4 z-10">
+                    <div className="absolute top-3 right-4 z-10">
                         <StatusBadge status={report.status} />
                     </div>
 
@@ -319,7 +319,7 @@ const ReportCard = memo(({
                                 {problem?.label || report.problem}
                             </h3>
                             <div className={cn(
-                                "flex flex-col items-start mt-2",
+                                "flex flex-col items-start mt-4 space-y-2.5",
                                 showUpvote && "hidden"
                             )}>
                                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
@@ -334,7 +334,7 @@ const ReportCard = memo(({
                             
                             {showUpvote && (
                               <>
-                                <div className="flex flex-wrap items-center gap-x-5 mt-9">
+                                <div className="flex flex-wrap items-center gap-x-5 mt-11">
                                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
                                       {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
                                       <span className="uppercase tracking-wider text-[11px] opacity-80">{category?.label || report.category}</span>
@@ -361,7 +361,7 @@ const ReportCard = memo(({
                     </div>
 
                     {!showUpvote && isEmployee && (
-                        <div className="flex items-center gap-2.5 text-xs text-muted-foreground pt-4 mt-2 border-t border-border/50">
+                        <div className="flex items-center gap-2.5 text-xs text-muted-foreground pt-5 mt-5 border-t border-border/50">
                             <User className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
                             <span className="font-medium">{report.relatorEmail}</span>
                         </div>
