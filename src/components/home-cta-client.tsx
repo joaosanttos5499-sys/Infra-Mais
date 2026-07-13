@@ -1,8 +1,9 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Plus } from "lucide-react";
+import { ShieldCheck, Plus } from "lucide-react";
 import { useUser } from "@/firebase";
 import { isEmailEmployee } from "@/lib/config";
 
@@ -28,9 +29,13 @@ export function HomeCtaClient() {
       );
   }
 
+  // Se o usuário está logado (e não é funcionário), vai diretamente para o novo relato
+  // Caso contrário, vai para a página de autenticação
+  const destination = user ? "/report/new" : "/report/auth";
+
   return (
     <Button asChild size="lg" className="w-full sm:w-auto rounded-xl px-10 h-12 md:h-14 text-base md:text-lg font-bold shadow-xl hover:scale-105 hover:brightness-110 transition-all duration-300 bg-primary text-white">
-      <Link href="/report/auth" className="flex items-center gap-2 justify-center">
+      <Link href={destination} className="flex items-center gap-2 justify-center">
         Enviar Relato <Plus className="h-6 w-6" />
       </Link>
     </Button>
