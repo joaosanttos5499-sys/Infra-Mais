@@ -3,6 +3,7 @@
 
 import { useOptimistic, useState, useRef, useActionState, useEffect, useTransition, startTransition, memo, useMemo, useCallback } from "react";
 import Image from "next/image";
+import imageCompression from 'browser-image-compression';
 import { 
   updateReportStatus as dbUpdateReportStatus, 
   upvoteReport as dbUpvoteReport, 
@@ -93,20 +94,27 @@ const ReportCard = memo(({
     onSuccess,
     isUpvoted,
     showUpvote,
+    isExpanded,
+    onToggleExpansion
 }: { 
     report: Report,
     onUpvote: (id: string, userId: string) => void,
     onStatusUpdate?: (id: string, newStatus: ReportStatus) => void,
     onSuccess?: () => void,
     isUpvoted: boolean,
-    showUpvote: boolean
+    showUpvote: boolean,
+    isExpanded: boolean,
+    onToggleExpansion: () => void
 }) => {
   const { user } = useUser();
   const { toast } = useToast();
   const router = useRouter();
   const [isDeleting, startDeleteTransition] = useTransition();
   const [isUpdating, startUpdateTransition] = useTransition();
+  const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
   const [isDeletingPermanently, setIsDeletingPermanently] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const category = getCategory(report.category);
   const problem = category?.problems.find(p => p.value === report.problem);
   
@@ -134,6 +142,49 @@ const ReportCard = memo(({
   const [deleteOtherDescription, setDeleteOtherDescription] = useState("");
 
   const editProblems = useMemo(() => getCategory(editCategory)?.problems || [], [editCategory]);
+
+  const handlePhotoClick = () => {
+    if (!showUpvote && isExpanded && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUpdatingPhoto(true);
+    try {
+      const options = {
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+        fileType: 'image/webp',
+        initialQuality: 0.6
+      };
+      
+      const compressedFile = await imageCompression(file, options);
+      const reader = new FileReader();
+      
+      reader.onloadend = async () => {
+        const dataUri = reader.result as string;
+        try {
+          const success = await clientUpdateReportStatus(report.id, report.userId, report.status, dataUri);
+          if (success) {
+            toast({ title: "Foto atualizada", description: "A imagem do relato foi alterada automaticamente." });
+            if (onSuccess) onSuccess();
+            router.refresh();
+          }
+        } catch (dbErr) {
+          toast({ variant: "destructive", title: "Erro", description: "Não foi possível salvar a nova imagem." });
+        }
+      };
+      reader.readAsDataURL(compressedFile);
+    } catch (error) {
+      toast({ variant: "destructive", title: "Erro", description: "Falha ao processar a imagem." });
+    } finally {
+      setIsUpdatingPhoto(false);
+    }
+  };
 
   const handleReportSubmit = async () => {
     if (!reportReason) {
@@ -205,6 +256,7 @@ const ReportCard = memo(({
 
                 toast({ title: "Sucesso", description: "Relato atualizado com sucesso." });
                 setIsStatusConfirmOpen(false);
+                onToggleExpansion(); // Fecha o painel após salvar
                 if (onSuccess) onSuccess();
                 router.refresh();
             } else {
@@ -230,6 +282,7 @@ const ReportCard = memo(({
                 await addNotification(report.userId, report.id, 'EXCLUDED', 'Relato removido', `Seu relato foi removido. Motivo: ${finalReason}`);
                 toast({ title: "Relatório removido", description: "O registro foi movido para a Central de Moderação." });
                 setIsDeleteDialogOpen(false);
+                onToggleExpansion(); // Fecha o painel após excluir
                 if (onSuccess) onSuccess();
                 router.refresh();
             } else {
@@ -271,41 +324,75 @@ const ReportCard = memo(({
       id={`report-${report.id}`}
     >
       <CardContent className="p-0">
-        <Accordion type="single" collapsible disabled={showUpvote}>
+        <Accordion type="single" collapsible disabled={showUpvote} value={isExpanded ? report.id : ""}>
           <AccordionItem value={report.id} className="border-b-0">
             <div className="flex flex-col md:flex-row h-full">
-                <div className="relative w-full md:w-72 lg:w-80 h-64 md:h-auto overflow-hidden bg-muted shrink-0 group/photo">
+                <div 
+                  className={cn(
+                    "relative w-full md:w-72 lg:w-80 h-64 md:h-auto overflow-hidden bg-muted shrink-0 group/photo transition-all duration-300",
+                    !showUpvote && isExpanded && "cursor-pointer"
+                  )}
+                  onClick={handlePhotoClick}
+                >
                     <Image
                         src={report.photoUrl}
                         alt="Foto do problema"
                         fill
-                        className="object-cover"
+                        className={cn(
+                          "object-cover transition-all duration-500",
+                          !showUpvote && isExpanded && "scale-105 brightness-[0.4]"
+                        )}
                         sizes="(max-width: 768px) 100vw, 400px"
                     />
+
+                    {/* Overlay de Edição para Funcionários */}
+                    {!showUpvote && isExpanded && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center z-10 animate-in fade-in zoom-in duration-300">
+                        <div className="bg-white/20 backdrop-blur-md p-4 rounded-full border border-white/30 shadow-2xl scale-110 group-hover/photo:scale-125 transition-transform">
+                          {isUpdatingPhoto ? (
+                            <Loader2 className="h-8 w-8 text-white animate-spin" />
+                          ) : (
+                            <ImagePlus className="h-8 w-8 text-white" />
+                          )}
+                        </div>
+                        <p className="text-white text-[10px] font-black uppercase tracking-[0.2em] mt-4 drop-shadow-md">Alterar Foto</p>
+                      </div>
+                    )}
                     
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <button 
-                                className="absolute bottom-4 right-4 z-20 bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-xl opacity-0 group-hover/photo:opacity-100 transition-all backdrop-blur-md scale-90 group-hover/photo:scale-100"
-                                title="Ver em tela cheia"
-                            >
-                                <Maximize2 className="h-5 w-5" />
-                            </button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0 overflow-hidden border-none bg-transparent shadow-none">
-                            <DialogHeader className="sr-only">
-                                <DialogTitle>Visualização da Foto</DialogTitle>
-                                <DialogDescription>Foto em alta resolução do problema relatado.</DialogDescription>
-                            </DialogHeader>
-                            <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
-                                <img 
-                                    src={report.photoUrl} 
-                                    alt="Foto em tamanho real" 
-                                    className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in duration-300" 
-                                />
-                            </div>
-                        </DialogContent>
-                    </Dialog>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept="image/*" 
+                      onChange={handlePhotoChange} 
+                    />
+                    
+                    {(!isExpanded || showUpvote) && (
+                      <Dialog>
+                          <DialogTrigger asChild>
+                              <button 
+                                  className="absolute bottom-4 right-4 z-20 bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-xl opacity-0 group-hover/photo:opacity-100 transition-all backdrop-blur-md scale-90 group-hover/photo:scale-100"
+                                  title="Ver em tela cheia"
+                                  onClick={(e) => e.stopPropagation()}
+                              >
+                                  <Maximize2 className="h-5 w-5" />
+                              </button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0 overflow-hidden border-none bg-transparent shadow-none">
+                              <DialogHeader className="sr-only">
+                                  <DialogTitle>Visualização da Foto</DialogTitle>
+                                  <DialogDescription>Foto em alta resolução do problema relatado.</DialogDescription>
+                              </DialogHeader>
+                              <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
+                                  <img 
+                                      src={report.photoUrl} 
+                                      alt="Foto em tamanho real" 
+                                      className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in duration-300" 
+                                  />
+                              </div>
+                          </DialogContent>
+                      </Dialog>
+                    )}
                 </div>
 
                 <div className="pt-0 pb-6 md:pb-8 px-6 md:px-10 flex flex-col flex-grow min-w-0 relative">
@@ -405,10 +492,13 @@ const ReportCard = memo(({
                                     Apoiar ({report.upvotes})
                                 </Button>
                             ) : (
-                                <AccordionTrigger className={cn(
-                                  "py-0 px-6 h-11 rounded-xl font-bold hover:no-underline flex items-center gap-2 text-xs transition-all active:scale-95",
-                                  report.status === 'EXCLUDED' ? "bg-orange-100 text-orange-600 hover:bg-orange-200" : "bg-primary/10 text-primary hover:bg-primary/20"
-                                )}>
+                                <AccordionTrigger 
+                                  onClick={onToggleExpansion}
+                                  className={cn(
+                                    "py-0 px-6 h-11 rounded-xl font-bold hover:no-underline flex items-center gap-2 text-xs transition-all active:scale-95",
+                                    report.status === 'EXCLUDED' ? "bg-orange-100 text-orange-600 hover:bg-orange-200" : "bg-primary/10 text-primary hover:bg-primary/20"
+                                  )}
+                                >
                                     <Settings2 className="h-4 w-4" /> Gerenciar Relato
                                 </AccordionTrigger>
                             )}
@@ -694,6 +784,7 @@ export function DashboardClient({
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [bairroFilter, setBairroFilter] = useState<string>("all");
   const [sortOption, setSortOption] = useState<string>("recent");
+  const [openReportId, setOpenReportId] = useState<string | null>(null);
 
   const handleUpvote = async (id: string, userId: string) => {
     try {
@@ -836,7 +927,16 @@ export function DashboardClient({
             <EmptyState hasFilters={hasActiveFilters} />
           ) : (
             filteredReports.under_review.map(report => (
-              <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+              <ReportCard 
+                key={report.id} 
+                report={report} 
+                onUpvote={handleUpvote} 
+                isUpvoted={upvotedReports.has(report.id)} 
+                showUpvote={showUpvote} 
+                onSuccess={onSuccess}
+                isExpanded={openReportId === report.id}
+                onToggleExpansion={() => setOpenReportId(openReportId === report.id ? null : report.id)}
+              />
             ))
           )}
         </TabsContent>
@@ -847,7 +947,16 @@ export function DashboardClient({
           <EmptyState hasFilters={hasActiveFilters} />
         ) : (
           filteredReports.pending.map(report => (
-            <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+            <ReportCard 
+              key={report.id} 
+              report={report} 
+              onUpvote={handleUpvote} 
+              isUpvoted={upvotedReports.has(report.id)} 
+              showUpvote={showUpvote} 
+              onSuccess={onSuccess}
+              isExpanded={openReportId === report.id}
+              onToggleExpansion={() => setOpenReportId(openReportId === report.id ? null : report.id)}
+            />
           ))
         )}
       </TabsContent>
@@ -857,7 +966,16 @@ export function DashboardClient({
           <EmptyState hasFilters={hasActiveFilters} />
         ) : (
           filteredReports.in_progress.map(report => (
-            <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+            <ReportCard 
+              key={report.id} 
+              report={report} 
+              onUpvote={handleUpvote} 
+              isUpvoted={upvotedReports.has(report.id)} 
+              showUpvote={showUpvote} 
+              onSuccess={onSuccess}
+              isExpanded={openReportId === report.id}
+              onToggleExpansion={() => setOpenReportId(openReportId === report.id ? null : report.id)}
+            />
           ))
         )}
       </TabsContent>
@@ -867,7 +985,16 @@ export function DashboardClient({
           <EmptyState hasFilters={hasActiveFilters} />
         ) : (
           filteredReports.resolved.map(report => (
-            <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+            <ReportCard 
+              key={report.id} 
+              report={report} 
+              onUpvote={handleUpvote} 
+              isUpvoted={upvotedReports.has(report.id)} 
+              showUpvote={showUpvote} 
+              onSuccess={onSuccess}
+              isExpanded={openReportId === report.id}
+              onToggleExpansion={() => setOpenReportId(openReportId === report.id ? null : report.id)}
+            />
           ))
         )}
       </TabsContent>
@@ -884,7 +1011,16 @@ export function DashboardClient({
                 <EmptyState hasFilters={hasActiveFilters} />
               ) : (
                 filteredReports.excluded.map(report => (
-                  <ReportCard key={report.id} report={report} onUpvote={handleUpvote} isUpvoted={upvotedReports.has(report.id)} showUpvote={showUpvote} onSuccess={onSuccess} />
+                  <ReportCard 
+                    key={report.id} 
+                    report={report} 
+                    onUpvote={handleUpvote} 
+                    isUpvoted={upvotedReports.has(report.id)} 
+                    showUpvote={showUpvote} 
+                    onSuccess={onSuccess}
+                    isExpanded={openReportId === report.id}
+                    onToggleExpansion={() => setOpenReportId(openReportId === report.id ? null : report.id)}
+                  />
                 ))
               )}
             </TabsContent>
