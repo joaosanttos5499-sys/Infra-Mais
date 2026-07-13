@@ -453,8 +453,11 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               <div className="pt-6 border-t border-border flex justify-start items-center">
                                 <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => { setIsDeleteDialogOpen(open); if(!open) { setDeletePassword(""); setIsAwareChecked(false); setShowDeletePassword(false); } }}>
                                   <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" className="text-destructive text-xs hover:bg-destructive/10">
-                                      <Trash2 className="mr-2 h-4 w-4" /> Excluir Minha Conta
+                                    <Button 
+                                      variant="ghost" 
+                                      className="text-destructive text-xs hover:bg-destructive/10 border border-transparent hover:border-destructive hover:scale-105 transition-all duration-200"
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" /> Excluir Conta
                                     </Button>
                                   </AlertDialogTrigger>
                                   <AlertDialogContent className="rounded-2xl max-w-sm">
