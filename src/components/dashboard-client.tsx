@@ -306,7 +306,7 @@ const ReportCard = memo(({
 
   const handleToggle = () => {
     if (isExpanded) {
-        // Se estiver fechando, reverte a foto pendente
+        // Se estiver fechando (cancelando), reverte a foto pendente
         setPendingPhotoUpdate(null);
     }
     onToggleExpansion();
@@ -504,10 +504,13 @@ const ReportCard = memo(({
                                   onClick={handleToggle}
                                   className={cn(
                                     "py-0 px-6 h-11 rounded-xl font-bold hover:no-underline flex items-center gap-2 text-xs transition-all active:scale-95",
-                                    report.status === 'EXCLUDED' ? "bg-orange-100 text-orange-600 hover:bg-orange-200" : "bg-primary/10 text-primary hover:bg-primary/20"
+                                    isExpanded 
+                                      ? "bg-destructive/10 text-destructive hover:bg-destructive/20" 
+                                      : (report.status === 'EXCLUDED' ? "bg-orange-100 text-orange-600 hover:bg-orange-200" : "bg-primary/10 text-primary hover:bg-primary/20")
                                   )}
                                 >
-                                    <Settings2 className="h-4 w-4" /> Gerenciar Relato
+                                    {isExpanded ? <X className="h-4 w-4" /> : <Settings2 className="h-4 w-4" />}
+                                    {isExpanded ? "Cancelar Alterações" : "Gerenciar Relato"}
                                 </AccordionTrigger>
                             )}
                         </div>
