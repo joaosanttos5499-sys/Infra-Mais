@@ -421,7 +421,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                     )}
                                   </div>
                                   <FormControl>
-                                      <Input {...field} disabled={!isEditingName} className="h-10 dark:bg-white/10 dark:disabled:opacity-80" />
+                                      <Input {...field} disabled={!isEditingName} className="h-10 dark:bg-white/5 dark:text-slate-200 dark:disabled:opacity-100" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -431,12 +431,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                             <div className="space-y-4 pt-2">
                                 <div className="space-y-1">
                                     <Label className="text-sm font-medium">E-mail</Label>
-                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-10 dark:bg-white/10 dark:disabled:opacity-80" />
+                                    <Input value={userProfile?.email || user.email || ''} disabled className="h-10 dark:bg-white/5 dark:text-slate-200 dark:disabled:opacity-100" />
                                 </div>
 
                                 <div className="space-y-1">
                                     <Label className="text-sm font-medium">Data de Nascimento</Label>
-                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-10 dark:bg-white/10 dark:disabled:opacity-80" />
+                                    <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className="h-10 dark:bg-white/5 dark:text-slate-200 dark:disabled:opacity-100" />
                                 </div>
                             </div>
 
