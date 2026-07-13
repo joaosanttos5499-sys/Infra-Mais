@@ -128,8 +128,6 @@ const ReportCard = memo(({
   const [editDescription, setEditDescription] = useState(report.description);
   const [editLat, setEditLat] = useState(report.latitude);
   const [editLng, setEditLng] = useState(report.longitude);
-  const [editPhotoPreview, setEditPhotoPreview] = useState<string | null>(null);
-  const [isCompressingPhoto, setIsCompressingPhoto] = useState(false);
 
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
@@ -417,12 +415,12 @@ const ReportCard = memo(({
                             {showUpvote ? (
                               <div className="flex flex-col gap-6">
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-6">
-                                  <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
+                                  <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
                                       {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
                                       <span className="truncate">{category?.label || report.category}</span>
                                   </div>
-                                  <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
-                                      <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                                  <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+                                      <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                       <span className="truncate">{displayCity} - {report.bairro}</span>
                                   </div>
                                 </div>
@@ -446,12 +444,12 @@ const ReportCard = memo(({
                       <div className="flex-1 flex flex-col justify-center mt-4">
                         <div className="w-full space-y-4 py-6 border-y border-border/60">
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-6">
-                            <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
+                            <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
                                 {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
                                 <span className="truncate">{category?.label || report.category}</span>
                             </div>
-                            <div className="text-xs text-foreground/75 flex items-center gap-1.5 font-bold">
-                                <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                            <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+                                <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                 <span className="truncate">{displayCity} - {report.bairro}</span>
                             </div>
                             <div className="flex items-center gap-3 text-sm text-muted-foreground mt-2 w-full">
@@ -578,7 +576,7 @@ const ReportCard = memo(({
                         </div>
 
                         <div className="lg:col-span-5 flex flex-col gap-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
+                            <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-1.5">
                                     <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Localização no Mapa</Label>
                                     <div className="h-[200px] rounded-xl overflow-hidden border border-border relative z-0 shadow-sm">
@@ -586,35 +584,6 @@ const ReportCard = memo(({
                                     </div>
                                     <input type="hidden" name="latitude" value={editLat} />
                                     <input type="hidden" name="longitude" value={editLng} />
-                                </div>
-
-                                <div className="space-y-1.5">
-                                    <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1 flex items-center justify-between">
-                                        Foto do Relato
-                                        {editPhotoPreview && (
-                                          <button onClick={() => setEditPhotoPreview(null)} className="text-[9px] text-destructive hover:underline flex items-center gap-1">
-                                            <RotateCcw className="h-2.5 w-2.5" /> Desfazer Alteração
-                                          </button>
-                                        )}
-                                    </Label>
-                                    <div className={cn(
-                                      "relative h-[200px] rounded-xl overflow-hidden border-2 border-dashed flex flex-col items-center justify-center transition-all bg-card shadow-sm",
-                                      editPhotoPreview ? "border-primary/50" : "border-border hover:bg-muted/30 hover:border-primary/30"
-                                    )}>
-                                        {isCompressingPhoto ? (
-                                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                                        ) : editPhotoPreview || report.photoUrl ? (
-                                          <>
-                                            <Image src={editPhotoPreview || report.photoUrl} alt="Nova foto" fill className="object-cover" />
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                                              <Camera className="h-8 w-8 text-white" />
-                                            </div>
-                                          </>
-                                        ) : (
-                                          <Camera className="h-8 w-8 text-muted-foreground/40" />
-                                        )}
-                                        <input type="file" accept="image/*" onChange={handlePhotoChange} className="absolute inset-0 opacity-0 cursor-pointer" />
-                                    </div>
                                 </div>
                             </div>
 
