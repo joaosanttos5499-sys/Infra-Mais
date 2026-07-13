@@ -320,7 +320,7 @@ const ReportCard = memo(({
                             </h3>
                             
                             {showUpvote ? (
-                              <div className="mt-7 flex flex-col gap-6">
+                              <div className="mt-10 flex flex-col gap-3">
                                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
                                       {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
@@ -333,7 +333,7 @@ const ReportCard = memo(({
                                 </div>
 
                                 {report.summary && (
-                                  <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20 space-y-2 relative overflow-hidden group/summary animate-in fade-in slide-in-from-top-2">
+                                  <div className="p-4 mt-2 bg-primary/5 rounded-2xl border border-primary/20 space-y-2 relative overflow-hidden group/summary animate-in fade-in slide-in-from-top-2">
                                     <div className="flex items-center gap-1.5 text-[10px] font-black text-primary uppercase tracking-[0.15em]">
                                       <span className="shrink-0"><Sparkles className="h-3 w-3" /></span> Resumo Inteligente
                                     </div>
