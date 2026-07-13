@@ -7,7 +7,6 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
-import { isEmailEmployee } from "@/lib/config";
 
 export function AuthReportClient() {
     const { user, isUserLoading } = useUser();
@@ -15,11 +14,8 @@ export function AuthReportClient() {
 
     useEffect(() => {
         if (!isUserLoading && user) {
-            if (isEmailEmployee(user.email)) {
-                router.push('/funcionarios');
-            } else {
-                router.push('/report/new');
-            }
+            // Redireciona para a página inicial conforme solicitado
+            router.push('/');
         }
     }, [user, isUserLoading, router]);
 
@@ -41,7 +37,7 @@ export function AuthReportClient() {
             <CardContent>
                 <Separator className="mb-6" />
                 <AuthForm onAuthSuccess={() => {
-                    // Success callback will handle standard routing if useEffect hasn't triggered yet
+                    // O redirecionamento principal é tratado pelo useEffect acima
                 }} />
             </CardContent>
         </Card>
