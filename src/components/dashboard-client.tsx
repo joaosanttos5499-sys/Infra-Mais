@@ -307,7 +307,7 @@ const ReportCard = memo(({
                     </Dialog>
                 </div>
 
-                <div className="p-6 md:p-8 flex flex-col flex-grow min-w-0">
+                <div className="pt-4 md:pt-5 pb-6 md:pb-8 px-6 md:px-8 flex flex-col flex-grow min-w-0">
                     <div className="flex justify-between items-start gap-4 mb-2">
                         <div className="space-y-1.5 min-w-0">
                             <h3 className="font-bold text-xl text-foreground leading-tight tracking-tight truncate">
@@ -369,14 +369,14 @@ const ReportCard = memo(({
                                   variant={isUpvoted ? "default" : "outline"} 
                                   size="sm" 
                                   onClick={(e) => { 
-                                    if (isEmployee) return; // Funcionários não podem apoiar
+                                    if (isEmployee) return; 
                                     e.stopPropagation(); 
                                     onUpvote(report.id, report.userId); 
                                   }}
                                   className={cn(
                                     "rounded-xl font-bold h-10 px-6 text-xs transition-all shadow-sm active:scale-95", 
                                     isUpvoted ? "bg-primary hover:bg-primary/90" : "bg-muted/30 border-border hover:bg-muted",
-                                    isEmployee && "opacity-50 pointer-events-none cursor-default" // Estilo para funcionário
+                                    isEmployee && "opacity-50 pointer-events-none cursor-default" 
                                   )}
                                   aria-disabled={isEmployee}
                                 >
