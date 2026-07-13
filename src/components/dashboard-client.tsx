@@ -43,7 +43,6 @@ import Link from "next/link";
 import dynamic from 'next/dynamic';
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import imageCompression from 'browser-image-compression';
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
