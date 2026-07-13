@@ -93,7 +93,7 @@ function MyReportItem({ report }: { report: Report }) {
                     <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0 overflow-hidden border-none bg-transparent shadow-none">
                         <DialogHeader className="sr-only">
                             <DialogTitle>Visualização da Foto</DialogTitle>
-                            <DialogDescription>Foto em alta resolução do problema relatado.</DialogDescription>
+                            <DialogDescription>Foto em alta resolution do problema relatado.</DialogDescription>
                         </DialogHeader>
                         <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
                             <img 
@@ -514,7 +514,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                 <Card className="bg-card rounded-[2.5rem] shadow-md border border-border p-6 sm:p-10 mx-4 sm:mx-0 scroll-mt-24" id="meus-relatorios" ref={reportsRef}>
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                          <h2 className="text-2xl font-black text-foreground tracking-tight">Meus Relatórios</h2>
+                          <h2 className="text-2xl font-black text-foreground tracking-tight">Meus Relatos</h2>
                         </div>
                         <Button asChild variant="default" size="sm" className="rounded-xl h-10 px-5 font-bold shadow-lg shadow-primary/20">
                             <Link href="/report/new">Novo Relato</Link>
