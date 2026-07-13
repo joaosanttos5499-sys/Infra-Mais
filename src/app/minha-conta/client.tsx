@@ -312,7 +312,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             setIsConfirmEnabled(false);
             setCountdown(5);
             const interval = setInterval(() => setCountdown(p => p > 0 ? p - 1 : 0), 1000);
-            const timeout = setTimeout(() => setIsStatusConfirmEnabled(true), 5000);
+            const timeout = setTimeout(() => setIsConfirmEnabled(true), 5000);
             return () => { clearInterval(interval); clearTimeout(timeout); };
         }
     }, [isConfirmOpen]);
@@ -415,7 +415,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                               render={({ field }) => (
                                 <FormItem>
                                   <div className="flex justify-between items-center">
-                                    <FormLabel>Nome Completo</FormLabel>
+                                    <FormLabel className="text-foreground dark:text-white font-bold">Nome Completo</FormLabel>
                                     {!isEditingName && (
                                         <Button type="button" variant="link" className="p-0 h-auto text-xs text-primary font-bold" onClick={handleEditClick}>
                                             Alterar Nome
@@ -432,12 +432,12 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
 
                             <div className="space-y-4 pt-2">
                                 <div className="space-y-1">
-                                    <Label className="text-sm font-medium">E-mail</Label>
+                                    <Label className="text-sm font-bold text-foreground dark:text-white">E-mail</Label>
                                     <Input value={userProfile?.email || user.email || ''} disabled className={cn(infoInputClasses)} />
                                 </div>
 
                                 <div className="space-y-1">
-                                    <Label className="text-sm font-medium">Data de Nascimento</Label>
+                                    <Label className="text-sm font-bold text-foreground dark:text-white">Data de Nascimento</Label>
                                     <Input value={userProfile?.dateOfBirth || 'Não informada'} disabled className={cn(infoInputClasses)} />
                                 </div>
                             </div>
@@ -513,7 +513,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             </AlertDialog>
 
             {!isEmployee && (
-                <Card className="bg-card rounded-[2.5rem] shadow-md border border-border p-6 sm:p-10 mx-4 sm:mx-0 scroll-mt-24" id="meus-relatorios" ref={reportsRef}>
+                <Card className="bg-card rounded-[2.5rem] shadow-md border border-border p-6 sm:p-10 mx-4 sm:mx-0 scroll-mt-24" id="meus-relatos" ref={reportsRef}>
                     <div className="flex items-center justify-between mb-8">
                         <div>
                           <h2 className="text-2xl font-black text-foreground tracking-tight">Meus Relatos</h2>
