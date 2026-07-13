@@ -9,7 +9,7 @@ import { ReportTime } from "@/components/report-time";
 import { type Report } from "@/lib/types";
 import { getCategory } from "@/lib/categories";
 import { useRouter } from "next/navigation";
-import { memo } from "react";
+import React, { memo, useCallback } from "react";
 
 interface RecentReportCardProps {
   report: Report;
