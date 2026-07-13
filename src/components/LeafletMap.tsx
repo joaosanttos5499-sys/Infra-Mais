@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef, memo, useState } from "react";
@@ -144,6 +145,9 @@ const LeafletMap = ({
         .bindPopup(popupContent, {
           className: 'custom-popup',
           offset: [0, -10]
+        })
+        .on('click', (e) => {
+          map.setView(e.latlng, 18, { animate: true });
         });
       
       const key = `${report.latitude.toFixed(6)},${report.longitude.toFixed(6)}`;
@@ -169,7 +173,7 @@ const LeafletMap = ({
       selectionMarkerInstance.current = L.marker([selectedLocation.lat, selectedLocation.lng], { icon }).addTo(map);
       map.setView([selectedLocation.lat, selectedLocation.lng], 16);
     } else {
-      map.setView([selectedLocation.lat, selectedLocation.lng], 17, {
+      map.setView([selectedLocation.lat, selectedLocation.lng], 18, {
         animate: true,
         duration: 1
       });
