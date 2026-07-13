@@ -26,13 +26,13 @@ function RecentReportCardComponent({ report, priority = false }: RecentReportCar
   const problem = category?.problems.find(p => p.value === report.problem);
   const displayCity = report.city === 'Picui' ? 'Picuí' : report.city;
   
-  const handleCardClick = () => {
+  const handleCardClick = useCallback(() => {
     router.push(`/dashboard#report-${report.id}`);
-  };
+  }, [router, report.id]);
 
-  const handleMapClick = (e: React.MouseEvent) => {
+  const handleMapClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-  };
+  }, []);
 
   return (
     <div 
@@ -43,7 +43,7 @@ function RecentReportCardComponent({ report, priority = false }: RecentReportCar
         <div className="relative h-48 w-full bg-muted">
             <Image
               src={report.photoUrl}
-              alt="Foto do problema"
+              alt={problem?.label || "Foto do problema de infraestrutura"}
               fill
               className="object-cover transition-opacity duration-300"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

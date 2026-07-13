@@ -26,7 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "./ui/button";
-import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle, ShieldCheck, MessageSquare, ArrowRight, Sparkles, X, SortAsc, SortDesc } from "lucide-react";
+import { ThumbsUp, Camera, Upload, Loader2, Filter, Trash2, MapPin, Settings2, Clock, CheckCircle2, ShieldAlert, Mail, Maximize2, Info, ImagePlus, User, ChevronRight, Flag, AlertTriangle, ShieldCheck, MessageSquare, ArrowRight, Sparkles, X, SortAsc, SortDesc, RotateCcw } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -43,6 +43,7 @@ import Link from "next/link";
 import dynamic from 'next/dynamic';
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import imageCompression from 'browser-image-compression';
 
 const LeafletMap = dynamic(() => import('@/components/LeafletMap'), {
   ssr: false,
@@ -89,7 +90,6 @@ const EXCLUSION_REASONS = [
 const ReportCard = memo(({ 
     report,
     onUpvote,
-    onStatusUpdate,
     onSuccess,
     isUpvoted,
     showUpvote,
@@ -98,7 +98,6 @@ const ReportCard = memo(({
 }: { 
     report: Report,
     onUpvote: (id: string, userId: string) => void,
-    onStatusUpdate?: (id: string, newStatus: ReportStatus) => void,
     onSuccess?: () => void,
     isUpvoted: boolean,
     showUpvote: boolean,
@@ -130,6 +129,8 @@ const ReportCard = memo(({
   const [editDescription, setEditDescription] = useState(report.description);
   const [editLat, setEditLat] = useState(report.latitude);
   const [editLng, setEditLng] = useState(report.longitude);
+  const [editPhotoPreview, setEditPhotoPreview] = useState<string | null>(null);
+  const [isCompressingPhoto, setIsCompressingPhoto] = useState(false);
 
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
@@ -521,20 +522,20 @@ const ReportCard = memo(({
             {!showUpvote && (
             <AccordionContent className="bg-muted/5 border-t border-border/50">
                 <div className="p-6 md:p-8 space-y-6 max-w-[1400px] mx-auto">
-                    <div className="grid lg:grid-cols-12 gap-6 items-stretch">
-                        <div className="lg:col-span-8 flex flex-col gap-5">
+                    <div className="grid lg:grid-cols-12 gap-8 items-start">
+                        <div className="lg:col-span-7 flex flex-col gap-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Categoria</Label>
                                     <Select name="category" value={editCategory} onValueChange={setEditCategory}>
-                                        <SelectTrigger className="h-10 rounded-lg bg-card border-border"><SelectValue /></SelectTrigger>
+                                        <SelectTrigger className="h-11 rounded-lg bg-card border-border shadow-sm"><SelectValue /></SelectTrigger>
                                         <SelectContent className="rounded-lg">{categories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
                                     </Select>
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Problema</Label>
                                     <Select name="problem" value={editProblem} onValueChange={setEditProblem}>
-                                        <SelectTrigger className="h-10 rounded-lg bg-card border-border"><SelectValue /></SelectTrigger>
+                                        <SelectTrigger className="h-11 rounded-lg bg-card border-border shadow-sm"><SelectValue /></SelectTrigger>
                                         <SelectContent className="rounded-lg">{editProblems.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>
                                     </Select>
                                 </div>
@@ -544,57 +545,86 @@ const ReportCard = memo(({
                                 <div className="space-y-1.5">
                                     <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Bairro</Label>
                                     <Select name="bairro" value={editBairro} onValueChange={setEditBairro}>
-                                        <SelectTrigger className="h-10 rounded-lg bg-card border-border"><SelectValue /></SelectTrigger>
+                                        <SelectTrigger className="h-11 rounded-lg bg-card border-border shadow-sm"><SelectValue /></SelectTrigger>
                                         <SelectContent className="rounded-lg">{PICUI_NEIGHBORHOODS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
                                     </Select>
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Referência</Label>
-                                    <Input name="location" value={editLocation} onChange={(e) => setEditLocation(e.target.value)} className="h-10 rounded-lg bg-card border-border" />
+                                    <Input name="location" value={editLocation} onChange={(e) => setEditLocation(e.target.value)} className="h-11 rounded-lg bg-card border-border shadow-sm" />
                                 </div>
                             </div>
 
-                            <div className="space-y-5">
-                                {report.summary && (
-                                    <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
-                                        <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1 flex items-center gap-1.5">
-                                            <Sparkles className="h-3 w-3 text-primary" /> Resumo Inteligente (IA)
-                                        </Label>
-                                        <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl shadow-sm italic font-medium text-sm text-foreground/90 leading-relaxed">
-                                            "{report.summary}"
-                                        </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Descrição do Cidadão</Label>
+                                <Textarea 
+                                    name="description" 
+                                    value={editDescription} 
+                                    onChange={(e) => setEditDescription(e.target.value)} 
+                                    className="h-24 rounded-lg bg-card border-border shadow-sm resize-none p-4 text-sm leading-relaxed" 
+                                    placeholder="Nenhuma descrição adicional fornecida."
+                                />
+                            </div>
+
+                            {report.summary && (
+                                <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1 flex items-center gap-1.5">
+                                        <Sparkles className="h-3.5 w-3.5 text-primary" /> Resumo Inteligente (IA)
+                                    </Label>
+                                    <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl shadow-inner italic font-medium text-sm text-foreground/90 leading-relaxed">
+                                        "{report.summary}"
                                     </div>
-                                )}
-
-                                <div className="space-y-1.5">
-                                    <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Descrição do Cidadão</Label>
-                                    <Textarea 
-                                        name="description" 
-                                        value={editDescription} 
-                                        onChange={(e) => setEditDescription(e.target.value)} 
-                                        className="h-20 rounded-lg bg-card border-border resize-none p-3 text-sm" 
-                                        placeholder="Nenhuma descrição adicional fornecida."
-                                    />
                                 </div>
-                            </div>
+                            )}
                         </div>
 
-                        <div className="lg:col-span-4 flex flex-col gap-4">
-                            <div className="space-y-1.5">
-                                <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Localização no Mapa</Label>
-                                <div className="h-[200px] rounded-lg overflow-hidden border border-border relative z-0">
-                                    <LeafletMap interactive={true} onLocationSelect={(lat, lng) => { setEditLat(lat); setEditLng(lng); }} selectedLocation={{ lat: editLat, lng: editLng }} />
+                        <div className="lg:col-span-5 flex flex-col gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
+                                <div className="space-y-1.5">
+                                    <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1">Localização no Mapa</Label>
+                                    <div className="h-[200px] rounded-xl overflow-hidden border border-border relative z-0 shadow-sm">
+                                        <LeafletMap interactive={true} onLocationSelect={(lat, lng) => { setEditLat(lat); setEditLng(lng); }} selectedLocation={{ lat: editLat, lng: editLng }} />
+                                    </div>
+                                    <input type="hidden" name="latitude" value={editLat} />
+                                    <input type="hidden" name="longitude" value={editLng} />
                                 </div>
-                                <input type="hidden" name="latitude" value={editLat} />
-                                <input type="hidden" name="longitude" value={editLng} />
+
+                                <div className="space-y-1.5">
+                                    <Label className="text-[10px] font-black text-muted-foreground uppercase pl-1 flex items-center justify-between">
+                                        Foto do Relato
+                                        {editPhotoPreview && (
+                                          <button onClick={() => setEditPhotoPreview(null)} className="text-[9px] text-destructive hover:underline flex items-center gap-1">
+                                            <RotateCcw className="h-2.5 w-2.5" /> Desfazer Alteração
+                                          </button>
+                                        )}
+                                    </Label>
+                                    <div className={cn(
+                                      "relative h-[200px] rounded-xl overflow-hidden border-2 border-dashed flex flex-col items-center justify-center transition-all bg-card shadow-sm",
+                                      editPhotoPreview ? "border-primary/50" : "border-border hover:bg-muted/30 hover:border-primary/30"
+                                    )}>
+                                        {isCompressingPhoto ? (
+                                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                        ) : editPhotoPreview || report.photoUrl ? (
+                                          <>
+                                            <Image src={editPhotoPreview || report.photoUrl} alt="Nova foto" fill className="object-cover" />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                                              <Camera className="h-8 w-8 text-white" />
+                                            </div>
+                                          </>
+                                        ) : (
+                                          <Camera className="h-8 w-8 text-muted-foreground/40" />
+                                        )}
+                                        <input type="file" accept="image/*" onChange={handlePhotoChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                                    </div>
+                                </div>
                             </div>
 
-                            <Card className="rounded-xl bg-card border-border shadow-sm p-4 space-y-4">
-                                <div className="flex flex-col items-stretch gap-3">
-                                    <div className="space-y-1.5">
+                            <Card className="rounded-xl bg-card border-border shadow-sm p-6 space-y-6">
+                                <div className="flex flex-col items-stretch gap-4">
+                                    <div className="space-y-2">
                                         <Label className="text-[10px] font-black text-muted-foreground uppercase">Alterar Status</Label>
                                         <Select name="status" value={selectedStatus} onValueChange={(val) => setSelectedStatus(val as ReportStatus)}>
-                                            <SelectTrigger className="h-11 rounded-lg bg-background border-primary/20 font-bold"><SelectValue /></SelectTrigger>
+                                            <SelectTrigger className="h-12 rounded-lg bg-background border-primary/20 font-bold shadow-sm transition-all hover:bg-primary/5"><SelectValue /></SelectTrigger>
                                             <SelectContent className="rounded-lg">
                                                 {Object.entries(statusConfig).map(([key, { label }]) => (
                                                     <SelectItem key={key} value={key} disabled={key !== nextAllowedStatus && key !== report.status}>
@@ -604,8 +634,8 @@ const ReportCard = memo(({
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <Button type="button" onClick={() => setIsStatusConfirmOpen(true)} disabled={isUpdating} className="h-11 rounded-lg font-bold bg-primary hover:bg-primary/90 shadow-md w-full">
-                                        {isUpdating ? <Loader2 className="animate-spin h-4 w-4" /> : <Upload className="h-4 w-4" />}
+                                    <Button type="button" onClick={() => setIsStatusConfirmOpen(true)} disabled={isUpdating} className="h-12 rounded-lg font-bold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 w-full transition-all active:scale-95">
+                                        {isUpdating ? <Loader2 className="animate-spin h-5 w-5" /> : <Upload className="h-5 w-5" />}
                                         <span className="ml-2">Salvar Alterações</span>
                                     </Button>
                                     
@@ -625,7 +655,7 @@ const ReportCard = memo(({
                                     </AlertDialog>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border mt-2">
+                                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
                                   {report.status !== 'EXCLUDED' ? (
                                     <>
                                       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
@@ -633,7 +663,7 @@ const ReportCard = memo(({
                                           <Button 
                                             type="button" 
                                             variant="outline" 
-                                            className="h-11 rounded-lg border-orange-500/20 text-orange-600 hover:bg-orange-50 font-bold w-full"
+                                            className="h-11 rounded-lg border-orange-500/20 text-orange-600 hover:bg-orange-50 font-bold w-full transition-all active:scale-95"
                                           >
                                             Denunciar
                                           </Button>
@@ -680,7 +710,7 @@ const ReportCard = memo(({
                                           <Button 
                                             type="button" 
                                             variant="outline" 
-                                            className="h-11 rounded-lg border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive font-bold w-full"
+                                            className="h-11 rounded-lg border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive font-bold w-full transition-all active:scale-95"
                                           >
                                             Excluir
                                           </Button>
@@ -723,7 +753,7 @@ const ReportCard = memo(({
                                             <Button 
                                                 type="button" 
                                                 variant="destructive" 
-                                                className="h-11 rounded-lg font-bold w-full col-span-2"
+                                                className="h-11 rounded-lg font-bold w-full col-span-2 transition-all active:scale-95"
                                             >
                                                 Excluir Definitivamente
                                             </Button>
@@ -797,7 +827,7 @@ export function DashboardClient({
   const [sortOption, setSortOption] = useState<string>("recent");
   const [openReportId, setOpenReportId] = useState<string | null>(null);
 
-  const handleUpvote = async (id: string, userId: string) => {
+  const handleUpvote = useCallback(async (id: string, userId: string) => {
     try {
         if (upvotedReports.has(id)) {
           await clientDownvoteReport(id, userId);
@@ -815,7 +845,7 @@ export function DashboardClient({
     } catch (error) {
         console.error("Erro ao votar:", error);
     }
-  };
+  }, [upvotedReports, onSuccess, router]);
 
   const filteredReports = useMemo(() => {
     const applyFiltersAndSort = (list: Report[]) => {
@@ -842,11 +872,11 @@ export function DashboardClient({
     };
   }, [reports, categoryFilter, bairroFilter, sortOption]);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setCategoryFilter("all");
     setBairroFilter("all");
     setSortOption("recent");
-  };
+  }, []);
 
   const hasActiveFilters = categoryFilter !== "all" || bairroFilter !== "all" || sortOption !== "recent";
 

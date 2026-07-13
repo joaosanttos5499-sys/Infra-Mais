@@ -12,6 +12,7 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "700"],
   variable: "--font-poppins",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -28,6 +29,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#3b82f6" },
+    { media: "(prefers-color-scheme: dark)", color: "#1e293b" },
+  ],
 };
 
 export default function RootLayout({

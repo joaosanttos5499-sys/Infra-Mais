@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
 import { Menu, Home, FileText, LifeBuoy, User, LogOut, ShieldCheck, Plus, Briefcase, Users, Trash2, Palette, Sun, Moon, CheckCircle2, UserPlus } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { AuthForm } from "./auth-form";
 import { useUser, useAuth } from "@/firebase";
@@ -49,6 +49,7 @@ function UserButton({ onLoginClick, scrolled }: { onLoginClick: () => void, scro
   const dynamicOffset = scrolled ? 18 : 26;
 
   useEffect(() => {
+    if (!isSwitchAccountOpen) return;
     const saved = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
     if (saved) {
       try {
@@ -318,15 +319,16 @@ export function Header() {
   const { user } = useUser();
   const router = useRouter();
 
+  const handleScroll = useCallback(() => {
+    setScrolled(window.scrollY > 10);
+  }, []);
+
   useEffect(() => {
     setMounted(true);
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [handleScroll]);
 
   const isEmployee = isEmailEmployee(user?.email);
   const filteredNavLinks = [...navLinks];
@@ -335,10 +337,10 @@ export function Header() {
     filteredNavLinks.push({ href: "/funcionarios", label: "Gestão", icon: ShieldCheck, public: false });
   }
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = useCallback(() => {
     setIsAuthModalOpen(false);
     router.push('/');
-  }
+  }, [router]);
 
   return (
     <header className={cn(

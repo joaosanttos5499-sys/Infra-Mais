@@ -12,6 +12,7 @@ import { RecentReportCard } from "@/components/recent-report-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 async function RecentReports({ reports }: { reports: Report[] }) {
   const publicReports = reports.filter(report => report.status !== 'UNDER_REVIEW' && report.status !== 'EXCLUDED');
