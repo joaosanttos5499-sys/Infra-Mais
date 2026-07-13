@@ -320,7 +320,7 @@ const ReportCard = memo(({
                             </h3>
                             <div className={cn(
                                 "flex gap-y-1.5",
-                                showUpvote ? "flex-row flex-wrap items-center gap-x-5 mt-5" : "flex-col items-start mt-2"
+                                showUpvote ? "flex-row flex-wrap items-center gap-x-5 mt-7" : "flex-col items-start mt-2"
                             )}>
                                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold">
                                     {category?.icon && <category.icon className="h-3.5 w-3.5" style={{ color: category?.color }} />}
@@ -737,13 +737,13 @@ export function DashboardClient({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 overflow-x-auto pb-2">
         <TabsList className="bg-muted/50 p-1 rounded-2xl h-12 flex-nowrap w-max">
           {!showUpvote && (
-            <TabsTrigger value="under_review" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Em Análise</TabsTrigger>
+            <TabsTrigger value="under_review" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider border border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-slate-400 data-[state=active]:text-slate-400">Em Análise</TabsTrigger>
           )}
-          <TabsTrigger value="pending" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Pendente</TabsTrigger>
-          <TabsTrigger value="in_progress" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Em Andamento</TabsTrigger>
-          <TabsTrigger value="resolved" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider">Resolvido</TabsTrigger>
+          <TabsTrigger value="pending" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider border border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-amber-500 data-[state=active]:text-amber-500">Pendente</TabsTrigger>
+          <TabsTrigger value="in_progress" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider border border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary data-[state=active]:text-primary">Em Andamento</TabsTrigger>
+          <TabsTrigger value="resolved" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider border border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-600">Resolvido</TabsTrigger>
           {!showUpvote && (
-            <TabsTrigger value="moderation" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+            <TabsTrigger value="moderation" className="rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-wider border border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-destructive data-[state=active]:text-destructive">
               Central de Moderação
             </TabsTrigger>
           )}
@@ -858,8 +858,8 @@ export function DashboardClient({
         <TabsContent value="moderation">
           <Tabs defaultValue="excluded">
             <TabsList className="bg-muted/10 p-4 border-b border-border w-full flex justify-start">
-              <TabsTrigger value="excluded" className="text-xs uppercase tracking-widest font-bold">Relatos Excluídos</TabsTrigger>
-              <TabsTrigger value="complaints" className="text-xs uppercase tracking-widest font-bold">Relatos Denunciados</TabsTrigger>
+              <TabsTrigger value="excluded" className="text-xs uppercase tracking-widest font-bold border border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-destructive data-[state=active]:text-destructive">Relatos Excluídos</TabsTrigger>
+              <TabsTrigger value="complaints" className="text-xs uppercase tracking-widest font-bold border border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-500 data-[state=active]:text-orange-500">Relatos Denunciados</TabsTrigger>
             </TabsList>
             <TabsContent value="excluded" className="p-6 space-y-6">
               {filteredReports.excluded.length === 0 ? (
