@@ -18,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UpdateProfileSchema } from "@/lib/schemas";
 import { updateUserProfileAction, deleteReportAction, deleteAccountAction } from "@/lib/actions";
-import { getUserById, deleteReportPermanently as clientDeleteReportPermanently } from "@/lib/data";
+import { getUserById, deleteReportPermanently as clientDeleteReportPermanently, getReportsByUserId } from "@/lib/data";
 import { updateProfile, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -182,7 +182,16 @@ function MyReportItem({ report }: { report: Report }) {
     );
 }
 
-function MyReportsList({ reports }: { reports: Report[] }) {
+function MyReportsList({ reports, isLoading }: { reports: Report[], isLoading: boolean }) {
+    if (isLoading) {
+      return (
+        <div className="flex flex-col gap-6">
+          <Skeleton className="h-40 w-full rounded-2xl" />
+          <Skeleton className="h-40 w-full rounded-2xl" />
+        </div>
+      );
+    }
+
     if (reports.length === 0) {
         return (
             <div className="text-center text-muted-foreground py-16 border-2 border-dashed border-border rounded-[2rem] bg-muted/10 mx-4 sm:mx-0">
@@ -214,7 +223,7 @@ function UserDataSkeleton() {
     )
 }
 
-export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
+export function MinhaContaClient() {
     const { user, isUserLoading } = useUser();
     const auth = useAuth();
     const router = useRouter();
@@ -234,6 +243,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [isProfileLoading, setIsProfileLoading] = useState(true);
     const [userReports, setUserReports] = useState<Report[]>([]);
+    const [isReportsLoading, setIsReportsLoading] = useState(true);
     
     const reportsRef = useRef<HTMLDivElement>(null);
     const isEmployee = isEmailEmployee(user?.email);
@@ -248,24 +258,26 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
             if (!user) {
                 router.push('/report/auth');
             } else {
-                if (!isEmployee) {
+                setIsProfileLoading(true);
+                setIsReportsLoading(true);
+
+                // Busca relatos específicos do usuário no cliente para maior confiabilidade
+                getReportsByUserId(user.uid).then(reports => {
+                  if (!isEmployee) {
                     const now = new Date();
-                    const filteredReports = allReports.filter(report => {
-                        if (report.userId !== user.uid) return false;
-                        
+                    const filtered = reports.filter(report => {
                         if (report.status === 'EXCLUDED') {
                             if (!report.excludedAt) return false;
                             const excludedDate = new Date(report.excludedAt);
                             const diffInDays = (now.getTime() - excludedDate.getTime()) / (1000 * 60 * 60 * 24);
                             return diffInDays <= 3;
                         }
-                        
                         return true;
                     });
-                    setUserReports(filteredReports);
-                }
+                    setUserReports(filtered);
+                  }
+                }).finally(() => setIsReportsLoading(false));
 
-                setIsProfileLoading(true);
                 getUserById(user.uid)
                     .then((data) => {
                         if (data) {
@@ -277,7 +289,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                                 name: user.displayName || 'Usuário',
                                 email: user.email || '',
                                 dateOfBirth: 'Não informada',
-                                role: isEmailEmployee(user.email) ? 'EMPLOYEE' : 'USER'
+                                role: isEmployee ? 'EMPLOYEE' : 'USER'
                             };
                             setUserProfile(fallback);
                             form.reset({ name: fallback.name });
@@ -289,7 +301,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                     .finally(() => setIsProfileLoading(false));
             }
         }
-    }, [user, isUserLoading, allReports, router, isEmployee, form]);
+    }, [user, isUserLoading, router, isEmployee, form]);
     
     useEffect(() => {
         if (typeof window !== 'undefined' && window.location.hash === '#meus-relatos' && reportsRef.current && !isProfileLoading) {
@@ -563,7 +575,7 @@ export function MinhaContaClient({ allReports }: { allReports: Report[] }) {
                         <h2 className="text-2xl font-black text-foreground tracking-tight">Meus Relatos</h2>
                     </div>
                     <CardContent className="p-0">
-                        <MyReportsList reports={userReports} />
+                        <MyReportsList reports={userReports} isLoading={isReportsLoading} />
                     </CardContent>
                 </Card>
             )}

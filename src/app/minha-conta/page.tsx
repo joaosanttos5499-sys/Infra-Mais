@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { getReports } from "@/lib/data";
 import { MinhaContaClient } from "./client";
 import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -14,9 +13,7 @@ function PageSkeleton() {
     );
   }
 
-async function MinhaContaContent() {
-    const reports = await getReports();
-
+function MinhaContaContent() {
     return (
         <main className="flex-1 pt-10 pb-24 px-8 md:px-16">
             <div className="max-w-[1750px] mx-auto">
@@ -29,7 +26,8 @@ async function MinhaContaContent() {
                         Gerencie suas informações pessoais e acompanhe sua atividade na plataforma.
                     </p>
                 </div>
-                <MinhaContaClient allReports={reports} />
+                {/* MinhaContaClient agora busca seus próprios relatos no cliente */}
+                <MinhaContaClient />
             </div>
         </main>
     );

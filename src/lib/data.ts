@@ -70,17 +70,14 @@ function getDB() {
  */
 export async function getReports(limitCount?: number): Promise<Report[]> {
   const firestore = getDB();
-  logFirestoreOp('QUERY', 'collectionGroup:reports', 'Global');
-
+  
   try {
-    const reportsQuery = query(
-      collectionGroup(firestore, "reports")
-    );
-    
+    // Consulta simples de Collection Group para evitar necessidade de índices complexos iniciais
+    const reportsQuery = query(collectionGroup(firestore, "reports"));
     const snapshot = await getDocs(reportsQuery);
     const results = snapshot.docs.map(doc => convertDoc<Report>(doc));
     
-    // Ordenação em memória (descendente por createdAt)
+    // Ordenação em memória (descendente por createdAt) para garantir performance sem erros de índice
     results.sort((a, b) => {
         const dateA = new Date(a.createdAt).getTime();
         const dateB = new Date(b.createdAt).getTime();
@@ -95,8 +92,31 @@ export async function getReports(limitCount?: number): Promise<Report[]> {
 }
 
 /**
+ * Busca relatos específicos de um usuário utilizando o caminho direto da coleção.
+ * Vantagem: Não requer índices de Collection Group e é mais performático para o perfil.
+ */
+export async function getReportsByUserId(userId: string): Promise<Report[]> {
+  const firestore = getDB();
+  try {
+    const reportsRef = collection(firestore, `users/${userId}/reports`);
+    const snapshot = await getDocs(reportsRef);
+    const results = snapshot.docs.map(doc => convertDoc<Report>(doc));
+    
+    results.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA;
+    });
+    
+    return results;
+  } catch (error: any) {
+    console.error(`[Firestore Error] getReportsByUserId: ${error.message}`);
+    return [];
+  }
+}
+
+/**
  * Busca um relato específico pelo seu ID e o ID do usuário proprietário.
- * O uso do caminho direto evita a necessidade de índices de Collection Group.
  */
 export async function getReportById(id: string, userId: string): Promise<Report | undefined> {
   const firestore = getDB();
@@ -122,9 +142,6 @@ export async function addReport(report: NewReport): Promise<Report> {
     createdAt: new Date().toISOString(),
     upvotes: 0,
   };
-  
-  const path = `users/${report.userId}/reports/${reportId}`;
-  logFirestoreOp('SET', 'reports', path, newReport);
   
   try {
     const reportRef = doc(firestore, `users/${report.userId}/reports`, reportId);
@@ -281,7 +298,6 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
   const firestore = getDB();
   if (!userId) return [];
   
-  logFirestoreOp('QUERY', 'notifications', `userId == ${userId}`);
   try {
     const q = query(
       collection(firestore, "notifications"),
@@ -290,7 +306,6 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
     const snapshot = await getDocs(q);
     const results = snapshot.docs.map(doc => convertDoc<Notification>(doc));
 
-    // Ordenação em memória (descendente por createdAt)
     results.sort((a, b) => {
         const dateA = new Date(a.createdAt).getTime();
         const dateB = new Date(b.createdAt).getTime();
@@ -382,7 +397,6 @@ export async function getComplaints(): Promise<Complaint[]> {
     const snapshot = await getDocs(collection(firestore, "complaints"));
     const results = snapshot.docs.map(doc => convertDoc<Complaint>(doc));
 
-    // Ordenação em memória (descendente por createdAt)
     results.sort((a, b) => {
         const dateA = new Date(a.createdAt).getTime();
         const dateB = new Date(b.createdAt).getTime();
